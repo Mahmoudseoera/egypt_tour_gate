@@ -79,7 +79,7 @@ export default function EgyptToursBanner() {
           <div className="flex justify-center gap-6">
             {/* Image 1 */}
             <div className="relative animate-floating">
-              <div className="relative w-[100px] md:w-[200px] lg:w-[250px] h-[300px] md:h-[360px] rounded-(--corner-radius) overflow-hidden border-4 border-[#e3b75e] shadow-xl">
+              <div className="relative w-[100px] md:w-[200px] lg:w-[250px] h-[300px] md:h-[360px] rounded-(--corner-radius) rounded-[10px] overflow-hidden border-1 border-[#e3b75e] shadow-xl">
                 <Image
                   src={heroBanner.imageOne}
                   alt="Tour Image"
@@ -91,7 +91,7 @@ export default function EgyptToursBanner() {
 
             {/* Image 2 */}
             <div className="relative animate-floating-delayed">
-              <div className="relative  w-[100px] md:w-[200px] lg:w-[250px] h-[300px] md:h-[360px] rounded-[999px] overflow-hidden border-4 border-[#272262] shadow-xl">
+              <div className="relative  w-[100px] md:w-[200px] lg:w-[250px] h-[300px] md:h-[360px] rounded-[10px] overflow-hidden border-1 border-[#272262] shadow-xl">
                 <Image
                   src={heroBanner.imageTwo}
                   alt="Tour Image"
