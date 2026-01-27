@@ -268,6 +268,14 @@
   border-radius: 9999px;
 }
 
+nav.fixed {
+  width: calc(100% - 20px);
+  left: 10px;
+  border-radius: 0 0 15px 15px;
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .navbar-main>li {
   position: relative;
 }
@@ -303,4 +311,72 @@
   visibility: visible;
   pointer-events: auto;
   display: block;
+}
+
+/* =============================
+404 Page Custom Styles
+============================= */
+
+.svg-error svg {
+  margin-left: auto;
+}
+
+
+.btn-effect {
+  padding: 10px 25px;
+  border: 2px solid #1e2256;
+  color: #1e2256;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+
+.btn-effect:hover {
+  background: #1e2256;
+  color: #fff;
+}
+
+
+#Polygon-1,
+#Polygon-2,
+#Polygon-3,
+#Polygon-4,
+#Polygon-5 {
+  animation: float 1s infinite ease-in-out alternate;
+}
+
+
+#Polygon-2 {
+  animation-delay: .2s;
+}
+
+#Polygon-3 {
+  animation-delay: .4s;
+}
+
+#Polygon-4 {
+  animation-delay: .6s;
+}
+
+#Polygon-5 {
+  animation-delay: .8s;
+}
+
+
+@keyframes float {
+  100% {
+    transform: translateY(20px);
+  }
+}
+
+
+@media (max-width: 450px) {
+  .svg-error svg {
+    top: 50%;
+    left: 50%;
+    margin-top: -250px;
+    margin-left: -190px;
+  }
+
+
 }

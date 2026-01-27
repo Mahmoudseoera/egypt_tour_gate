@@ -1,107 +1,73 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Heart } from 'lucide-react';
+"use client";
 
-const TravelTourSlider = () => {
-  const swiperContainerRef = useRef(null);
-  const [favorites, setFavorites] = useState({});
+import { useState } from "react";
+import Image from "next/image";
+import { Heart } from "lucide-react";
 
-  const tours = [
-    {
-      id: 1,
-      image: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=800&q=80',
-      title: 'From its medieval origins to the digital era',
-      description: '40 impressive UNESCO World Heritage sites which bear witness to over 2,000 years of the city history.',
-      price: '€145',
-      city: 'Venice'
-    },
-    {
-      id: 2,
-      image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
-      title: 'Discover Ancient Wonders',
-      description: 'Explore breathtaking archaeological sites and immerse yourself in rich cultural heritage spanning millennia.',
-      price: '€199',
-      city: 'Paris'
-    },
-    {
-      id: 3,
-      image: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&q=80',
-      title: 'European Cultural Journey',
-      description: 'Experience the finest museums, galleries, and historic landmarks across iconic European destinations.',
-      price: '€175',
-      city: 'Rome'
-    },
-    {
-      id: 4,
-      image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
-      title: 'Magical City Exploration',
-      description: 'Discover the enchanting streets and historical monuments of this beautiful European capital.',
-      price: '€165',
-      city: 'Barcelona'
-    },
-    {
-      id: 5,
-      image: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&q=80',
-      title: 'Mediterranean Paradise',
-      description: 'Experience the stunning coastline and rich cultural heritage of Mediterranean destinations.',
-      price: '€210',
-      city: 'Athens'
-    }
-  ];
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
 
-  useEffect(() => {
-    // Load Swiper CSS
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.css';
-    document.head.appendChild(link);
+// styles
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
-    // Load Swiper JS
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.js';
-    script.async = true;
-    
-    script.onload = () => {
-      if (window.Swiper && swiperContainerRef.current) {
-        new window.Swiper(swiperContainerRef.current, {
-          slidesPerView: 1,
-          spaceBetween: 24,
-          loop: true,
-          autoplay: {
-            delay: 3500,
-            disableOnInteraction: false,
-          },
-          pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-            dynamicBullets: true,
-          },
-          navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-          },
-          breakpoints: {
-            768: {
-              slidesPerView: 2,
-              spaceBetween: 24,
-            },
-            1024: {
-              slidesPerView: 3,
-              spaceBetween: 24,
-            },
-          },
-        });
-      }
-    };
-    
-    document.body.appendChild(script);
+interface Tour {
+  id: number;
+  image: string;
+  title: string;
+  description: string;
+  price: string;
+  city: string;
+}
 
-    return () => {
-      document.head.removeChild(link);
-      document.body.removeChild(script);
-    };
-  }, []);
+const tours: Tour[] = [
+  {
+    id: 1,
+    image: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=800&q=80',
+    title: 'From its medieval origins to the digital era',
+    description: '40 impressive UNESCO World Heritage sites which bear witness to over 2,000 years of the city history.',
+    price: '€145',
+    city: 'Venice'
+  },
+  {
+    id: 2,
+    image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
+    title: 'Discover Ancient Wonders',
+    description: 'Explore breathtaking archaeological sites and immerse yourself in rich cultural heritage spanning millennia.',
+    price: '€199',
+    city: 'Paris'
+  },
+  {
+    id: 3,
+    image: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&q=80',
+    title: 'European Cultural Journey',
+    description: 'Experience the finest museums, galleries, and historic landmarks across iconic European destinations.',
+    price: '€175',
+    city: 'Rome'
+  },
+  {
+    id: 4,
+    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
+    title: 'Magical City Exploration',
+    description: 'Discover the enchanting streets and historical monuments of this beautiful European capital.',
+    price: '€165',
+    city: 'Barcelona'
+  },
+  {
+    id: 5,
+    image: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&q=80',
+    title: 'Mediterranean Paradise',
+    description: 'Experience the stunning coastline and rich cultural heritage of Mediterranean destinations.',
+    price: '€210',
+    city: 'Athens'
+  }
+];
 
-  const toggleFavorite = (id) => {
+export default function TravelTourSlider() {
+  const [favorites, setFavorites] = useState<Record<number, boolean>>({});
+
+  const toggleFavorite = (id: number) => {
     setFavorites(prev => ({
       ...prev,
       [id]: !prev[id]
@@ -109,382 +75,190 @@ const TravelTourSlider = () => {
   };
 
   return (
-    <div className="travel-slider-container">
-      <style jsx>{`
-        :root {
-          --main-color: #e3b75e;
-          --second-color: #272262;
-          --white-color: #fff;
-          --black-color: #333;
-          --main-grey: #f9f9f9;
-          --swiper-theme-color: var(--main-color);
-          --swiper-pagination-bullet-inactive-color: #ddd;
-        }
+    <section className="min-h-screen bg-[var(--main-grey)] py-16">
+      <div className="max-w-7xl mx-auto px-5">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-block mb-4">
+            <div className="h-1 w-20 bg-[var(--main-color)] mx-auto"></div>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-[var(--second-color)] mb-4">
+            Popular Tours
+          </h2>
+          <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
+            Discover amazing destinations and create unforgettable memories with our curated tour packages
+          </p>
+        </div>
 
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
+        {/* Swiper */}
+        <Swiper
+          modules={[Autoplay, Navigation, Pagination]}
+          loop={true}
+          slidesPerView={1}
+          speed={700}
+          autoplay={{
+            delay: 3500,
+            disableOnInteraction: false,
+          }}
+          breakpoints={{
+            640: { slidesPerView: 1 },
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+          }}
+          spaceBetween={24}
+          navigation
+          pagination={{
+            clickable: true,
+            dynamicBullets: true,
+          }}
+          className="py-8 pb-16"
+        >
+          {tours.map((tour) => (
+            <SwiperSlide key={tour.id}>
+              <div className="tour-card bg-white rounded-3xl overflow-visible shadow-[0_8px_30px_rgba(0,0,0,0.12)] h-full flex flex-col relative">
+                {/* Ticket Shape Decorations */}
+                <div className="absolute w-10 h-10 bg-[var(--main-grey)] rounded-full -left-5 top-[280px] z-10"></div>
+                <div className="absolute w-10 h-10 bg-[var(--main-grey)] rounded-full -right-5 top-[280px] z-10"></div>
+                
+                {/* Ticket Divider */}
+                <div 
+                  className="absolute left-5 right-5 h-0.5 z-10"
+                  style={{
+                    top: '280px',
+                    backgroundImage: 'repeating-linear-gradient(to right, var(--main-grey) 0, var(--main-grey) 8px, transparent 8px, transparent 16px)'
+                  }}
+                ></div>
 
-        .travel-slider-container {
-          min-height: 100vh;
-          background-color: var(--main-grey);
-          padding: 60px 20px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
+                {/* Image Section */}
+                <div className="relative w-full h-[280px] overflow-hidden rounded-t-3xl">
+                  <Image
+                    src={tour.image}
+                    alt={tour.title}
+                    fill
+                    className="object-cover transition-transform duration-400 hover:scale-110"
+                  />
 
-        .slider-wrapper {
-          width: 100%;
-          max-width: 1400px;
-          position: relative;
-        }
+                  {/* Favorite Button */}
+                  <button
+                    className={`absolute top-4 right-4 w-11 h-11 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 z-20 shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:scale-110 ${
+                      favorites[tour.id] 
+                        ? 'bg-[var(--main-color)]' 
+                        : 'bg-white/95 hover:bg-white'
+                    }`}
+                    onClick={() => toggleFavorite(tour.id)}
+                    aria-label="Add to favorites"
+                  >
+                    <Heart
+                      size={20}
+                      fill={favorites[tour.id] ? '#fff' : 'none'}
+                      color={favorites[tour.id] ? '#fff' : '#333'}
+                      strokeWidth={2.5}
+                    />
+                  </button>
 
-        .swiper {
-          padding: 20px 0 60px 0;
-        }
+                  {/* City Badge */}
+                  <div className="absolute bottom-4 left-4 bg-[var(--second-color)] text-white px-4 py-2 rounded-full text-xs font-semibold tracking-wide z-20">
+                    {tour.city}
+                  </div>
+                </div>
 
-        .swiper-slide {
-          height: auto;
-        }
+                {/* Content Section */}
+                <div className="p-6 pt-7 flex-1 flex flex-col">
+                  <h2 className="text-xl font-bold text-[var(--black-color)] leading-snug mb-3 min-h-[56px]">
+                    {tour.title}
+                  </h2>
 
-        .tour-card {
-          background: var(--white-color);
-          overflow: visible;
-          position: relative;
-          height: 100%;
-        }
+                  <p className="text-sm text-gray-600 leading-relaxed mb-5 flex-1 line-clamp-3">
+                    {tour.description}
+                  </p>
 
-        .ticket-shape {
-          position: relative;
-          background: var(--white-color);
-          border-radius: 20px;
-          overflow: hidden;
-          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-        }
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+                        Price
+                      </span>
+                      <span className="text-3xl font-extrabold text-[var(--main-color)]">
+                        {tour.price}
+                      </span>
+                    </div>
 
-        .ticket-shape::before,
-        .ticket-shape::after {
-          content: '';
-          position: absolute;
-          width: 40px;
-          height: 40px;
-          background: var(--main-grey);
-          border-radius: 50%;
-          z-index: 2;
-        }
+                    <button className="bg-[var(--second-color)] text-white border-none px-7 py-3 rounded-full text-sm font-bold cursor-pointer transition-all duration-300 uppercase tracking-wide hover:bg-[#1a1848] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(39,34,98,0.3)]">
+                      Book Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
 
-        .ticket-shape::before {
-          left: -20px;
-          top: 280px;
-        }
-
-        .ticket-shape::after {
-          right: -20px;
-          top: 280px;
-        }
-
-        .ticket-divider {
-          position: absolute;
-          top: 280px;
-          left: 20px;
-          right: 20px;
-          height: 2px;
-          background-image: repeating-linear-gradient(
-            to right,
-            var(--main-grey) 0,
-            var(--main-grey) 8px,
-            transparent 8px,
-            transparent 16px
-          );
-          z-index: 1;
-        }
-
-        .tour-image-wrapper {
-          position: relative;
-          width: 100%;
-          height: 280px;
-          overflow: hidden;
-        }
-
-        .tour-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.4s ease;
-        }
-
-        .tour-card:hover .tour-image {
-          transform: scale(1.08);
-        }
-
-        .favorite-btn {
-          position: absolute;
-          top: 16px;
-          right: 16px;
-          width: 44px;
-          height: 44px;
-          background: rgba(255, 255, 255, 0.95);
-          border: none;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          z-index: 3;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .favorite-btn:hover {
-          transform: scale(1.1);
-          background: var(--white-color);
-        }
-
-        .favorite-btn.active {
-          background: var(--main-color);
-        }
-
-        .city-badge {
-          position: absolute;
-          bottom: 16px;
-          left: 16px;
-          background: var(--second-color);
-          color: var(--white-color);
-          padding: 8px 18px;
-          border-radius: 20px;
-          font-size: 13px;
-          font-weight: 600;
-          letter-spacing: 0.5px;
-          z-index: 3;
-        }
-
-        .tour-content {
-          padding: 28px 24px 24px;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .tour-title {
-          font-size: 20px;
-          font-weight: 700;
-          color: var(--black-color);
-          line-height: 1.4;
-          margin-bottom: 12px;
-          min-height: 56px;
-        }
-
-        .tour-description {
-          font-size: 14px;
-          color: #666;
-          line-height: 1.6;
-          margin-bottom: 20px;
-          flex: 1;
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-
-        .tour-footer {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding-top: 16px;
-          border-top: 1px solid #f0f0f0;
-        }
-
-        .price-tag {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .price-label {
-          font-size: 12px;
-          color: #999;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .price-value {
-          font-size: 32px;
-          font-weight: 800;
-          color: var(--main-color);
-        }
-
-        .book-btn {
-          background: var(--second-color);
-          color: var(--white-color);
-          border: none;
-          padding: 12px 28px;
-          border-radius: 25px;
-          font-size: 14px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .book-btn:hover {
-          background: #1a1848;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(39, 34, 98, 0.3);
-        }
-
+      <style jsx global>{`
+        /* Swiper Navigation Buttons */
         .swiper-button-next,
         .swiper-button-prev {
-          width: 50px;
-          height: 50px;
-          background: var(--white-color);
-          border: 2px solid var(--main-color);
-          border-radius: 50%;
-          color: var(--main-color);
-          font-weight: bold;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-          transition: all 0.3s ease;
+          width: 50px !important;
+          height: 50px !important;
+          background: var(--white-color) !important;
+          border: 2px solid var(--main-color) !important;
+          border-radius: 50% !important;
+          color: var(--main-color) !important;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+          transition: all 0.3s ease !important;
         }
 
         .swiper-button-next:after,
         .swiper-button-prev:after {
-          font-size: 20px;
-          font-weight: bold;
+          font-size: 20px !important;
+          font-weight: bold !important;
         }
 
         .swiper-button-next:hover,
         .swiper-button-prev:hover {
-          background: var(--main-color);
-          color: var(--white-color);
-          box-shadow: 0 6px 20px rgba(227, 183, 94, 0.4);
+          background: var(--main-color) !important;
+          color: var(--white-color) !important;
+          box-shadow: 0 6px 20px rgba(227, 183, 94, 0.4) !important;
         }
 
-        .swiper-pagination {
-          bottom: 10px !important;
-        }
-
+        /* Swiper Pagination */
         .swiper-pagination-bullet {
-          width: 12px;
-          height: 12px;
-          background: var(--swiper-pagination-bullet-inactive-color);
-          opacity: 1;
+          width: 12px !important;
+          height: 12px !important;
+          background: #ddd !important;
+          opacity: 1 !important;
         }
 
         .swiper-pagination-bullet-active {
-          background: var(--main-color);
-          width: 32px;
-          border-radius: 6px;
+          background: var(--main-color) !important;
+          width: 32px !important;
+          border-radius: 6px !important;
         }
 
+        /* Responsive adjustments */
         @media (max-width: 1024px) {
           .swiper-button-next {
-            right: 10px;
+            right: 10px !important;
           }
           
           .swiper-button-prev {
-            left: 10px;
+            left: 10px !important;
           }
         }
 
         @media (max-width: 768px) {
-          .travel-slider-container {
-            padding: 40px 10px;
-          }
-
-          .tour-title {
-            font-size: 18px;
-            min-height: auto;
-          }
-
-          .tour-description {
-            font-size: 13px;
-          }
-
-          .price-value {
-            font-size: 28px;
-          }
-
           .swiper-button-next,
           .swiper-button-prev {
-            width: 40px;
-            height: 40px;
+            width: 40px !important;
+            height: 40px !important;
           }
 
           .swiper-button-next:after,
           .swiper-button-prev:after {
-            font-size: 16px;
+            font-size: 16px !important;
           }
         }
       `}</style>
-
-      <div className="slider-wrapper">
-        <div className="swiper" ref={swiperContainerRef}>
-          <div className="swiper-wrapper">
-            {tours.map((tour) => (
-              <div key={tour.id} className="swiper-slide">
-                <div className="tour-card">
-                  <div className="ticket-shape">
-                    <div className="tour-image-wrapper">
-                      <img 
-                        src={tour.image} 
-                        alt={tour.title}
-                        className="tour-image"
-                      />
-                      <button 
-                        className={`favorite-btn ${favorites[tour.id] ? 'active' : ''}`}
-                        onClick={() => toggleFavorite(tour.id)}
-                        aria-label="Add to favorites"
-                      >
-                        <Heart 
-                          size={20} 
-                          fill={favorites[tour.id] ? '#fff' : 'none'}
-                          color={favorites[tour.id] ? '#fff' : '#333'}
-                          strokeWidth={2.5}
-                        />
-                      </button>
-                      <div className="city-badge">{tour.city}</div>
-                    </div>
-                    
-                    <div className="ticket-divider"></div>
-                    
-                    <div className="tour-content">
-                      <h2 className="tour-title">{tour.title}</h2>
-                      
-                      <p className="tour-description">
-                        {tour.description}
-                      </p>
-                      
-                      <div className="tour-footer">
-                        <div className="price-tag">
-                          <span className="price-label">Price</span>
-                          <span className="price-value">{tour.price}</span>
-                        </div>
-                        
-                        <button className="book-btn">
-                          Book Now
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="swiper-button-prev"></div>
-          <div className="swiper-button-next"></div>
-          <div className="swiper-pagination"></div>
-        </div>
-      </div>
-    </div>
+    </section>
   );
-};
-
-export default TravelTourSlider;
+}

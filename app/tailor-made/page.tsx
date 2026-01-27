@@ -1,16 +1,19 @@
 "use client";
-
-import { useState, useEffect } from "react";
+// import { toast } from "sonner";
+import { useState } from "react";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
-import { Check, Calendar, Users, DollarSign, MapPin, Phone, Mail, User, Plane, Ship, Plus } from "lucide-react";
+import { Check, Calendar, MapPin, Plane, Ship, Plus } from "lucide-react";
+
+type TimeOption = "exact" | "month" | "days";
+
 type TailorMadeFormData = {
   cities: string[];
   checkIn: string;
   checkOut: string;
   monthSelect: string;
   vacationDays: string;
-  timeOption: "exact" | "month" | "days";
+  timeOption: TimeOption;
   fullName: string;
   email: string;
   phoneCode: string;
@@ -29,7 +32,7 @@ export default function TailorMadePage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TailorMadeFormData>({
     cities: [],
     checkIn: "",
     checkOut: "",
@@ -74,11 +77,14 @@ export default function TailorMadePage() {
     "German", "French", "Italian", "Spanish", "Chinese", "Japanese"
   ];
 
-  const updateFormData = (field, value) => {
+  const updateFormData = <K extends keyof TailorMadeFormData>(
+    field: K,
+    value: TailorMadeFormData[K]
+  ) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const toggleCity = (cityId) => {
+  const toggleCity = (cityId: string) => {
     setFormData(prev => ({
       ...prev,
       cities: prev.cities.includes(cityId)
@@ -120,23 +126,27 @@ export default function TailorMadePage() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-    const res = await fetch("/api/tailor-made", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+      const res = await fetch("/api/tailor-made", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    if (res.ok) {
-      setMessage("Trip request submitted successfully! ✅");
-    } else {
+      if (res.ok) {
+        setMessage("Trip request submitted successfully! ✅");
+      } else {
+        setMessage("Something went wrong. Please try again. ❌");
+      }
+    } catch (error) {
       setMessage("Something went wrong. Please try again. ❌");
     }
 
@@ -147,10 +157,10 @@ export default function TailorMadePage() {
     if (formData.checkIn && formData.checkOut) {
       const start = new Date(formData.checkIn);
       const end = new Date(formData.checkOut);
-      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+      const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
       return days > 0 ? days : 0;
     }
-    return formData.vacationDays || 0;
+    return formData.vacationDays ? parseInt(formData.vacationDays) : 0;
   };
 
   return (
@@ -286,30 +296,34 @@ export default function TailorMadePage() {
                     <div>
                       <label className="block text-sm font-medium mb-2">Check In</label>
                       <Flatpickr
-                          value={formData.checkIn}
-                          options={{
-                            dateFormat: "Y-m-d",
-                            minDate: "today",
-                          }}
-                          onChange={(dates) => {
-                            updateFormData("checkIn", dates[0]);
-                          }}
-                          className="input"
-                        />
+                        value={formData.checkIn}
+                        options={{
+                          dateFormat: "Y-m-d",
+                          minDate: "today",
+                        }}
+                        onChange={(dates: Date[]) => {
+                          if (dates[0]) {
+                            updateFormData("checkIn", dates[0].toISOString().split('T')[0]);
+                          }
+                        }}
+                        className="input"
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Check Out</label>
-                       <Flatpickr
-                          value={formData.checkOut}
-                          options={{
-                            dateFormat: "Y-m-d",
-                            minDate: "today",
-                          }}
-                          onChange={(dates) => {
-                            updateFormData("checkOut", dates[0]);
-                          }}
-                          className="input"
-                        />
+                      <Flatpickr
+                        value={formData.checkOut}
+                        options={{
+                          dateFormat: "Y-m-d",
+                          minDate: "today",
+                        }}
+                        onChange={(dates: Date[]) => {
+                          if (dates[0]) {
+                            updateFormData("checkOut", dates[0].toISOString().split('T')[0]);
+                          }
+                        }}
+                        className="input"
+                      />
                     </div>
                   </div>
                 )}
@@ -514,7 +528,7 @@ export default function TailorMadePage() {
                       <input
                         type="number"
                         value={formData.priceMin}
-                        onChange={(e) => updateFormData("priceMin", parseInt(e.target.value))}
+                        onChange={(e) => updateFormData("priceMin", parseInt(e.target.value) || 0)}
                         className="input w-32"
                       />
                     </div>
@@ -523,7 +537,7 @@ export default function TailorMadePage() {
                       <input
                         type="number"
                         value={formData.priceMax}
-                        onChange={(e) => updateFormData("priceMax", parseInt(e.target.value))}
+                        onChange={(e) => updateFormData("priceMax", parseInt(e.target.value) || 0)}
                         className="input w-32"
                       />
                     </div>
