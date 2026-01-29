@@ -7,7 +7,7 @@ import {useGeneralData} from "@/lib/api/GeneralApi";
 
 export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
-    const {data, error} = useGeneralData();
+    const {data, error, loading} = useGeneralData();
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 50) {
@@ -24,7 +24,33 @@ export default function Navbar() {
         };
     }, []);
 
+    // Show loading state or error fallback
+    if (loading) {
+        return (
+            <nav className="w-full z-50 relative bg-white">
+                <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+                    <Link href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
+                        <Image src="/assets/images/egypt-tour-gate-logo.png" alt="Egypt Tour Gate Logo"
+                            width={70}
+                            height={30}/>
+                    </Link>
+                </div>
+            </nav>
+        );
+    }
+
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Navbar State:', { loading, error, hasData: !!data, data });
+    }
+
     if (error || !data) {
+        // Show error message in development
+        const errorMessage = error || 'No data received from API';
+        if (process.env.NODE_ENV === 'development') {
+            console.error('❌ Navbar Error:', errorMessage);
+        }
+        
         return (
             <header>
                 <div className="topbar-wrapper">
