@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, Mail, ChevronDown, Heart } from "lucide-react";
+import { Phone, Mail, ChevronDown } from "lucide-react";
 import { useGeneralData } from "@/lib/api/GeneralApi";
 
 export default function Navbar() {
@@ -81,7 +81,7 @@ export default function Navbar() {
                 <span className="font-medium">info@example.com</span>
               </div>
 
-              <div className="relative group flex items-center gap-1 cursor-pointer">
+              <div className="relative group flex items-center gap-1 cursor-pointer ">
                 {/* Selected language */}
                 <Image
                   src="https://flagcdn.com/w40/us.png"
@@ -90,7 +90,7 @@ export default function Navbar() {
                   height={16}
                   className="rounded-full"
                 />
-                <span>ENG</span>
+                <span className="text-[var(--second-color)]">ENG</span>
                 <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />{" "}
                 {/* Dropdown */}
                 <div className="lang-menu">
@@ -140,17 +140,17 @@ export default function Navbar() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 cursor-pointer">
+              <div className="flex items-center gap-1 cursor-pointer text-[var(--second-color)]">
                 <span>USD</span>
                 <ChevronDown className="h-4 w-4" />
               </div>
 
-              <div className="relative flex items-center gap-2">
+              {/* <div className="relative flex items-center gap-2">
                 <Heart />
                 <span className="flex h-4 w-4 items-center justify-center rounded-full bg-yellow-400 text-[10px] font-bold text-black">
                   0
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -282,7 +282,7 @@ export default function Navbar() {
                 height={16}
                 className="rounded-full"
               />
-              <span>ENG</span>
+              <span className="text-[var(--second-color)]">ENG</span>
               <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />{" "}
               {/* Dropdown */}
               <div className="lang-menu">
@@ -332,17 +332,17 @@ export default function Navbar() {
               </div>
             </div>
 
-            <div className="flex items-center gap-1 cursor-pointer">
+            <div className="flex items-center gap-1 cursor-pointer text-[var(--second-color)]">
               <span>USD</span>
               <ChevronDown className="h-4 w-4" />
             </div>
 
-            <div className="relative flex items-center gap-2">
+            {/* <div className="relative flex items-center gap-2">
               <Heart />
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-yellow-400 text-[10px] font-bold text-black">
                 0
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
