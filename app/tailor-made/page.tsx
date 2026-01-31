@@ -1,5 +1,6 @@
 "use client";
 // import { toast } from "sonner";
+import Image from "next/image";
 import { useState } from "react";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
@@ -606,11 +607,13 @@ export default function TailorMadePage() {
           {/* Summary Sidebar */}
           <div className="bg-white rounded-3xl shadow-2xl p-6 h-fit sticky top-4">
             <div className="mb-4">
-              <img
-                src="https://images.unsplash.com/photo-1539768942893-daf53e448371?w=400"
-                alt="Egypt"
-                className="w-full h-32 object-cover rounded-xl mb-4"
-              />
+                 <Image
+                  src="https://images.unsplash.com/photo-1539768942893-daf53e448371?w=400"
+                  alt="Egypt"
+                  width={400}
+                  height={300}
+                  className="w-full h-32 object-cover rounded-xl mb-4"
+                />
               <h3 className="text-xl font-bold text-[#272262] mb-2">Trip Summary</h3>
             </div>
 

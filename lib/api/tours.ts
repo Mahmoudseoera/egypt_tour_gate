@@ -23,6 +23,8 @@ export type Tour = {
     },
   ];
   
+
+
   export const  secondTours = [
     {
       id: 1,
@@ -73,47 +75,4 @@ export type Tour = {
       location: 'Kenya',
     },
   ];
-  export type TravelCategory = {
-    id: number;
-    slug: string;
-    title: string;
-    description: string;
-    image: string;
-    toursCount: number;
-  };
-  
-  export const travelCategories: TravelCategory[] = [
-    {
-      id: 1,
-      slug: "classic-tours",
-      title: "Classic Tours",
-      description: "Explore Egypt’s iconic landmarks like Cairo, Luxor, and Aswan.",
-      image: "/images/categories/classic-tours.jpg",
-      toursCount: 12,
-    },
-    {
-      id: 2,
-      slug: "nile-cruises",
-      title: "Nile Cruises",
-      description: "Luxury Nile cruises between Luxor and Aswan.",
-      image: "/images/categories/nile-cruises.jpg",
-      toursCount: 8,
-    },
-    {
-      id: 3,
-      slug: "desert-adventures",
-      title: "Desert Adventures",
-      description: "Safari trips and desert experiences in Egypt’s oases.",
-      image: "/images/categories/desert-adventures.jpg",
-      toursCount: 5,
-    },
-    {
-      id: 4,
-      slug: "family-tours",
-      title: "Family Tours",
-      description: "Fun and safe tours designed especially for families.",
-      image: "/images/categories/family-tours.jpg",
-      toursCount: 6,
-    },
-  ];
-  
+

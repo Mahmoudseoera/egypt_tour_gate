@@ -1,5 +1,5 @@
-import { ArrowRight, User } from 'lucide-react';
-
+import { ArrowRight, User } from "lucide-react";
+import Image from "next/image";
 export default function TravelBlogSection() {
   const blogPosts = [
     {
@@ -7,55 +7,61 @@ export default function TravelBlogSection() {
       author: "Aidan Butler",
       date: { day: "14", month: "June" },
       title: "Resources for your first trip to overseas vacation",
-      image: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&q=80",
+      image:
+        "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&q=80",
       link: "#",
-      type: "small"
+      type: "small",
     },
     {
       id: 2,
       author: "Poul Ward",
       date: { day: "28", month: "June" },
       title: "Step by step guide to planning your ideal holiday",
-      image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&q=80",
+      image:
+        "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&q=80",
       link: "#",
-      type: "small"
+      type: "small",
     },
     {
       id: 3,
       author: "Ricardo Bell",
       date: { day: "26", month: "June" },
       title: "How to get acquainted with natives in a strange land",
-      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80",
+      image:
+        "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80",
       link: "#",
-      type: "small"
+      type: "small",
     },
     {
       id: 4,
       author: "Poul Ward",
       date: { day: "28", month: "June" },
       title: "Step by step guide to planning your ideal holiday",
-      image: "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=800&q=80",
+      image:
+        "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=800&q=80",
       link: "#",
-      type: "medium"
+      type: "medium",
     },
     {
       id: 5,
       author: "Martin Hicks",
       date: { day: "20", month: "June" },
       title: "Resources for your first trip to overseas vacation",
-      image: "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=400&q=80",
+      image:
+        "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=400&q=80",
       link: "#",
-      type: "small"
+      type: "small",
     },
     {
       id: 6,
       author: "Joey Peterson",
       date: { day: "08", month: "JUNE" },
       title: "The Top Travel Destinations for Photography Enthusiasts",
-      image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+      image:
+        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
       link: "#",
-      type: "featured"
-    }
+      type: "featured",
+    },
   ];
 
   const styles = `
@@ -155,31 +161,53 @@ export default function TravelBlogSection() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
-      <div style={{ backgroundColor: '#f9f9f9' }} className="py-20 px-4 md:px-8">
+      <div
+        style={{ backgroundColor: "#f9f9f9" }}
+        className="py-20 px-4 md:px-8"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - 3 Small Cards */}
             <div className="flex flex-col gap-6 h-full">
               {blogPosts.slice(0, 3).map((post) => (
-                <div key={post.id} className="blog-card-hover blog-fade-in bg-white rounded-3xl overflow-hidden shadow-md flex-1">
+                <div
+                  key={post.id}
+                  className="blog-card-hover blog-fade-in bg-white rounded-3xl overflow-hidden shadow-md flex-1"
+                >
                   <div className="flex items-center gap-4 p-4 h-full">
                     {/* Image - Clickable */}
-                    <a href={post.link} className="clickable-link flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden blog-overlay">
-                      <img 
+                    <a
+                      href={post.link}
+                      className="clickable-link flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden blog-overlay"
+                    >
+                      <Image
                         src={post.image}
                         alt={post.title}
+                        width={1200}
+                        height={800}
                         className="blog-image w-full h-full object-cover"
                       />
                     </a>
-                    
+
                     {/* Content */}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <User className="w-4 h-4" style={{ color: '#e3b75e' }} />
-                        <h4 style={{ color: '#e3b75e' }} className="font-bold text-sm">{post.author}</h4>
+                        <User
+                          className="w-4 h-4"
+                          style={{ color: "#e3b75e" }}
+                        />
+                        <h4
+                          style={{ color: "#e3b75e" }}
+                          className="font-bold text-sm"
+                        >
+                          {post.author}
+                        </h4>
                       </div>
                       <a href={post.link} className="clickable-link block">
-                        <p style={{ color: '#272262' }} className="font-semibold text-base leading-snug line-clamp-2">
+                        <p
+                          style={{ color: "#272262" }}
+                          className="font-semibold text-base leading-snug line-clamp-2"
+                        >
                           {post.title}
                         </p>
                       </a>
@@ -187,11 +215,27 @@ export default function TravelBlogSection() {
 
                     {/* Date Badge */}
                     <div className="flex-shrink-0 rounded-xl overflow-hidden shadow-sm min-w-[60px]">
-                      <div style={{ backgroundColor: '#fff', borderColor: '#e3b75e' }} className="text-center px-3 py-2 border-b-2">
-                        <div style={{ color: '#272262' }} className="text-xl font-bold leading-none">{post.date.day}</div>
+                      <div
+                        style={{
+                          backgroundColor: "#fff",
+                          borderColor: "#e3b75e",
+                        }}
+                        className="text-center px-3 py-2 border-b-2"
+                      >
+                        <div
+                          style={{ color: "#272262" }}
+                          className="text-xl font-bold leading-none"
+                        >
+                          {post.date.day}
+                        </div>
                       </div>
-                      <div style={{ backgroundColor: '#272262' }} className="text-center px-3 py-1">
-                        <div className="text-white text-xs font-medium">{post.date.month}</div>
+                      <div
+                        style={{ backgroundColor: "#272262" }}
+                        className="text-center px-3 py-1"
+                      >
+                        <div className="text-white text-xs font-medium">
+                          {post.date.month}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -201,26 +245,52 @@ export default function TravelBlogSection() {
 
             {/* Middle Column - Medium Card */}
             <div className="blog-card-hover blog-fade-in blog-overlay rounded-3xl overflow-hidden shadow-md relative h-full min-h-[600px]">
-              <a href={blogPosts[3].link} className="clickable-link block h-full">
-                <img 
+              <a
+                href={blogPosts[3].link}
+                className="clickable-link block h-full"
+              >
+                <Image
                   src={blogPosts[3].image}
                   alt={blogPosts[3].title}
+                  width={1200}
+                  height={800}
                   className="blog-image absolute inset-0 w-full h-full object-cover"
                 />
                 <div className="blog-content absolute bottom-0 left-0 right-0 p-8">
                   {/* Date Badge */}
                   <div className="inline-block rounded-xl overflow-hidden shadow-lg mb-4">
-                    <div style={{ backgroundColor: '#fff', borderColor: '#e3b75e' }} className="text-center px-4 py-2 border-b-2">
-                      <div style={{ color: '#272262' }} className="text-2xl font-bold leading-none">{blogPosts[3].date.day}</div>
+                    <div
+                      style={{
+                        backgroundColor: "#fff",
+                        borderColor: "#e3b75e",
+                      }}
+                      className="text-center px-4 py-2 border-b-2"
+                    >
+                      <div
+                        style={{ color: "#272262" }}
+                        className="text-2xl font-bold leading-none"
+                      >
+                        {blogPosts[3].date.day}
+                      </div>
                     </div>
-                    <div style={{ backgroundColor: '#272262' }} className="text-center px-4 py-2">
-                      <div className="text-white text-xs font-medium">{blogPosts[3].date.month}</div>
+                    <div
+                      style={{ backgroundColor: "#272262" }}
+                      className="text-center px-4 py-2"
+                    >
+                      <div className="text-white text-xs font-medium">
+                        {blogPosts[3].date.month}
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 mb-3">
-                    <User className="w-4 h-4" style={{ color: '#e3b75e' }} />
-                    <h4 style={{ color: '#e3b75e' }} className="font-bold text-lg">{blogPosts[3].author}</h4>
+                    <User className="w-4 h-4" style={{ color: "#e3b75e" }} />
+                    <h4
+                      style={{ color: "#e3b75e" }}
+                      className="font-bold text-lg"
+                    >
+                      {blogPosts[3].author}
+                    </h4>
                   </div>
                   <p className="text-white font-semibold text-xl leading-snug">
                     {blogPosts[3].title}
@@ -235,22 +305,38 @@ export default function TravelBlogSection() {
               <div className="blog-card-hover blog-fade-in bg-white rounded-3xl overflow-hidden shadow-md">
                 <div className="flex items-center gap-4 p-4">
                   {/* Image - Clickable */}
-                  <a href={blogPosts[4].link} className="clickable-link flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden blog-overlay">
-                    <img 
+                  <a
+                    href={blogPosts[4].link}
+                    className="clickable-link flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden blog-overlay"
+                  >
+                    <Image
                       src={blogPosts[4].image}
                       alt={blogPosts[4].title}
+                      width={1200}
+                      height={800}
                       className="blog-image w-full h-full object-cover"
                     />
                   </a>
-                  
+
                   {/* Content */}
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <User className="w-4 h-4" style={{ color: '#e3b75e' }} />
-                      <h4 style={{ color: '#e3b75e' }} className="font-bold text-sm">{blogPosts[4].author}</h4>
+                      <User className="w-4 h-4" style={{ color: "#e3b75e" }} />
+                      <h4
+                        style={{ color: "#e3b75e" }}
+                        className="font-bold text-sm"
+                      >
+                        {blogPosts[4].author}
+                      </h4>
                     </div>
-                    <a href={blogPosts[4].link} className="clickable-link block">
-                      <p style={{ color: '#272262' }} className="font-semibold text-base leading-snug line-clamp-2">
+                    <a
+                      href={blogPosts[4].link}
+                      className="clickable-link block"
+                    >
+                      <p
+                        style={{ color: "#272262" }}
+                        className="font-semibold text-base leading-snug line-clamp-2"
+                      >
                         {blogPosts[4].title}
                       </p>
                     </a>
@@ -258,11 +344,27 @@ export default function TravelBlogSection() {
 
                   {/* Date Badge */}
                   <div className="flex-shrink-0 rounded-xl overflow-hidden shadow-sm min-w-[60px]">
-                    <div style={{ backgroundColor: '#fff', borderColor: '#e3b75e'  }} className="text-center px-3 py-2 border-b-2">
-                      <div style={{ color: '#272262' }} className="text-xl font-bold leading-none">{blogPosts[4].date.day}</div>
+                    <div
+                      style={{
+                        backgroundColor: "#fff",
+                        borderColor: "#e3b75e",
+                      }}
+                      className="text-center px-3 py-2 border-b-2"
+                    >
+                      <div
+                        style={{ color: "#272262" }}
+                        className="text-xl font-bold leading-none"
+                      >
+                        {blogPosts[4].date.day}
+                      </div>
                     </div>
-                    <div style={{ backgroundColor: '#272262' }} className="text-center px-3 py-1">
-                      <div className="text-white text-xs font-medium">{blogPosts[4].date.month}</div>
+                    <div
+                      style={{ backgroundColor: "#272262" }}
+                      className="text-center px-3 py-1"
+                    >
+                      <div className="text-white text-xs font-medium">
+                        {blogPosts[4].date.month}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -270,27 +372,56 @@ export default function TravelBlogSection() {
 
               {/* Large Featured Card */}
               <div className="blog-card-hover blog-fade-in blog-overlay rounded-3xl overflow-hidden shadow-md relative flex-1 min-h-[400px]">
-                <a href={blogPosts[5].link} className="clickable-link block h-full">
-                  <img 
+                <a
+                  href={blogPosts[5].link}
+                  className="clickable-link block h-full"
+                >
+                  <Image
                     src={blogPosts[5].image}
                     alt={blogPosts[5].title}
+                    width={1200}
+                    height={800}
                     className="blog-image absolute inset-0 w-full h-full object-cover"
                   />
                   <div className="blog-content absolute top-6 right-6">
                     {/* Date Badge */}
                     <div className="rounded-xl overflow-hidden shadow-lg">
-                      <div style={{ backgroundColor: '#fff' }} className="text-center px-5 py-3 border-b-2">
-                        <div style={{ color: '#272262' }} className="text-3xl font-bold leading-none">{blogPosts[5].date.day}</div>
+                      <div
+                        style={{ backgroundColor: "#fff" }}
+                        className="text-center px-5 py-3 border-b-2"
+                      >
+                        <div
+                          style={{ color: "#272262" }}
+                          className="text-3xl font-bold leading-none"
+                        >
+                          {blogPosts[5].date.day}
+                        </div>
                       </div>
-                      <div style={{ backgroundColor: '#e3b75e', borderColor: '#e3b75e'}} className="text-center px-5 py-2">
-                        <div style={{ color: '#272262' }} className="text-sm font-bold">{blogPosts[5].date.month}</div>
+                      <div
+                        style={{
+                          backgroundColor: "#e3b75e",
+                          borderColor: "#e3b75e",
+                        }}
+                        className="text-center px-5 py-2"
+                      >
+                        <div
+                          style={{ color: "#272262" }}
+                          className="text-sm font-bold"
+                        >
+                          {blogPosts[5].date.month}
+                        </div>
                       </div>
                     </div>
                   </div>
                   <div className="blog-content absolute bottom-0 left-0 right-0 p-8">
                     <div className="flex items-center gap-2 mb-3">
-                      <User className="w-5 h-5" style={{ color: '#e3b75e' }} />
-                      <h4 style={{ color: '#e3b75e' }} className="font-bold text-base">By {blogPosts[5].author}</h4>
+                      <User className="w-5 h-5" style={{ color: "#e3b75e" }} />
+                      <h4
+                        style={{ color: "#e3b75e" }}
+                        className="font-bold text-base"
+                      >
+                        By {blogPosts[5].author}
+                      </h4>
                     </div>
                     <p className="text-white font-bold text-2xl leading-tight">
                       {blogPosts[5].title}
@@ -303,9 +434,9 @@ export default function TravelBlogSection() {
 
           {/* CTA Button */}
           <div className="mt-12 text-center">
-            <button 
+            <button
               className="cta-button inline-flex items-center gap-3 px-8 py-4 rounded-full font-bold text-lg text-white shadow-lg"
-              style={{ backgroundColor: '#e3b75e' }}
+              style={{ backgroundColor: "#e3b75e" }}
             >
               <span>Explore All Articles</span>
               <ArrowRight className="arrow-icon w-5 h-5" />

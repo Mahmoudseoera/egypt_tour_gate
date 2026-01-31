@@ -6,6 +6,10 @@ import { useState } from "react";
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  console.log(
+    "API BASE:",
+    process.env.NEXT_PUBLIC_API_BASE_URL
+  );
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

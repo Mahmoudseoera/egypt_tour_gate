@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { useGeneralData } from "@/lib/api/GeneralApi";
 export function Footer() {
@@ -168,7 +167,7 @@ export function Footer() {
       {category.children.map((child) => (
         <li key={child.id}>
           <Link
-            href={`/tours/${child.slug}`}
+            href={`/${category.slug}/${child.slug}`}
             className="text-muted-foreground hover:text-primary transition-colors"
           >
             {child.name.en}

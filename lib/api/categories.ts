@@ -1,0 +1,214 @@
+/** Localized display name (e.g. en, pt) */
+export interface LocalizedName {
+  en: string;
+  pt: string;
+}
+
+/** City within a category */
+export interface CategoryCity {
+  id: number;
+  slug: string;
+  name: LocalizedName;
+}
+
+/** Tour category (day tours, packages, cruises) */
+export interface Category {
+  id: number;
+  type: string;
+  slug: string;
+  name: LocalizedName;
+  cities?: CategoryCity[];
+}
+
+/** Day tour item */
+export interface Tour {
+  id: number;
+  title: string;
+  slug: string;
+  category: string;
+  city: string;
+  duration: string;
+  price_from: number;
+  rating: number;
+  image?: string;
+  short_description?: string;
+  highlights?: string[];
+}
+
+/** Tour package item */
+export interface TourPackage {
+  id: number;
+  title: string;
+  slug: string;
+  category: string;
+  duration: string;
+  price_from: number;
+  rating: number;
+  image?: string;
+  includes?: string[];
+}
+
+/** Nile cruise item */
+export interface NileCruise {
+  id: number;
+  title: string;
+  slug: string;
+  duration: string;
+  price_from: number;
+  rating: number;
+  route: string[];
+  image?: string;
+}
+
+/** Root categories data (categories, tours, packages, nile_cruises) */
+export interface CategoriesData {
+  categories: Category[];
+  tours: Tour[];
+  packages: TourPackage[];
+  nile_cruises: NileCruise[];
+}
+
+const categoriesData: CategoriesData = {
+  categories: [
+    {
+      id: 2,
+      type: "day_tours",
+      slug: "egypt-day-tours",
+      name: {
+        en: "Egypt Day Tours",
+        pt: "Egito: excursões de um dia"
+      },
+      cities: [
+        {
+          id: 1,
+          slug: "cairo",
+          name: { en: "Cairo", pt: "Cairo" }
+        },
+        {
+          id: 2,
+          slug: "luxor",
+          name: { en: "Luxor", pt: "Luxor" }
+        },
+        {
+          id: 3,
+          slug: "hurghada",
+          name: { en: "Hurghada", pt: "Hurghada" }
+        },
+        {
+          id: 7,
+          slug: "aswan",
+          name: { en: "Aswan", pt: "Assuão" }
+        }
+      ]
+    },
+    {
+      id: 3,
+      type: "packages",
+      slug: "egypt-tour-packages",
+      name: {
+        en: "Egypt Tour Packages",
+        pt: "Pacotes para o Egito"
+      }
+    },
+    {
+      id: 4,
+      type: "cruises",
+      slug: "nile-cruises",
+      name: {
+        en: "Nile Cruises",
+        pt: "Cruzeiros no Nilo"
+      }
+    }
+  ],
+  tours: [
+    {
+      id: 101,
+      title: "Giza Pyramids & Sphinx Tour",
+      slug: "giza-pyramids-sphinx-tour",
+      category: "egypt-day-tours",
+      city: "cairo",
+      duration: "1 Day",
+      price_from: 75,
+      rating: 4.8,
+      image: "/mock/tours/giza.jpg",
+      short_description: "Explore the Great Pyramids of Giza and the Sphinx with a professional Egyptologist.",
+      highlights: [
+        "Great Pyramid of Khufu",
+        "Panoramic View",
+        "Sphinx"
+      ]
+    },
+    {
+      id: 102,
+      title: "Valley of the Kings Tour",
+      slug: "valley-of-the-kings-tour",
+      category: "egypt-day-tours",
+      city: "luxor",
+      duration: "1 Day",
+      price_from: 85,
+      rating: 4.9,
+      image: "/mock/tours/valley-kings.jpg",
+      short_description: "Visit the royal tombs of ancient Egypt in Luxor's West Bank."
+    },
+    {
+      id: 103,
+      title: "Hurghada Desert Safari",
+      slug: "hurghada-desert-safari",
+      category: "egypt-day-tours",
+      city: "hurghada",
+      duration: "6 Hours",
+      price_from: 55,
+      rating: 4.7,
+      image: "/mock/tours/desert-safari.jpg"
+    }
+  ],
+  packages: [
+    {
+      id: 201,
+      title: "Classic Egypt 7 Days",
+      slug: "classic-egypt-7-days",
+      category: "egypt-tour-packages",
+      duration: "7 Days / 6 Nights",
+      price_from: 899,
+      rating: 4.9,
+      image: "/mock/packages/classic-egypt.jpg",
+      includes: [
+        "Cairo",
+        "Luxor",
+        "Aswan"
+      ]
+    },
+    {
+      id: 202,
+      title: "Egypt Highlights 10 Days",
+      slug: "egypt-highlights-10-days",
+      category: "egypt-tour-packages",
+      duration: "10 Days / 9 Nights",
+      price_from: 1299,
+      rating: 5
+    }
+  ],
+  nile_cruises: [
+    {
+      id: 301,
+      title: "Luxor to Aswan Nile Cruise",
+      slug: "luxor-aswan-nile-cruise",
+      duration: "4 Days / 3 Nights",
+      price_from: 650,
+      rating: 4.8,
+      route: ["Luxor", "Edfu", "Kom Ombo", "Aswan"],
+      image: "/mock/cruises/luxor-aswan.jpg"
+    },
+    {
+      id: 302,
+      title: "Lake Nasser Cruise",
+      slug: "lake-nasser-cruise",
+      duration: "5 Days / 4 Nights",
+      price_from: 850,
+      rating: 4.6,
+      route: ["Aswan", "Abu Simbel"]
+    }
+  ]
+};
+
+export default categoriesData;
