@@ -34,7 +34,10 @@ export default function Home() {
         <h2 className="text-4xl md:text-3xl font-bold text-[var(--second-color)] mb-4">
         Explore Our Amazing Tours
         </h2>
-          <span className="relative block h-1 w-40 bg-gradient-to-r from-indigo-900 to-amber-400 mx-auto rounded-md before:content-['.'] before:absolute"></span>
+          <span className="relative block h-1 w-40 bg-gradient-to-r from-indigo-900 to-amber-400 mx-auto rounded-md before:content-[''] before:absolute     relative block h-10 w-40 mx-auto rounded-md
+    before:absolute before:inset-0
+    before:bg-[url('/assets/images/pyramids.svg')]
+    before:bg-center before:bg-no-repeat before:bg-contain"></span>
         </div>
         <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
         Discover unforgettable travel experiences tailored just for you

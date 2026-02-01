@@ -1,4 +1,7 @@
+import {
+  getBlogCategoryBySlug,
+  getBlogPostsByCategory,
+} from "@/lib/api/blogData";
 
-export default function Page() {
-  return <div>Blog Page</div>;
-}
+const category = getBlogCategoryBySlug(params.categorySlug);
+const posts = getBlogPostsByCategory(params.categorySlug);
