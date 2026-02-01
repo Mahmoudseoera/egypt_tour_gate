@@ -381,19 +381,26 @@ export default function Navbar() {
 
           {/* Menu */}
           <div className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1">
-            <ul className="flex flex-col md:flex-row md:space-x-8 font-medium">
+            <ul className="flex flex-col md:flex-row md:space-x-8 font-medium navbar-main">
+              <Link
+                href="/"
+                className="block py-2 px-3 capitalize hover:text-fg-brand"
+              >
+                Home
+              </Link>
               {data &&
                 data.header.headerCategories.map((category) => (
-                  <li key={category.id} className="relative group capitalize">
+                  <li key={category.id} className="relative group capitalize has-dropdown">
                     <Link
                       href={`/${category.slug}`}
                       className="block py-2 px-3 capitalize hover:text-fg-brand"
+
                     >
-                      {category.name.en.toLowerCase()}{" "}
+                      {category.name.en.toLowerCase()}{" "}<ChevronDown className="inline h-4 w-4" />
                     </Link>
                     {/* Dropdown */}
                     {category.children.length > 0 && (
-                      <ul className="absolute left-0 top-full hidden group-hover:block bg-white shadow-lg rounded-base min-w-[200px]">
+                      <ul className="absolute left-0 top-full hidden group-hover:[var(--main-color)] bg-white shadow-lg rounded-sm min-w-[200px]">
                         {category.children.map((child) => (
                           <li key={child.id}>
                             <Link
@@ -408,12 +415,32 @@ export default function Navbar() {
                     )}{" "}
                   </li>
                 ))}
+              <li className="relative group capitalize has-dropdown">
+                <Link
+                  href="/#"
+                  className="block py-2 px-3 capitalize hover:text-fg-brand"
+                >
+                  Static Pages
+                </Link>
+                  <ul className="absolute left-0 top-full hidden group-hover:block bg-white shadow-lg rounded-sm min-w-[200px]">
+                    <li>
+                      <Link
+                        href="/contact"
+                        className="block px-4 py-2 text-sm text-heading hover:bg-neutral-tertiary"
+                      >
+                        contact
+                      </Link>
+                    </li>
+                  </ul>
+        
+              </li>
+
               <li>
                 <Link
-                  href="/contact"
-                  className="block px-4 py-2 text-sm text-heading hover:bg-neutral-tertiary"
+                  href="/blogs"
+                  className="block py-2 px-3 capitalize hover:text-fg-brand"
                 >
-                  Contact Us
+                  Blogs
                 </Link>
               </li>
             </ul>

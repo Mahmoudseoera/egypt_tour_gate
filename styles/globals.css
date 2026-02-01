@@ -167,7 +167,14 @@
   background-color: hsl(220 20% 70%);
   border-radius: 999px;
 }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
 
+.group:hover .animate-float {
+  animation: float 3s ease-in-out infinite;
+}
 
 .btn-effect {
   color: var(--second-color);
@@ -271,16 +278,18 @@
 nav.fixed {
   width: calc(100% - 20px);
   left: 10px;
-  border-radius: 0 0 15px 15px;
+  border-radius: 15px !important;
   backdrop-filter: blur(20px);
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.5);
+  top: 7px;
+  overflow: hidden;
 }
 
-.navbar-main>li {
+.navbar-main >li {
   position: relative;
 }
 
-.navbar-main>li a::before {
+.navbar-main >li a::before {
   content: "";
   position: absolute;
   height: 2px;

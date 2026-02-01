@@ -62,9 +62,10 @@ export default async function SubcategoryPage({ params }: SubcategoryPageProps) 
   const subcategoryName = subcategory.name?.en ?? subcategorySlug;
 
   return (
-    <div className="container py-10">
-      <h1 className="text-3xl font-bold mb-2">{categoryName}</h1>
-      <h2 className="text-xl text-gray-600 mb-8">{subcategoryName}</h2>
+    <section className="tours-page">
+    <div className="container mx-auto py-16">
+      <h1 className="text-3xl font-bold mb-2 text-center">{categoryName}</h1>
+      <h2 className="text-xl text-gray-600 mb-8 text-center">{subcategoryName}</h2>
 
       {items.length === 0 ? (
         <p className="text-lg">No tours found for this subcategory.</p>
@@ -77,8 +78,9 @@ export default async function SubcategoryPage({ params }: SubcategoryPageProps) 
               className="group block bg-white rounded-lg overflow-hidden shadow hover:shadow-xl transition-shadow border border-gray-100"
             >
               <div className="relative h-48 w-full overflow-hidden">
+              {/* src={(item as Tour & TourPackage & NileCruise).image ?? "/placeholder.svg"} */}
                 <Image
-                  src={(item as Tour & TourPackage & NileCruise).image ?? "/placeholder.svg"}
+                  src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80"
                   alt={item.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform"
@@ -111,5 +113,7 @@ export default async function SubcategoryPage({ params }: SubcategoryPageProps) 
         </div>
       )}
     </div>
+    </section>
+
   );
 }
