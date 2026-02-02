@@ -2,6 +2,7 @@
 // import { toast } from "sonner";
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import { Check, Calendar, MapPin, Plane, Ship, Plus } from "lucide-react";
@@ -30,6 +31,7 @@ type TailorMadeFormData = {
 };
 
 export default function TailorMadePage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -144,6 +146,7 @@ export default function TailorMadePage() {
 
       if (res.ok) {
         setMessage("Trip request submitted successfully! ✅");
+        router.push("/thank-you");
       } else {
         setMessage("Something went wrong. Please try again. ❌");
       }

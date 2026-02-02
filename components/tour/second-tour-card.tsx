@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { MapPin, Calendar, Star } from "lucide-react";
 
 interface TourCardProps {
-  image: string;
+  image: string | StaticImageData;
   title: string;
   description: string;
   price: number;

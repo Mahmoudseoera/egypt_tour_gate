@@ -1,7 +1,4 @@
 import type { Metadata } from "next";
-import { config } from '@fortawesome/fontawesome-svg-core'
-import '@fortawesome/fontawesome-svg-core/styles.css'
-config.autoAddCss = false 
 import { montserrat } from "./fonts";
 import Navbar from "../components/layout/navbar"
 import Footer from "../components/layout/footer"
@@ -31,6 +28,15 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+      <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+          integrity="sha512-..."
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
+      </head>
       <body suppressHydrationWarning className={`${montserrat.variable} antialiased`}>
         <Navbar />
         {children}

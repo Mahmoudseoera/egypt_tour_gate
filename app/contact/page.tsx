@@ -1,17 +1,21 @@
 "use client";
 
 import { Send } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const router = useRouter();
+
   console.log(
     "API BASE:",
     process.env.NEXT_PUBLIC_API_BASE_URL
   );
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    
     e.preventDefault();
     setLoading(true);
     setMessage(null);
@@ -34,7 +38,8 @@ export default function ContactPage() {
 
     if (data.success) {
       setMessage("Message sent successfully ✅");
-      e.currentTarget.reset();
+      // e.currentTarget.reset();
+      router.push("/thank-you");
     } else {
       setMessage("Something went wrong ❌");
     }

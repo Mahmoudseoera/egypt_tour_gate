@@ -231,7 +231,7 @@
 .topbar-wrapper {
   background-color: #f1f2f3;
   /* background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35)); */
-  backdrop-filter: blur(6px);
+  /* backdrop-filter: blur(6px); */
 }
 
 .lang-menu {

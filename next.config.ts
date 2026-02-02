@@ -10,8 +10,16 @@ const nextConfig: NextConfig = {
         hostname: "www.wondertravelegypt.com",
         pathname: "/storage/**",
       },
+      {
+        protocol: 'https',
+        hostname: '**', 
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
     ],
-    domains: ["images.unsplash.com", "flagcdn.com"],
+    domains: ["images.unsplash.com", "flagcdn.com", "localhost"],
   },
 };
 
