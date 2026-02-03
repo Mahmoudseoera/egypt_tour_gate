@@ -1,3 +1,4 @@
+// Category Page //
 import Link from "next/link";
 import Image from "next/image";
 type CategoryPageProps = {
@@ -28,6 +29,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <section className="sub-category max-w-7xl mx-auto py-16">
+                <nav className="text-sm text-gray-500 mb-6">
+        <Link href="/" className="hover:text-[var(--main-color)]">Home</Link>
+        <span className="mx-2">/</span>
+        <span className="text-navy font-medium">
+          {categorySlug.replace(/-/g, " ")}
+        </span>
+      </nav>
       <h1 className="text-3xl font-bold mb-6 text-center">
         {category.name.en}
       </h1>

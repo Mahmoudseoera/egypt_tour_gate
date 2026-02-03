@@ -1,8 +1,13 @@
+//  tour Details Page //
+
 import Link from "next/link";
-import Image from "next/image";
+import { useState } from 'react';
+import Image from 'next/image';
+import { X, ChevronLeft, ChevronRight, MapPin, Clock, Users, Calendar, Star, Check } from 'lucide-react';
 import { notFound } from "next/navigation";
 import categoriesData from "@/lib/api/categories";
 import type { Tour, TourPackage, NileCruise } from "@/lib/api/categories";
+import "@/styles/tour-details.css";
 
 type TourDetailPageProps = {
   params: Promise<{
@@ -11,7 +16,6 @@ type TourDetailPageProps = {
     tourSlug: string;
   }>;
 };
-
 function findTourBySlug(slug: string): Tour | TourPackage | NileCruise | null {
   const tour = categoriesData.tours.find((t) => t.slug === slug);
   if (tour) return tour;
@@ -35,7 +39,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
   const isCruise = "route" in item;
 
   return (
-    <div className="container py-10 max-w-4xl">
+    <>
       <nav className="text-sm text-gray-500 mb-6">
         <Link href="/" className="hover:text-[var(--main-color)]">Home</Link>
         <span className="mx-2">/</span>
@@ -52,7 +56,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
         <span className="mx-2">/</span>
         <span className="text-navy font-medium">{item.title}</span>
       </nav>
-
+        <div className="container py-10 max-w-4xl">
       <div className="relative h-80 w-full rounded-xl overflow-hidden mb-8">
         <Image
           src={item.image ?? "/placeholder.svg"}
@@ -137,5 +141,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
         </a>
       </div>
     </div>
+    </>
+
   );
 }

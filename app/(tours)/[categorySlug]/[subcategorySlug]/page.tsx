@@ -1,3 +1,5 @@
+//  Sub Category Page //
+
 import Link from "next/link";
 import Image from "next/image";
 import categoriesData from "@/lib/api/categories";
@@ -62,7 +64,17 @@ export default async function SubcategoryPage({ params }: SubcategoryPageProps) 
   const subcategoryName = subcategory.name?.en ?? subcategorySlug;
 
   return (
-    <section className="tours-page">
+    <section className="container py-10 max-w-4xl">
+          <nav className="text-sm text-gray-500 mb-6">
+        <Link href="/" className="hover:text-[var(--main-color)]">Home</Link>
+        <span className="mx-2">/</span>
+        <Link href={`/${categorySlug}`} className="hover:text-[var(--main-color)]">
+          {categorySlug.replace(/-/g, " ")}
+        </Link>
+        <span className="mx-2">/</span>
+        <span className="text-navy font-medium">{subcategorySlug.replace(/-/g, " ")}</span>
+      </nav>
+      <section className="tours-page">
     <div className="container mx-auto py-16">
       <h1 className="text-3xl font-bold mb-2 text-center">{categoryName}</h1>
       <h2 className="text-xl text-gray-600 mb-8 text-center">{subcategoryName}</h2>
@@ -70,7 +82,7 @@ export default async function SubcategoryPage({ params }: SubcategoryPageProps) 
       {items.length === 0 ? (
         <p className="text-lg">No tours found for this subcategory.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {items.map((item) => (
             <Link
               key={item.id}
@@ -114,6 +126,8 @@ export default async function SubcategoryPage({ params }: SubcategoryPageProps) 
       )}
     </div>
     </section>
+    </section>
+
 
   );
 }

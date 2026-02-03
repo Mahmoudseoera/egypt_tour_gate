@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Phone, Mail, ChevronDown } from "lucide-react";
 import { useGeneralData } from "@/lib/api/GeneralApi";
 import SimpleSocialIcon, { SocialItem } from '@/components/layout/simpleSocialIcon';
+import { usePathname } from 'next/navigation';
 // بيانات من API
 const socialData: SocialItem[] = [
   {
@@ -31,6 +32,16 @@ const socialData: SocialItem[] = [
 
 
 export default function Navbar() {
+  const pathname = usePathname();
+
+  const isActive = (href) => {
+    // For exact match
+    if (href === '/') {
+      return pathname === '/';
+    }
+    // For nested routes - active when current path starts with href
+    return pathname.startsWith(href) && href !== '/';
+  };
   const [isScrolled, setIsScrolled] = useState(false);
   const { data, error, loading } = useGeneralData();
   useEffect(() => {
@@ -273,7 +284,7 @@ export default function Navbar() {
                     <li>
                       <Link
                         href="/contact"
-                        className="block px-4 py-2 text-sm text-heading hover:bg-neutral-tertiary"
+                        className={`block py-2 px-3 capitalize hover:text-fg-brand ${isActive('/contact') ? 'active' : ''}`} 
                       >
                         contact
                       </Link>
@@ -285,7 +296,7 @@ export default function Navbar() {
               <li>
                 <Link
                   href="/blogs"
-                  className="block py-2 px-3 capitalize hover:text-fg-brand"
+                  className={`block py-2 px-3 capitalize hover:text-fg-brand ${isActive('/blogs') ? 'active' : ''}`} 
                 >
                   Blogs
                 </Link>

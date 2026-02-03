@@ -1,4 +1,5 @@
 
+// All Category Page //
 // import CategoryCard from "@/components/tour/category-card";
 import categoriesData from "@/lib/api/categories";
 
