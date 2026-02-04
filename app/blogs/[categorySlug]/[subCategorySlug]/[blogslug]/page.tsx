@@ -1,4 +1,7 @@
-export default function Page() {
-    return <div>Blog Category  Page</div>;
-  }
-  
+import React from 'react'
+
+export default function page() {
+  return (
+    <div>page</div>
+  )
+}

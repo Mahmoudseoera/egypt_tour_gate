@@ -21,15 +21,7 @@ export type BlogPost = {
   content: string;
   image: string;
   author: string;
-  authorAvatar: string;
-  readTime: string;
-  tags: string[];
   date: string;
-  views: number;
-  likes: number;
-  comments: number;
-  featured: boolean;
-  relatedPosts: number[];
 };
 
   /* ==============================
@@ -143,6 +135,7 @@ export type BlogPost = {
       content: "Full article content here...",
       image: "/images/blogs/cairo-luxury.jpg",
       date: "2026-01-10",
+      author: "Mirna Khalil",
     },
     {
       id: 2,
@@ -153,6 +146,7 @@ export type BlogPost = {
       content: "Full article content here...",
       image: "/images/blogs/budget-egypt.jpg",
       date: "2026-01-05",
+      author: "Ali Mohamed",
     },
   ];
   
@@ -203,11 +197,13 @@ export type BlogPost = {
         slug: current.slug,
       });
   
-      current = current.parentSlug
-        ? blogCategories.find(
-            (cat) => cat.slug === current.parentSlug
-          )
-        : null;
+      const parentSlug = current?.parentSlug;
+
+      current = parentSlug
+        ? blogCategories.find((cat) => cat.slug === parentSlug)
+        : undefined;
+      
+    
     }
   
     return breadcrumb;

@@ -1,7 +1,7 @@
-import {
-  getBlogCategoryBySlug,
-  getBlogPostsByCategory,
-} from "@/lib/api/blogData";
+import React from 'react'
 
-const category = getBlogCategoryBySlug(params.categorySlug);
-const posts = getBlogPostsByCategory(params.categorySlug);
+export default function page() {
+  return (
+    <div>page</div>
+  )
+}

@@ -117,7 +117,7 @@ export const apiService = {
     // Use Next.js API route instead of direct external API call
     // This avoids CORS issues since the server makes the request
     const response = await fetch('/api/general', {
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
