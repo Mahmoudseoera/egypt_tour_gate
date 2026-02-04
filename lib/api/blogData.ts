@@ -202,9 +202,14 @@ export type BlogPost = {
       current = parentSlug
         ? blogCategories.find((cat) => cat.slug === parentSlug)
         : undefined;
-      
-    
     }
+  
+    // if (breadcrumb.length > 0) {
+    //   breadcrumb.unshift({
+    //     name: "Home",
+    //     slug: "/",
+    //   });
+    // }
   
     return breadcrumb;
   };
