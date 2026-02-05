@@ -278,6 +278,14 @@ export default function Navbar() {
                         contact
                       </Link>
                     </li>
+                    <li>
+                      <Link
+                        href="/about-us"
+                        className='block py-2 px-3 capitalize hover:text-fg-brand'
+                      >
+                        About Us
+                      </Link>
+                    </li>
                   </ul>
         
               </li>
