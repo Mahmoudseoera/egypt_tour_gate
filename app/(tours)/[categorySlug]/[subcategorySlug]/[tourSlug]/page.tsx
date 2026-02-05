@@ -39,7 +39,10 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
 
   return (
     <>
-      <nav className="text-sm text-gray-500 mb-6">
+          {/* Breadcrumb */}
+          <div className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 md:px-8 lg:px-16 py-4">
+        <nav className="text-sm text-gray-500 mb-6">
         <Link href="/" className="hover:text-[var(--main-color)]">Home</Link>
         <span className="mx-2">/</span>
         <Link href={`/${categorySlug}`} className="hover:text-[var(--main-color)]">
@@ -55,16 +58,18 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
         <span className="mx-2">/</span>
         <span className="text-navy font-medium">{item.title}</span>
       </nav>
-        <div className="container py-10 max-w-4xl">
+        </div>
+      </div>
+        <div className="container py-10 max-w-7xl mx-auto">
       <div className="relative h-80 w-full rounded-xl overflow-hidden mb-8">
-        <Image
+        {/* <Image
           src={item.image ?? "/placeholder.svg"}
           alt={item.title}
           fill
           className="object-cover"
           priority
           sizes="(max-width: 896px) 100vw, 896px"
-        />
+        /> */}
         <div className="absolute bottom-4 right-4 bg-white/95 px-4 py-2 rounded-lg shadow">
           <p className="text-navy font-bold text-xl">{"From $" + item.price_from}</p>
         </div>
