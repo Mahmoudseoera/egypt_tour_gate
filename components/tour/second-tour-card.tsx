@@ -2,6 +2,7 @@
 
 import Image, { StaticImageData } from "next/image";
 import { MapPin, Calendar, Star } from "lucide-react";
+import Link from "next/link";
 
 interface TourCardProps {
   image: string | StaticImageData;
@@ -13,7 +14,7 @@ interface TourCardProps {
   duration: string;
   location: string;
   ctaText?: string;
-  onCta?: () => void;
+  tourLink: string;
 }
 
 export default function SecondTourCard({
@@ -26,7 +27,7 @@ export default function SecondTourCard({
   duration,
   location,
   ctaText = "Book Now",
-  onCta,
+  tourLink
 }: TourCardProps) {
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 max-w-sm second-tour-card">
@@ -83,12 +84,12 @@ export default function SecondTourCard({
           </div>
         </div>
 
-        <button
-          onClick={onCta}
+        <Link
+          href={tourLink}
           className="w-full bg-navy hover:bg-gold text-white hover:text-navy font-bold py-3 px-4 rounded-lg transition-all"
         >
           {ctaText}
-        </button>
+        </Link>
       </div>
     </div>
   );

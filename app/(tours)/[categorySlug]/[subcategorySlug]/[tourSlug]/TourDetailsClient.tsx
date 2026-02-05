@@ -55,12 +55,12 @@ export default function TourDetailsClient() {
 
   // Sample data
   const tourImages = [
-    'https://images.unsplash.com/photo-1761839257845-9283b7d1b933?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxfHx8ZW58MHx8fHx8',
     '/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp',
-    '/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp',
-    '/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp',
-    '/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp',
-    '/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp',
+    '/assets/images/tours/great-pyramid-webp.webp',
+    '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp',
+    '/assets/images/tours/Cairo day tours in Egypt-webp.webp',
+    '/assets/images/tours/49-webp.webp',
+    '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp',
   ];
 
   const highlights = [
@@ -206,7 +206,7 @@ export default function TourDetailsClient() {
   };
 
   return (
-    <div className="min-h-screen bg-main-grey">
+    <div className="min-h-screen">
     
       {/* Hero Section with Gallery */}
       <section className="relative w-full h-[400px] md:h-[600px] overflow-hidden">
@@ -266,9 +266,9 @@ export default function TourDetailsClient() {
                 </span>
               </div>
               
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-navy mb-4">
+              {/* <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-navy mb-4">
                 5-Day Egypt Discovery Tour: Cairo, Luxor & Nile Cruise
-              </h1>
+              </h1> */}
               
               <p className="text-gray-700 text-lg leading-relaxed">
                 Experience the wonders of ancient Egypt on this comprehensive 5-day tour. Visit the iconic Pyramids of Giza, 

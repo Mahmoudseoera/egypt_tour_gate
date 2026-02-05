@@ -12,6 +12,7 @@ import TravelServicesSection from "../components/home/services";
 import PartnersMarquee from "../components/home/partners";
 import TravelBlogSection from "../components/home/blog-section";
 import TravelTourSlider from "../components/home/tours-section"
+import categoriesData from "@/lib/api/categories";
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 // style css for home page //
@@ -34,10 +35,11 @@ export default function Home() {
         <h2 className="text-4xl md:text-3xl font-bold text-[var(--second-color)] mb-4">
         Explore Our Amazing Tours
         </h2>
-          <span className="relative block h-1 w-40 bg-gradient-to-r from-indigo-900 to-amber-400 mx-auto rounded-md before:content-[''] before:absolute     relative block h-10 w-40 mx-auto rounded-md
+        {/* before:content-[''] before:absolute     
     before:absolute before:inset-0
     before:bg-[url('/assets/images/pyramids.svg')]
-    before:bg-center before:bg-no-repeat before:bg-contain"></span>
+    before:bg-center before:bg-no-repeat before:bg-contain */}
+          <span className="relative block h-1 w-40 bg-gradient-to-r from-indigo-900 to-amber-400 mx-auto relative block  w-40 mx-auto rounded-md"></span>
         </div>
         <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
         Discover unforgettable travel experiences tailored just for you
@@ -46,7 +48,7 @@ export default function Home() {
 
         {/* Tour Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {secondTours.map((tour) => (
+        {secondTours.map((tour) => (
             <SecondTourCard
               key={tour.id}
               image={tour.image}
@@ -58,9 +60,7 @@ export default function Home() {
               duration={tour.duration}
               location={tour.location}
               ctaText="Book Now"
-              onCta={() =>
-                alert(`Booking tour: ${tour.title}`)
-              }
+              tourLink="/"
             />
           ))}
         </div>

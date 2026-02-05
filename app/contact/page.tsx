@@ -60,24 +60,77 @@ export default function ContactPage() {
               onSubmit={handleSubmit}
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
-              <input name="name" className="input" placeholder="Name" required />
-              <input name="email" type="email" className="input" placeholder="Email" required />
-
-              <input name="phone" className="input" placeholder="Phone" />
-              <input name="subject" className="input" placeholder="Subject" />
-
-              <select name="country" className="input md:col-span-2">
+              <div className="relative">
+            <input
+              required
+              type="text" 
+              name="text"
+              autoComplete="off"
+              className="input peer w-full border-[1.5px] border-solid border-[#9e9e9e] rounded-2xl bg-transparent px-4 py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[var(--second-color)] valid:border-[var(--second-color)] valid:outline-none outline-none"
+            />
+          <label className="absolute left-[15px] text-[#aaa] pointer-events-none translate-y-4 transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] peer-focus:-translate-y-1/2 peer-focus:scale-80 peer-focus:bg-[var(--second-color)] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[var(--main-color)] peer-valid:-translate-y-1/2 peer-valid:scale-80 peer-valid:bg-[#212121] peer-valid:px-[0.2em] peer-valid:py-0 peer-valid:text-[#2196f3]">
+            Full Name
+          </label>
+          </div>  
+          <div className="relative">
+            <input
+              required
+              type="email" 
+              name="text"
+              autoComplete="off"
+              className="input peer w-full border-[1.5px] border-solid border-[#9e9e9e] rounded-2xl bg-transparent px-4 py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[var(--second-color)] valid:border-[var(--second-color)] valid:outline-none outline-none"
+            />
+          <label className="absolute left-[15px] text-[#aaa] pointer-events-none translate-y-4 transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] peer-focus:-translate-y-1/2 peer-focus:scale-80 peer-focus:bg-[var(--second-color)] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[var(--main-color)] peer-valid:-translate-y-1/2 peer-valid:scale-80 peer-valid:bg-[#212121] peer-valid:px-[0.2em] peer-valid:py-0 peer-valid:text-[#2196f3]">
+            Email Address
+          </label>
+          </div>  
+          <div className="relative">
+            <input
+              required
+              type="number" 
+              name="phone"
+              autoComplete="off"
+              className="input peer w-full border-[1.5px] border-solid border-[#9e9e9e] rounded-2xl bg-transparent px-4 py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[var(--second-color)] valid:border-[var(--second-color)] valid:outline-none outline-none"
+            />
+          <label className="absolute left-[15px] text-[#aaa] pointer-events-none translate-y-4 transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] peer-focus:-translate-y-1/2 peer-focus:scale-80 peer-focus:bg-[var(--second-color)] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[var(--main-color)] peer-valid:-translate-y-1/2 peer-valid:scale-80 peer-valid:bg-[#212121] peer-valid:px-[0.2em] peer-valid:py-0 peer-valid:text-[#2196f3]">
+          Phone Number
+          </label>
+          </div>
+          <div className="relative">
+            <input
+              required
+              type="text" 
+              name="subject" 
+              autoComplete="off"
+              className="input peer w-full border-[1.5px] border-solid border-[#9e9e9e] rounded-2xl bg-transparent px-4 py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[var(--second-color)] valid:border-[var(--second-color)] valid:outline-none outline-none"
+            />
+          <label className="absolute left-[15px] text-[#aaa] pointer-events-none translate-y-4 transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] peer-focus:-translate-y-1/2 peer-focus:scale-80 peer-focus:bg-[var(--second-color)] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[var(--main-color)] peer-valid:-translate-y-1/2 peer-valid:scale-80 peer-valid:bg-[#212121] peer-valid:px-[0.2em] peer-valid:py-0 peer-valid:text-[#2196f3]">
+          Subject
+          </label>
+          </div>
+              
+          <div className="relative relative md:col-span-2 input">
+          <select name="country" className="w-full py-4 px-4 rounded-2xl border-[1.5px] border-solid border-[#9e9e9e]">
                 <option value="">Select Country</option>
                 <option value="Egypt">Egypt</option>
                 <option value="Portugal">Portugal</option>
               </select>
+          <label className="absolute left-[15px] text-[#aaa] pointer-events-none translate-y-4 transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] peer-focus:-translate-y-1/2 peer-focus:scale-80 peer-focus:bg-[var(--second-color)] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[var(--main-color)] peer-valid:-translate-y-1/2 peer-valid:scale-80 peer-valid:bg-[#212121] peer-valid:px-[0.2em] peer-valid:py-0 peer-valid:text-[#2196f3]">
+          Select Country
+          </label>
+          </div>
 
-              <textarea
-                name="message"
-                className="md:col-span-2 input h-32 resize-none"
-                placeholder="Write Message"
-                required
-              />
+          <div className="relative md:col-span-2 input h-48">
+            <textarea
+              required
+              name="message"
+              className="h-48 input peer w-full border-[1.5px] border-solid border-[#9e9e9e] rounded-2xl bg-transparent px-4 py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[var(--second-color)] valid:border-[var(--second-color)] valid:outline-none outline-none resize-none"
+            />
+          <label className="absolute left-[15px] text-[#aaa] pointer-events-none translate-y-4 transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] peer-focus:-translate-y-1/2 peer-focus:scale-80 peer-focus:bg-[var(--second-color)] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[var(--main-color)] peer-valid:-translate-y-1/2 peer-valid:scale-80 peer-valid:bg-[#212121] peer-valid:px-[0.2em] peer-valid:py-0 peer-valid:text-[#2196f3]">
+          Write Message
+          </label>
+          </div>
+
 
               <div className="md:col-span-2 mt-4">
                 <button

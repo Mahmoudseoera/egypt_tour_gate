@@ -277,13 +277,13 @@ const styles =`
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 md:px-8 lg:px-16 py-4">
           <nav className="flex items-center gap-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-[var(--main-color)] transition-colors">HOME</Link>
+            <Link href="/" className="hover:text-[var(--main-color)] transition-colors underline underline-offset-4">Home</Link>
             <span>/</span>
-            <Link href="/blog" className="hover:text-[var(--main-color)] transition-colors">BLOG</Link>
+            <Link href="/blog" className="hover:text-[var(--main-color)] transition-colors underline underline-offset-4">Blog</Link>
             <span>/</span>
-            <Link href="/blog/egypt-tours-guide" className="hover:text-[var(--main-color)] transition-colors">EGYPT TOURS GUIDE</Link>
+            <Link href="/blog/egypt-tours-guide" className="hover:text-[var(--main-color)] transition-colors underline underline-offset-4">Egypt Tours Guide</Link>
             <span>/</span>
-            <span className="text-[var(--second-color)] font-medium uppercase">
+            <span className="text-[var(--second-color)] font-medium capitalize">
               {blogPost.title.length > 50 ? blogPost.title.substring(0, 50) + '...' : blogPost.title}
             </span>
           </nav>
@@ -318,7 +318,7 @@ const styles =`
                 <span className="font-medium text-sm">{blogPost.author}</span>
               </div>
               <div className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="#e3b75e" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span className="text-sm">{blogPost.date}</span>

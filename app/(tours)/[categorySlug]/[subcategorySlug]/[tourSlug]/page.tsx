@@ -38,20 +38,20 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
   const isCruise = "route" in item;
 
   return (
-    <>
+    <main class="bg-main-grey">
           {/* Breadcrumb */}
-          <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 md:px-8 lg:px-16 py-4">
-        <nav className="text-sm text-gray-500 mb-6">
+          <div className="bg-[#fff]  border-gray-200">
+        <div className="container mx-auto px-4 md:px-8  py-4">
+        <nav className="text-sm text-gray-500">
         <Link href="/" className="hover:text-[var(--main-color)]">Home</Link>
         <span className="mx-2">/</span>
-        <Link href={`/${categorySlug}`} className="hover:text-[var(--main-color)]">
+        <Link href={`/${categorySlug}`} className="hover:text-[var(--main-color)] underline">
           {categorySlug.replace(/-/g, " ")}
         </Link>
         <span className="mx-2">/</span>
         <Link
           href={`/${categorySlug}/${subcategorySlug}`}
-          className="hover:text-[var(--main-color)]"
+          className="hover:text-[var(--main-color)] underline"
         >
           {subcategorySlug.replace(/-/g, " ")}
         </Link>
@@ -61,21 +61,24 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
         </div>
       </div>
         <div className="container py-10 max-w-7xl mx-auto">
-      <div className="relative h-80 w-full rounded-xl overflow-hidden mb-8">
-        {/* <Image
+      {/* <div className="relative h-80 w-full rounded-xl overflow-hidden mb-8">
+        <Image
           src={item.image ?? "/placeholder.svg"}
           alt={item.title}
           fill
           className="object-cover"
           priority
           sizes="(max-width: 896px) 100vw, 896px"
-        /> */}
-        <div className="absolute bottom-4 right-4 bg-white/95 px-4 py-2 rounded-lg shadow">
+        />
+
+      </div> */}
+       <div className="tour-title relative">
+       <h1 className="text-3xl font-bold text-navy mb-4">{item.title}</h1>
+      <div className="absolute bottom-4 right-4 bg-white/95 px-4 py-2 rounded-lg shadow">
           <p className="text-navy font-bold text-xl">{"From $" + item.price_from}</p>
         </div>
-      </div>
+       </div>
 
-      <h1 className="text-3xl font-bold text-navy mb-4">{item.title}</h1>
        <TourDetailsClient />
       {"short_description" in item && item.short_description && (
         <p className="text-lg text-gray-700 mb-6">{item.short_description}</p>
@@ -130,7 +133,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
         </section>
       )}
 
-      <div className="flex gap-4 mt-8">
+      {/* <div className="flex gap-4 mt-8">
         <Link
           href={`/${categorySlug}/${subcategorySlug}`}
           className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -143,9 +146,9 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
         >
           Book now
         </a>
-      </div>
+      </div> */}
     </div>
-    </>
+    </main>
 
   );
 }

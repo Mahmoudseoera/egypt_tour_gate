@@ -202,18 +202,7 @@ export default function DestinationGrid() {
             Plan Your Journey
           </button>
         </div>
-        <div className="relative">
-        <input
-          required
-          type="text"
-          name="text"
-          autoComplete="off"
-          className="peer w-full border-[1.5px] border-solid border-[#9e9e9e] rounded-2xl bg-transparent px-4 py-4 text-base text-[#f5f5f5] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#1a73e8] valid:border-[#1a73e8] valid:outline-none outline-none"
-        />
-        <label className="absolute left-[15px] text-[#aaa] pointer-events-none translate-y-4 transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] peer-focus:-translate-y-1/2 peer-focus:scale-80 peer-focus:bg-[#212121] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[#2196f3] peer-valid:-translate-y-1/2 peer-valid:scale-80 peer-valid:bg-[#212121] peer-valid:px-[0.2em] peer-valid:py-0 peer-valid:text-[#2196f3]">
-          First Name
-        </label>
-    </div>
+
       </div>
     </section>
   );

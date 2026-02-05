@@ -194,7 +194,7 @@ export default function Navbar() {
         </div>
       </div>
       <nav
-        className={`w-full z-50 transition-all duration-300
+        className={`w-full z-50 border-gray-200 transition-all duration-300
         ${isScrolled ? "fixed top-0 bg-white shadow-xl" : "relative bg-white"}
         `}
       >
