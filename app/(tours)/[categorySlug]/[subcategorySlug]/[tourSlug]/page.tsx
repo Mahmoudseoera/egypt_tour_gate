@@ -38,7 +38,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
   const isCruise = "route" in item;
 
   return (
-    <main class="bg-main-grey">
+    <main className="bg-main-grey">
           {/* Breadcrumb */}
           <div className="bg-[#fff]  border-gray-200">
         <div className="container mx-auto px-4 md:px-8  py-4">

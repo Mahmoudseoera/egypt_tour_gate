@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Toaster } from 'sonner';
 import { montserrat } from "./fonts";
 import Navbar from "../components/layout/navbar"
 import Footer from "../components/layout/footer"
@@ -42,6 +43,12 @@ export default function RootLayout({
         {children}
         <ScrollToTop />
         <Footer />
+                {/* Sonner Toaster */}
+                <Toaster
+          position="top-right"
+          richColors
+          closeButton
+        />
       </body>
     </html>
   );

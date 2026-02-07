@@ -1,232 +1,192 @@
-import { 
-  getBlogCategoryBySlug, 
-  getBlogPostsByCategory, 
-  getBlogSubCategories,
-  buildBlogBreadcrumb,
-  hasSubCategories
-} from "@/lib/api/blogData";
-import Image from "next/image";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-
-/**
- * DYNAMIC CATEGORY PAGE
- * Route: /blogs/[category]
- * Shows all posts in a category OR subcategories if the category has children
- */
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import { getCategoryBySlug, getPostsByCategory } from '../../../lib/api/blogData';
+import Breadcrumb from '@/components/layout/breadcrumb';
 
 interface CategoryPageProps {
   params: Promise<{
-    category: string;
+    subCategorySlug: string;
   }>;
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
-  // Await params in Next.js 15+
-  const { category: categorySlug } = await params;
-  
-  // Get category data
-  const category = getBlogCategoryBySlug(categorySlug);
-  
-  // If category doesn't exist, show 404
-  if (!category) {
-    notFound();
-  }
-  
-  // Get breadcrumb for navigation
-  const breadcrumb = buildBlogBreadcrumb(categorySlug);
-  
-  // Check if this category has subcategories
-  const hasChildren = hasSubCategories(categorySlug);
-  const subCategories = getBlogSubCategories(categorySlug);
-  
-  // Get posts for this category (includes posts from child categories)
-  const posts = getBlogPostsByCategory(categorySlug);
-
-  return (
-    <section className="category-page py-16 md:py-24 bg-[#f9f9f9] min-h-screen">
-      <div className="container mx-auto px-4">
-        {/* Breadcrumb Navigation - Shows hierarchical path */}
-        <nav className="mb-8 flex items-center gap-2 text-sm">
-          <Link 
-            href="/blogs" 
-            className="text-gray-600 hover:text-[#e3b75e] transition-colors"
-          >
-            All Categories
-          </Link>
-          {breadcrumb.map((crumb, index) => (
-            <div key={crumb.slug} className="flex items-center gap-2">
-              <span className="text-gray-400">/</span>
-              {index === breadcrumb.length - 1 ? (
-                <span className="text-[#272262] font-semibold">{crumb.name}</span>
-              ) : (
-                <Link 
-                  href={`/blogs/${crumb.slug}`}
-                  className="text-gray-600 hover:text-[#e3b75e] transition-colors"
-                >
-                  {crumb.name}
-                </Link>
-              )}
-            </div>
-          ))}
-        </nav>
-
-        {/* Category Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="w-20 h-1.5 mx-auto mb-6 bg-[#e3b75e]"></div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-[#272262]">
-            {category.name}
-          </h1>
-          <p className="text-lg text-gray-600 leading-relaxed">
-            {category.description}
-          </p>
-        </div>
-
-        {/* Show Subcategories if they exist */}
-        {hasChildren && subCategories.length > 0 && (
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold mb-6 text-[#272262]">Explore Subcategories</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {subCategories.map((subCat) => (
-                <Link 
-                  key={subCat.slug}
-                  href={`/blogs/${subCat.slug}`}
-                  className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <Image
-                      src={subCat.image}
-                      alt={subCat.name}
-                      width={400}
-                      height={200}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="p-5">
-                    <h3 className="text-xl font-bold mb-2 text-[#272262] group-hover:text-[#e3b75e] transition-colors">
-                      {subCat.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {subCat.description}
-                    </p>
-                    <div className="mt-3 text-sm text-[#e3b75e] font-semibold">
-                      {subCat.postCount} Articles →
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Blog Posts Grid */}
-        {posts.length > 0 ? (
-          <>
-            <h2 className="text-2xl font-bold mb-6 text-[#272262]">
-              {hasChildren ? 'Latest Articles' : 'All Articles'}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post) => (
-                <article 
-                  key={post.slug}
-                  className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden"
-                >
-                  {/* Post Image with Link */}
-                  <Link href={`/blogs/${categorySlug}/${post.slug}`}>
-                    <div className="relative h-56 overflow-hidden">
-                      <Image
-                        src={post.image}
-                        alt={post.title}
-                        width={400}
-                        height={250}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      {/* Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                  </Link>
-
-                  {/* Post Content */}
-                  <div className="p-6">
-                    {/* Post Title with Link */}
-                    <Link href={`/blogs/${categorySlug}/${post.slug}`}>
-                      <h3 className="text-xl font-bold mb-3 text-[#272262] hover:text-[#e3b75e] transition-colors line-clamp-2 min-h-[3.5rem]">
-                        {post.title}
-                      </h3>
-                    </Link>
-
-                    {/* Post Excerpt */}
-                    <p className="text-gray-600 mb-4 line-clamp-3 text-sm leading-relaxed min-h-[4.5rem]">
-                      {post.excerpt}
-                    </p>
-
-                    {/* Post Meta - Author and Date */}
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                      <div className="flex items-center gap-2">
-                        {/* Author Icon */}
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span className="font-medium">{post.author}</span>
-                      </div>
-                      <span>{post.readTime}</span>
-                    </div>
-
-                    {/* Read More Link/Button */}
-                    <Link 
-                      href={`/blogs/${categorySlug}/${post.slug}`}
-                      className="inline-flex items-center gap-2 text-[#e3b75e] font-semibold hover:gap-3 transition-all duration-300"
-                    >
-                      <span>Read More</span>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                      </svg>
-                    </Link>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </>
-        ) : (
-          /* No Posts Message */
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">📝</div>
-            <h3 className="text-2xl font-bold text-[#272262] mb-2">No Articles Yet</h3>
-            <p className="text-gray-600">Check back soon for new content in this category.</p>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-/**
- * Generate static params for all categories (for static site generation)
- * This is optional but improves performance
- */
-export async function generateStaticParams() {
-  const { blogCategories } = await import("@/lib/api/blogData");
-  
-  return blogCategories.map((category) => ({
-    category: category.slug,
-  }));
-}
-
-/**
- * Generate metadata for SEO
- */
-export async function generateMetadata({ params }: CategoryPageProps) {
-  const { category: categorySlug } = await params;
-  const category = getBlogCategoryBySlug(categorySlug);
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const category = getCategoryBySlug(resolvedParams.subCategorySlug);
   
   if (!category) {
     return {
-      title: "Category Not Found",
+      title: 'Category Not Found',
     };
   }
-  
+
   return {
-    title: `${category.name} | Egypt Tours Blog`,
+    title: `${category.title} - Egypt Travel Blog | Egypt Tours Gate`,
     description: category.description,
   };
+}
+
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  const resolvedParams = await params;
+  const category = getCategoryBySlug(resolvedParams.subCategorySlug);
+  
+  if (!category) {
+    notFound();
+  }
+
+  const posts = getPostsByCategory(resolvedParams.subCategorySlug);
+
+  return (
+    <div className="min-h-screen bg-grey-light">
+      {/* Breadcrumb */}
+      <Breadcrumb 
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Blogs', href: '/blogs' },
+          { label: category.title, href: `/blogs/${resolvedParams.subCategorySlug}` }
+        ]}
+      />
+
+      {/* Category Hero */}
+      <section className="relative bg-gradient-to-br from-navy via-[#3d3586] to-navy py-20 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 right-10 text-9xl">
+            {category.icon}
+          </div>
+          <div className="absolute bottom-10 left-10 w-32 h-32 border-4 border-gold rounded-full"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="text-7xl mb-6">{category.icon}</div>
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              {category.title}
+            </h1>
+            <p className="text-xl text-white/90 leading-relaxed">
+              {category.description}
+            </p>
+            <div className="mt-8 inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-white">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="font-semibold">{posts.length} Article{posts.length !== 1 ? 's' : ''}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Posts Grid */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto">
+            {posts.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="text-6xl mb-6">📝</div>
+                <h2 className="text-3xl font-bold text-navy mb-4">No Articles Yet</h2>
+                <p className="text-gray-600 mb-8">
+                  We&aposre working on creating amazing content for this category. Check back soon!
+                </p>
+                <Link 
+                  href="/blogs"
+                  className="inline-block bg-gold hover:bg-gold/90 text-navy px-6 py-3 rounded-full font-bold transition-all"
+                >
+                  Browse All Categories
+                </Link>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {posts.map((post) => (
+                  <article
+                    key={post.slug}
+                    className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+                  >
+                    <Link href={`/blogs/${resolvedParams.subCategorySlug}/${post.slug}`}>
+                      <div className="relative h-64 bg-gradient-to-br from-navy/20 to-gold/20 overflow-hidden">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <svg className="w-24 h-24 text-gold/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                          </svg>
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div className="absolute top-4 left-4">
+                          <span className="bg-gold text-navy px-3 py-1 rounded-full text-sm font-bold">
+                            {category.icon} {category.title}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="p-6">
+                        <div className="flex items-center gap-4 mb-3 text-sm text-gray-500">
+                          <time dateTime={post.publishedAt}>
+                            {new Date(post.publishedAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </time>
+                          <span className="text-gold">•</span>
+                          <span>{post.readTime}</span>
+                        </div>
+                        
+                        <h3 className="text-xl font-bold text-navy mb-3 group-hover:text-gold transition-colors line-clamp-2">
+                          {post.title}
+                        </h3>
+                        
+                        <p className="text-gray-600 mb-4 line-clamp-3">
+                          {post.excerpt}
+                        </p>
+                        
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {post.tags.slice(0, 3).map((tag) => (
+                            <span 
+                              key={tag}
+                              className="bg-grey-light text-navy px-3 py-1 rounded-full text-xs font-medium"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-navy flex items-center justify-center text-white font-bold">
+                              {post.author.name.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">{post.author.name}</p>
+                            </div>
+                          </div>
+                          
+                          <svg className="w-6 h-6 text-gold group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Back to All Categories */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <Link
+              href="/blogs"
+              className="inline-flex items-center gap-2 text-navy hover:text-gold font-semibold text-lg transition-colors group"
+            >
+              <svg className="w-6 h-6 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span>Back to All Categories</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }

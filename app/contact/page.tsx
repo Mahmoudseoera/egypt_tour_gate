@@ -3,6 +3,8 @@
 import { Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
@@ -37,11 +39,11 @@ export default function ContactPage() {
     const data = await res.json();
 
     if (data.success) {
-      setMessage("Message sent successfully ✅");
+      toast.success("Message sent successfully");
       // e.currentTarget.reset();
       router.push("/thank-you");
     } else {
-      setMessage("Something went wrong ❌");
+      toast.error("Something went wrong ❌");
     }
 
     setLoading(false);

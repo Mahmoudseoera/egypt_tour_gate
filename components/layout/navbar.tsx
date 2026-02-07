@@ -286,8 +286,15 @@ export default function Navbar() {
                         About Us
                       </Link>
                     </li>
+                    <li>
+                      <Link
+                        href="/free-page"
+                        className='block py-2 px-3 capitalize hover:text-fg-brand'
+                      >
+                        Free Page
+                      </Link>
+                    </li>
                   </ul>
-        
               </li>
 
               <li>

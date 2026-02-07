@@ -1,8 +1,4 @@
-
-/* Blog post details page  
-   Route: /blogs/[subCategorySlug]/[blogslug]/page.tsx
-   Displays all top-level blog categories in a grid layout  */
-  import { Metadata } from 'next';
+import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getPostBySlug, getCategoryBySlug, getRelatedPosts } from  '../../../../lib/api/blogData';
@@ -10,51 +6,45 @@ import Breadcrumb from '@/components/layout/breadcrumb';
 import ReactMarkdown from 'react-markdown';
 
 interface BlogPostPageProps {
-  params: Promise<{
+  params: {
     subCategorySlug: string;
     blogslug: string;
-  }>;
+  };
 }
 
-
-export async function generateMetadata(
-  {
-    params,
-  }: {
-    params: Promise<{
-      subCategorySlug: string;
-      blogslug: string;
-    }>;
-  }
-): Promise<Metadata> {
-  const { blogslug } = await params;
-
-  const post = getPostBySlug(blogslug);
-
+export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+  const post = getPostBySlug(params.blogslug);
+  
   if (!post) {
     return {
-      title: "Post Not Found",
+      title: 'Post Not Found',
     };
   }
 
   return {
-    title: `${post.title} | Egypt Travel Blog`,
+    title: `${post.title} | Egypt Tours Gate Blog`,
     description: post.excerpt,
   };
 }
 
-
-
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { blogslug, subCategorySlug } = await params;
-
-  const post = getPostBySlug(blogslug);
-  const category = getCategoryBySlug(subCategorySlug);
-
-  if (!post || !category) {
+export default function BlogPostPage({ params }: BlogPostPageProps) {
+  const post = getPostBySlug(params.blogslug);
+  const category = getCategoryBySlug(params.subCategorySlug);
+  
+  // Validate post exists
+  if (!post) {
     notFound();
   }
 
+  // Validate post belongs to the category
+  if (post.categorySlug !== params.subCategorySlug) {
+    notFound();
+  }
+
+  // Validate category exists
+  if (!category) {
+    notFound();
+  }
 
   const relatedPosts = getRelatedPosts(post, 3);
 
@@ -65,8 +55,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         items={[
           { label: 'Home', href: '/' },
           { label: 'Blogs', href: '/blogs' },
-          { label: category.title, href: `/blogs/${subCategorySlug}`},
-          { label: post.title, href: `/blogs/${subCategorySlug}/${blogslug}`}
+          { label: category.title, href: `/blogs/${params.subCategorySlug}` },
+          { label: post.title, href: `/blogs/${params.subCategorySlug}/${params.blogslug}` }
         ]}
       />
 
@@ -76,7 +66,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="max-w-4xl mx-auto">
             {/* Category Badge */}
             <Link 
-              href={`/blogs/${subCategorySlug}`}
+              href={`/blogs/${params.subCategorySlug}`}
               className="inline-flex items-center gap-2 bg-gold/10 hover:bg-gold/20 text-gold px-4 py-2 rounded-full text-sm font-bold mb-6 transition-colors"
             >
               <span>{category.icon}</span>
@@ -257,7 +247,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 Start Planning Your Trip
               </Link>
               <Link
-                href={`/blogs/${subCategorySlug}`}
+                href={`/blogs/${params.subCategorySlug}`}
                 className="inline-block bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border-2 border-white px-8 py-4 rounded-full font-bold text-lg transition-all"
               >
                 More {category.title} Articles
