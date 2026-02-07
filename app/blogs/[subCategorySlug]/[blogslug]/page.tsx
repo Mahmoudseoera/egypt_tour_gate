@@ -13,7 +13,13 @@ interface BlogPostPageProps {
   params: Promise<{
     subCategorySlug: string;
     blogslug: string;
+    
   }>;
+}
+
+interface TableOfContentItem {
+  id: number;
+  title: string;
 }
 
 

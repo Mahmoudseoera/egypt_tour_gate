@@ -28,42 +28,42 @@ export const blogCategories: BlogCategory[] = [
     slug: "egypt-tours-guide",
     title: "Egypt Tours Guide",
     description: "Complete guides for exploring ancient Egypt's wonders, from pyramids to temples",
-    image: "/images/categories/egypt-tours.jpg",
+    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     icon: "🏛️"
   },
   {
     slug: "travel-tips",
     title: "Travel Tips",
     description: "Essential travel advice, packing guides, and insider tips for your Egyptian adventure",
-    image: "/images/categories/travel-tips.jpg",
+    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     icon: "✈️"
   },
   {
     slug: "cultural-experiences",
     title: "Cultural Experiences",
     description: "Immerse yourself in Egyptian culture, cuisine, and local traditions",
-    image: "/images/categories/cultural.jpg",
+    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     icon: "🎭"
   },
   {
     slug: "historical-insights",
     title: "Historical Insights",
     description: "Deep dives into ancient Egyptian history, pharaohs, and archaeological discoveries",
-    image: "/images/categories/historical.jpg",
+    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     icon: "📜"
   },
   {
     slug: "adventure-activities",
     title: "Adventure Activities",
     description: "Diving, desert safaris, hot air balloons, and thrilling Egyptian adventures",
-    image: "/images/categories/adventure.jpg",
+    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     icon: "🏄"
   },
   {
     slug: "luxury-travel",
     title: "Luxury Travel",
     description: "Premium experiences, 5-star hotels, and exclusive tours in Egypt",
-    image: "/images/categories/luxury.jpg",
+    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     icon: "💎"
   }
 ];
@@ -1638,7 +1638,7 @@ A luxury Nile cruise isn't just about the ship—it's about the total experience
 
 The Nile has carried travelers for millennia—doing it in luxury is an experience you'll treasure forever.
     `,
-    image: "/images/posts/luxury-nile-cruise.jpg",
+    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     author: {
       name: "Isabella Laurent",
       avatar: "/images/authors/isabella.jpg"
