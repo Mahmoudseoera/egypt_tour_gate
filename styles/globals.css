@@ -284,11 +284,11 @@ nav.fixed {
   top: 7px;
 }
 
-.navbar-main >li {
+.navbar-main > li {
   position: relative;
 }
 
-.navbar-main >li a::before {
+.navbar-main > li a::before {
   content: "";
   position: absolute;
   height: 2px;
@@ -299,7 +299,7 @@ nav.fixed {
   transition: 0.5s all ease-in-out;
 }
 
-.navbar-main li:hover a::before {
+.navbar-main > li:hover a::before {
   width: 100%;
   transition: 0.5s all ease-in-out;
 }

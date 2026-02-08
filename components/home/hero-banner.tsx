@@ -18,16 +18,16 @@ const heroBanner: HeroBanner = {
   description:
     'Discover the wonders of Egypt with our premium tour experiences. Explore ancient pyramids, vibrant cultures, and unforgettable memories.',
   imageOne:
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=700&fit=crop',
+    '/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp',
   imageTwo:
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=700&fit=crop',
+    '/assets/images/tours/luxurytours-webp.webp',
   BackgroundImg:
     'https://images.unsplash.com/photo-1539768942893-daf53e448371?q=80&w=1600&auto=format&fit=crop',
 };
 
 export default function EgyptToursBanner() {
   return (
-    <section className="relative w-full h-[80vh] md:h-[60vh]  lg:h-[70vh]  [clip-path:polygon(100%_0,_100%_95%,_50%_100%,_0_95%,_0_0)] overflow-hidden flex items-center">
+    <section className="relative w-full h-[50vh] md:h-[60vh]  lg:h-[70vh]  [clip-path:polygon(100%_0,_100%_95%,_50%_100%,_0_95%,_0_0)] overflow-hidden flex items-center">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none">
         <Image
@@ -44,20 +44,20 @@ export default function EgyptToursBanner() {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="grid md:grid-cols-2 gap-10 items-center">
+        <div className="grid md:grid-cols-2 gap-10 items-center text-center">
           {/* Left Content */}
-          <div className="text-left space-y-5 animate-slide-in-left">
-            <div className="w-14 h-1 bg-[#e3b75e] rounded-full" />
+          <div className="space-y-5 animate-slide-in-left text-center md:text-left lg:text-left ">
+            <div className="w-14 h-1 bg-[#e3b75e] rounded-full mx-auto md:mx-0 lg:mx-0 " />
 
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#272262] leading-tight">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl  text-center md:text-left lg:text-left  font-bold text-[#272262] leading-tight">
               {heroBanner.title}
             </h1>
 
-            <p className="text-base md:text-lg text-[#333] max-w-xl">
+            <p className="text-base md:text-lg text-[#333] max-w-xl text-center md:text-left lg:text-left">
               {heroBanner.description}
             </p>
 
-            <button className="inline-flex items-center gap-2 px-7 py-3 bg-[#e3b75e] text-[#272262] font-semibold rounded-lg hover:shadow-lg transition">
+            <button className="inline-flex items-center gap-2 px-7 py-3 bg-[#e3b75e] text-[#272262] font-semibold rounded-lg hover:shadow-lg transition mx-auto md:mx-0 lg:mx-0 ">
               Explore Tours
               <svg
                 className="w-4 h-4"
@@ -79,7 +79,7 @@ export default function EgyptToursBanner() {
           <div className="flex justify-center gap-6">
             {/* Image 1 */}
             <div className="relative animate-floating">
-              <div className="relative w-[100px] md:w-[200px] lg:w-[250px] h-[300px] md:h-[360px] rounded-(--corner-radius) rounded-[10px] overflow-hidden border-1 border-[#e3b75e] shadow-xl">
+              <div className="relative w-[150px] md:w-[200px] lg:w-[250px] h-[150px] md:h-[360px] lg:h-[400px]  rounded-(--corner-radius) rounded-[10px] overflow-hidden border-1 border-[#e3b75e] shadow-xl">
                 <Image
                   src={heroBanner.imageOne}
                   alt="Tour Image"
@@ -91,7 +91,7 @@ export default function EgyptToursBanner() {
 
             {/* Image 2 */}
             <div className="relative animate-floating-delayed">
-              <div className="relative  w-[100px] md:w-[200px] lg:w-[250px] h-[300px] md:h-[360px] rounded-[10px] overflow-hidden border-1 border-[#272262] shadow-xl">
+              <div className="relative  w-[150px] md:w-[200px] lg:w-[250px] h-[150px] md:h-[360px] lg:h-[400px]  rounded-[10px] overflow-hidden border-1 border-[#272262] shadow-xl">
                 <Image
                   src={heroBanner.imageTwo}
                   alt="Tour Image"

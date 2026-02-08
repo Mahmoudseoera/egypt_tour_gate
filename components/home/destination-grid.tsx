@@ -142,7 +142,7 @@ export default function DestinationGrid() {
           </div>
 
           {/* Small images - bottom right */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div
               className="relative rounded-3xl overflow-hidden group cursor-pointer"
               onMouseEnter={() => setHoveredIndex(5)}
@@ -164,36 +164,8 @@ export default function DestinationGrid() {
                 <h3 className="text-base font-bold">{destinations[5].title}</h3>
               </div>
             </div>
-            <div
-              className="relative rounded-3xl overflow-hidden group cursor-pointer"
-              onMouseEnter={() => setHoveredIndex(5)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 5 ? 'scale-110' : 'scale-100'}`}>
-                <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-100">
-                  <Image
-                  src={destinations[6].image || "/placeholder.svg"}
-                  alt={destinations[6].title}
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-300"
-                />
-                </div>
-              </div>
-              <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 6 ? 'opacity-100' : 'opacity-70'}`}></div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                <div className="text-xs font-medium opacity-90 mb-1">{destinations[6].location}</div>
-                <h3 className="text-base font-bold">{destinations[6].title}</h3>
-              </div>
-            </div>
-            {/* <div className="relative rounded-3xl overflow-hidden bg-[var(--second-color)] flex items-center justify-center cursor-pointer hover:bg-opacity-90 transition-all duration-300 group">
-              <div className="text-center text-white p-4">
-                <div className="text-4xl mb-2 group-hover:scale-110 transition-transform duration-300">✈️</div>
-                <div className="text-xs font-medium opacity-90 mb-1">{destinations[6].location}</div>
-                <h3 className="text-base font-bold">{destinations[6].title}</h3>
-              </div>
-            </div> */}
+            
           </div>
-          
         </div>
 
         {/* Call to Action */}

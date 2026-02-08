@@ -137,7 +137,7 @@ export default function RoavioAboutSection() {
                 <span className="text-gray-900">Egypt Tour Gate</span>
               </h2>
               <p className="text-gray-600 text-lg">
-                We are started with 2005s, <span className="text-orange-500 font-semibold">20+years of experience</span>
+                We are started with 2005s, <span className="text-[var(--main-second)] font-semibold">20+years of experience</span>
               </p>
             </div>
 
@@ -223,7 +223,7 @@ export default function RoavioAboutSection() {
                 {features.map((feature) => (
                   <div key={feature.id} className="flex items-center gap-3 roavio-feature-fade">
                     <div className="flex-shrink-0">
-                      <div className="w-6 h-6 rounded-full bg-[var(--main-color)] flex items-center justify-center roavio-check-pulse">
+                      <div className="w-6 h-6 rounded-full bg-[#e3b75e] flex items-center justify-center roavio-check-pulse">
                         <Check className="w-4 h-4 text-white" strokeWidth={3} />
                       </div>
                     </div>
@@ -236,7 +236,7 @@ export default function RoavioAboutSection() {
 
               {/* CTA Button */}
               <div>
-                <button className="roavio-btn-hover bg-[var(--main-color)] hover:bg-orange-600 text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 shadow-lg">
+                <button className="roavio-btn-hover bg-[#e3b75e] hover:bg-orange-600 text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 shadow-lg">
                   Learn More Us
                 </button>
               </div>

@@ -32,6 +32,8 @@ const socialData: SocialItem[] = [
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const { data, error, loading } = useGeneralData();
   useEffect(() => {
     const handleScroll = () => {
@@ -50,7 +52,7 @@ export default function Navbar() {
   }, []);
 
   // Show loading state or error fallback
-  if (loading) {
+  if (loading) { 
     return (
       <nav className="w-full z-50 relative bg-white">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
@@ -92,11 +94,11 @@ export default function Navbar() {
   return (
     <header>
       <div className="topbar-wrapper">
-        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-2 text-sm text-white">
-          {/* Left */}
-          <div className="flex items-center gap-2 text-[var(--second-color)]">
-                      {/* social icons */}
-          <div className="flex gap-4">
+      <div className="mx-auto flex max-w-[1500px] flex-col gap-3 px-6 py-2 text-sm text-white md:flex-row md:items-center md:justify-between">
+      {/* Left */}
+      <div className="flex flex-wrap items-center  gap-3 text-[var(--second-color)] justify-between md:justify-center lg:justify-center">
+      {/* social icons */}
+          <div className="flex gap-1 md:gap-2 lg:gap-4">
         {socialData.map((item, index) => (
           <SimpleSocialIcon
             key={index}
@@ -218,11 +220,13 @@ export default function Navbar() {
               Get started
             </Link>
 
+
             <button
               type="button"
-              className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-body rounded-base md:hidden hover:bg-neutral-secondary-soft"
+              onClick={() => setMobileOpen(true)}
+              className="inline-flex items-center p-2 w-10 h-10 justify-center md:hidden"
             >
-              <span className="sr-only">Open main menu</span>☰
+              ☰
             </button>
           </div>
 
@@ -309,6 +313,114 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
+            {/* Mobile Menu */}
+    {mobileOpen && (
+      <div className="fixed inset-0 z-[999] bg-black/40 md:hidden">
+        
+        {/* Drawer */}
+        <div className="absolute left-0 top-0 h-full w-[85%] bg-white p-6 overflow-y-auto">
+          
+          {/* Close */}
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              setActiveDropdown(null);
+            }}
+            className="mb-6 text-xl mr-auto"
+          >
+            ✕
+          </button>
+
+          <ul className="space-y-4">
+            
+            <li>
+              <Link href="/" onClick={() => setMobileOpen(false)}>
+                Home
+              </Link>
+            </li>
+
+            {data?.header.headerCategories.map((category) => (
+              <li key={category.id}>
+                
+                {/* Parent */}
+                <button
+                  onClick={() =>
+                    setActiveDropdown(
+                      activeDropdown === category.id ? null : category.id
+                    )
+                  }
+                  className="flex w-full items-center justify-between"
+                >
+                  <span>{category.name.en.toLowerCase()}</span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform
+                    ${activeDropdown === category.id ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {/* Children */}
+                {activeDropdown === category.id && (
+                  <ul className="mt-3 ml-4 space-y-2">
+                    {category.children.map((child) => (
+                      <li key={child.id}>
+                        <Link
+                          href={`/${category.slug}/${child.slug}`}
+                          onClick={() => setMobileOpen(false)}
+                          className="block text-sm"
+                        >
+                          {child.name.en.toLowerCase()}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+
+            {/* Static pages */}
+            <li className="relative group capitalize">
+                <span
+                  
+                  className="block py-2 px-3 capitalize hover:text-fg-brand"
+                >
+                  Static Pages
+                </span>
+                  <ul className="absolute left-0 top-full hidden group-hover:block bg-white shadow-lg rounded-sm min-w-[200px]">
+                    <li>
+                      <Link
+                        href="/contact"
+                        className='block py-2 px-3 capitalize hover:text-fg-brand'
+                      >
+                        contact
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/about-us"
+                        className='block py-2 px-3 capitalize hover:text-fg-brand'
+                      >
+                        About Us
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/free-page"
+                        className='block py-2 px-3 capitalize hover:text-fg-brand'
+                      >
+                        Free Page
+                      </Link>
+                    </li>
+                  </ul>
+              </li>
+            <li>
+              <Link href="/blogs" onClick={() => setMobileOpen(false)}>
+                Blogs
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </div>
+    )}
     </header>
   );
 }

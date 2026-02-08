@@ -30,7 +30,7 @@ export default function SecondTourCard({
   tourLink
 }: TourCardProps) {
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 max-w-sm second-tour-card">
+    <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 max-w-sm mx-auto second-tour-card">
       {/* Image Container */}
       <div className="relative h-56 w-full overflow-hidden group">
         <Image
