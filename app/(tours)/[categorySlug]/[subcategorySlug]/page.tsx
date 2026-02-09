@@ -79,7 +79,7 @@ export default async function SubcategoryPage({
   return (
     <>
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white border border-gray-200">
         <div className="container mx-auto px-4 md:px-8 lg:px-16 py-4">
           <nav className="flex items-center gap-2 text-sm text-gray-600">
             <Link href="/" className="hover:text-[var(--main-color)]">
@@ -102,11 +102,11 @@ export default async function SubcategoryPage({
       <section className="container py-10 max-w-7xl mx-auto">
         <section className="tours-page">
           <div className="container mx-auto py-16">
-            <h1 className="text-3xl font-bold mb-2 text-center">
-              {categoryName}
+            <h1 className="text-3xl font-bold mb-2 text-center text-[var(--second-color)]">
+              {categoryName.toLowerCase()}
             </h1>
             <h2 className="text-xl text-gray-600 mb-8 text-center">
-              {subcategoryName}
+              {subcategoryName.toLowerCase()}
             </h2>
 
             {items.length === 0 ? (

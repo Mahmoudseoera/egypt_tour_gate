@@ -51,6 +51,7 @@ export default function Home() {
         {secondTours.map((tour) => (
             <SecondTourCard
               key={tour.id}
+              id={tour.id} 
               image={tour.image}
               title={tour.title}
               description={tour.description}
@@ -59,7 +60,6 @@ export default function Home() {
               reviewCount={tour.reviewCount}
               duration={tour.duration}
               location={tour.location}
-              ctaText="Book Now"
               tourLink="/"
             />
           ))}
