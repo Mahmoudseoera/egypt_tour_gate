@@ -24,7 +24,7 @@ interface Tour {
 const tours: Tour[] = [
   {
     id: 1,
-    image: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=800&q=80',
+    image: "/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp",
     title: 'From its medieval origins to the digital era',
     description: '40 impressive UNESCO World Heritage sites which bear witness to over 2,000 years of the city history.',
     price: '€145',
@@ -32,7 +32,7 @@ const tours: Tour[] = [
   },
   {
     id: 2,
-    image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
+    image: "/assets/images/tours/grand-egyptian-museum-opening-(2)-webp.webp",
     title: 'Discover Ancient Wonders',
     description: 'Explore breathtaking archaeological sites and immerse yourself in rich cultural heritage spanning millennia.',
     price: '€199',
@@ -40,7 +40,7 @@ const tours: Tour[] = [
   },
   {
     id: 3,
-    image: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&q=80',
+    image: "/assets/images/tours/camel front of giza pyramids.jpg",
     title: 'European Cultural Journey',
     description: 'Experience the finest museums, galleries, and historic landmarks across iconic European destinations.',
     price: '€175',
@@ -48,7 +48,7 @@ const tours: Tour[] = [
   },
   {
     id: 4,
-    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
+    image: "/assets/images/tours/Pyramids-in-Egypt-webp.webp",
     title: 'Magical City Exploration',
     description: 'Discover the enchanting streets and historical monuments of this beautiful European capital.',
     price: '€165',
@@ -56,7 +56,7 @@ const tours: Tour[] = [
   },
   {
     id: 5,
-    image: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&q=80',
+    image: "/assets/images/tours/great-pyramid-webp.webp",
     title: 'Mediterranean Paradise',
     description: 'Experience the stunning coastline and rich cultural heritage of Mediterranean destinations.',
     price: '€210',

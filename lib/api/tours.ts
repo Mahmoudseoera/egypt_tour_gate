@@ -28,7 +28,7 @@ export type Tour = {
   export const  secondTours = [
     {
       id: 1,
-      image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
+      image: "/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp",
       title: 'Mountain Adventure in the Alps',
       description:
         'Experience breathtaking views and challenging hiking trails in the heart of the Swiss Alps.',
@@ -40,7 +40,7 @@ export type Tour = {
     },
     {
       id: 2,
-      image: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&h=300&fit=crop',
+      image: "/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp",
       title: 'Tropical Paradise Beach Tour',
       description:
         'Relax on pristine beaches, snorkel in crystal clear waters, and enjoy island culture.',
@@ -52,7 +52,7 @@ export type Tour = {
     },
     {
       id: 3,
-      image: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=400&h=300&fit=crop',
+      image: "/assets/images/tours/camel front of giza pyramids.jpg",
       title: 'Historic Cities Walking Tour',
       description:
         'Explore centuries of history, architecture, and culture in Europes most iconic cities.',
@@ -64,7 +64,7 @@ export type Tour = {
     },
     {
       id: 4,
-      image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
+      image: "/assets/images/tours/Pyramids-in-Egypt-webp.webp",
       title: 'Safari Expedition Africa',
       description:
         'Witness incredible wildlife and landscape photography opportunities in the African savanna.',
