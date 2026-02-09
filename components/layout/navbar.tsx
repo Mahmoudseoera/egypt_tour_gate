@@ -33,7 +33,7 @@ const socialData: SocialItem[] = [
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { data, error, loading } = useGeneralData();
   useEffect(() => {
     const handleScroll = () => {
