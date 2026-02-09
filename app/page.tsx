@@ -4,7 +4,6 @@ import Providers from '../components/providers'
 import EgyptToursBanner  from '../components/home/hero-banner'
 import TestimonialSlider from "../components/testimonails/testimonials-card";
 import SecondTourCard from "../components/tour/second-tour-card";
-import { secondTours } from '../lib/api/tours'
 import  DestinationGrid  from "../components/home/destination-grid";
 import FAQSection from "../components/layout/faq";
 import RoavioAboutSection from "../components/home/about";
@@ -13,6 +12,9 @@ import PartnersMarquee from "../components/home/partners";
 import TravelBlogSection from "../components/home/blog-section";
 import TravelTourSlider from "../components/home/tours-section"
 import categoriesData from "@/lib/api/categories";
+import type { NileCruise } from "@/lib/api/categories";
+const { nile_cruises } = categoriesData;
+
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 // style css for home page //
@@ -48,22 +50,22 @@ export default function Home() {
 
         {/* Tour Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {secondTours.map((tour) => (
-            <SecondTourCard
-              key={tour.id}
-              id={tour.id} 
-              image={tour.image}
-              title={tour.title}
-              description={tour.description}
-              price={tour.price}
-              rating={tour.rating}
-              reviewCount={tour.reviewCount}
-              duration={tour.duration}
-              location={tour.location}
-              tourLink="/"
-            />
-          ))}
-        </div>
+        {nile_cruises.map((tour) => (
+          <SecondTourCard
+            key={tour.id}
+            id={tour.id}
+            image={tour.image}
+            title={tour.title}
+            description={tour.description}
+            price={tour.price_from}   
+            rating={tour.rating}
+            reviewCount={tour.reviewCount}
+            duration={tour.duration}
+            location={tour.location}
+            tourLink={`/tours/${tour.slug}`}  
+          />
+        ))}
+      </div>
       </section>
       <div className="animate-on-scroll">
       <DestinationGrid />

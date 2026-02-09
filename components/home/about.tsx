@@ -147,7 +147,7 @@ export default function RoavioAboutSection() {
               <div className="col-span-2 lg:col-span-1 roavio-card-hover">
                 <div className="rounded-3xl overflow-hidden h-72 lg:h-full">
                   <Image
-                src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80" 
+                src="/assets/images/tours/Pyramids-in-Egypt-webp.webp" 
                 alt="Colosseum Rome" 
                  className="w-full h-full object-cover roavio-image-zoom"
                  width={800}
@@ -201,7 +201,7 @@ export default function RoavioAboutSection() {
             <div className="roavio-card-hover">
               <div className="rounded-3xl overflow-hidden h-96">
               <Image
-                src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80" 
+                src="/assets/images/tours/Egypt Budget Tours-webp.webp" 
                 alt="Colosseum Rome" 
                  className="w-full h-full object-cover roavio-image-zoom"
                  width={800}

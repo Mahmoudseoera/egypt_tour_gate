@@ -186,13 +186,13 @@ export default function Navbar() {
           </div>
 
           {/* Desktop menu */}
-          <ul className="hidden md:flex gap-8 font-medium">
+          <ul className="hidden md:flex gap-8 font-medium navbar-main">
             <li>
               <Link href="/">Home</Link>
             </li>
 
             {data.header.headerCategories.map((cat) => (
-              <li key={cat.id} className="relative group">
+              <li key={cat.id} className="relative group has-dropdown">
                 <Link href={`/${cat.slug}`} className="flex items-center gap-1">
                   {cat.name.en.toLowerCase()}
                   <ChevronDown className="h-4 w-4" />
@@ -215,7 +215,7 @@ export default function Navbar() {
               </li>
             ))}
 
-            <li className="relative group">
+            <li className="relative group has-dropdown ">
               <span className="cursor-pointer flex items-center gap-1">
                 Static Pages <ChevronDown className="h-4 w-4" />
               </span>

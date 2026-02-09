@@ -276,7 +276,7 @@ export default function TravelServicesSection() {
               style={{ minHeight: "0", maxHeight: "350px" }}
             >
               <Image
-                src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80"
+                src="/assets/images/blogs/A-wonderful-picture-of-a-tourist-in-front-of-the-pyramids-webp.webp"
                 alt="Luxury cabin retreat"
                 width={1200}
                 height={800}

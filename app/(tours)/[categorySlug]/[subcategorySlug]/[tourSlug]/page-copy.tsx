@@ -121,7 +121,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
         <section className="mb-8">
           <h2 className="text-xl font-bold mb-3">Route</h2>
           <p className="text-gray-700">
-            {(item as NileCruise).route.join(" → ")}
+          {(item as NileCruise).route?.join(" → ") ?? "No route available"}
           </p>
         </section>
       )}

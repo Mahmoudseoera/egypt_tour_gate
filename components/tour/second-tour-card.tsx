@@ -6,12 +6,12 @@ import Link from "next/link";
 
 interface TourCardProps {
   id: number;
-  image: string | StaticImageData;
+  image?: string | StaticImageData;
   title: string;
-  description: string;
+  description?: string;
   price: number;
   rating: number;
-  reviewCount: number;
+  reviewCount?: number;
   duration: string;
   location: string;
   tourLink: string;

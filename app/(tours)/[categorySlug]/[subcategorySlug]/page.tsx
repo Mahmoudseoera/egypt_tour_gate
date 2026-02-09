@@ -120,9 +120,9 @@ export default async function SubcategoryPage({
                     className="group block bg-white rounded-lg overflow-hidden shadow hover:shadow-xl transition-shadow border border-gray-100"
                   >
                     <div className="relative h-48 w-full overflow-hidden">
-                      {/* src={(item as Tour & TourPackage & NileCruise).image ?? "/placeholder.svg"} */}
+                      
                       <Image
-                        src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80"
+                        src={item.image ?? "/placeholder.svg"}
                         alt={item.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform"

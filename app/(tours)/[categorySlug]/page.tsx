@@ -4,6 +4,11 @@ import Image from "next/image";
 type CategoryPageProps = {
   params: Promise<{ categorySlug: string }>;
 };
+const photos = [
+  "/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp",
+  "/assets/images/tours/camel front of giza pyramids.jpg",
+  "/assets/images/tours/Pyramids-in-Egypt-webp.webp",
+];
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { categorySlug } = await params;
@@ -64,13 +69,20 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               <Link href={`/${category.slug}/${child.slug}`}>
                 {/* Image Container */}
                 <div className="relative h-64 overflow-hidden">
-                  <Image
-                    src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80"
-                    alt="test"
-                    width={500}
-                    height={500}
-                    className="w-full h-full object-cover transform group-hover:scale-110 group-hover:rotate-2 transition-all duration-700 ease-out"
-                  />
+                {photos.map((photo, index) => (
+                    <div
+                      key={index}
+                      className="group relative overflow-hidden rounded-2xl"
+                    >
+                      <Image
+                        src={photo}
+                        alt={child.name?.en ?? "category"}
+                        width={500}
+                        height={500}
+                        className="w-full h-full object-cover transform group-hover:scale-110 group-hover:rotate-2 transition-all duration-700 ease-out"
+                      />
+                    </div>
+                  ))}
 
                   {/* Overlay Gradient */}
                   <div
@@ -109,7 +121,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                     className="text-2xl font-bold mb-3 group-hover:translate-x-1 transition-transform duration-300"
                     style={{ color: "var(--second-color)" }}
                   >
-                    {child.name.en}
+                    {child.name.en.toLowerCase()}
                   </h3>
 
                   <p
