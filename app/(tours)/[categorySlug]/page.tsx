@@ -75,7 +75,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                       className="group relative overflow-hidden rounded-2xl"
                     >
                       <Image
-                        src={photo}
+                        src={photos[child.id % photos.length]}
                         alt={child.name?.en ?? "category"}
                         width={500}
                         height={500}
