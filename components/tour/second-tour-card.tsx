@@ -50,7 +50,7 @@ export default function SecondTourCard({
   };
   
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 max-w-sm mx-auto">
+    <div className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl  transition-shadow duration-300 max-w-sm mx-auto">
 
       {/* Image */}
       <Link href={tourLink} className="relative h-56 w-full block group">
@@ -58,9 +58,9 @@ export default function SecondTourCard({
           src={image || "/placeholder.svg"}
           alt={title}
           fill
-          className="object-cover group-hover:scale-110 transition-transform duration-300"
+          className="object-cover group-hover:scale-110 group-hover:transform-gpu group-hover:-translate-y-3 groub-hover:rotate-x-15 group-hover:rotate-y-30 group-hover:transition-transform duration-300"
         />
-        <div className="absolute top-4 right-4 bg-gold px-4 py-2 rounded-lg">
+        <div className="absolute top-4 right-4 px-4 py-2 rounded-lg bg-[rgba(255,255,255,0.2)] backdrop-blur-lg">
           <p className="text-navy font-bold text-lg">${price}</p>
         </div>
       </Link>
