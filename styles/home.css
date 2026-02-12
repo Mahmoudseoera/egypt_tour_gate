@@ -2,6 +2,9 @@
 swiper css card
 ============================================*/
 /* arrows */
+.swiper-wrapper {
+    padding: 2rem 1rem;
+}
 .swiper-button-next,
 .swiper-button-prev {
     width: 44px;
@@ -10,7 +13,12 @@ swiper css card
     border-radius: 50%;
     color: var(--main-color);
 }
-
+.swiper-button-next {
+right: 0 !important;
+}
+.swiper-button-prev  {
+left: 0 !important;
+}
 .swiper-button-prev,
 .swiper-button-next {
     svg {

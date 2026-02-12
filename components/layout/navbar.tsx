@@ -52,107 +52,121 @@ export default function Navbar() {
     <header>
       {/* ================= TOP BAR ================= */}
       <div className="topbar-wrapper">
-      <div className="mx-auto flex max-w-[1500px] flex-col gap-3 px-6 py-2 text-sm text-white md:flex-row md:items-center md:justify-between">
-      {/* Left */}
-      <div className="flex flex-wrap items-center  gap-3 text-[var(--second-color)] justify-between md:justify-center lg:justify-center">
-      {/* social icons */}
-          <div className="flex gap-1 md:gap-2 lg:gap-4">
+  <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-2 text-sm text-white">
+
+    {/* ================= LEFT ================= */}
+    <div className="flex items-center">
+
+      {/* Social */}
+      <div className="flex items-center gap-2 pr-4 border-r border-white/20">
         {socialData.map((item, index) => (
           <SimpleSocialIcon
             key={index}
             item={item}
-            className="text-1xl text-[var(--second-color)] hover:text-[var(--main-color)]"
+            className="text-[var(--second-color)] hover:text-[var(--main-color)] transition"
           />
         ))}
       </div>
-            <Link href="tel:+201110008407" className="flex items-center gap-2">
-              <Phone className="h-4 w-4" />
-              <span className="font-medium">Call Free :</span>
-              <span>+201110008407</span>
-            </Link>
-          </div>
 
-          {/* Right */}
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-[var(--second-color)]">
-              <Mail className="h-4 w-4" />
-              <span>Email :</span>
-              <span className="font-medium">info@example.com</span>
-            </div>
+      {/* Phone */}
+      <Link
+        href="tel:+201110008407"
+        className="flex items-center gap-2 pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
+      >
+        <Phone className="h-4 w-4" />
+        <span className="hidden md:inline font-medium">
+          Call Free :
+        </span>
+        <span className="hidden lg:inline">
+          +201110008407
+        </span>
+      </Link>
+    </div>
 
-            <div className="relative group flex items-center gap-1 cursor-pointer">
-              {/* Selected language */}
-              <Image
-                src="https://flagcdn.com/w40/us.png"
-                alt="ENG"
-                width={16}
-                height={16}
-                className="rounded-full"
-              />
-              <span className="text-[var(--second-color)]">ENG</span>
-              <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />{" "}
-              {/* Dropdown */}
-              <div className="lang-menu">
-                <Link href="/" className="lang-item">
-                  <Image
-                    src="https://flagcdn.com/w40/us.png"
-                    alt="English"
-                    width={20}
-                    height={20}
-                    className="lang-flag"
-                  />
-                  English
-                </Link>
+    {/* ================= RIGHT ================= */}
+    <div className="flex items-center">
 
-                <Link href="/" className="lang-item">
-                  <Image
-                    src="https://flagcdn.com/w40/fr.png"
-                    alt="Français"
-                    width={20}
-                    height={20}
-                    className="lang-flag"
-                  />
-                  Français
-                </Link>
+      {/* Email */}
+      <Link
+        href="mailto:info@example.com"
+        className="flex items-center gap-2 pr-4 border-r border-white/20 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
+      >
+        <Mail className="h-4 w-4" />
+        <span className="hidden lg:inline font-medium">
+          info@example.com
+        </span>
+      </Link>
 
-                <Link href="/" className="lang-item">
-                  <Image
-                    src="https://flagcdn.com/w40/de.png"
-                    alt="Deutsch"
-                    width={20}
-                    height={20}
-                    className="lang-flag"
-                  />
-                  Deutsch
-                </Link>
+      {/* Language */}
+      <div className="relative group flex items-center gap-1 px-4 border-r border-white/20 cursor-pointer text-[var(--second-color)]">
+        <Image
+          src="https://flagcdn.com/w40/us.png"
+          alt="ENG"
+          width={16}
+          height={16}
+          className="rounded-full"
+        />
+        <span className="hidden md:inline">ENG</span>
+        <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
 
-                <Link href="/" className="lang-item">
-                  <Image
-                    src="https://flagcdn.com/w40/eg.png"
-                    alt="Arabic"
-                    width={20}
-                    height={20}
-                    className="lang-flag"
-                  />
-                  العربية
-                </Link>
-              </div>
-            </div>
+        {/* Dropdown */}
+        <div className="lang-menu">
+          <Link href="/" className="lang-item">
+            <Image
+              src="https://flagcdn.com/w40/us.png"
+              alt="English"
+              width={20}
+              height={20}
+              className="lang-flag"
+            />
+            English
+          </Link>
 
-            <div className="flex items-center gap-1 cursor-pointer text-[var(--second-color)]">
-              <span>USD</span>
-              <ChevronDown className="h-4 w-4" />
-            </div>
+          <Link href="/" className="lang-item">
+            <Image
+              src="https://flagcdn.com/w40/fr.png"
+              alt="Français"
+              width={20}
+              height={20}
+              className="lang-flag"
+            />
+            Français
+          </Link>
 
-            {/* <div className="relative flex items-center gap-2">
-              <Heart />
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-yellow-400 text-[10px] font-bold text-black">
-                0
-              </span>
-            </div> */}
-          </div>
+          <Link href="/" className="lang-item">
+            <Image
+              src="https://flagcdn.com/w40/de.png"
+              alt="Deutsch"
+              width={20}
+              height={20}
+              className="lang-flag"
+            />
+            Deutsch
+          </Link>
+
+          <Link href="/" className="lang-item">
+            <Image
+              src="https://flagcdn.com/w40/eg.png"
+              alt="Arabic"
+              width={20}
+              height={20}
+              className="lang-flag"
+            />
+            العربية
+          </Link>
         </div>
       </div>
+
+      {/* Currency */}
+      <div className="flex items-center gap-1 pl-4 cursor-pointer text-[var(--second-color)]">
+        <span className="hidden md:inline">USD</span>
+        <ChevronDown className="h-4 w-4" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
 
       {/* ================= MAIN NAV ================= */}
       <nav
@@ -199,7 +213,7 @@ export default function Navbar() {
                 </Link>
 
                 {cat.children.length > 0 && (
-                  <ul className="absolute left-0 top-full hidden min-w-[200px] bg-white shadow-lg group-hover:block">
+                  <ul className="absolute left-0 top-4 hidden min-w-[200px] bg-white shadow-lg group-hover:block rounded-sm overflow-hidden">
                     {cat.children.map((child) => (
                       <li key={child.id}>
                         <Link
@@ -219,7 +233,7 @@ export default function Navbar() {
               <span className="cursor-pointer flex items-center gap-1">
                 Static Pages <ChevronDown className="h-4 w-4" />
               </span>
-              <ul className="absolute left-0 top-full hidden bg-white shadow-lg group-hover:block">
+              <ul className="absolute left-0 top-4  hidden bg-white shadow-lg group-hover:block rounded-sm overflow-hidden">
                 <li><Link href="/contact" className="block px-4 py-2">Contact</Link></li>
                 <li><Link href="/about-us" className="block px-4 py-2">About Us</Link></li>
                 <li><Link href="/free-page" className="block px-4 py-2">Free Page</Link></li>

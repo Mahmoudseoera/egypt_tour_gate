@@ -11,7 +11,7 @@ export default function TravelServicesSection() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className="text-white"
+          className="text-[var(--main-color)]"
         >
           <path
             d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
@@ -40,7 +40,7 @@ export default function TravelServicesSection() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className="text-white"
+          className="text-[var(--main-color)]"
         >
           <path
             d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
@@ -68,7 +68,7 @@ export default function TravelServicesSection() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className="text-white"
+          className="text-[var(--main-color)]"
         >
           <circle cx="11" cy="11" r="8" />
           <path
@@ -93,7 +93,7 @@ export default function TravelServicesSection() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className="text-white"
+          className="text-[var(--main-color)]"
         >
           <path
             d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
@@ -121,7 +121,7 @@ export default function TravelServicesSection() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className="text-white"
+          className="text-[var(--main-color)]"
         >
           <path
             d="M10 2v7.31M14 9.3V1.99M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"
@@ -149,7 +149,7 @@ export default function TravelServicesSection() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className="text-white"
+          className="text-[var(--main-color)]"
         >
           <path
             d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
@@ -172,15 +172,15 @@ export default function TravelServicesSection() {
   const styles = `
       .service-card-hover {
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                background-color: rgba(227, 183, 94, 0.05);
       }
   
       .service-card-hover:hover {
-        transform: translateY(-8px);
-        background-color: rgba(227, 183, 94, 0.05);
+        background-color: var(--second-500);
       }
   
       .service-card-hover:hover .service-icon-bg {
-        background-color: #e3b75e;
+        background-color: var(--second-color);
       }
   
       .service-icon-float {
@@ -248,17 +248,55 @@ export default function TravelServicesSection() {
     <>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <div
-        style={{ backgroundColor: "#1a1a1a" }}
-        className="py-20 px-4 md:px-8"
+        className="py-20 px-4 md:px-8 bg-[var(--second-color)]"
       >
         <div className="max-w-7xl mx-auto">
           {/* First Row: 2 Cards + 1 Large Image */}
+          <div className="text-center mb-12">
+        <h2 className="text-4xl md:text-3xl font-bold text-white mb-4">
+        Explore Our Amazing Destinations
+        </h2>
+        <span
+        className="relative block h-1 w-40 mb-6 bg-gradient-to-r from-[var(--main-color)] via-[transparent] to-[var(--main-color)] mx-auto relative block  w-40 mx-auto rounded-md
+
+          before:content-['']
+          before:absolute
+          before:top-1/2
+          before:left-1/2
+          before:-translate-x-1/2
+          before:-translate-y-1/2
+          before:w-4
+          before:h-4
+          before:bg-[url('/assets/images/pryamids-2.svg')]
+          before:bg-contain
+          before:bg-no-repeat
+          before:z-20
+
+          after:content-['']
+          after:absolute
+          after:top-1/2
+          after:left-1/2
+          after:-translate-x-1/2
+          after:-translate-y-1/2
+          after:w-[26px]
+          after:h-[26px]
+          after:bg-[var(--second-color)]
+          after:rounded-full
+          after:z-0
+        ">
+        </span>
+        <p className="text-lg text-white opacity-70 max-w-2xl mx-auto">
+          Discover breathtaking locations around the world and create unforgettable memories
+        </p>
+      </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             {/* Expert Travel Guide */}
-            <div className="service-card-hover service-fade-in bg-zinc-800 rounded-3xl p-8 border border-zinc-700">
+            <div className="service-card-hover service-fade-in bg-[var(--second-300) rounded-3xl p-8 border border-[var(--second-900)] 
+            hover:rotate-3 hover:scale-105 transition-transform hover:rotate-x-15 hover:rotate-y-20 hover:transition-transform duration-300
+            smooth-transition">
               <div
                 className="service-icon-bg w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-400"
-                style={{ backgroundColor: "#2a2a2a" }}
+                
               >
                 <div className="service-icon-float">{services[0].icon}</div>
               </div>
@@ -299,10 +337,12 @@ export default function TravelServicesSection() {
             </div>
 
             {/* Easy Booking */}
-            <div className="service-card-hover service-fade-in bg-zinc-800 rounded-3xl p-8 border border-zinc-700">
+            <div className="service-card-hover service-fade-in bg-[var(--second-300) rounded-3xl p-8 border border-[var(--second-900)] 
+            hover:rotate-3 hover:scale-105 transition-transform hover:rotate-x-15 hover:rotate-y-20 hover:transition-transform duration-300
+            smooth-transition">
               <div
                 className="service-icon-bg w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-400"
-                style={{ backgroundColor: "#2a2a2a" }}
+                
               >
                 <div className="service-icon-float">{services[2].icon}</div>
               </div>
@@ -318,10 +358,12 @@ export default function TravelServicesSection() {
           {/* Second Row: 4 Equal Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Deals & Discounts */}
-            <div className="service-card-hover service-fade-in bg-zinc-800 rounded-3xl p-8 border border-zinc-700">
+            <div className="service-card-hover service-fade-in bg-[var(--second-300) rounded-3xl p-8 border border-[var(--second-900)] 
+            hover:rotate-3 hover:scale-105 transition-transform hover:rotate-x-15 hover:rotate-y-20 hover:transition-transform duration-300
+            smooth-transition">
               <div
                 className="service-icon-bg w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-400"
-                style={{ backgroundColor: "#2a2a2a" }}
+                
               >
                 <div className="service-icon-float">{services[3].icon}</div>
               </div>
@@ -334,10 +376,12 @@ export default function TravelServicesSection() {
             </div>
 
             {/* Local Guides Authentic */}
-            <div className="service-card-hover service-fade-in bg-zinc-800 rounded-3xl p-8 border border-zinc-700">
+            <div className="service-card-hover service-fade-in bg-[var(--second-300) rounded-3xl p-8 border border-[var(--second-900)] 
+            hover:rotate-3 hover:scale-105 transition-transform hover:rotate-x-15 hover:rotate-y-20 hover:transition-transform duration-300
+            smooth-transition">
               <div
                 className="service-icon-bg w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-400"
-                style={{ backgroundColor: "#2a2a2a" }}
+                
               >
                 <div className="service-icon-float">{services[4].icon}</div>
               </div>
@@ -350,10 +394,12 @@ export default function TravelServicesSection() {
             </div>
 
             {/* Travel Insurance */}
-            <div className="service-card-hover service-fade-in bg-zinc-800 rounded-3xl p-8 border border-zinc-700">
+            <div className="service-card-hover service-fade-in bg-[var(--second-300) rounded-3xl p-8 border border-[var(--second-900)] 
+            hover:rotate-3 hover:scale-105 transition-transform hover:rotate-x-15 hover:rotate-y-20 hover:transition-transform duration-300
+            smooth-transition">
               <div
                 className="service-icon-bg w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-400"
-                style={{ backgroundColor: "#2a2a2a" }}
+                
               >
                 <div className="service-icon-float">{services[5].icon}</div>
               </div>
@@ -366,10 +412,12 @@ export default function TravelServicesSection() {
             </div>
 
             {/* Additional Service (you can add more or duplicate) */}
-            <div className="service-card-hover service-fade-in bg-zinc-800 rounded-3xl p-8 border border-zinc-700">
+            <div className="service-card-hover service-fade-in bg-[var(--second-300) rounded-3xl p-8 border border-[var(--second-900)] 
+            hover:rotate-3 hover:scale-105 transition-transform hover:rotate-x-15 hover:rotate-y-20 hover:transition-transform duration-300
+            smooth-transition">
               <div
                 className="service-icon-bg w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-400"
-                style={{ backgroundColor: "#2a2a2a" }}
+                
               >
                 <div className="service-icon-float">
                   <svg
@@ -379,7 +427,7 @@ export default function TravelServicesSection() {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="1.5"
-                    className="text-white"
+                    className="text-[var(--main-color)]"
                   >
                     <path
                       d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"

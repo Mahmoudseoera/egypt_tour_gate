@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Heart } from "lucide-react";
-
+import { Heart, MapPin } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 
@@ -27,7 +26,7 @@ const tours: Tour[] = [
     image: "/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp",
     title: 'From its medieval origins to the digital era',
     description: '40 impressive UNESCO World Heritage sites which bear witness to over 2,000 years of the city history.',
-    price: '€145',
+    price: '145$',
     city: 'Venice'
   },
   {
@@ -35,7 +34,7 @@ const tours: Tour[] = [
     image: "/assets/images/tours/grand-egyptian-museum-opening-(2)-webp.webp",
     title: 'Discover Ancient Wonders',
     description: 'Explore breathtaking archaeological sites and immerse yourself in rich cultural heritage spanning millennia.',
-    price: '€199',
+    price: '199$',
     city: 'Paris'
   },
   {
@@ -43,7 +42,7 @@ const tours: Tour[] = [
     image: "/assets/images/tours/camel front of giza pyramids.jpg",
     title: 'European Cultural Journey',
     description: 'Experience the finest museums, galleries, and historic landmarks across iconic European destinations.',
-    price: '€175',
+    price: '175$',
     city: 'Rome'
   },
   {
@@ -51,7 +50,7 @@ const tours: Tour[] = [
     image: "/assets/images/tours/Pyramids-in-Egypt-webp.webp",
     title: 'Magical City Exploration',
     description: 'Discover the enchanting streets and historical monuments of this beautiful European capital.',
-    price: '€165',
+    price: '165$',
     city: 'Barcelona'
   },
   {
@@ -59,7 +58,7 @@ const tours: Tour[] = [
     image: "/assets/images/tours/great-pyramid-webp.webp",
     title: 'Mediterranean Paradise',
     description: 'Experience the stunning coastline and rich cultural heritage of Mediterranean destinations.',
-    price: '€210',
+    price: '210$',
     city: 'Athens'
   }
 ];
@@ -79,15 +78,45 @@ export default function TravelTourSlider() {
       <div className="max-w-7xl mx-auto px-5">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-block mb-4">
-            <div className="h-1 w-20 bg-[var(--main-color)] mx-auto"></div>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-[var(--second-color)] mb-4">
-            Popular Tours
-          </h2>
-          <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
-            Discover amazing destinations and create unforgettable memories with our curated tour packages
-          </p>
+        
+        <h2 className="text-4xl md:text-3xl font-bold text-[var(--second-color)] mb-4">
+        Explore Our Amazing Destinations
+        </h2>
+          <span
+            className={`
+              relative block h-1 w-40 mb-4 mx-auto rounded-md
+              bg-gradient-to-r from-[var(--second-color)] via-transparent to-[var(--second-color)]
+
+              before:content-['']
+              before:absolute
+              before:top-1/2
+              before:left-1/2
+              before:-translate-x-1/2
+              before:-translate-y-1/2
+              before:w-4
+              before:h-4
+              before:bg-[url('/assets/images/pryamids-2.svg')]
+              before:bg-contain
+              before:bg-no-repeat
+              before:z-20
+
+              after:content-['']
+              after:absolute
+              after:top-1/2
+              after:left-1/2
+              after:-translate-x-1/2
+              after:-translate-y-1/2
+              after:w-[26px]
+              after:h-[26px]
+              after:bg-white
+              after:rounded-full
+              after:z-0
+            `}
+          ></span>
+
+<p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
+          Discover breathtaking locations around the world and create unforgettable memories
+        </p>
         </div>
 
         {/* Swiper */}
@@ -96,39 +125,26 @@ export default function TravelTourSlider() {
           loop={true}
           slidesPerView={1}
           speed={700}
-          autoplay={{
-            delay: 3500,
-            disableOnInteraction: false,
-          }}
+          // autoplay={{
+          //   delay: 3500,
+          //   disableOnInteraction: false,
+          // }}
           breakpoints={{
             640: { slidesPerView: 1 },
             768: { slidesPerView: 2 },
             1024: { slidesPerView: 3 },
           }}
-          spaceBetween={24}
+          spaceBetween={30}
           navigation
           pagination={{
             clickable: true,
             dynamicBullets: true,
           }}
-          className="py-8 pb-16"
+          className="py-16 pb-16 group"
         >
           {tours.map((tour) => (
             <SwiperSlide key={tour.id}>
-              <div className="tour-card bg-white rounded-3xl overflow-visible shadow-[0_8px_30px_rgba(0,0,0,0.12)] h-full flex flex-col relative">
-                {/* Ticket Shape Decorations */}
-                <div className="absolute w-10 h-10 bg-[var(--main-grey)] rounded-full -left-5 top-[280px] z-10"></div>
-                <div className="absolute w-10 h-10 bg-[var(--main-grey)] rounded-full -right-5 top-[280px] z-10"></div>
-                
-                {/* Ticket Divider */}
-                <div 
-                  className="absolute left-5 right-5 h-0.5 z-10"
-                  style={{
-                    top: '280px',
-                    backgroundImage: 'repeating-linear-gradient(to right, var(--main-grey) 0, var(--main-grey) 8px, transparent 8px, transparent 16px)'
-                  }}
-                ></div>
-
+              <div className="tour-card group bg-white rounded-3xl overflow-visible shadow-[0_8px_30px_rgba(0,0,0,0.12)] h-full flex flex-col relative">
                 {/* Image Section */}
                 <div className="relative w-full h-[280px] overflow-hidden rounded-t-3xl">
                   <Image
@@ -157,14 +173,15 @@ export default function TravelTourSlider() {
                   </button>
 
                   {/* City Badge */}
-                  <div className="absolute bottom-4 left-4 bg-[var(--second-color)] text-white px-4 py-2 rounded-full text-xs font-semibold tracking-wide z-20">
+                  <div className="absolute bottom-4 flex items-center gap-2 left-4 bg-[rgba(255,255,255,0.5)] text-[var(--second-color)]  px-3 py-2 rounded-full text-xs font-semibold tracking-wide z-20">
+                  <MapPin size={16} className="text-indigo-900 "/>
                     {tour.city}
                   </div>
                 </div>
 
                 {/* Content Section */}
-                <div className="p-6 pt-7 flex-1 flex flex-col">
-                  <h2 className="text-xl font-bold text-[var(--black-color)] leading-snug mb-3 min-h-[56px]">
+                <div className="p-6 pt-7 flex-1 flex flex-col overflow-hidden">
+                  <h2 className=" text-xl font-bold text-[var(--black-color)] leading-snug mb-3 min-h-[56px]">
                     {tour.title}
                   </h2>
 
@@ -173,7 +190,11 @@ export default function TravelTourSlider() {
                   </p>
 
                   {/* Footer */}
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="relative flex items-center justify-between pt-4 border-t-8 border border-dotted border-gray-200">
+                  {/* Ticket Divider */}
+                {/* Ticket Shape Decorations */}
+                <div className="absolute top-[-25px] w-10 h-10 bg-gray-200 rounded-full left-[-50px] z-10 shadow-inner shadow-[0_8px_30px_rgba(0,0,0,0.12)]"></div>
+                <div className="absolute top-[-25px] w-10 h-10 bg-gray-200 rounded-full right-[-50px] z-10 shadow-inner shadow-[0_8px_30px_rgba(0,0,0,0.12)]"></div>
                     <div className="flex flex-col gap-1">
                       <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">
                         Price

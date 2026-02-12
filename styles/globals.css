@@ -39,11 +39,70 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* Travel Website Colors */
+
+  /* ========== Brand Colors (لا يتم تغييرهم) ========== */
   --main-color: #e3b75e;
   --second-color: #272262;
-  --white-color: #fff;
-  --black-color: #333;
+
+  /* ========== Main Color Shades ========== */
+  --main-50: #fbf6ea;
+  --main-100: #f6ebd2;
+  --main-200: #efd6a4;
+  --main-300: #e8c277;
+  --main-400: #e3b75e; /* الأصل */
+  --main-500: #d6a94a;
+  --main-600: #c4973e;
+  --main-700: #a87f32;
+  --main-800: #8b6827;
+  --main-900: #6f521d;
+
+  /* ========== Second Color Shades ========== */
+  --second-50: #ecebfa;
+  --second-100: #d8d7f3;
+  --second-200: #b1afe7;
+  --second-300: #8a87db;
+  --second-400: #4f4a9e;
+  --second-500: #272262; /* الأصل */
+  --second-600: #221d55;
+  --second-700: #1c1747;
+  --second-800: #16123a;
+  --second-900: #100c2c;
+
+  /* ========== Neutral Colors ========== */
+  --white-color: #ffffff;
+  --black-color: #333333;
   --main-grey: #f9f9f9;
+
+  --grey-100: #f5f5f5;
+  --grey-200: #eeeeee;
+  --grey-300: #e0e0e0;
+  --grey-400: #bdbdbd;
+  --grey-500: #9e9e9e;
+  --grey-600: #757575;
+  --grey-700: #616161;
+  --grey-800: #424242;
+  --grey-900: #212121;
+
+  /* ========== System Colors ========== */
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --info-color: #17a2b8;
+
+  /* ========== Background Helpers ========== */
+  --section-bg-light: #fbfbfb;
+  --section-bg-dark: var(--second-900);
+
+  /* ========== Borders ========== */
+  --border-light: #eeeeee;
+  --border-medium: #dddddd;
+  --border-dark: #cccccc;
+
+  /* ========== Shadow Colors ========== */
+  --shadow-light: rgba(0, 0, 0, 0.05);
+  --shadow-medium: rgba(0, 0, 0, 0.1);
+  --shadow-dark: rgba(0, 0, 0, 0.2);
+
 }
 
 .dark {
@@ -149,6 +208,18 @@
     background-color: var(--background);
   }
 
+  .rotate-x-12 {
+    transform: rotateX(12deg);
+  }
+
+  .transform-3d {
+    transform-style: preserve-3d;
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
   .text-foreground {
     color: var(--foreground);
   }
@@ -167,9 +238,17 @@
   background-color: hsl(220 20% 70%);
   border-radius: 999px;
 }
+
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .group:hover .animate-float {
@@ -288,7 +367,7 @@ nav.fixed {
   position: relative;
 }
 
-.navbar-main > li a::before {
+.navbar-main > li > a::before {
   content: "";
   position: absolute;
   height: 2px;
@@ -330,7 +409,7 @@ nav.fixed {
 }
 
 
-.btn-effect {
+/* .btn-effect {
   padding: 10px 25px;
   border: 2px solid #1e2256;
   color: #1e2256;
@@ -342,7 +421,7 @@ nav.fixed {
 .btn-effect:hover {
   background: #1e2256;
   color: #fff;
-}
+} */
 
 
 #Polygon-1,

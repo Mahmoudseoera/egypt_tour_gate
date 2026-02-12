@@ -58,7 +58,7 @@ export default function SecondTourCard({
           src={image || "/placeholder.svg"}
           alt={title}
           fill
-          className="object-cover group-hover:scale-110 group-hover:transform-gpu group-hover:-translate-y-3 groub-hover:rotate-x-15 group-hover:rotate-y-30 group-hover:transition-transform duration-300"
+          className="object-covertransition-transform group-hover:scale-120  groub-hover:rotate-x-15 group-hover:rotate-y-15 group-hover:transition-transform duration-300"
         />
         <div className="absolute top-4 right-4 px-4 py-2 rounded-lg bg-[rgba(255,255,255,0.2)] backdrop-blur-lg">
           <p className="text-navy font-bold text-lg">${price}</p>
@@ -104,7 +104,7 @@ export default function SecondTourCard({
         <div className="flex items-center gap-3">
           <Link
             href={tourLink}
-            className="flex-1 bg-navy text-white text-center py-3 rounded-lg hover:bg-gold hover:text-navy transition"
+            className="flex-1 bg-navy text-white text-center py-3 hover:bg-gold hover:text-navy transition btn-effect rounded-lg bg-[var(--main-color)]"
           >
             Book Now
           </Link>

@@ -101,7 +101,7 @@ export default async function SubcategoryPage({
       </div>
       <section className="container py-10 max-w-7xl mx-auto">
         <section className="tours-page">
-          <div className="container mx-auto py-16">
+          <div className="container mx-auto">
             <h1 className="text-3xl font-bold mb-2 text-center text-[var(--second-color)]">
               {categoryName.toLowerCase()}
             </h1>

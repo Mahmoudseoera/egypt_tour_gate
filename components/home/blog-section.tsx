@@ -155,11 +155,46 @@ export default function TravelBlogSection() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
-      <div
-        style={{ backgroundColor: "#f9f9f9" }}
-        className="py-20 px-4 md:px-8"
-      >
+      <div className="py-20 px-4 md:px-8 bg-[#f9f9f9]">
         <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+        <h2 className="text-4xl md:text-3xl font-bold text-[var(--second-color)] mb-4">
+        Explore Latest Articles
+        </h2>
+        <span
+        className="relative block h-1 w-40 mb-6 bg-gradient-to-r from-[var(--second-color)] via-[transparent] to-[var(--second-color)] mx-auto relative block  w-40 mx-auto rounded-md
+
+          before:content-['']
+          before:absolute
+          before:top-1/2
+          before:left-1/2
+          before:-translate-x-1/2
+          before:-translate-y-1/2
+          before:w-4
+          before:h-4
+          before:bg-[url('/assets/images/pryamids-2.svg')]
+          before:bg-contain
+          before:bg-no-repeat
+          before:z-20
+
+          after:content-['']
+          after:absolute
+          after:top-1/2
+          after:left-1/2
+          after:-translate-x-1/2
+          after:-translate-y-1/2
+          after:w-[26px]
+          after:h-[26px]
+          after:bg-[var(--main-grey)]
+          after:rounded-full
+          after:z-0
+        ">
+        </span>
+        <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
+          Discover breathtaking locations around the world and create unforgettable memories
+        </p>
+      </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - 3 Small Cards */}
             <div className="flex flex-col gap-6 h-full">

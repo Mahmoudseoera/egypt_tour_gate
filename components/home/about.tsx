@@ -131,13 +131,17 @@ export default function RoavioAboutSection() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
             {/* Left - Text Content */}
             <div className="flex flex-col justify-center">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--second-color)] mb-6 leading-tight">
+              <h2 className="text-4xl md:text-3xl font-bold text-[var(--second-color)] mb-4 leading-tight">
                 Passionate about your adventures with
                 <br />
                 <span className="text-gray-900">Egypt Tour Gate</span>
               </h2>
+              
               <p className="text-gray-600 text-lg">
                 We are started with 2005s, <span className="text-[var(--main-color)] font-semibold">20+years of experience</span>
+              </p>
+              <p>
+                
               </p>
             </div>
 

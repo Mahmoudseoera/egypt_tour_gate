@@ -23,34 +23,34 @@ const testimonials: Testimonial[] = [
   {
     id: 1,
     quote:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,",
     name: "Mahmoud Arafat",
     role: "Developer",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+    image: "/assets/images/testimonials/testimonial-img1.jpg",
   },
   {
     id: 2,
     quote:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,",
     name: "Omnia Arafat",
     role: "Designer",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+    image: "/assets/images/testimonials/testimonial-img2.jpg",
   },
   {
     id: 3,
     quote:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,",
     name: "Hussein Mohamed",
     role: "Designer",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+    image: "/assets/images/testimonials/testimonial-img3.jpg",
   },
   {
     id: 4,
     quote:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,",
     name: "Yasser Ali",
     role: "Designer",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+    image: "/assets/images/testimonials/testimonial-img4.jpg",
   },
 ];
 
@@ -58,16 +58,45 @@ export default function TestimonialSlider() {
   return (
     <section className="max-w-7xl mx-auto py-16">
     <div className="container mx-auto">
-       {/* Header */}
-      <div className="text-center mb-12">
+              {/* Header */}
+              <div className="text-center mb-12"> 
         <div className="inline-block mb-4">
-          <div className="h-1 w-20 bg-[var(--main-color)] mx-auto"></div>
-        </div>
         <h2 className="text-4xl md:text-3xl font-bold text-[var(--second-color)] mb-4">
         What Peoples Say About Us
         </h2>
+          <span
+        className="relative block h-1 w-40 bg-gradient-to-r from-[var(--second-color)] via-[transparent] to-[var(--second-color)] mx-auto relative block  w-40 mx-auto rounded-md
+
+          before:content-['']
+          before:absolute
+          before:top-1/2
+          before:left-1/2
+          before:-translate-x-1/2
+          before:-translate-y-1/2
+          before:w-4
+          before:h-4
+          before:bg-[url('/assets/images/pryamids-2.svg')]
+          before:bg-contain
+          before:bg-no-repeat
+          before:z-20
+
+          after:content-['']
+          after:absolute
+          after:top-1/2
+          after:left-1/2
+          after:-translate-x-1/2
+          after:-translate-y-1/2
+          after:w-[26px]
+          after:h-[26px]
+          after:bg-white
+          after:rounded-full
+          after:z-0
+        ">
+        </span>
+
+        </div>
         <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
-          Discover breathtaking locations around the world and create unforgettable memories
+        Discover unforgettable travel experiences tailored just for you
         </p>
       </div>
        {/* Swiper */}
@@ -103,7 +132,7 @@ export default function TestimonialSlider() {
       className="absolute top-6 right-6 text-blue-100 opacity-40"
     />
 
-    <p className="text-sm text-gray-600 leading-relaxed mb-8 relative z-10">
+    <p className="text-sm text-gray-600 leading-relaxed mb-8 relative z-10 line-clamp-3 overflow-hidden h-[85px] m-0">
       {item.quote}
     </p>
 
