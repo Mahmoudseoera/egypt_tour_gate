@@ -54,11 +54,16 @@ export interface NileCruise {
   title: string;
   slug: string;
   duration: string;
+  location: string;
   price_from: number;
   rating: number;
   route: string[];
   image?: string;
   description?:string;
+  reviewCount?:number;
+  tourLink?:string;
+  categorySlug: string; 
+  subcategorySlug: string;
 }
 
 /** Root categories data (categories, tours, packages, nile_cruises) */
@@ -194,33 +199,41 @@ const categoriesData: CategoriesData = {
       id: 301,
       title: "Luxor to Aswan Nile Cruise",
       slug: "luxor-aswan-nile-cruise",
+      categorySlug: "nile-cruises",
+      subcategorySlug: "luxor-aswan-nile-crusie",
       duration: "4 Days / 3 Nights",
       description: "Visit the royal tombs of ancient Egypt in Luxor's West Bank.",
       price_from: 650,
       rating: 4.8,
       route: ["Luxor", "Edfu", "Kom Ombo", "Aswan"],
-      
+      location: "aswan",
       image: "/assets/images/tours/Cairo day tours in Egypt-webp.webp"
     },
     {
       id: 302,
       title: "Lake Nasser Cruise",
       slug: "lake-nasser-cruise",
+      categorySlug: "nile-cruises",
+      subcategorySlug: "lake-nasser-cruise",
       duration: "5 Days / 4 Nights",
       description: "Visit the royal tombs of ancient Egypt in Luxor's West Bank.",
       price_from: 850,
       rating: 4.6,
+      location: "Luxor",
       route: ["Aswan", "Abu Simbel"],
-      image: "/assets/images/tours/Egypt Budget Tours-webp.webp"
+      image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp"
     },
     {
       id: 303,
       title: "Luxor to Aswan Nile Cruise",
       slug: "luxor-aswan-nile-cruise",
+      categorySlug: "nile-cruises",
+      subcategorySlug: "luxor-aswan-nile-crusie",
       duration: "4 Days / 3 Nights",
       description: "Visit the royal tombs of ancient Egypt in Luxor's West Bank.",
       price_from: 650,
       rating: 4.8,
+      location: "aswan",
       route: ["Luxor", "Edfu", "Kom Ombo", "Aswan"],
       image: "/assets/images/tours/49-webp.webp"
     },
@@ -228,10 +241,13 @@ const categoriesData: CategoriesData = {
       id: 304,
       title: "nubian Valley Cruise",
       slug: "nubian-cruise",
+      categorySlug: "nile-cruises",
+      subcategorySlug: "nubian-cruise",
       duration: "3 Days / 2 Nights",
       description: "Visit the royal tombs of ancient Egypt in Luxor's West Bank.",
       price_from: 600,
       rating: 4.6,
+      location: "Luxor",
       route: ["Aswan", "Abu Simbel"],
       image: "/assets/images/tours/camel front of giza pyramids.jpg"
     }

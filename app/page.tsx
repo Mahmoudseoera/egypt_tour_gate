@@ -76,17 +76,18 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {nile_cruises.map((tour) => (
           <SecondTourCard
-            key={tour.id}
-            id={tour.id}
-            image={tour.image}
-            title={tour.title}
-            description={tour.description}
-            price={tour.price_from}   
-            rating={tour.rating}
-            reviewCount={tour.reviewCount}
-            duration={tour.duration}
-            location={tour.location}
-            tourLink={`/${tour.categorySlug}/${tour.subcategorySlug}/${tour.slug}`} 
+          key={tour.id}
+          id={tour.id}
+          image={tour.image}
+          title={tour.title}
+          description={tour.description}
+          price={tour.price_from}
+          rating={tour.rating}
+          reviewCount={tour.reviewCount}
+          duration={tour.duration}
+          location={tour.location}
+          slug={tour.slug}
+          categorySlug="nile-cruises"
           />
         ))}
       </div>

@@ -28,42 +28,42 @@ export const blogCategories: BlogCategory[] = [
     slug: "egypt-tours-guide",
     title: "Egypt Tours Guide",
     description: "Complete guides for exploring ancient Egypt's wonders, from pyramids to temples",
-    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
+    image: "/assets/images/blogs/camel front of giza pyramids.jpg",
     icon: "🏛️"
   },
   {
     slug: "travel-tips",
     title: "Travel Tips",
     description: "Essential travel advice, packing guides, and insider tips for your Egyptian adventure",
-    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
+    image: "/assets/images/blogs/A-wonderful-picture-of-a-tourist-in-front-of-the-pyramids-webp.webp",
     icon: "✈️"
   },
   {
     slug: "cultural-experiences",
     title: "Cultural Experiences",
     description: "Immerse yourself in Egyptian culture, cuisine, and local traditions",
-    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
+    image: "/assets/images/blogs/camel front of giza pyramids.jpg",
     icon: "🎭"
   },
   {
     slug: "historical-insights",
     title: "Historical Insights",
     description: "Deep dives into ancient Egyptian history, pharaohs, and archaeological discoveries",
-    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
+    image: "/assets/images/blogs/Philae-Temple-Island-from-the-top-webp.webp",
     icon: "📜"
   },
   {
     slug: "adventure-activities",
     title: "Adventure Activities",
     description: "Diving, desert safaris, hot air balloons, and thrilling Egyptian adventures",
-    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
+    image: "/assets/images/blogs/guide-pictures_0052_Image-webp.webp",
     icon: "🏄"
   },
   {
     slug: "luxury-travel",
     title: "Luxury Travel",
     description: "Premium experiences, 5-star hotels, and exclusive tours in Egypt",
-    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
+    image: "/assets/images/blogs/guide-pictures_0052_Image-webp.webp",
     icon: "💎"
   }
 ];
@@ -72,6 +72,7 @@ export const blogPosts: BlogPost[] = [
   // Egypt Tours Guide
   {
     slug: "great-sphinx-giza-ultimate-guide",
+    image: "https://plus.unsplash.com/premium_photo-1661891622579-bee76e28c304?q=80&w=1181&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     categorySlug: "egypt-tours-guide",
     title: "The Great Sphinx of Giza: Ultimate Visitor's Guide",
     excerpt: "Discover everything you need to know about visiting the enigmatic Sphinx, from its mysterious history to the best photo spots and viewing times.",
@@ -126,7 +127,6 @@ The Sphinx continues to puzzle archaeologists:
 
 Plan at least 1-2 hours for your Sphinx visit to fully appreciate this ancient wonder.
     `,
-    image: "/images/posts/sphinx-guide.jpg",
     author: {
       name: "Dr. Ahmed Hassan",
       avatar: "/images/authors/ahmed.jpg"
@@ -137,6 +137,7 @@ Plan at least 1-2 hours for your Sphinx visit to fully appreciate this ancient w
   },
   {
     slug: "pyramids-of-giza-complete-tour",
+    image: "/assets/images/blogs/The-front-façade-of-Karnak-Temple-webp.webp",
     categorySlug: "egypt-tours-guide",
     title: "Pyramids of Giza: Your Complete Tour Guide",
     excerpt: "Navigate the pyramids like a pro with our comprehensive guide covering everything from tickets to hidden chambers.",
@@ -198,7 +199,6 @@ The Giza pyramid complex is Egypt's most visited archaeological site and one of 
 
 The pyramids deserve a full day of exploration to truly appreciate their magnificence.
     `,
-    image: "/images/posts/pyramids-tour.jpg",
     author: {
       name: "Sarah Mitchell",
       avatar: "/images/authors/sarah.jpg"
@@ -209,6 +209,7 @@ The pyramids deserve a full day of exploration to truly appreciate their magnifi
   },
   {
     slug: "luxor-karnak-temple-guide",
+    image: "/assets/images/blogs/A-wonderful-picture-of-a-tourist-in-front-of-the-pyramids-webp.webp",
     categorySlug: "egypt-tours-guide",
     title: "Karnak Temple Complex: Luxor's Crown Jewel",
     excerpt: "Explore the largest religious building ever constructed with our detailed guide to the magnificent Karnak Temple.",
@@ -263,7 +264,6 @@ A 2.7-kilometer processional road lined with sphinx statues connecting Karnak to
 
 Karnak is more than a temple—it's a journey through ancient Egyptian civilization.
     `,
-    image: "/images/posts/karnak-temple.jpg",
     author: {
       name: "Dr. Mohamed Saleh",
       avatar: "/images/authors/mohamed.jpg"
@@ -276,6 +276,7 @@ Karnak is more than a temple—it's a journey through ancient Egyptian civilizat
   // Travel Tips
   {
     slug: "best-time-visit-egypt",
+    image: "/assets/images/blogs/Philae-Temple-Island-from-the-top-webp.webp",
     categorySlug: "travel-tips",
     title: "When to Visit Egypt: Complete Seasonal Guide",
     excerpt: "Find the perfect time for your Egyptian adventure with our comprehensive seasonal breakdown and insider recommendations.",
@@ -384,7 +385,6 @@ Choosing the right time to visit Egypt can make or break your experience. Here's
 
 The best time ultimately depends on your priorities: weather, budget, crowds, or specific events.
     `,
-    image: "/images/posts/best-time-visit.jpg",
     author: {
       name: "Sarah Mitchell",
       avatar: "/images/authors/sarah.jpg"
@@ -395,6 +395,7 @@ The best time ultimately depends on your priorities: weather, budget, crowds, or
   },
   {
     slug: "egypt-packing-essentials",
+    image: "/assets/images/blogs/Zeg1JAMgqWlSUwDLVY9yXLVQcUXhG6EQZPfCcjT4.jpg",
     categorySlug: "travel-tips",
     title: "Egypt Packing List: Essential Guide for Every Season",
     excerpt: "Pack like a pro with our comprehensive checklist covering clothing, gadgets, medications, and cultural considerations.",
@@ -548,7 +549,6 @@ Remove: Warm layers (except light jacket for AC)
 
 Remember: You can buy most forgotten items in major Egyptian cities, though specific medications and tech may be harder to find.
     `,
-    image: "/images/posts/packing-essentials.jpg",
     author: {
       name: "Lisa Thompson",
       avatar: "/images/authors/lisa.jpg"
@@ -561,6 +561,7 @@ Remember: You can buy most forgotten items in major Egyptian cities, though spec
   // Cultural Experiences
   {
     slug: "egyptian-cuisine-food-guide",
+    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     categorySlug: "cultural-experiences",
     title: "Egyptian Cuisine: A Food Lover's Complete Guide",
     excerpt: "From street food to fine dining, discover the rich flavors and dishes that define Egyptian culinary culture.",
@@ -760,7 +761,6 @@ Egypt is surprisingly vegetarian-friendly:
 
 Egyptian food is about more than eating—it's about hospitality, tradition, and bringing people together. Don't be shy to try new things!
     `,
-    image: "/images/posts/egyptian-cuisine.jpg",
     author: {
       name: "Fatima El-Sayed",
       avatar: "/images/authors/fatima.jpg"
@@ -773,6 +773,7 @@ Egyptian food is about more than eating—it's about hospitality, tradition, and
   // Historical Insights
   {
     slug: "ancient-egypt-pharaohs-dynasties",
+    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     categorySlug: "historical-insights",
     title: "Ancient Egypt's Greatest Pharaohs and Their Dynasties",
     excerpt: "Journey through 3,000 years of pharaonic rule, from Narmer to Cleopatra, and discover the rulers who shaped civilization.",
@@ -965,7 +966,6 @@ New pharaohs and information still being discovered:
 
 The pharaohs created a civilization that lasted 3,000 years—longer than any empire before or since. Their monuments, achievements, and mysteries continue to captivate us today.
     `,
-    image: "/images/posts/pharaohs-dynasties.jpg",
     author: {
       name: "Dr. Ahmed Hassan",
       avatar: "/images/authors/ahmed.jpg"
@@ -977,6 +977,7 @@ The pharaohs created a civilization that lasted 3,000 years—longer than any em
 
   // Adventure Activities
   {
+    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     slug: "red-sea-diving-guide",
     categorySlug: "adventure-activities",
     title: "Red Sea Diving: Complete Guide to Egypt's Underwater Paradise",
@@ -1267,7 +1268,6 @@ Highly recommended:
 
 The Red Sea offers something for every diver, from your first breaths underwater to challenging technical dives. With warm water, incredible visibility, and diverse marine life, it's a bucket-list destination for divers worldwide.
     `,
-    image: "/images/posts/red-sea-diving.jpg",
     author: {
       name: "Captain Mahmoud Ali",
       avatar: "/images/authors/mahmoud.jpg"
@@ -1280,6 +1280,7 @@ The Red Sea offers something for every diver, from your first breaths underwater
   // Luxury Travel
   {
     slug: "luxury-nile-cruise-guide",
+    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     categorySlug: "luxury-travel",
     title: "Luxury Nile Cruises: The Ultimate Guide to Sailing in Style",
     excerpt: "Experience Egypt's timeless river journey aboard world-class luxury vessels with gourmet dining, spa treatments, and exclusive excursions.",

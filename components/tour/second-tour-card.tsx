@@ -14,7 +14,9 @@ interface TourCardProps {
   reviewCount?: number;
   duration: string;
   location: string;
-  tourLink: string;
+  slug: string;
+  categorySlug: string;
+  subcategorySlug?: string;
 }
 export default function SecondTourCard({
   id,
@@ -26,8 +28,13 @@ export default function SecondTourCard({
   reviewCount,
   duration,
   location,
-  tourLink,
-}: TourCardProps) {
+  slug,
+  categorySlug,
+  subcategorySlug, 
+}: TourCardProps)  {
+  const tourLink = subcategorySlug
+  ? `/${categorySlug}/${subcategorySlug}/${slug}`
+  : `/${categorySlug}/${slug}`;
   const [favorites, setFavorites] = useState<number[]>(() => {
     if (typeof window === "undefined") return [];
     const stored = sessionStorage.getItem("favorites");
@@ -50,6 +57,7 @@ export default function SecondTourCard({
   };
   
   return (
+
     <div className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl  transition-shadow duration-300 max-w-sm mx-auto">
 
       {/* Image */}
@@ -85,7 +93,9 @@ export default function SecondTourCard({
               className={i < Math.floor(rating) ? "fill-gold text-gold" : "text-grey-light"}
             />
           ))}
-          <span className="text-sm">({reviewCount})</span>
+          <span className="text-sm">
+            {reviewCount > 0 && `(${reviewCount})`}
+          </span>
         </div>
 
         {/* Info */}
@@ -104,7 +114,7 @@ export default function SecondTourCard({
         <div className="flex items-center gap-3">
           <Link
             href={tourLink}
-            className="flex-1 bg-navy text-white text-center py-3 hover:bg-gold hover:text-navy transition btn-effect rounded-lg bg-[var(--main-color)]"
+            className="flex-1 !bg-navy !text-white text-center py-3 hover:bg-gold hover:text-navy transition btn-effect rounded-lg bg-[var(--main-color)]"
           >
             Book Now
           </Link>
@@ -112,13 +122,13 @@ export default function SecondTourCard({
           <button
             onClick={() => toggleFavorite(id)}
             className={`w-11 h-11 flex items-center justify-center rounded-md transition
-              ${favorites[id] ? "bg-red-500" : "bg-gray-100 hover:bg-gray-200"}
+             ${favorites.includes(id) ? "bg-red-500" : "bg-gray-100"}
             `}
           >
             <Heart
               size={20}
-              fill={favorites[id] ? "#fff" : "none"}
-              color={favorites[id] ? "#fff" : "#333"}
+              fill={favorites.includes(id) ? "#fff" : "none"}
+              color={favorites.includes(id) ? "#fff" : "#333"}
             />
           </button>
         </div>

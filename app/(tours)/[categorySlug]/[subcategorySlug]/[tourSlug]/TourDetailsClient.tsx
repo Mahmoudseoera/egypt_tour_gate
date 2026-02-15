@@ -58,7 +58,7 @@ export default function TourDetailsClient() {
     '/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp',
     '/assets/images/tours/great-pyramid-webp.webp',
     '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp',
-    '/assets/images/tours/Cairo day tours in Egypt-webp.webp',
+    '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp',
     '/assets/images/tours/49-webp.webp',
     '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp',
   ];
@@ -128,7 +128,7 @@ export default function TourDetailsClient() {
     {
       id: '1',
       title: 'Cairo & Alexandria Discovery',
-      image: '/images/tours/cairo-alexandria.jpg',
+      image:'/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp',
       price: 599,
       duration: '4 Days',
       rating: 4.8,
@@ -137,7 +137,7 @@ export default function TourDetailsClient() {
     {
       id: '2',
       title: 'Luxor & Aswan Highlights',
-      image: '/images/tours/luxor-aswan.jpg',
+      image: '/assets/images/tours/49-webp.webp',
       price: 899,
       duration: '5 Days',
       rating: 4.9,
@@ -146,7 +146,7 @@ export default function TourDetailsClient() {
     {
       id: '3',
       title: 'Red Sea Adventure',
-      image: '/images/tours/red-sea.jpg',
+      image: '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp',
       price: 450,
       duration: '3 Days',
       rating: 4.7,
@@ -679,7 +679,13 @@ export default function TourDetailsClient() {
                 className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 group"
               >
                 <div className="relative h-56 overflow-hidden bg-gradient-to-br from-stone-300 to-stone-400">
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
+                  {/* <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" /> */}
+                  <Image
+                    src={tour.image}
+                    alt={tour.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-2 mb-3">

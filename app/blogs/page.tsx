@@ -51,9 +51,13 @@ export default function BlogsPage() {
                 >
                   <div className="relative h-56 bg-gradient-to-br from-navy/80 to-navy/60 overflow-hidden">
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-8xl opacity-30 group-hover:scale-110 transition-transform duration-300">
-                        {category.icon}
-                      </span>
+                     <Image
+                        src={category.image}
+                        alt={category.title}
+                        width={500}
+                        height={500}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-0 left-0 right-0 p-6">
