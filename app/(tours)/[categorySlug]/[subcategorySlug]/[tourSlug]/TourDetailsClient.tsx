@@ -8,6 +8,7 @@ import "lightgallery/css/lg-zoom.css";
 // plugins
 import lgZoom from "lightgallery/plugins/zoom"; 
 import { useState , useRef  } from 'react';
+import { tourDetailsSchema, type TourDetailsFormData } from '@/lib/validations/tour-details.schema';
 import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight, MapPin, Clock, Users, Calendar, Star, Check } from 'lucide-react';
 
@@ -37,7 +38,7 @@ export default function TourDetailsClient() {
   const [activeDay, setActiveDay] = useState<number | null>(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TourDetailsFormData>({
     name: '',
     email: '',
     nationality: '',
@@ -50,6 +51,8 @@ export default function TourDetailsClient() {
     childAge: '',
     message: ''
   });
+
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof TourDetailsFormData, string>>>({});
 
   const lightGalleryRef = useRef<any>(null);
 
@@ -176,18 +179,34 @@ export default function TourDetailsClient() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const handleNumberChange = (field: 'adults' | 'children', increment: boolean) => {
     setFormData(prev => ({
       ...prev,
-      [field]: Math.max(0, prev[field] + (increment ? 1 : -1))
+      [field]: Math.max(field === 'adults' ? 1 : 0, prev[field] + (increment ? 1 : -1))
     }));
+    setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
   };
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Redirect to thank you page
+
+    const parsed = tourDetailsSchema.safeParse(formData);
+    if (!parsed.success) {
+      const nextErrors: Partial<Record<keyof TourDetailsFormData, string>> = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0] as keyof TourDetailsFormData | undefined;
+        if (key && !nextErrors[key]) {
+          nextErrors[key] = issue.message;
+        }
+      }
+      setFieldErrors(nextErrors);
+      return;
+    }
+
+    setFieldErrors({});
     window.location.href = '/thank-you';
   };
 
@@ -421,7 +440,7 @@ export default function TourDetailsClient() {
                 <h3 className="text-xl font-bold">Check Availability</h3>
               </div>
               
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <form onSubmit={handleSubmit} className="p-6 space-y-4" noValidate>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Name</label>
                   <input
@@ -433,6 +452,7 @@ export default function TourDetailsClient() {
                     placeholder="Mahmoud Abozeid"
                     required
                   />
+                  {fieldErrors.name && <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>}
                 </div>
 
                 <div>
@@ -446,6 +466,7 @@ export default function TourDetailsClient() {
                     placeholder="M.abozeid7@gmail.com"
                     required
                   />
+                  {fieldErrors.email && <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>}
                 </div>
 
                 <div>
@@ -464,6 +485,7 @@ export default function TourDetailsClient() {
                     <option value="AU">Australia</option>
                     <option value="Other">Other</option>
                   </select>
+                  {fieldErrors.nationality && <p className="mt-1 text-xs text-red-600">{fieldErrors.nationality}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -478,6 +500,7 @@ export default function TourDetailsClient() {
                       placeholder="Egypt (+20)"
                       required
                     />
+                    {fieldErrors.countryCode && <p className="mt-1 text-xs text-red-600">{fieldErrors.countryCode}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
@@ -490,6 +513,7 @@ export default function TourDetailsClient() {
                       placeholder="1155131838"
                       required
                     />
+                    {fieldErrors.phone && <p className="mt-1 text-xs text-red-600">{fieldErrors.phone}</p>}
                   </div>
                 </div>
 
@@ -504,6 +528,7 @@ export default function TourDetailsClient() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all bg-blue-50/30"
                       required
                     />
+                    {fieldErrors.checkIn && <p className="mt-1 text-xs text-red-600">{fieldErrors.checkIn}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Check Out</label>
@@ -515,6 +540,7 @@ export default function TourDetailsClient() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all bg-blue-50/30"
                       required
                     />
+                    {fieldErrors.checkOut && <p className="mt-1 text-xs text-red-600">{fieldErrors.checkOut}</p>}
                   </div>
                 </div>
 
@@ -560,6 +586,9 @@ export default function TourDetailsClient() {
                     </div>
                   </div>
                 </div>
+                {(fieldErrors.adults || fieldErrors.children) && (
+                  <p className="text-xs text-red-600">{fieldErrors.adults ?? fieldErrors.children}</p>
+                )}
 
                 {formData.children > 0 && (
                   <div>
@@ -572,6 +601,7 @@ export default function TourDetailsClient() {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all bg-blue-50/30"
                     placeholder="e.g., 5, 8"
                   />
+                  {fieldErrors.childAge && <p className="mt-1 text-xs text-red-600">{fieldErrors.childAge}</p>}
                 </div>
                 )}
 
@@ -585,6 +615,7 @@ export default function TourDetailsClient() {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all bg-blue-50/30 resize-none"
                     placeholder="Any special requests or questions..."
                   />
+                  {fieldErrors.message && <p className="mt-1 text-xs text-red-600">{fieldErrors.message}</p>}
                 </div>
 
                 <button
