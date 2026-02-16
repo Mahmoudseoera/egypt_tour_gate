@@ -1639,7 +1639,6 @@ A luxury Nile cruise isn't just about the ship—it's about the total experience
 
 The Nile has carried travelers for millennia—doing it in luxury is an experience you'll treasure forever.
     `,
-    image: "/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp",
     author: {
       name: "Isabella Laurent",
       avatar: "/images/authors/isabella.jpg"

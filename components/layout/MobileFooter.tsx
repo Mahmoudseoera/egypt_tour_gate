@@ -1,6 +1,6 @@
 // components/MobileFooter.tsx
 'use client';
-
+import Image from "next/image";
 import Link from 'next/link';
 
 const MobileFooter = () => {
@@ -66,7 +66,7 @@ const MobileFooter = () => {
                        rounded-lg p-1"
             aria-label={item.alt}
           >
-            <img 
+            <Image 
               src={item.src} 
               alt="" // Empty alt since label is in aria-label and visible text
               loading="lazy"

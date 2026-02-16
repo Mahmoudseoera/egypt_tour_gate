@@ -18,6 +18,7 @@ interface TourCardProps {
   categorySlug: string;
   subcategorySlug?: string;
 }
+
 export default function SecondTourCard({
   id,
   image,
@@ -25,30 +26,61 @@ export default function SecondTourCard({
   description,
   price,
   rating,
-  reviewCount,
+  reviewCount = 0,
   duration,
   location,
   slug,
   categorySlug,
   subcategorySlug, 
-}: TourCardProps)  {
+}: TourCardProps) {
+  // Fixed: Proper tour link construction
   const tourLink = subcategorySlug
-  ? `/${categorySlug}/${subcategorySlug}/${slug}`
-  : `/${categorySlug}/${slug}`;
-  const [favorites, setFavorites] = useState<number[]>(() => {
-    if (typeof window === "undefined") return [];
-    const stored = sessionStorage.getItem("favorites");
-    return stored ? JSON.parse(stored) : [];
-  });
+    ? `/${categorySlug}/${subcategorySlug}/${slug}`
+    : `/${categorySlug}/${slug}`;
+
+    const [favorites, setFavorites] = useState<number[]>(() => {
+      if (typeof window !== "undefined") {
+        const stored = sessionStorage.getItem("favorites");
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) {
+              return parsed.filter((item): item is number => typeof item === "number");
+            }
+          } catch {
+            return [];
+          }
+        }
+      }
+      return [];
+    });
+    
+
+  // Fixed: Move sessionStorage access to useEffect
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     const stored = sessionStorage.getItem("favorites");
+  //     if (stored) {
+  //       try {
+  //         const parsed: unknown = JSON.parse(stored);
+  
+  //         if (Array.isArray(parsed) && parsed.every(item => typeof item === "number")) {
+  //           setFavorites(parsed);
+  //         }
+  //       } catch (error) {
+  //         console.error("Invalid favorites in sessionStorage");
+  //       }
+  //     }
+  //   }
+  // }, []);
+  
 
   const toggleFavorite = (tourId: number) => {
     setFavorites(prev => {
       let updated: number[];
       if (prev.includes(tourId)) {
-        
         updated = prev.filter(id => id !== tourId);
       } else {
-        
         updated = [...prev, tourId];
       }
       sessionStorage.setItem("favorites", JSON.stringify(updated));
@@ -57,16 +89,14 @@ export default function SecondTourCard({
   };
   
   return (
-
-    <div className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl  transition-shadow duration-300 max-w-sm mx-auto">
-
-      {/* Image */}
-      <Link href={tourLink} className="relative h-56 w-full block group">
+    <div className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 max-w-sm mx-auto">
+      {/* Image - Fixed className typos */}
+      <Link href={tourLink} className="relative h-56 w-full block">
         <Image
           src={image || "/placeholder.svg"}
           alt={title}
           fill
-          className="object-covertransition-transform group-hover:scale-120  groub-hover:rotate-x-15 group-hover:rotate-y-15 group-hover:transition-transform duration-300"
+          className="object-cover transition-transform group-hover:scale-110 duration-300"
         />
         <div className="absolute top-4 right-4 px-4 py-2 rounded-lg bg-[rgba(255,255,255,0.2)] backdrop-blur-lg">
           <p className="text-navy font-bold text-lg">${price}</p>
@@ -80,9 +110,12 @@ export default function SecondTourCard({
           </h3>
         </Link>
 
-        <p className="text-sm text-black line-clamp-2 mb-4">
-          {description}
-        </p>
+        {/* Fixed: Added conditional check for description */}
+        {description && (
+          <p className="text-sm text-black line-clamp-2 mb-4">
+            {description}
+          </p>
+        )}
 
         {/* Rating */}
         <div className="flex items-center gap-2 mb-4">
@@ -114,16 +147,14 @@ export default function SecondTourCard({
         <div className="flex items-center gap-3">
           <Link
             href={tourLink}
-            className="flex-1 !bg-navy !text-white text-center py-3 hover:bg-gold hover:text-navy transition btn-effect rounded-lg bg-[var(--main-color)]"
+            className="flex-1 !bg-navy !text-white text-center py-3 hover:bg-gold hover:text-navy transition btn-effect rounded-lg"
           >
             Book Now
           </Link>
 
           <button
             onClick={() => toggleFavorite(id)}
-            className={`w-11 h-11 flex items-center justify-center rounded-md transition
-             ${favorites.includes(id) ? "bg-red-500" : "bg-gray-100"}
-            `}
+            className={`w-11 h-11 flex items-center justify-center rounded-md transition ${favorites.includes(id) ? "bg-red-500" : "bg-gray-100"}`}
           >
             <Heart
               size={20}
@@ -135,5 +166,4 @@ export default function SecondTourCard({
       </div>
     </div>
   );
-
 }

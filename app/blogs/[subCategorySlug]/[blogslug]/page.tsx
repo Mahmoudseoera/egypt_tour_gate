@@ -32,7 +32,7 @@ const tableOfContents: TableOfContentItem[] = [
   { id: 6, title: "Conclusion" }
 ]
 
-const defaultCategories: Category[] = [
+const defaultCategories = [
   { name: "Travel", count: 12 },
   { name: "Guide", count: 10 },
   { name: "Rental", count: 14 },

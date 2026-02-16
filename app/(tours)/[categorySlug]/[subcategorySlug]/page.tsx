@@ -1,8 +1,6 @@
-//  Sub Category Page //
-
 import Link from "next/link";
-import Image from "next/image";
 import categoriesData from "@/lib/api/categories";
+import SecondTourCard from "@/components/tour/second-tour-card";
 import type { Tour, TourPackage, NileCruise } from "@/lib/api/categories";
 
 type SubcategoryPageProps = {
@@ -49,7 +47,6 @@ export default async function SubcategoryPage({
     );
   }
 
-  // Get items for this category + subcategory (day tours by city; packages/cruises by category)
   const { tours, packages, nile_cruises } = categoriesData;
 
   const dayTours = tours.filter(
@@ -60,18 +57,55 @@ export default async function SubcategoryPage({
     (p: TourPackage) => p.category === categorySlug
   );
 
-  const cruises = nile_cruises.filter(() => categorySlug === "nile-cruises");
+  const cruises = nile_cruises.filter(
+    (c: NileCruise) => c.categorySlug === categorySlug && c.subcategorySlug === subcategorySlug
+  );
 
-  type ListItem = (Tour | TourPackage | NileCruise) & {
-    slug: string;
-    title: string;
-    price_from: number;
-  };
-  const items: ListItem[] = [
-    ...dayTours,
-    ...(categorySlug === "egypt-tour-packages" ? packageItems : []),
-    ...(categorySlug === "nile-cruises" ? cruises : []),
-  ] as ListItem[];
+  // Normalize all items to a common structure for SecondTourCard
+  const normalizedItems = [
+    ...dayTours.map((tour: Tour) => ({
+      id: tour.id,
+      image: tour.image,
+      title: tour.title,
+      description: tour.short_description,
+      price: tour.price_from,
+      rating: tour.rating,
+      reviewCount: 0,
+      duration: tour.duration,
+      location: tour.city,
+      slug: tour.slug,
+      categorySlug: categorySlug,
+      subcategorySlug: subcategorySlug,
+    })),
+    ...packageItems.map((pkg: TourPackage) => ({
+      id: pkg.id,
+      image: pkg.image,
+      title: pkg.title,
+      description: pkg.includes?.join(", "),
+      price: pkg.price_from,
+      rating: pkg.rating,
+      reviewCount: 0,
+      duration: pkg.duration,
+      location: pkg.category,
+      slug: pkg.slug,
+      categorySlug: categorySlug,
+      subcategorySlug: subcategorySlug,
+    })),
+    ...cruises.map((cruise: NileCruise) => ({
+      id: cruise.id,
+      image: cruise.image,
+      title: cruise.title,
+      description: cruise.description,
+      price: cruise.price_from,
+      rating: cruise.rating,
+      reviewCount: cruise.reviewCount || 0,
+      duration: cruise.duration,
+      location: cruise.location,
+      slug: cruise.slug,
+      categorySlug: cruise.categorySlug,
+      subcategorySlug: cruise.subcategorySlug,
+    })),
+  ];
 
   const categoryName = category.name?.en ?? categorySlug;
   const subcategoryName = subcategory.name?.en ?? subcategorySlug;
@@ -99,66 +133,40 @@ export default async function SubcategoryPage({
           </nav>
         </div>
       </div>
+      
       <section className="container py-10 max-w-7xl mx-auto">
-        <section className="tours-page">
-          <div className="container mx-auto">
-            <h1 className="text-3xl font-bold mb-2 text-center text-[var(--second-color)]">
-              {categoryName.toLowerCase()}
-            </h1>
-            <h2 className="text-xl text-gray-600 mb-8 text-center">
-              {subcategoryName.toLowerCase()}
-            </h2>
+        <div className="container mx-auto">
+          <h1 className="text-3xl font-bold mb-2 text-center text-[var(--second-color)]">
+            {categoryName}
+          </h1>
+          <h2 className="text-xl text-gray-600 mb-8 text-center">
+            {subcategoryName}
+          </h2>
 
-            {items.length === 0 ? (
-              <p className="text-lg">No tours found for this subcategory.</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {items.map((item) => (
-                  <Link
-                    key={item.id}
-                    href={`/${categorySlug}/${subcategorySlug}/${item.slug}`}
-                    className="group block bg-white rounded-lg overflow-hidden shadow hover:shadow-xl transition-shadow border border-gray-100"
-                  >
-                    <div className="relative h-48 w-full overflow-hidden">
-                      
-                      <Image
-                        src={item.image ?? "/placeholder.svg"}
-                        alt={item.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                      <div className="absolute bottom-2 right-2 bg-white/90 px-2 py-1 rounded text-sm font-semibold">
-                        ${item.price_from}+
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-bold text-lg text-navy group-hover:text-[var(--main-color)]">
-                        {item.title}
-                      </h3>
-                      {"short_description" in item &&
-                        (item as Tour).short_description && (
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                            {(item as Tour).short_description}
-                          </p>
-                        )}
-                      {"duration" in item && (
-                        <p className="text-sm text-gray-500 mt-2">
-                          {item.duration}
-                        </p>
-                      )}
-                      {"rating" in item && (
-                        <span className="inline-block mt-2 text-sm font-medium">
-                          ★ {item.rating}
-                        </span>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
+          {normalizedItems.length === 0 ? (
+            <p className="text-lg text-center">No tours found for this subcategory.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {normalizedItems.map((item) => (
+                <SecondTourCard
+                  key={item.id}
+                  id={item.id}
+                  image={item.image}
+                  title={item.title}
+                  description={item.description}
+                  price={item.price}
+                  rating={item.rating}
+                  reviewCount={item.reviewCount}
+                  duration={item.duration}
+                  location={item.location}
+                  slug={item.slug}
+                  categorySlug={item.categorySlug}
+                  subcategorySlug={item.subcategorySlug}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
     </>
   );
