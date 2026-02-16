@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from "next/image";
+import Link from "next/link";
 import { destinations } from '../../lib/api/destinations';
 
 export default function DestinationGrid() {
@@ -17,7 +18,7 @@ export default function DestinationGrid() {
         Explore Our Amazing Destinations
         </h2>
         <span
-        className="relative block h-1 w-40 mb-6 bg-gradient-to-r from-[var(--second-color)] via-[transparent] to-[var(--second-color)] mx-auto relative block  w-40 mx-auto rounded-md
+        className="relative block h-1 w-40 mb-6 bg-gradient-to-r from-[var(--second-color)] via-[var(--main-color)] to-[var(--second-color)] mx-auto relative block  w-40 mx-auto rounded-md
 
           before:content-['']
           before:absolute
@@ -58,6 +59,7 @@ export default function DestinationGrid() {
             onMouseEnter={() => setHoveredIndex(0)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
+            <Link href="/contact">
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 0 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-100">
               <Image
@@ -73,6 +75,8 @@ export default function DestinationGrid() {
               <div className="text-sm font-medium opacity-90 mb-1">{destinations[0].location}</div>
               <h3 className="text-2xl font-bold">{destinations[0].title}</h3>
             </div>
+            </Link>
+
           </div>
 
           {/* Medium image - top middle */}
@@ -81,6 +85,7 @@ export default function DestinationGrid() {
             onMouseEnter={() => setHoveredIndex(1)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
+            <Link href="/contact">
             <div className={`absolute inset-0 bg-gradient-to-br transition-transform duration-500 ${hoveredIndex === 1 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-100">
                 <Image
@@ -96,6 +101,7 @@ export default function DestinationGrid() {
               <div className="text-xs font-medium opacity-90 mb-1">{destinations[1].location}</div>
               <h3 className="text-xl font-bold">{destinations[1].title}</h3>
             </div>
+            </Link>
           </div>
 
           {/* Large image - top right */}
@@ -104,6 +110,7 @@ export default function DestinationGrid() {
             onMouseEnter={() => setHoveredIndex(2)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
+            <Link href="/contact">
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 2 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-100">
                 <Image
@@ -119,6 +126,7 @@ export default function DestinationGrid() {
               <div className="text-sm font-medium opacity-90 mb-1">{destinations[2].location}</div>
               <h3 className="text-2xl font-bold">{destinations[2].title}</h3>
             </div>
+            </Link>
           </div>
 
           {/* Medium image - bottom middle */}
@@ -127,6 +135,7 @@ export default function DestinationGrid() {
             onMouseEnter={() => setHoveredIndex(3)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
+            <Link href="/contact">
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 3 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-100">
                 <Image
@@ -142,6 +151,7 @@ export default function DestinationGrid() {
               <div className="text-xs font-medium opacity-90 mb-1">{destinations[3].location}</div>
               <h3 className="text-xl font-bold">{destinations[3].title}</h3>
             </div>
+            </Link>
           </div>
 
           {/* Wide image - bottom */}
@@ -150,6 +160,7 @@ export default function DestinationGrid() {
             onMouseEnter={() => setHoveredIndex(4)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
+            <Link href="/contact">
             <div className={`absolute inset-0 bg-gradient-to-br transition-transform duration-500 ${hoveredIndex === 4 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-8xl opacity-100">
                 <Image
@@ -165,6 +176,7 @@ export default function DestinationGrid() {
               <div className="text-sm font-medium opacity-90 mb-1">{destinations[4].location}</div>
               <h3 className="text-2xl font-bold">{destinations[4].title}</h3>
             </div>
+            </Link>
           </div>
 
           {/* Small images - bottom right */}
@@ -174,6 +186,7 @@ export default function DestinationGrid() {
               onMouseEnter={() => setHoveredIndex(5)}
               onMouseLeave={() => setHoveredIndex(null)}
             >
+              <Link href="/contact">
               <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 5 ? 'scale-110' : 'scale-100'}`}>
                 <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-100">
                   <Image
@@ -189,8 +202,9 @@ export default function DestinationGrid() {
                 <div className="text-xs font-medium opacity-90 mb-1">{destinations[5].location}</div>
                 <h3 className="text-base font-bold">{destinations[5].title}</h3>
               </div>
+              </Link>
             </div>
-            
+
           </div>
         </div>
 

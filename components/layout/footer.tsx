@@ -255,7 +255,7 @@ export default function Footer() {
         {renderFooterContent(!!error || !data)}
         
         {/* Decorative bottom element - subtle pyramid pattern */}
-        <div className="mt-16 pt-6 border-t border-[var(--main-color)]/10 hidden md:block">
+        {/* <div className="mt-16 pt-6 border-t border-[var(--main-color)]/10 hidden md:block">
           <div className="flex justify-center gap-1.5">
             {[...Array(7)].map((_, i) => (
               <div 
@@ -265,7 +265,7 @@ export default function Footer() {
               ></div>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
       
       {/* Floating decorative element - subtle and elegant */}

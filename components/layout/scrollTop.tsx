@@ -39,7 +39,7 @@ export default function ScrollToTop() {
       onClick={scrollToTop}
       aria-label="Scroll to top"
       className={`
-        fixed bottom-8 cursor-pointer
+        fixed bottom-20 lg:bottom-8 cursor-pointer
           right-8 z-[9999]
         h-12 w-12 rounded-full
         transition-all duration-200

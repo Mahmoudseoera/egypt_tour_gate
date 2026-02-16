@@ -136,7 +136,7 @@ const categoriesData: CategoriesData = {
       duration: "1 Day",
       price_from: 75,
       rating: 4.8,
-      image: "/mock/tours/giza.jpg",
+      image: "/assets/images/tours/great-pyramid-webp.webp",
       short_description: "Explore the Great Pyramids of Giza and the Sphinx with a professional Egyptologist.",
       highlights: [
         "Great Pyramid of Khufu",
@@ -153,7 +153,7 @@ const categoriesData: CategoriesData = {
       duration: "1 Day",
       price_from: 85,
       rating: 4.9,
-      image: "/mock/tours/valley-kings.jpg",
+      image: "/assets/images/tours/Pyramids-in-Egypt-webp.webp",
       short_description: "Visit the royal tombs of ancient Egypt in Luxor's West Bank."
     },
     {
@@ -165,7 +165,7 @@ const categoriesData: CategoriesData = {
       duration: "6 Hours",
       price_from: 55,
       rating: 4.7,
-      image: "/mock/tours/desert-safari.jpg"
+      image: "/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp",
     }
   ],
   packages: [
@@ -177,7 +177,7 @@ const categoriesData: CategoriesData = {
       duration: "7 Days / 6 Nights",
       price_from: 899,
       rating: 4.9,
-      image: "/mock/packages/classic-egypt.jpg",
+      image: "/assets/images/tours/49-webp.webp",
       includes: [
         "Cairo",
         "Luxor",
@@ -190,6 +190,7 @@ const categoriesData: CategoriesData = {
       slug: "egypt-highlights-10-days",
       category: "egypt-tour-packages",
       duration: "10 Days / 9 Nights",
+      image: "/assets/images/tours/grand-egyptian-museum-opening-(2)-webp.webp",
       price_from: 1299,
       rating: 5
     }

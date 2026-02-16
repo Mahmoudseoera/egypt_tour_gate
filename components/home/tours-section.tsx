@@ -2,86 +2,81 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Heart, MapPin } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import categoriesData from "@/lib/api/categories";
+import type { Tour, TourPackage, NileCruise } from "@/lib/api/categories";
 
 // styles
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-interface Tour {
-  id: number;
-  image: string;
-  title: string;
-  description: string;
-  price: string;
-  city: string;
-}
-
-const tours: Tour[] = [
-  {
-    id: 1,
-    image: "/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp",
-    title: 'From its medieval origins to the digital era',
-    description: '40 impressive UNESCO World Heritage sites which bear witness to over 2,000 years of the city history.',
-    price: '145$',
-    city: 'Venice'
-  },
-  {
-    id: 2,
-    image: "/assets/images/tours/grand-egyptian-museum-opening-(2)-webp.webp",
-    title: 'Discover Ancient Wonders',
-    description: 'Explore breathtaking archaeological sites and immerse yourself in rich cultural heritage spanning millennia.',
-    price: '199$',
-    city: 'Paris'
-  },
-  {
-    id: 3,
-    image: "/assets/images/tours/camel front of giza pyramids.jpg",
-    title: 'European Cultural Journey',
-    description: 'Experience the finest museums, galleries, and historic landmarks across iconic European destinations.',
-    price: '175$',
-    city: 'Rome'
-  },
-  {
-    id: 4,
-    image: "/assets/images/tours/Pyramids-in-Egypt-webp.webp",
-    title: 'Magical City Exploration',
-    description: 'Discover the enchanting streets and historical monuments of this beautiful European capital.',
-    price: '165$',
-    city: 'Barcelona'
-  },
-  {
-    id: 5,
-    image: "/assets/images/tours/great-pyramid-webp.webp",
-    title: 'Mediterranean Paradise',
-    description: 'Experience the stunning coastline and rich cultural heritage of Mediterranean destinations.',
-    price: '210$',
-    city: 'Athens'
-  }
-];
+// Combine all tour types into one interface for easier handling
+type TourItem = (Tour | TourPackage | NileCruise) & {
+  link: string;
+  location: string;
+};
 
 export default function TravelTourSlider() {
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
 
-  const toggleFavorite = (id: number) => {
+  const toggleFavorite = (id: number, e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent link navigation when clicking favorite button
     setFavorites(prev => ({
       ...prev,
       [id]: !prev[id]
     }));
   };
 
+  // Prepare tour items with proper links and locations
+  const prepareTourItems = (): TourItem[] => {
+    const items: TourItem[] = [];
+
+    // Add day tours (max 2)
+    categoriesData.tours.slice(0, 2).forEach(tour => {
+      items.push({
+        ...tour,
+        link: `/${tour.category}/${tour.city}/${tour.slug}`,
+        location: tour.city.charAt(0).toUpperCase() + tour.city.slice(1)
+      });
+    });
+
+    // Add packages (max 2)
+    categoriesData.packages.slice(0, 2).forEach(pkg => {
+      items.push({
+        ...pkg,
+        link: `/${pkg.category}/${pkg.slug}`,
+        location: "Egypt",
+        city: "Egypt"
+      } as TourItem);
+    });
+
+    // Add nile cruises (max 2)
+    categoriesData.nile_cruises.slice(0, 2).forEach(cruise => {
+      items.push({
+        ...cruise,
+        link: `/${cruise.categorySlug}/${cruise.subcategorySlug}/${cruise.slug}`,
+        location: cruise.location.charAt(0).toUpperCase() + cruise.location.slice(1),
+        city: cruise.location
+      } as TourItem);
+    });
+
+    return items;
+  };
+
+  const tourItems = prepareTourItems();
+
   return (
-    <section className="min-h-screen bg-[var(--main-grey)] py-16">
+    <section className="min-h-screen bg-[var(--main-grey)] pt-16">
       <div className="max-w-7xl mx-auto px-5">
         {/* Header */}
         <div className="text-center mb-12">
-        
-        <h2 className="text-4xl md:text-3xl font-bold text-[var(--second-color)] mb-4">
-        Explore Our Amazing Destinations
-        </h2>
+          <h2 className="text-4xl md:text-3xl font-bold text-[var(--second-color)] mb-4">
+            Explore Our Amazing Destinations
+          </h2>
           <span
             className={`
               relative block h-1 w-40 mb-4 mx-auto rounded-md
@@ -114,105 +109,114 @@ export default function TravelTourSlider() {
             `}
           ></span>
 
-<p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
-          Discover breathtaking locations around the world and create unforgettable memories
-        </p>
+          <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
+            Discover breathtaking locations around the world and create unforgettable memories
+          </p>
         </div>
 
         {/* Swiper */}
-        <Swiper
-          modules={[Autoplay, Navigation, Pagination]}
-          loop={true}
-          slidesPerView={1}
-          speed={700}
-          // autoplay={{
-          //   delay: 3500,
-          //   disableOnInteraction: false,
-          // }}
-          breakpoints={{
-            640: { slidesPerView: 1 },
-            768: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-          }}
-          spaceBetween={30}
-          navigation
-          pagination={{
-            clickable: true,
-            dynamicBullets: true,
-          }}
-          className="py-16 pb-16 group"
-        >
-          {tours.map((tour) => (
-            <SwiperSlide key={tour.id}>
-              <div className="tour-card group bg-white rounded-3xl overflow-visible shadow-[0_8px_30px_rgba(0,0,0,0.12)] h-full flex flex-col relative">
-                {/* Image Section */}
-                <div className="relative w-full h-[280px] overflow-hidden rounded-t-3xl">
-                  <Image
-                    src={tour.image}
-                    alt={tour.title}
-                    fill
-                    className="object-cover transition-transform duration-400 hover:scale-110"
-                  />
+        <div className="pb-16">
+          <Swiper
+            modules={[Autoplay, Navigation, Pagination]}
+            loop={true}
+            slidesPerView={1}
+            speed={700}
+            autoplay={{
+              delay: 3500,
+              disableOnInteraction: false,
+            }}
+            breakpoints={{
+              640: { slidesPerView: 1 },
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+            spaceBetween={30}
+            navigation
+            pagination={{
+              clickable: true,
+              dynamicBullets: true,
+            }}
+            className="!pb-12"
+          >
+            {tourItems.map((tour) => (
+              <SwiperSlide key={tour.id}>
+                <Link href={tour.link} className="block">
+                  <div className="tour-card group bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] h-full flex flex-col hover:shadow-[0_12px_40px_rgba(0,0,0,0.18)] transition-all duration-300">
+                    {/* Image Section */}
+                    <div className="relative w-full h-[280px] overflow-hidden rounded-t-3xl">
+                      <Image
+                        src={tour.image || "/placeholder.svg"}
+                        alt={tour.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
 
-                  {/* Favorite Button */}
-                  <button
-                    className={`absolute top-4 right-4 w-11 h-11 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 z-20 shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:scale-110 ${
-                      favorites[tour.id] 
-                        ? 'bg-[var(--main-color)]' 
-                        : 'bg-white/95 hover:bg-white'
-                    }`}
-                    onClick={() => toggleFavorite(tour.id)}
-                    aria-label="Add to favorites"
-                  >
-                    <Heart
-                      size={20}
-                      fill={favorites[tour.id] ? '#fff' : 'none'}
-                      color={favorites[tour.id] ? '#fff' : '#333'}
-                      strokeWidth={2.5}
-                    />
-                  </button>
+                      {/* Favorite Button */}
+                      <button
+                        className={`absolute top-4 right-4 w-11 h-11 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 z-20 shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:scale-110 ${
+                          favorites[tour.id] 
+                            ? 'bg-[var(--main-color)]' 
+                            : 'bg-white/95 hover:bg-white'
+                        }`}
+                        onClick={(e) => toggleFavorite(tour.id, e)}
+                        aria-label="Add to favorites"
+                      >
+                        <Heart
+                          size={20}
+                          fill={favorites[tour.id] ? '#fff' : 'none'}
+                          color={favorites[tour.id] ? '#fff' : '#333'}
+                          strokeWidth={2.5}
+                        />
+                      </button>
 
-                  {/* City Badge */}
-                  <div className="absolute bottom-4 flex items-center gap-2 left-4 bg-[rgba(255,255,255,0.5)] text-[var(--second-color)]  px-3 py-2 rounded-full text-xs font-semibold tracking-wide z-20">
-                  <MapPin size={16} className="text-indigo-900 "/>
-                    {tour.city}
-                  </div>
-                </div>
-
-                {/* Content Section */}
-                <div className="p-6 pt-7 flex-1 flex flex-col overflow-hidden">
-                  <h2 className=" text-xl font-bold text-[var(--black-color)] leading-snug mb-3 min-h-[56px]">
-                    {tour.title}
-                  </h2>
-
-                  <p className="text-sm text-gray-600 leading-relaxed mb-5 flex-1 line-clamp-3">
-                    {tour.description}
-                  </p>
-
-                  {/* Footer */}
-                  <div className="relative flex items-center justify-between pt-4 border-t-8 border border-dotted border-gray-200">
-                  {/* Ticket Divider */}
-                {/* Ticket Shape Decorations */}
-                <div className="absolute top-[-25px] w-10 h-10 bg-gray-200 rounded-full left-[-50px] z-10 shadow-inner shadow-[0_8px_30px_rgba(0,0,0,0.12)]"></div>
-                <div className="absolute top-[-25px] w-10 h-10 bg-gray-200 rounded-full right-[-50px] z-10 shadow-inner shadow-[0_8px_30px_rgba(0,0,0,0.12)]"></div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">
-                        Price
-                      </span>
-                      <span className="text-3xl font-extrabold text-[var(--main-color)]">
-                        {tour.price}
-                      </span>
+                      {/* Location Badge */}
+                      <div className="absolute bottom-4 flex items-center gap-2 left-4 bg-[rgba(255,255,255,0.5)] backdrop-blur-sm text-[var(--second-color)] px-3 py-2 rounded-full text-xs font-semibold tracking-wide z-20">
+                        <MapPin size={16} className="text-indigo-900" />
+                        {tour.location}
+                      </div>
                     </div>
 
-                    <button className="bg-[var(--second-color)] text-white border-none px-7 py-3 rounded-full text-sm font-bold cursor-pointer transition-all duration-300 uppercase tracking-wide hover:bg-[#1a1848] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(39,34,98,0.3)]">
-                      Book Now
-                    </button>
+                    {/* Content Section */}
+                    <div className="p-6 pt-7 flex-1 flex flex-col">
+                      <h2 className="text-xl font-bold text-[var(--black-color)] leading-snug mb-3 min-h-[56px] line-clamp-2 group-hover:text-[var(--main-color)] transition-colors">
+                        {tour.title}
+                      </h2>
+
+                      <p className="text-sm text-gray-600 leading-relaxed mb-5 flex-1 line-clamp-3">
+                        {'short_description' in tour 
+                          ? tour.short_description 
+                          : 'description' in tour 
+                          ? tour.description 
+                          : `Experience an unforgettable journey with our ${tour.duration} tour.`}
+                      </p>
+
+                      {/* Footer */}
+                      <div className="relative flex items-center justify-between pt-4 border-t-8 border border-dotted border-gray-200">
+                        {/* Ticket Shape Decorations */}
+                        <div className="absolute top-[-25px] w-10 h-10 bg-gray-200 rounded-full left-[-50px] z-10 shadow-inner shadow-[0_8px_30px_rgba(0,0,0,0.12)]"></div>
+                        <div className="absolute top-[-25px] w-10 h-10 bg-gray-200 rounded-full right-[-50px] z-10 shadow-inner shadow-[0_8px_30px_rgba(0,0,0,0.12)]"></div>
+                        
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+                            From
+                          </span>
+                          <span className="text-3xl font-extrabold text-[var(--main-color)]">
+                            ${tour.price_from}
+                          </span>
+                        </div>
+
+                        <div className="bg-[var(--second-color)] text-white border-none px-7 py-3 rounded-full text-sm font-bold cursor-pointer transition-all duration-300 uppercase tracking-wide hover:bg-[#1a1848] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(39,34,98,0.3)]">
+                          Book Now
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+                </Link>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
       </div>
 
       <style jsx global>{`
@@ -227,6 +231,16 @@ export default function TravelTourSlider() {
           color: var(--main-color) !important;
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
           transition: all 0.3s ease !important;
+          top: 50% !important;
+          margin-top: -25px !important;
+        }
+
+        .swiper-button-next {
+          right: 10px !important;
+        }
+
+        .swiper-button-prev {
+          left: 10px !important;
         }
 
         .swiper-button-next:after,
@@ -243,11 +257,16 @@ export default function TravelTourSlider() {
         }
 
         /* Swiper Pagination */
+        .swiper-pagination {
+          bottom: 0 !important;
+        }
+
         .swiper-pagination-bullet {
           width: 12px !important;
           height: 12px !important;
           background: #ddd !important;
           opacity: 1 !important;
+          transition: all 0.3s ease !important;
         }
 
         .swiper-pagination-bullet-active {
@@ -256,14 +275,20 @@ export default function TravelTourSlider() {
           border-radius: 6px !important;
         }
 
+        /* Fix for slide overflow */
+        .swiper-slide {
+          height: auto !important;
+          padding: 10px 5px !important;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 1024px) {
           .swiper-button-next {
-            right: 10px !important;
+            right: 5px !important;
           }
           
           .swiper-button-prev {
-            left: 10px !important;
+            left: 5px !important;
           }
         }
 

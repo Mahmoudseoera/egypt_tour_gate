@@ -84,7 +84,7 @@ const FAQSection = () => {
         Frequently Asked Questions
         </h2>
         <span
-        className="relative block h-1 w-40 mb-6 bg-gradient-to-r from-[var(--second-color)] via-[transparent] to-[var(--second-color)] mx-auto relative block  w-40 mx-auto rounded-md
+        className="relative block h-1 w-40 mb-6 bg-gradient-to-r from-[var(--second-color)] via-[var(--main-color)] to-[var(--second-color)] mx-auto relative block  w-40 mx-auto rounded-md
 
           before:content-['']
           before:absolute
@@ -222,7 +222,7 @@ const FAQSection = () => {
         </div>
 
         {/* Contact Support */}
-        <div className="mt-16 p-8 bg-gradient-to-r from-[#272262]/5 to-[#e3b75e]/10 rounded-2xl border border-[#e3b75e]/20 text-center">
+        {/* <div className="mt-16 p-8 bg-gradient-to-r from-[#272262]/5 to-[#e3b75e]/10 rounded-2xl border border-[#e3b75e]/20 text-center">
           <div className="max-w-4xl mx-auto">
             <div className="mb-6">
               <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-[#e3b75e] to-[#272262] rounded-full flex items-center justify-center">
@@ -246,7 +246,7 @@ const FAQSection = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );

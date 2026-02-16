@@ -65,7 +65,7 @@ export default function TestimonialSlider() {
         What Peoples Say About Us
         </h2>
           <span
-        className="relative block h-1 w-40 bg-gradient-to-r from-[var(--second-color)] via-[transparent] to-[var(--second-color)] mx-auto relative block  w-40 mx-auto rounded-md
+        className="relative block h-1 w-40 bg-gradient-to-r from-[var(--second-color)] via-[var(--main-color)] to-[var(--second-color)] mx-auto relative block  w-40 mx-auto rounded-md
 
           before:content-['']
           before:absolute
@@ -129,7 +129,7 @@ export default function TestimonialSlider() {
     {/* Quote Background */}
     <Quote
       size={80}
-      className="absolute top-6 right-6 text-blue-100 opacity-40"
+      className="absolute bottom-6 right-6 text-blue-100 opacity-40"
     />
 
     <p className="text-sm text-gray-600 leading-relaxed mb-8 relative z-10 line-clamp-3 overflow-hidden h-[85px] m-0">

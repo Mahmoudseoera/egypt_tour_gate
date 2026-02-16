@@ -257,7 +257,7 @@ export default function TravelServicesSection() {
         Explore Our Amazing Destinations
         </h2>
         <span
-        className="relative block h-1 w-40 mb-6 bg-gradient-to-r from-[var(--main-color)] via-[transparent] to-[var(--main-color)] mx-auto relative block  w-40 mx-auto rounded-md
+        className="relative block h-1 w-40 mb-6 bg-gradient-to-r from-[var(--main-color)] via-[var(--main-color)] to-[var(--main-color)] mx-auto relative block  w-40 mx-auto rounded-md
 
           before:content-['']
           before:absolute
