@@ -6,35 +6,17 @@ import { useRouter } from "next/navigation";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import { Check, Calendar, MapPin, Plane, Ship, Plus } from "lucide-react";
-
-type TimeOption = "exact" | "month" | "days";
-
-type TailorMadeFormData = {
-  cities: string[];
-  checkIn: string;
-  checkOut: string;
-  monthSelect: string;
-  vacationDays: string;
-  timeOption: TimeOption;
-  fullName: string;
-  email: string;
-  phoneCode: string;
-  phoneNumber: string;
-  nationality: string;
-  hotel: string;
-  additionalInfo: string;
-  adults: number;
-  children: number;
-  infants: number;
-  priceMin: number;
-  priceMax: number;
-};
+import {
+  tailorMadeSchema,
+  type TailorMadeFormData,
+} from "@/lib/validations/tailor-made.schema";
 
 export default function TailorMadePage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [stepError, setStepError] = useState<string | null>(null);
   const [formData, setFormData] = useState<TailorMadeFormData>({
     cities: [],
     checkIn: "",
@@ -85,6 +67,7 @@ export default function TailorMadePage() {
     value: TailorMadeFormData[K]
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    if (stepError) setStepError(null);
   };
 
   const toggleCity = (cityId: string) => {
@@ -94,33 +77,77 @@ export default function TailorMadePage() {
         ? prev.cities.filter(c => c !== cityId)
         : [...prev.cities, cityId]
     }));
+    if (stepError) setStepError(null);
   };
 
   const isStepValid = () => {
+    const parsed = tailorMadeSchema.safeParse(formData);
+
+    if (parsed.success) {
+      return true;
+    }
+
     switch (currentStep) {
       case 1:
-        return formData.cities.length > 0;
+        return !parsed.error.issues.some((issue) => issue.path[0] === "cities");
       case 2:
-        if (formData.timeOption === "exact") {
-          return formData.checkIn && formData.checkOut;
-        } else if (formData.timeOption === "month") {
-          return formData.monthSelect;
-        } else {
-          return formData.vacationDays;
-        }
+        return !parsed.error.issues.some((issue) =>
+          ["checkIn", "checkOut", "monthSelect", "vacationDays", "timeOption"].includes(
+            String(issue.path[0])
+          )
+        );
       case 3:
-        return formData.fullName && formData.email && formData.phoneNumber;
+        return !parsed.error.issues.some((issue) =>
+          ["fullName", "email", "phoneCode", "phoneNumber", "nationality", "hotel"].includes(
+            String(issue.path[0])
+          )
+        );
       case 4:
-        return true;
+        return !parsed.error.issues.some((issue) => ["priceMin", "priceMax"].includes(String(issue.path[0])));
       default:
         return false;
     }
   };
 
+  const getCurrentStepError = () => {
+    const parsed = tailorMadeSchema.safeParse(formData);
+    if (parsed.success) {
+      return null;
+    }
+
+    const issue = parsed.error.issues.find((currentIssue) => {
+      const field = String(currentIssue.path[0]);
+
+      if (currentStep === 1) {
+        return field === "cities";
+      }
+
+      if (currentStep === 2) {
+        return ["checkIn", "checkOut", "monthSelect", "vacationDays", "timeOption"].includes(field);
+      }
+
+      if (currentStep === 3) {
+        return ["fullName", "email", "phoneCode", "phoneNumber", "nationality", "hotel"].includes(field);
+      }
+
+      if (currentStep === 4) {
+        return ["priceMin", "priceMax"].includes(field);
+      }
+
+      return false;
+    });
+
+    return issue?.message ?? null;
+  };
+
   const nextStep = () => {
     if (isStepValid() && currentStep < 5) {
+      setStepError(null);
       setCurrentStep(currentStep + 1);
+      return;
     }
+
+    setStepError(getCurrentStepError());
   };
 
   const prevStep = () => {
@@ -131,6 +158,13 @@ export default function TailorMadePage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const validatedData = tailorMadeSchema.safeParse(formData);
+    if (!validatedData.success) {
+      setMessage(validatedData.error.issues[0]?.message ?? "Please review and fix the form fields.");
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
 
@@ -141,7 +175,7 @@ export default function TailorMadePage() {
       const res = await fetch("/api/tailor-made", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(validatedData.data),
       });
 
       if (res.ok) {
@@ -581,6 +615,10 @@ export default function TailorMadePage() {
                   )}
                 </form>
               </div>
+            )}
+
+            {stepError && (
+              <p className="mt-6 text-sm text-red-600">{stepError}</p>
             )}
 
             {/* Navigation Buttons */}
