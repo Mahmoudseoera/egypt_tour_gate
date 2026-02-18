@@ -223,6 +223,9 @@
   .text-foreground {
     color: var(--foreground);
   }
+  .paused {
+    animation-play-state: paused;
+  }
 }
 
 ::selection {

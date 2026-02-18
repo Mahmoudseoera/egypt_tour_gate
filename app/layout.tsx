@@ -5,6 +5,7 @@ import Navbar from "../components/layout/navbar"
 import Footer from "../components/layout/footer"
 import ScrollToTop from  "../components/layout/scrollTop"
 import MobileFooter from "../components/layout/MobileFooter";
+import WhatsappIcon from "../components/layout/Whatsapp-icon";
 
 import "../styles/globals.css";
 
@@ -44,6 +45,7 @@ export default function RootLayout({
         {children}
         <ScrollToTop />
         <MobileFooter />
+        <WhatsappIcon />
         <Footer />
                 {/* Sonner Toaster */}
                 <Toaster

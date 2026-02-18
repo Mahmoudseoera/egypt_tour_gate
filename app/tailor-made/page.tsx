@@ -1,11 +1,10 @@
 "use client";
-// import { toast } from "sonner";
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
-import { Check, Calendar, MapPin, Plane, Ship, Plus } from "lucide-react";
+import { Check, Calendar, Plus } from "lucide-react";
 import {
   tailorMadeSchema,
   type TailorMadeFormData,
@@ -17,7 +16,7 @@ export default function TailorMadePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [stepError, setStepError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<TailorMadeFormData>({
+  const [formData, setFormData] = useState({
     cities: [],
     checkIn: "",
     checkOut: "",
@@ -39,14 +38,46 @@ export default function TailorMadePage() {
   });
 
   const cities = [
-    { id: "cairo", name: "Cairo" },
-    { id: "giza", name: "Giza" },
-    { id: "luxor", name: "Luxor" },
-    { id: "aswan", name: "Aswan" },
-    { id: "alexandria", name: "Alexandria" },
-    { id: "dahab", name: "Dahab" },
-    { id: "sharm", name: "Sharm El-Sheikh" },
-    { id: "taba", name: "Taba" },
+    { 
+      id: "cairo", 
+      name: "Cairo",
+      image: "https://images.unsplash.com/photo-1572252009286-268acec5ca0a?w=400&h=300&fit=crop"
+    },
+    { 
+      id: "giza", 
+      name: "Giza",
+      image: "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?w=400&h=300&fit=crop"
+    },
+    { 
+      id: "luxor", 
+      name: "Luxor",
+      image: "https://images.unsplash.com/photo-1566127444979-b3d2b654e3d7?w=400&h=300&fit=crop"
+    },
+    { 
+      id: "aswan", 
+      name: "Aswan",
+      image: "https://images.unsplash.com/photo-1539650116455-2514c1a88b5f?w=400&h=300&fit=crop"
+    },
+    { 
+      id: "alexandria", 
+      name: "Alexandria",
+      image: "https://images.unsplash.com/photo-1571189434050-646ec5fe65f7?w=400&h=300&fit=crop"
+    },
+    { 
+      id: "dahab", 
+      name: "Dahab",
+      image: "https://images.unsplash.com/photo-1518182170546-0766ce6fec56?w=400&h=300&fit=crop"
+    },
+    { 
+      id: "sharm", 
+      name: "Sharm El-Sheikh",
+      image: "https://images.unsplash.com/photo-1573331518732-72155500f194?w=400&h=300&fit=crop"
+    },
+    { 
+      id: "taba", 
+      name: "Taba",
+      image: "https://images.unsplash.com/photo-1580674285054-bed31e145f59?w=400&h=300&fit=crop"
+    },
   ];
 
   const phoneCodes = [
@@ -82,7 +113,6 @@ export default function TailorMadePage() {
 
   const isStepValid = () => {
     const parsed = tailorMadeSchema.safeParse(formData);
-
     if (parsed.success) {
       return true;
     }
@@ -114,7 +144,6 @@ export default function TailorMadePage() {
     if (parsed.success) {
       return null;
     }
-
     const issue = parsed.error.issues.find((currentIssue) => {
       const field = String(currentIssue.path[0]);
 
@@ -146,7 +175,6 @@ export default function TailorMadePage() {
       setCurrentStep(currentStep + 1);
       return;
     }
-
     setStepError(getCurrentStepError());
   };
 
@@ -156,9 +184,8 @@ export default function TailorMadePage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const validatedData = tailorMadeSchema.safeParse(formData);
     if (!validatedData.success) {
       setMessage(validatedData.error.issues[0]?.message ?? "Please review and fix the form fields.");
@@ -169,7 +196,6 @@ export default function TailorMadePage() {
     setMessage(null);
 
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       const res = await fetch("/api/tailor-made", {
@@ -201,33 +227,42 @@ export default function TailorMadePage() {
     return formData.vacationDays ? parseInt(formData.vacationDays) : 0;
   };
 
+  // FIX: Removed `wrap: true` from options — it requires a specific DOM wrapper
+  // structure that react-flatpickr doesn't support out of the box, causing the
+  // "Cannot read properties of null (reading 'className')" error.
+  const flatpickrOptions = {
+    dateFormat: "Y-m-d",
+    minDate: "today" as const,
+  };
+
+  const monthFlatpickrOptions = {
+    dateFormat: "Y-m",
+    minDate: "today" as const,
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-300 via-purple-400 to-purple-300 relative overflow-hidden">
-      {/* Decorative Elements */}
-      <div className="absolute inset-0 pointer-events-none opacity-30">
-        <Plane className="absolute top-20 left-1/3 text-teal-500 w-16 h-16" />
-        <Ship className="absolute bottom-32 left-32 text-teal-600 w-12 h-12" />
-        <div className="absolute top-12 right-1/4 w-6 h-6 bg-teal-400 rounded-full" />
-        <div className="absolute bottom-1/3 left-1/4 w-5 h-5 bg-blue-300 rounded-full" />
-        <Plus className="absolute bottom-1/4 left-20 text-teal-400 text-4xl" />
-        <Plus className="absolute top-1/2 right-20 text-teal-400 text-4xl" />
+    <div className="relative min-h-screen bg-[var(--section-bg-light)] py-12">
+      {/* Decorative Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-[var(--main-200)] rounded-full opacity-20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[var(--second-200)] rounded-full opacity-20 blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-12">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-indigo-900 mb-4">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
+        <div className="text-center mb-10">
+          <h1 className="text-4xl md:text-5xl font-bold text-[var(--second-500)] mb-4">
             Egypt Tailor Made Packages
           </h1>
-          <p className="text-white text-lg max-w-2xl mx-auto">
+          <p className="text-[var(--grey-600)] text-lg max-w-2xl mx-auto">
             Plan your perfect Egypt adventure with our customized tour packages
           </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Form Section */}
-          <div className="lg:col-span-2 bg-white rounded-3xl shadow-2xl p-8">
+          <div className="lg:col-span-2 bg-[var(--white-color)] rounded-3xl shadow-xl border border-[var(--border-light)] p-8">
             {/* Step Navigation */}
-            <div className="flex justify-between mb-8 overflow-x-auto pb-4">
+            <div className="flex justify-between mb-10 overflow-x-auto pb-4">
               {[1, 2, 3, 4, 5].map((step) => (
                 <div
                   key={step}
@@ -236,15 +271,15 @@ export default function TailorMadePage() {
                   }`}
                 >
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition ${
+                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                       step <= currentStep
-                        ? "bg-[#e3b75e] text-white"
-                        : "bg-gray-200 text-gray-400"
+                        ? "bg-[var(--main-400)] text-[var(--white-color)] shadow-lg"
+                        : "bg-[var(--grey-200)] text-[var(--grey-400)]"
                     }`}
                   >
                     {step < currentStep ? <Check size={20} /> : step}
                   </div>
-                  <span className="text-xs text-center font-medium">
+                  <span className="text-xs text-center font-semibold text-[var(--second-500)]">
                     {step === 1 && "Select City"}
                     {step === 2 && "Select Time"}
                     {step === 3 && "Personal Info"}
@@ -258,10 +293,10 @@ export default function TailorMadePage() {
             {/* Step 1: Select Cities */}
             {currentStep === 1 && (
               <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-gray-800">
+                <h3 className="text-2xl font-bold text-[var(--second-500)]">
                   Select the cities you want to visit
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-[var(--grey-600)]">
                   Choose from our amazing destinations across Egypt
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -270,14 +305,35 @@ export default function TailorMadePage() {
                       key={city.id}
                       type="button"
                       onClick={() => toggleCity(city.id)}
-                      className={`p-4 rounded-xl border-2 transition hover:scale-105 ${
+                      className={`group relative overflow-hidden rounded-2xl border-2 transition-all duration-300 hover:scale-105 hover:shadow-xl ${
                         formData.cities.includes(city.id)
-                          ? "border-[#e3b75e] bg-amber-50"
-                          : "border-gray-200 hover:border-amber-300"
+                          ? "border-[var(--main-400)] shadow-lg"
+                          : "border-[var(--border-light)] hover:border-[var(--main-300)]"
                       }`}
                     >
-                      <MapPin className="w-8 h-8 mx-auto mb-2 text-[#272262]" />
-                      <h5 className="font-semibold text-sm">{city.name}</h5>
+                      <div className="aspect-square relative">
+                        <Image
+                          src={city.image}
+                          alt={city.name}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
+                        />
+                        <div className={`absolute inset-0 transition-opacity duration-300 ${
+                          formData.cities.includes(city.id)
+                            ? "bg-[var(--main-400)]/30"
+                            : "bg-black/0 group-hover:bg-black/20"
+                        }`} />
+                        {formData.cities.includes(city.id) && (
+                          <div className="absolute top-2 right-2 w-6 h-6 bg-[var(--main-400)] rounded-full flex items-center justify-center">
+                            <Check size={14} className="text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-3 bg-[var(--white-color)]">
+                        <h5 className="font-bold text-sm text-[var(--second-500)] text-center">
+                          {city.name}
+                        </h5>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -287,80 +343,64 @@ export default function TailorMadePage() {
             {/* Step 2: Select Time */}
             {currentStep === 2 && (
               <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-gray-800">
+                <h3 className="text-2xl font-bold text-[var(--second-500)]">
                   When do you want to travel?
                 </h3>
                 <div className="flex gap-4 mb-6">
-                  <button
-                    type="button"
-                    onClick={() => updateFormData("timeOption", "exact")}
-                    className={`flex-1 p-4 rounded-xl border-2 transition ${
-                      formData.timeOption === "exact"
-                        ? "border-[#e3b75e] bg-amber-50"
-                        : "border-gray-200"
-                    }`}
-                  >
-                    <Calendar className="w-6 h-6 mx-auto mb-2" />
-                    <span className="text-sm font-medium">Exact Date</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateFormData("timeOption", "month")}
-                    className={`flex-1 p-4 rounded-xl border-2 transition ${
-                      formData.timeOption === "month"
-                        ? "border-[#e3b75e] bg-amber-50"
-                        : "border-gray-200"
-                    }`}
-                  >
-                    <Calendar className="w-6 h-6 mx-auto mb-2" />
-                    <span className="text-sm font-medium">Approx Month</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateFormData("timeOption", "days")}
-                    className={`flex-1 p-4 rounded-xl border-2 transition ${
-                      formData.timeOption === "days"
-                        ? "border-[#e3b75e] bg-amber-50"
-                        : "border-gray-200"
-                    }`}
-                  >
-                    <Calendar className="w-6 h-6 mx-auto mb-2" />
-                    <span className="text-sm font-medium">Not Sure</span>
-                  </button>
+                  {["exact", "month", "days"].map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => updateFormData("timeOption", option)}
+                      className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 ${
+                        formData.timeOption === option
+                          ? "border-[var(--main-400)] bg-[var(--main-50)] shadow-md"
+                          : "border-[var(--border-light)] hover:border-[var(--main-300)]"
+                      }`}
+                    >
+                      <Calendar className="w-6 h-6 mx-auto mb-2 text-[var(--second-500)]" />
+                      <span className="text-sm font-semibold text-[var(--second-500)]">
+                        {option === "exact" && "Exact Date"}
+                        {option === "month" && "Approx Month"}
+                        {option === "days" && "Not Sure"}
+                      </span>
+                    </button>
+                  ))}
                 </div>
 
                 {formData.timeOption === "exact" && (
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Check In</label>
+                      <label className="block text-sm font-semibold mb-2 text-[var(--second-500)]">
+                        Check In
+                      </label>
+                      {/* FIX: Removed wrap:true, using className prop directly on Flatpickr */}
                       <Flatpickr
                         value={formData.checkIn}
-                        options={{
-                          dateFormat: "Y-m-d",
-                          minDate: "today",
-                        }}
+                        options={flatpickrOptions}
                         onChange={(dates: Date[]) => {
                           if (dates[0]) {
-                            updateFormData("checkIn", dates[0].toISOString().split('T')[0]);
+                            updateFormData("checkIn", dates[0].toISOString().split("T")[0]);
                           }
                         }}
-                        className="input"
+                        className="input-field"
+                        placeholder="Select check-in date"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Check Out</label>
+                      <label className="block text-sm font-semibold mb-2 text-[var(--second-500)]">
+                        Check Out
+                      </label>
                       <Flatpickr
                         value={formData.checkOut}
-                        options={{
-                          dateFormat: "Y-m-d",
-                          minDate: "today",
-                        }}
+                        options={flatpickrOptions}
                         onChange={(dates: Date[]) => {
                           if (dates[0]) {
-                            updateFormData("checkOut", dates[0].toISOString().split('T')[0]);
+                            updateFormData("checkOut", dates[0].toISOString().split("T")[0]);
                           }
                         }}
-                        className="input"
+                        className="input-field"
+                        placeholder="Select check-out date"
                       />
                     </div>
                   </div>
@@ -368,27 +408,33 @@ export default function TailorMadePage() {
 
                 {formData.timeOption === "month" && (
                   <div>
-                    <label className="block text-sm font-medium mb-2">Select Month</label>
-                    <input
-                      type="month"
+                    <label className="block text-sm font-semibold mb-2 text-[var(--second-500)]">
+                      Select Month
+                    </label>
+                    <Flatpickr
                       value={formData.monthSelect}
-                      onChange={(e) => updateFormData("monthSelect", e.target.value)}
-                      className="input"
-                      min={new Date().toISOString().slice(0, 7)}
+                      options={monthFlatpickrOptions}
+                      onChange={(dates: Date[]) => {
+                        if (dates[0]) {
+                          updateFormData("monthSelect", dates[0].toISOString().slice(0, 7));
+                        }
+                      }}
+                      className="input-field"
+                      placeholder="Select month"
                     />
                   </div>
                 )}
 
                 {formData.timeOption === "days" && (
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label className="block text-sm font-semibold mb-2 text-[var(--second-500)]">
                       Number of Vacation Days
                     </label>
                     <input
                       type="number"
                       value={formData.vacationDays}
                       onChange={(e) => updateFormData("vacationDays", e.target.value)}
-                      className="input"
+                      className="input-field"
                       min="1"
                       max="30"
                       placeholder="Enter number of days"
@@ -401,38 +447,44 @@ export default function TailorMadePage() {
             {/* Step 3: Personal Info */}
             {currentStep === 3 && (
               <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-gray-800">
+                <h3 className="text-2xl font-bold text-[var(--second-500)]">
                   Your Personal Information
                 </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Full Name</label>
+                    <label className="block text-sm font-semibold mb-2 text-[var(--second-500)]">
+                      Full Name
+                    </label>
                     <input
                       type="text"
                       value={formData.fullName}
                       onChange={(e) => updateFormData("fullName", e.target.value)}
-                      className="input"
+                      className="input-field"
                       placeholder="Enter your full name"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Email</label>
+                    <label className="block text-sm font-semibold mb-2 text-[var(--second-500)]">
+                      Email
+                    </label>
                     <input
                       type="email"
                       value={formData.email}
                       onChange={(e) => updateFormData("email", e.target.value)}
-                      className="input"
+                      className="input-field"
                       placeholder="your@email.com"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Phone Code</label>
+                    <label className="block text-sm font-semibold mb-2 text-[var(--second-500)]">
+                      Phone Code
+                    </label>
                     <select
                       value={formData.phoneCode}
                       onChange={(e) => updateFormData("phoneCode", e.target.value)}
-                      className="input"
+                      className="input-field"
                     >
                       <option value="">Select</option>
                       {phoneCodes.map((pc) => (
@@ -443,22 +495,26 @@ export default function TailorMadePage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Phone Number</label>
+                    <label className="block text-sm font-semibold mb-2 text-[var(--second-500)]">
+                      Phone Number
+                    </label>
                     <input
                       type="tel"
                       value={formData.phoneNumber}
                       onChange={(e) => updateFormData("phoneNumber", e.target.value)}
-                      className="input"
+                      className="input-field"
                       placeholder="123456789"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Nationality</label>
+                    <label className="block text-sm font-semibold mb-2 text-[var(--second-500)]">
+                      Nationality
+                    </label>
                     <select
                       value={formData.nationality}
                       onChange={(e) => updateFormData("nationality", e.target.value)}
-                      className="input"
+                      className="input-field"
                     >
                       <option value="">Select</option>
                       {nationalities.map((n) => (
@@ -467,22 +523,26 @@ export default function TailorMadePage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Hotel Preference</label>
+                    <label className="block text-sm font-semibold mb-2 text-[var(--second-500)]">
+                      Hotel Preference
+                    </label>
                     <input
                       type="text"
                       value={formData.hotel}
                       onChange={(e) => updateFormData("hotel", e.target.value)}
-                      className="input"
+                      className="input-field"
                       placeholder="Optional"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Additional Info</label>
+                  <label className="block text-sm font-semibold mb-2 text-[var(--second-500)]">
+                    Additional Info
+                  </label>
                   <textarea
                     value={formData.additionalInfo}
                     onChange={(e) => updateFormData("additionalInfo", e.target.value)}
-                    className="input h-24 resize-none"
+                    className="input-field h-28 resize-none"
                     placeholder="Any special requests or preferences..."
                   />
                 </div>
@@ -492,91 +552,57 @@ export default function TailorMadePage() {
             {/* Step 4: Price & Guests */}
             {currentStep === 4 && (
               <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-gray-800">
+                <h3 className="text-2xl font-bold text-[var(--second-500)]">
                   Customize Your Trip
                 </h3>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                    <span className="font-medium">Adults</span>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => updateFormData("adults", Math.max(1, formData.adults - 1))}
-                        className="w-8 h-8 rounded-full bg-white border-2 border-gray-300 hover:border-[#e3b75e] transition"
-                      >
-                        -
-                      </button>
-                      <span className="w-8 text-center font-semibold">{formData.adults}</span>
-                      <button
-                        type="button"
-                        onClick={() => updateFormData("adults", Math.min(10, formData.adults + 1))}
-                        className="w-8 h-8 rounded-full bg-white border-2 border-gray-300 hover:border-[#e3b75e] transition"
-                      >
-                        +
-                      </button>
+                  {["adults", "children", "infants"].map((type) => (
+                    <div key={type} className="flex items-center justify-between p-4 bg-[var(--grey-100)] rounded-xl border border-[var(--border-light)]">
+                      <span className="font-semibold text-[var(--second-500)] capitalize">
+                        {type}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => updateFormData(type as any, Math.max(type === "adults" ? 1 : 0, formData[type as keyof typeof formData] as number - 1))}
+                          className="w-10 h-10 rounded-full bg-[var(--white-color)] border-2 border-[var(--border-medium)] hover:border-[var(--main-400)] transition-all font-bold text-[var(--second-500)]"
+                        >
+                          -
+                        </button>
+                        <span className="w-10 text-center font-bold text-lg text-[var(--second-500)]">
+                          {formData[type as keyof typeof formData] as number}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => updateFormData(type as any, Math.min(10, formData[type as keyof typeof formData] as number + 1))}
+                          className="w-10 h-10 rounded-full bg-[var(--white-color)] border-2 border-[var(--border-medium)] hover:border-[var(--main-400)] transition-all font-bold text-[var(--second-500)]"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                    <span className="font-medium">Children</span>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => updateFormData("children", Math.max(0, formData.children - 1))}
-                        className="w-8 h-8 rounded-full bg-white border-2 border-gray-300 hover:border-[#e3b75e] transition"
-                      >
-                        -
-                      </button>
-                      <span className="w-8 text-center font-semibold">{formData.children}</span>
-                      <button
-                        type="button"
-                        onClick={() => updateFormData("children", Math.min(10, formData.children + 1))}
-                        className="w-8 h-8 rounded-full bg-white border-2 border-gray-300 hover:border-[#e3b75e] transition"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                    <span className="font-medium">Infants</span>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => updateFormData("infants", Math.max(0, formData.infants - 1))}
-                        className="w-8 h-8 rounded-full bg-white border-2 border-gray-300 hover:border-[#e3b75e] transition"
-                      >
-                        -
-                      </button>
-                      <span className="w-8 text-center font-semibold">{formData.infants}</span>
-                      <button
-                        type="button"
-                        onClick={() => updateFormData("infants", Math.min(10, formData.infants + 1))}
-                        className="w-8 h-8 rounded-full bg-white border-2 border-gray-300 hover:border-[#e3b75e] transition"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
+                  ))}
                 </div>
 
-                <div className="mt-6">
-                  <h4 className="font-semibold mb-4">Price Range (USD)</h4>
+                <div className="mt-6 p-6 bg-[var(--grey-100)] rounded-xl border border-[var(--border-light)]">
+                  <h4 className="font-bold mb-4 text-[var(--second-500)]">Price Range (USD)</h4>
                   <div className="flex gap-4 mb-4">
-                    <div>
-                      <label className="text-sm text-gray-600">Min</label>
+                    <div className="flex-1">
+                      <label className="text-sm font-semibold text-[var(--grey-600)] mb-2 block">Min</label>
                       <input
                         type="number"
                         value={formData.priceMin}
                         onChange={(e) => updateFormData("priceMin", parseInt(e.target.value) || 0)}
-                        className="input w-32"
+                        className="input-field"
                       />
                     </div>
-                    <div>
-                      <label className="text-sm text-gray-600">Max</label>
+                    <div className="flex-1">
+                      <label className="text-sm font-semibold text-[var(--grey-600)] mb-2 block">Max</label>
                       <input
                         type="number"
                         value={formData.priceMax}
                         onChange={(e) => updateFormData("priceMax", parseInt(e.target.value) || 0)}
-                        className="input w-32"
+                        className="input-field"
                       />
                     </div>
                   </div>
@@ -587,8 +613,13 @@ export default function TailorMadePage() {
                     step="100"
                     value={formData.priceMin}
                     onChange={(e) => updateFormData("priceMin", parseInt(e.target.value))}
-                    className="w-full"
+                    className="w-full accent-[var(--main-400)]"
                   />
+                  <div className="flex justify-between mt-2 text-sm font-semibold text-[var(--grey-600)]">
+                    <span>$0</span>
+                    <span className="text-[var(--main-600)]">${formData.priceMin}</span>
+                    <span>$10,000</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -596,29 +627,33 @@ export default function TailorMadePage() {
             {/* Step 5: Confirm */}
             {currentStep === 5 && (
               <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-gray-800">
+                <h3 className="text-2xl font-bold text-[var(--second-500)]">
                   Confirm Your Details
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-[var(--grey-600)]">
                   Thank you, {formData.fullName}! Please review your trip details before submitting.
                 </p>
                 <form onSubmit={handleSubmit}>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#e3b75e] hover:bg-[#d4a856] text-white font-semibold py-4 rounded-xl transition disabled:opacity-50"
+                    className="w-full bg-[var(--main-400)] hover:bg-[var(--main-500)] text-[var(--white-color)] font-bold py-4 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                   >
                     {loading ? "Submitting..." : "Submit Trip Request"}
                   </button>
                   {message && (
-                    <p className="text-center mt-4 text-sm">{message}</p>
+                    <p className="text-center mt-4 text-sm font-semibold text-[var(--second-500)]">
+                      {message}
+                    </p>
                   )}
                 </form>
               </div>
             )}
 
             {stepError && (
-              <p className="mt-6 text-sm text-red-600">{stepError}</p>
+              <p className="mt-6 text-sm font-semibold text-[var(--danger-color)] bg-[var(--danger-color)]/10 p-3 rounded-lg">
+                {stepError}
+              </p>
             )}
 
             {/* Navigation Buttons */}
@@ -628,7 +663,7 @@ export default function TailorMadePage() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="flex-1 border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition"
+                    className="flex-1 border-2 border-[var(--border-medium)] text-[var(--second-500)] font-bold py-3 rounded-xl hover:bg-[var(--grey-100)] transition-all duration-300"
                   >
                     Back
                   </button>
@@ -637,7 +672,7 @@ export default function TailorMadePage() {
                   type="button"
                   onClick={nextStep}
                   disabled={!isStepValid()}
-                  className="flex-1 bg-[#e3b75e] hover:bg-[#d4a856] text-white font-semibold py-3 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-[var(--main-400)] hover:bg-[var(--main-500)] text-[var(--white-color)] font-bold py-3 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                 >
                   Next
                 </button>
@@ -646,78 +681,78 @@ export default function TailorMadePage() {
           </div>
 
           {/* Summary Sidebar */}
-          <div className="bg-white rounded-3xl shadow-2xl p-6 h-fit sticky top-4">
-            <div className="mb-4">
-                 <Image
-                  src="https://images.unsplash.com/photo-1539768942893-daf53e448371?w=400"
-                  alt="Egypt"
-                  width={400}
-                  height={300}
-                  className="w-full h-32 object-cover rounded-xl mb-4"
-                />
-              <h3 className="text-xl font-bold text-[#272262] mb-2">Trip Summary</h3>
+          <div className="bg-[var(--white-color)] rounded-3xl shadow-xl border border-[var(--border-light)] p-6 h-fit sticky top-4">
+            <div className="mb-6">
+              <Image
+                src="https://images.unsplash.com/photo-1539768942893-daf53e448371?w=400"
+                alt="Egypt"
+                width={400}
+                height={300}
+                className="w-full h-40 object-cover rounded-2xl mb-4"
+              />
+              <h3 className="text-xl font-bold text-[var(--second-500)]">Trip Summary</h3>
             </div>
 
             <div className="space-y-3 text-sm">
               {formData.cities.length > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Cities:</span>
-                  <span className="font-medium">
+                <div className="flex justify-between py-2 border-b border-[var(--border-light)]">
+                  <span className="text-[var(--grey-600)] font-medium">Cities:</span>
+                  <span className="font-bold text-[var(--second-500)] text-right">
                     {formData.cities.map(id => cities.find(c => c.id === id)?.name).join(", ")}
                   </span>
                 </div>
               )}
 
               {(formData.checkIn || formData.monthSelect) && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Dates:</span>
-                  <span className="font-medium">
+                <div className="flex justify-between py-2 border-b border-[var(--border-light)]">
+                  <span className="text-[var(--grey-600)] font-medium">Dates:</span>
+                  <span className="font-bold text-[var(--second-500)]">
                     {formData.checkIn ? `${formData.checkIn} to ${formData.checkOut}` : formData.monthSelect}
                   </span>
                 </div>
               )}
 
               {getDaysCount() > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Days:</span>
-                  <span className="font-medium">{getDaysCount()} days</span>
+                <div className="flex justify-between py-2 border-b border-[var(--border-light)]">
+                  <span className="text-[var(--grey-600)] font-medium">Days:</span>
+                  <span className="font-bold text-[var(--main-600)]">{getDaysCount()} days</span>
                 </div>
               )}
 
               {formData.fullName && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Name:</span>
-                  <span className="font-medium">{formData.fullName}</span>
+                <div className="flex justify-between py-2 border-b border-[var(--border-light)]">
+                  <span className="text-[var(--grey-600)] font-medium">Name:</span>
+                  <span className="font-bold text-[var(--second-500)]">{formData.fullName}</span>
                 </div>
               )}
 
               {formData.email && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Email:</span>
-                  <span className="font-medium text-xs">{formData.email}</span>
+                <div className="flex justify-between py-2 border-b border-[var(--border-light)]">
+                  <span className="text-[var(--grey-600)] font-medium">Email:</span>
+                  <span className="font-bold text-[var(--second-500)] text-xs">{formData.email}</span>
                 </div>
               )}
 
               {formData.phoneNumber && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Phone:</span>
-                  <span className="font-medium">+{formData.phoneCode} {formData.phoneNumber}</span>
+                <div className="flex justify-between py-2 border-b border-[var(--border-light)]">
+                  <span className="text-[var(--grey-600)] font-medium">Phone:</span>
+                  <span className="font-bold text-[var(--second-500)]">+{formData.phoneCode} {formData.phoneNumber}</span>
                 </div>
               )}
 
               {(formData.adults > 0 || formData.children > 0 || formData.infants > 0) && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Guests:</span>
-                  <span className="font-medium">
+                <div className="flex justify-between py-2 border-b border-[var(--border-light)]">
+                  <span className="text-[var(--grey-600)] font-medium">Guests:</span>
+                  <span className="font-bold text-[var(--second-500)]">
                     {formData.adults}A {formData.children}C {formData.infants}I
                   </span>
                 </div>
               )}
 
               {formData.priceMin && formData.priceMax && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Budget:</span>
-                  <span className="font-medium">${formData.priceMin} - ${formData.priceMax}</span>
+                <div className="flex justify-between py-2">
+                  <span className="text-[var(--grey-600)] font-medium">Budget:</span>
+                  <span className="font-bold text-[var(--main-600)]">${formData.priceMin} - ${formData.priceMax}</span>
                 </div>
               )}
             </div>
@@ -726,9 +761,70 @@ export default function TailorMadePage() {
       </div>
 
       <style jsx global>{`
-        .input {
-          @apply w-full rounded-xl border border-gray-200 px-4 py-3 text-sm
-          focus:outline-none focus:ring-2 focus:ring-[#e3b75e] transition;
+        .input-field {
+          @apply w-full rounded-xl border-2 border-[var(--border-medium)] px-4 py-3 text-sm
+          bg-[var(--white-color)] text-[var(--foreground)]
+          placeholder:text-[var(--grey-400)]
+          focus:outline-none focus:ring-2 focus:ring-[var(--main-400)] focus:border-[var(--main-400)]
+          transition-all duration-300 font-medium;
+        }
+
+        .input-field:hover {
+          border-color: var(--main-300);
+        }
+
+        /* Flatpickr Customization */
+        .flatpickr-calendar {
+          border-radius: 12px !important;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+          border: 2px solid var(--border-light) !important;
+        }
+
+        .flatpickr-day.selected,
+        .flatpickr-day.startRange,
+        .flatpickr-day.endRange,
+        .flatpickr-day.selected.inRange,
+        .flatpickr-day.startRange.inRange,
+        .flatpickr-day.endRange.inRange,
+        .flatpickr-day.selected:focus,
+        .flatpickr-day.startRange:focus,
+        .flatpickr-day.endRange:focus,
+        .flatpickr-day.selected:hover,
+        .flatpickr-day.startRange:hover,
+        .flatpickr-day.endRange:hover,
+        .flatpickr-day.selected.prevMonthDay,
+        .flatpickr-day.startRange.prevMonthDay,
+        .flatpickr-day.endRange.prevMonthDay,
+        .flatpickr-day.selected.nextMonthDay,
+        .flatpickr-day.startRange.nextMonthDay,
+        .flatpickr-day.endRange.nextMonthDay {
+          background: var(--main-400) !important;
+          border-color: var(--main-400) !important;
+        }
+
+        .flatpickr-day:hover {
+          background: var(--main-100) !important;
+          border-color: var(--main-300) !important;
+        }
+
+        .flatpickr-months .flatpickr-month {
+          background: var(--second-500) !important;
+          color: var(--white-color) !important;
+        }
+
+        .flatpickr-current-month .flatpickr-monthDropdown-months,
+        .flatpickr-current-month input.cur-year {
+          color: var(--white-color) !important;
+          font-weight: 600;
+        }
+
+        .flatpickr-weekdays {
+          background: var(--grey-100) !important;
+        }
+
+        .flatpickr-weekday {
+          color: var(--second-500) !important;
+          font-weight: 600;
         }
       `}</style>
     </div>

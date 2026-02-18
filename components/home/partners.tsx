@@ -23,7 +23,7 @@ const PartnersMarquee = () => {
                 alt={img.split(".")[0]}
                 width={150}
                 height={70}
-                className="object-cover transition-transform duration-300 hover:-translate-y-1 hover:scale-105"
+                className="object-cover transition-transform duration-300 hover:-translate-y-1 hover:scale-105 hover:paused"
               />
             </div>
           ))}
@@ -34,7 +34,7 @@ const PartnersMarquee = () => {
                 alt={img.split(".")[0]}
                 width={150}
                 height={70}
-                className="object-cover transition-transform duration-300 hover:-translate-y-1 hover:scale-105"
+                className="object-cover transition-transform duration-300 hover:-translate-y-1 hover:scale-105 hover:paused"
               />
             </div>
           ))}

@@ -74,12 +74,15 @@ export default function Footer() {
                     : footerData?.site_address || "Cairo, Egypt"}
                 </span>
               </div>
-              <div className="flex items-start gap-3 group">
-                <div className="p-2 bg-[var(--main-color)]/10 rounded-full group-hover:bg-[var(--main-color)]/20 transition-colors">
-                  <Phone className="h-4 w-4 text-[var(--main-color)] mt-0.5" aria-hidden="true" />
+              <Link href="tel:+20212345678">
+                <div className="flex items-start gap-3 group">
+                  <div className="p-2 bg-[var(--main-color)]/10 rounded-full group-hover:bg-[var(--main-color)]/20 transition-colors">
+                      <Phone className="h-4 w-4 text-[var(--main-color)] mt-0.5" aria-hidden="true" />
+                    </div>
+                    <span className="text-white/90">+20 2 1234 5678</span>
                 </div>
-                <span className="text-white/90">+20 2 1234 5678</span>
-              </div>
+              </Link>
+              <Link href="/">
               <div className="flex items-start gap-3 group">
                 <div className="p-2 bg-[var(--main-color)]/10 rounded-full group-hover:bg-[var(--main-color)]/20 transition-colors">
                   <Mail className="h-4 w-4 text-[var(--main-color)] mt-0.5" aria-hidden="true" />
@@ -88,6 +91,7 @@ export default function Footer() {
                   {isErrorState ? "info@egypttourgaten.com" : "info@nilevoyages.com"}
                 </span>
               </div>
+              </Link>
             </div>
           </div>
 
@@ -222,7 +226,7 @@ export default function Footer() {
         aria-busy="true"
         className="relative bg-[var(--second-color)] text-white pt-16 pb-10 overflow-hidden"
       >
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22none%22/><path d=%22M20,20 Q40,5 60,20 T100,20 L100,100 L0,100 Z%22 fill=%22%23e3b75e%22 opacity=%220.03%22/></svg>')]"></div>
+        {/* <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22none%22/><path d=%22M20,20 Q40,5 60,20 T100,20 L100,100 L0,100 Z%22 fill=%22%23e3b75e%22 opacity=%220.03%22/></svg>')]"></div> */}
         <div className="container mx-auto px-4 md:px-6 flex items-center justify-center min-h-[300px]">
           <div className="text-center">
             <div className="relative">
@@ -254,18 +258,6 @@ export default function Footer() {
       <div className="container mx-auto px-4 md:px-6">
         {renderFooterContent(!!error || !data)}
         
-        {/* Decorative bottom element - subtle pyramid pattern */}
-        {/* <div className="mt-16 pt-6 border-t border-[var(--main-color)]/10 hidden md:block">
-          <div className="flex justify-center gap-1.5">
-            {[...Array(7)].map((_, i) => (
-              <div 
-                key={i} 
-                className="w-1.5 h-1.5 bg-[var(--main-color)]/30 rounded-sm"
-                style={{ transform: `translateY(${i % 2 === 0 ? '0' : '2px'})` }}
-              ></div>
-            ))}
-          </div>
-        </div> */}
       </div>
       
       {/* Floating decorative element - subtle and elegant */}
