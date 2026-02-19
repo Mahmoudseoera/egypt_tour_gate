@@ -194,7 +194,7 @@ export default function TravelServicesSection() {
         {/* Background Image */}
         <div className="services-bg-image">
           <Image
-            src="/assets/images/blogs/A-wonderful-picture-of-a-tourist-in-front-of-the-pyramids-webp.webp"
+            src="/assets/images/tours/camel front of giza pyramids.jpg"
             alt="Egypt background"
             fill
             className="object-cover object-center"
@@ -215,7 +215,7 @@ export default function TravelServicesSection() {
             </h2>
             <span
               className="relative block h-1 w-40 mb-5 mx-auto rounded-md
-                bg-gradient-to-r from-[var(--main-color)] via-[var(--main-color)] to-[var(--main-color)]
+                bg-gradient-to-r from-[var(--main-color)] via-[var(--second-color)] to-[var(--main-color)]
                 before:content-[''] before:absolute before:top-1/2 before:left-1/2
                 before:-translate-x-1/2 before:-translate-y-1/2
                 before:w-4 before:h-4
@@ -223,8 +223,8 @@ export default function TravelServicesSection() {
                 before:bg-contain before:bg-no-repeat before:z-20
                 after:content-[''] after:absolute after:top-1/2 after:left-1/2
                 after:-translate-x-1/2 after:-translate-y-1/2
-                after:w-[26px] after:h-[26px]
-                after:bg-[var(--second-color)] after:rounded-full after:z-0"
+                after:w-[26px] after:h-[26px] after:opacity-3
+                after:bg-[#4A4976] after:rounded-full after:z-0"
             />
             <p className="text-base text-white/70 max-w-2xl mx-auto">
               Discover breathtaking locations around the world and create unforgettable memories
@@ -251,13 +251,13 @@ export default function TravelServicesSection() {
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 z-10 p-6 flex flex-col justify-end" style={{position:'absolute'}}>
+              {/* <div className="absolute inset-0 z-10 p-6 flex flex-col justify-end" style={{position:'absolute'}}>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="service-icon-wrap">{services[1].icon}</div>
                   <h3 className="text-white text-base font-bold leading-tight">{services[1].title}</h3>
                 </div>
                 <p className="text-white/75 text-sm leading-relaxed">{services[1].description}</p>
-              </div>
+              </div> */}
             </div>
 
             {/* Card 3 */}

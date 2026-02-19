@@ -22,13 +22,13 @@ export default function Home() {
         <EgyptToursBanner />
         <RoavioAboutSection />
         
-        <section className="first-tours max-w-7xl mx-auto py-16 animate-on-scroll">
+        <section className="first-tours max-w-7xl mx-auto py-16 animate-on-scroll" id="tours-section">
           <div className="text-center mb-12"> 
             <div className="inline-block mb-4">
               <h2 className="text-4xl md:text-3xl font-bold text-[var(--second-color)] mb-4">
                 Explore Our Amazing Tours
               </h2>
-              <span className="relative block h-1 w-40 bg-gradient-to-r from-[var(--second-color)] via-[transparent] to-[var(--second-color)] mx-auto rounded-md before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-4 before:h-4 before:bg-[url('/assets/images/pryamids-2.svg')] before:bg-contain before:bg-no-repeat before:z-20 after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-[26px] after:h-[26px] after:bg-white after:rounded-full after:z-0">
+              <span className="relative block h-1 w-40 bg-gradient-to-r from-[var(--second-color)] via-[var(--main-color)] to-[var(--second-color)] mx-auto rounded-md before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-4 before:h-4 before:bg-[url('/assets/images/pryamids-2.svg')] before:bg-contain before:bg-no-repeat before:z-20 after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-[26px] after:h-[26px] after:bg-white after:rounded-full after:z-0">
               </span>
             </div>
             <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">

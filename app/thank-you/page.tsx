@@ -146,9 +146,6 @@ export default function ThankYouPage() {
 
       {/* Main Content Card with Animations */}
       <div className="relative z-10 bg-white p-12 rounded-3xl shadow-2xl text-center max-w-lg mx-4 animate-fade-in-up">
-        {/* Top Decorative Bar */}
-        <div className="w-20 h-1.5 mx-auto mb-8 bg-[#e3b75e] animate-slide-in-left"></div>
-        
         {/* Icon Circle with Animation */}
         <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center shadow-lg bg-[#272262] animate-scale-in"
              style={{ animationDelay: '0.2s' }}>

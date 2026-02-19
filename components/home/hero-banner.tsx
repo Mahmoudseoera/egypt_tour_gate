@@ -28,10 +28,10 @@ const heroBanner: HeroBanner = {
 
 // ─── Badge content — easy to update ───────────────────────────────────────────
 const badgeContent = {
-  brandLine: 'Condé Nast',
+  brandLine: 'Egypt Tour Gate',
   titleLine: 'Traveler',
   subLine:   'Bright Ideas in Travel',
-  yearLine:  '2023 WINNER',
+  yearLine:  '2025 WINNER',
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -39,7 +39,7 @@ export default function EgyptToursBanner() {
   return (
     <>
       <style jsx global>{`
-
+          
         /* ============================================================
            SECTION SHELL
         ============================================================ */
@@ -96,7 +96,7 @@ export default function EgyptToursBanner() {
           z-index: 2;
           pointer-events: none;
           background:
-            radial-gradient(ellipse 70% 60% at 15% 50%,  rgba(227,183,94,0.18) 0%, transparent 70%),
+            radial-gradient(ellipse 70% 60% at 15% 50%,  rgba(184, 152, 89, 0.) 0%, transparent 70%),
             radial-gradient(ellipse 50% 50% at 85% 20%,  rgba(227,183,94,0.12) 0%, transparent 65%),
             radial-gradient(ellipse 40% 40% at 60% 85%,  rgba(39,34,98,0.07)   0%, transparent 60%);
           animation: glowPulse 6s ease-in-out infinite;

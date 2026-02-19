@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react';
 import Image from "next/image";
+import Link from "next/link"
 
 export default function RoavioAboutSection() {
   const features = [
@@ -88,38 +89,7 @@ export default function RoavioAboutSection() {
       }
     }
 
-    .roavio-btn-hover {
-      position: relative;
-      overflow: hidden;
-      transform: translateY(0);
-    }
 
-    .roavio-btn-hover::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-
-    .roavio-btn-hover:hover::before {
-      width: 300px;
-      height: 300px;
-    }
-
-    .roavio-btn-hover:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(249, 115, 22, 0.3);
-    }
-
-    .roavio-btn-hover:active {
-      transform: translateY(0);
-    }
   `;
 
   return (
@@ -151,11 +121,11 @@ export default function RoavioAboutSection() {
               <div className="col-span-2 lg:col-span-1 roavio-card-hover">
                 <div className="rounded-3xl overflow-hidden h-72 lg:h-full">
                   <Image
-                src="/assets/images/tours/Pyramids-in-Egypt-webp.webp" 
-                alt="Colosseum Rome" 
-                 className="w-full h-full object-cover roavio-image-zoom"
-                 width={800}
-                 height={800}
+                    src="/assets/images/tours/Pyramids-in-Egypt-webp.webp" 
+                    alt="Colosseum Rome" 
+                    className="w-full h-full object-cover roavio-image-zoom"
+                    width={800}
+                    height={800}
                 />
                 </div>
               </div>
@@ -240,9 +210,9 @@ export default function RoavioAboutSection() {
 
               {/* CTA Button */}
               <div>
-                <button className="roavio-btn-hover bg-[#e3b75e] hover:bg-orange-600 text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 shadow-lg">
+                <Link href="/about-us" className="btn-effect !bg-[var(--second-color)] !hover:bg-[var(--main-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg">
                   Learn More Us
-                </button>
+                </Link>
               </div>
             </div>
           </div>

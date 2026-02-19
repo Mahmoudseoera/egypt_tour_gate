@@ -360,17 +360,17 @@
 nav.fixed {
   width: calc(100% - 20px);
   left: 10px;
-  border-radius: 15px !important;
+  border-radius: 0 0 24px 24px !important;
   backdrop-filter: blur(20px);
   background: rgba(255, 255, 255, 0.5);
-  top: 7px;
+  top: 0;
 }
 
 .navbar-main > li {
   position: relative;
 }
 
-.navbar-main > li > a::before {
+/* .navbar-main > li > a::before {
   content: "";
   position: absolute;
   height: 2px;
@@ -379,7 +379,7 @@ nav.fixed {
   left: 0;
   background-color: var(--main-color);
   transition: 0.5s all ease-in-out;
-}
+} */
 
 .navbar-main > li:hover a::before {
   width: 100%;
