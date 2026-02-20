@@ -147,7 +147,7 @@ export default function ContactPage() {
               target={target as "_blank" | "_self"}
               rel={target === "_blank" ? "noopener noreferrer" : undefined}
               aria-label={ariaLabel}
-              className="group flex flex-col items-center text-center bg-white rounded-2xl shadow-lg p-7 border border-transparent hover:border-[var(--main-color)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group shimmer-effect flex flex-col items-center text-center bg-white rounded-2xl shadow-lg p-7 border border-transparent hover:border-[var(--main-color)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               {/* Icon bubble */}
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[var(--second-color)] to-[#4a43a0] flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform duration-300">
@@ -175,7 +175,6 @@ export default function ContactPage() {
           {/* ── Contact Form ── */}
           <div className="bg-white rounded-3xl shadow-xl p-8 flex flex-col">
             <div className="mb-8">
-              <div className="w-12 h-1 bg-[var(--main-color)] rounded-full mb-4" />
               <h2 className="text-2xl font-bold text-[var(--second-color)]">
                 Send Us a Message
               </h2>

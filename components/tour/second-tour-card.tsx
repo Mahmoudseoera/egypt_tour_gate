@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image, { StaticImageData } from "next/image";
-import { MapPin, Calendar, Star, Heart } from "lucide-react";
+import { MapPin, Calendar, Star, Heart , Ticket } from "lucide-react";
 import Link from "next/link";
 
 interface TourCardProps {
@@ -99,7 +99,9 @@ export default function SecondTourCard({
           className="object-cover transition-transform group-hover:scale-110 duration-300"
         />
         <div className="absolute top-4 right-4 px-4 py-2 rounded-lg bg-[rgba(255,255,255,0.2)] backdrop-blur-lg">
-          <p className="text-navy font-bold text-lg">${price}</p>
+          <p className="text-navy font-bold text-lg flex items-center gap-1">
+            {/* <Ticket className="w-4 h-4"></Ticket> */}
+            ${price}</p>
         </div>
       </Link>
 

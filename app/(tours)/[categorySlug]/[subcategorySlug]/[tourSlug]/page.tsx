@@ -80,7 +80,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
        </div>
 
        <TourDetailsClient />
-       
+             {/*
       {"short_description" in item && item.short_description && (
         <p className="text-lg text-gray-700 mb-6">{item.short_description}</p>
       )}
@@ -134,7 +134,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
         </section>
       )}
 
-      {/* <div className="flex gap-4 mt-8">
+          <div className="flex gap-4 mt-8">
         <Link
           href={`/${categorySlug}/${subcategorySlug}`}
           className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
