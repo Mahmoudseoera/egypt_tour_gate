@@ -1,20 +1,15 @@
 import { z } from "zod";
 
 /* ─────────────────────────────────────────────────────────────
-   Security helpers — same pipeline used in contact.schema.ts
-   Every field: sanitise → injection check → field-specific rules
+   Security helpers
    ───────────────────────────────────────────────────────────── */
-
 const INJECTION_PATTERNS: RegExp[] = [
-  /* SQL */
   /(\bSELECT\b|\bINSERT\b|\bUPDATE\b|\bDELETE\b|\bDROP\b|\bTRUNCATE\b|\bALTER\b|\bCREATE\b|\bEXEC\b|\bEXECUTE\b|\bUNION\b|\bCAST\b|\bCONVERT\b)/i,
   /('|--|;|\/\*|\*\/|xp_|0x[0-9a-f]{2,})/i,
   /\bOR\b\s+['"\d]/i,
   /\bAND\b\s+['"\d]/i,
   /SLEEP\s*\(\s*\d+\s*\)/i,
   /BENCHMARK\s*\(/i,
-
-  /* XSS / HTML */
   /<\s*script[\s\S]*?>[\s\S]*?<\/\s*script\s*>/i,
   /<[a-z][a-z0-9]*(?:\s[^>]*)?\s*\/?>/i,
   /<\/[a-z][a-z0-9]*\s*>/i,
@@ -23,15 +18,11 @@ const INJECTION_PATTERNS: RegExp[] = [
   /data\s*:\s*text\/html/i,
   /on\w+\s*=\s*["'`]?[^"'`>]+/i,
   /&#x?[0-9a-f]+;/i,
-
-  /* SSTI */
   /\{\{[\s\S]*?\}\}/,
   /\{%[\s\S]*?%\}/,
   /\{#[\s\S]*?#\}/,
   /\$\{[\s\S]*?\}/,
   /#\{[\s\S]*?\}/,
-
-  /* PHP */
   /<\?php/i,
   /<\?=/i,
   /\$_(GET|POST|REQUEST|COOKIE|SESSION|SERVER|FILES|ENV)\s*\[/i,
@@ -43,14 +34,10 @@ const INJECTION_PATTERNS: RegExp[] = [
   /\bshell_exec\s*\(/i,
   /phpinfo\s*\(\s*\)/i,
   /preg_replace\s*\(\s*['"`].*[eis]/i,
-
-  /* Java / JSP */
   /<%[\s\S]*?%>/,
   /Runtime\.getRuntime\s*\(\s*\)/i,
   /ProcessBuilder/i,
   /\$\{T\s*\(/i,
-
-  /* Node.js */
   /require\s*\(\s*['"`][^'"`]+['"`]\s*\)/i,
   /process\s*\.\s*env/i,
   /child_process/i,
@@ -58,26 +45,18 @@ const INJECTION_PATTERNS: RegExp[] = [
   /Function\s*\(\s*['"`]/i,
   /\bnew\s+Function\b/i,
   /\.constructor\s*\(\s*['"`]/i,
-
-  /* Shell / OS */
   /[|`]\s*(cat|ls|rm|wget|curl|bash|sh|python|perl|ruby|nc|ncat|netcat|whoami|id|uname)\b/i,
   /;\s*(cat|ls|rm|wget|curl|bash|sh|python|perl)\b/i,
   /\.\.\//,
   /%2e%2e%2f/i,
   /%00/,
-
-  /* NoSQL */
   /\$where\s*:/i,
   /\$gt\s*:\s*""/i,
   /\$ne\s*:\s*null/i,
   /\$regex\s*:/i,
-
-  /* XXE */
   /<!ENTITY/i,
   /<!DOCTYPE[\s\S]*?\[/i,
   /SYSTEM\s+["'][^"']*["']/i,
-
-  /* Null byte */
   /\x00/,
 ];
 
@@ -93,7 +72,6 @@ function sanitise(value: string): string {
     .trim();
 }
 
-/** Base safe string: sanitise → injection check */
 const safeStr = (label: string) =>
   z
     .string()
@@ -101,26 +79,34 @@ const safeStr = (label: string) =>
     .refine(isClean, { message: `${label} contains invalid or unsafe content` });
 
 /* ─────────────────────────────────────────────────────────────
-   Per-child age schema (used for the dynamic child age array)
+   Date helpers — always in LOCAL time, never UTC
    ───────────────────────────────────────────────────────────── */
-export const childAgeItemSchema = safeStr("Child age").pipe(
-  z
-    .string()
-    .min(1, "Child age is required")
-    .max(3, "Enter a valid age")
-    .regex(/^\d{1,2}$/, "Age must be a number between 0 and 17")
-    .refine((v) => {
-      const n = parseInt(v, 10);
-      return !isNaN(n) && n >= 0 && n <= 17;
-    }, "Child age must be between 0 and 17")
-);
+
+export function todayISO(): string {
+  const d = new Date();
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
+}
+
+/** Tomorrow — used as flatpickr minDate so the UI won't allow today */
+export function tomorrowISO(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
+}
 
 /* ─────────────────────────────────────────────────────────────
    Tour Details Booking Schema
    ───────────────────────────────────────────────────────────── */
 export const tourDetailsSchema = z
   .object({
-    /** Full name */
     name: safeStr("Name").pipe(
       z
         .string()
@@ -132,7 +118,6 @@ export const tourDetailsSchema = z
         )
     ),
 
-    /** Email */
     email: safeStr("Email").pipe(
       z
         .string()
@@ -140,12 +125,11 @@ export const tourDetailsSchema = z
         .email("Please enter a valid email address")
         .max(254, "Email is too long")
         .refine(
-          (v) => !/[<>()\[\]\\,;:"']/.test(v.split("@")[0] ?? ""),
+          (v) => !/[<>()[\]\\,;:"']/.test(v.split("@")[0] ?? ""),
           "Email contains invalid characters"
         )
     ),
 
-    /** Nationality — selected from a controlled list */
     nationality: safeStr("Nationality").pipe(
       z
         .string()
@@ -154,7 +138,6 @@ export const tourDetailsSchema = z
         .regex(/^[\p{L}\p{M}\s,\-.]+$/u, "Nationality contains invalid characters")
     ),
 
-    /** Phone country code — digits only */
     countryCode: safeStr("Country code").pipe(
       z
         .string()
@@ -163,7 +146,6 @@ export const tourDetailsSchema = z
         .regex(/^\+?\d{1,6}$/, "Country code must be numeric (e.g. +20)")
     ),
 
-    /** Phone number */
     phone: safeStr("Phone").pipe(
       z
         .string()
@@ -175,49 +157,48 @@ export const tourDetailsSchema = z
         )
     ),
 
-    /** Check-in date — ISO date string YYYY-MM-DD */
+    /* Check-in must be today or later.
+       Flatpickr minDate is set to tomorrowISO() in the component
+       so the calendar already prevents selecting today,
+       making the effective minimum "tomorrow" for the UI. */
     checkIn: z
       .string()
       .min(1, "Check-in date is required")
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Check-in date must be a valid date")
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Check-in date must be YYYY-MM-DD")
       .refine(
-        (v) => !isNaN(Date.parse(v)) && new Date(v) >= new Date(new Date().toDateString()),
-        "Check-in date cannot be in the past"
+        (v) => v >= todayISO(),
+        "Check-in date must be today or in the future"
       ),
 
-    /** Check-out date */
     checkOut: z
       .string()
       .min(1, "Check-out date is required")
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Check-out date must be a valid date")
-      .refine((v) => !isNaN(Date.parse(v)), "Check-out date must be valid"),
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Check-out date must be YYYY-MM-DD"),
 
-    /** Adults count */
-    adults: z
-      .number({ invalid_type_error: "Adults must be a number" })
+    /* ── FIXED: z.coerce.number() — works in both Zod v3 and v4.
+       Zod v4 removed the { invalid_type_error } option from z.number().
+       z.coerce.number() automatically coerces string "1" → 1 and
+       does not need any constructor options at all.            ── */
+    adults: z.coerce
+      .number()
       .int("Adults must be a whole number")
       .min(1, "At least one adult is required")
-      .max(20, "Maximum 20 adults"),
+      .max(20, "Maximum 20 adults allowed"),
 
-    /** Children count */
-    children: z
-      .number({ invalid_type_error: "Children must be a number" })
+    children: z.coerce
+      .number()
       .int("Children must be a whole number")
       .min(0, "Children cannot be negative")
-      .max(20, "Maximum 20 children"),
+      .max(20, "Maximum 20 children allowed"),
 
-    /**
-     * Dynamic per-child ages: array of age strings.
-     * Length must equal children count (validated in superRefine).
-     */
     childAges: z
       .array(
         safeStr("Child age").pipe(
           z
             .string()
             .min(1, "Child age is required")
-            .max(2, "Enter a valid age (0–17)")
-            .regex(/^\d{1,2}$/, "Age must be 0–17")
+            .max(2, "Enter an age between 0 and 17")
+            .regex(/^\d{1,2}$/, "Age must be a whole number")
             .refine((v) => {
               const n = parseInt(v, 10);
               return !isNaN(n) && n >= 0 && n <= 17;
@@ -226,13 +207,12 @@ export const tourDetailsSchema = z
       )
       .default([]),
 
-    /** Optional message */
-    message: safeStr("Message").pipe(
-      z.string().max(1500, "Message is too long")
-    ).optional().default(""),
+    message: safeStr("Message")
+      .pipe(z.string().max(1500, "Message is too long"))
+      .optional()
+      .default(""),
   })
   .superRefine((data, ctx) => {
-    /* Check-out after check-in */
     if (data.checkIn && data.checkOut && data.checkOut <= data.checkIn) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -240,15 +220,90 @@ export const tourDetailsSchema = z
         message: "Check-out date must be after check-in date",
       });
     }
-
-    /* childAges length must match children count */
     if (data.children > 0 && data.childAges.length !== data.children) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["childAges"],
-        message: `Please provide the age for all ${data.children} child${data.children > 1 ? "ren" : ""}`,
+        message: `Please enter the age for all ${data.children} child${data.children > 1 ? "ren" : ""}`,
       });
     }
   });
 
 export type TourDetailsFormData = z.infer<typeof tourDetailsSchema>;
+
+/* ─────────────────────────────────────────────────────────────
+   Per-field validation helpers (used for onBlur validation)
+   ───────────────────────────────────────────────────────────── */
+
+/**
+ * Validates a single named field from the schema.
+ * Returns the first error message, or undefined when valid.
+ *
+ * Pass currentFormData so cross-field rules (checkOut > checkIn)
+ * are only enforced when both values are present.
+ */
+export function validateField(
+  field: keyof TourDetailsFormData,
+  value: unknown,
+  currentFormData?: Partial<TourDetailsFormData>
+): string | undefined {
+  /* Build a fully-populated payload with safe defaults so
+     superRefine cross-field checks don't fire falsely. */
+  const payload: Record<string, unknown> = {
+    name: "Placeholder",
+    email: "placeholder@example.com",
+    nationality: "Other",
+    countryCode: "+1",
+    phone: "000000",
+    checkIn: tomorrowISO(),
+    checkOut: tomorrowISO(),
+    adults: 1,
+    children: 0,
+    childAges: [],
+    message: "",
+    ...currentFormData,
+    [field]: value,
+  };
+
+  const result = tourDetailsSchema.safeParse(payload);
+  if (result.success) return undefined;
+
+  const issue = result.error.issues.find(
+    (i) => String(i.path[0]) === String(field)
+  );
+  return issue?.message;
+}
+
+/**
+ * Validates a single child-age entry by its array index.
+ * Returns the first error message, or undefined when valid.
+ */
+export function validateChildAge(
+  index: number,
+  value: string,
+  totalChildren: number
+): string | undefined {
+  const ages = Array(totalChildren)
+    .fill("5")
+    .map((v, i) => (i === index ? value : v));
+
+  const result = tourDetailsSchema.safeParse({
+    name: "x",
+    email: "a@b.com",
+    nationality: "Other",
+    countryCode: "+1",
+    phone: "123456",
+    checkIn: tomorrowISO(),
+    checkOut: tomorrowISO(),
+    adults: 1,
+    children: totalChildren,
+    childAges: ages,
+    message: "",
+  });
+
+  if (result.success) return undefined;
+  const issue = result.error.issues.find(
+    (i) => i.path[0] === "childAges" && i.path[1] === index
+  );
+  return issue?.message;
+}

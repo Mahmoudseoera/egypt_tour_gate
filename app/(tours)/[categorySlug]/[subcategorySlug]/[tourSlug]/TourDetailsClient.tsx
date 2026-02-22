@@ -4,32 +4,25 @@ import LightGallery from "lightgallery/react";
 import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
 import lgZoom from "lightgallery/plugins/zoom";
-import type { Instance as FlatpickrInstance } from 'flatpickr/dist/types/instance';
+
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { tourDetailsSchema, type TourDetailsFormData } from '@/lib/validations/tour-details.schema';
+import {
+  tourDetailsSchema,
+  validateField,
+  validateChildAge,
+  tomorrowISO,
+  todayISO,
+  type TourDetailsFormData,
+} from '@/lib/validations/tour-details.schema';
 import Image from 'next/image';
 import {
-  X, ChevronLeft, ChevronRight, MapPin, Clock, Users,
-  Calendar, Star, Check, Phone, Mail, MessageCircle,
-  BookOpen, ArrowRight, Baby
+  X, ChevronLeft, ChevronRight, MapPin, Clock,
+  Star, Check, Phone, Mail, MessageCircle,
+  Calendar, BookOpen, ArrowRight, Baby,
 } from 'lucide-react';
 
-/* ─── Flatpickr (loaded dynamically to avoid SSR issues) ─── */
-let flatpickrLoaded = false;
-let fpModule: typeof import('flatpickr').default | null = null;
-
-async function getFlatpickr() {
-  if (!flatpickrLoaded) {
-    const mod = await import('flatpickr');
-    await import('flatpickr/dist/flatpickr.min.css' as string);
-    fpModule = mod.default;
-    flatpickrLoaded = true;
-  }
-  return fpModule!;
-}
-
 /* ─── Types ─── */
-interface Tour {
+interface TourItem {
   id: string;
   title: string;
   image: string;
@@ -43,7 +36,7 @@ interface Article {
   id: string;
   title: string;
   image: string;
-  date: string;       // ← added for requirement 5
+  date: string;
   readTime: string;
 }
 
@@ -52,85 +45,101 @@ interface PriceRow {
   price: number;
 }
 
-/* ─── Input shared classes ─── */
-const inputCls =
-  "w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--second-color)] focus:border-transparent outline-none transition-all bg-white text-sm text-gray-800 placeholder-gray-400";
-const labelCls = "block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide";
-const errorCls = "mt-1 text-xs text-red-500 font-medium";
+/* ─── Shared class builders ─── */
+const inputCls = (err?: string) =>
+  `w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-[var(--second-color)] focus:border-transparent outline-none transition-all bg-white text-sm text-gray-800 placeholder-gray-400 ${
+    err ? 'border-red-400 focus:ring-red-300' : 'border-gray-200'
+  }`;
+const labelCls = 'block text-[11px] font-semibold text-gray-500 mb-1.5 uppercase tracking-wide';
+const errCls   = 'mt-1 text-xs text-red-500 font-medium';
+
+/* ─── Form initial state ─── */
+type FormState = Omit<TourDetailsFormData, 'childAges' | 'message'> & {
+  childAges: string[];
+  message: string;
+};
+
+const INITIAL: FormState = {
+  name:        '',
+  email:       '',
+  nationality: '',
+  countryCode: '',
+  phone:       '',
+  checkIn:     '',
+  checkOut:    '',
+  adults:       1,
+  children:     0,
+  childAges:   [],
+  message:     '',
+};
 
 export default function TourDetailsClient() {
-  const [activeDay, setActiveDay] = useState<number | null>(1);
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [activeDay,          setActiveDay]          = useState<number | null>(1);
+  const [isLightboxOpen,     setIsLightboxOpen]     = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
-  /* ── Form state ── */
-  const [formData, setFormData] = useState<Omit<TourDetailsFormData, 'childAges'> & { childAges: string[] }>({
-    name: '',
-    email: '',
-    nationality: '',
-    countryCode: '',
-    phone: '',
-    checkIn: '',
-    checkOut: '',
-    adults: 1,
-    children: 0,
-    childAges: [],
-    message: '',
-  });
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [formData,           setFormData]           = useState<FormState>(INITIAL);
+  const [fieldErrors,        setFieldErrors]        = useState<Record<string, string | undefined>>({});
+  const [submitted,          setSubmitted]          = useState(false);
 
   /* Flatpickr refs */
-  const checkInRef = useRef<HTMLInputElement>(null);
+  const checkInRef  = useRef<HTMLInputElement>(null);
   const checkOutRef = useRef<HTMLInputElement>(null);
-  const fpCheckIn = useRef<FlatpickrInstance | null>(null);
-  const fpCheckOut = useRef<FlatpickrInstance | null>(null);
+  const fpCheckIn   = useRef<{ destroy(): void; setDate(d: string, t: boolean): void } | null>(null);
+  const fpCheckOut  = useRef<{ destroy(): void; set(k: string, v: unknown): void } | null>(null);
+  const lightGalleryRef = useRef<{ openGallery(i: number): void } | null>(null);
 
-  const lightGalleryRef = useRef<any>(null);
-
-  /* ── Init flatpickr ── */
+  /* ── Init flatpickr (dynamic import — SSR safe) ── */
   useEffect(() => {
-    let destroyed = false;
-    getFlatpickr().then((fp) => {
-      if (destroyed) return;
-      const today = new Date();
+    let cancelled = false;
 
+    import('flatpickr').then((mod) => {
+      if (cancelled) return;
+      const fp = mod.default;
+
+      /* Check-in: minDate = tomorrow so "today" is never selectable */
       fpCheckIn.current = fp(checkInRef.current!, {
-        minDate: today,
-        dateFormat: 'Y-m-d',
-        altInput: true,
-        altFormat: 'D, M J Y',
+        minDate:      tomorrowISO(),
+        dateFormat:   'Y-m-d',
+        altInput:     true,
+        altFormat:    'D, M j Y',
         disableMobile: false,
-        onChange: ([date]) => {
+        onChange([date]) {
           if (!date) return;
           const iso = date.toISOString().slice(0, 10);
           setFormData((p) => ({ ...p, checkIn: iso }));
-          setFieldErrors((p) => { const n = { ...p }; delete n.checkIn; return n; });
-          if (fpCheckOut.current) {
-            fpCheckOut.current.set('minDate', date);
-          }
+          /* Live-validate on pick */
+          const err = validateField('checkIn', iso);
+          setFieldErrors((p) => ({ ...p, checkIn: err }));
+          /* Push checkout minDate forward */
+          (fpCheckOut.current as any)?.set('minDate', date);
         },
-      });
+      }) as unknown as typeof fpCheckIn.current;
 
+      /* Check-out: minDate starts at tomorrow, updated when check-in chosen */
       fpCheckOut.current = fp(checkOutRef.current!, {
-        minDate: today,
-        dateFormat: 'Y-m-d',
-        altInput: true,
-        altFormat: 'D, M J Y',
+        minDate:      tomorrowISO(),
+        dateFormat:   'Y-m-d',
+        altInput:     true,
+        altFormat:    'D, M j Y',
         disableMobile: false,
-        onChange: ([date]) => {
+        onChange([date]) {
           if (!date) return;
           const iso = date.toISOString().slice(0, 10);
-          setFormData((p) => ({ ...p, checkOut: iso }));
-          setFieldErrors((p) => { const n = { ...p }; delete n.checkOut; return n; });
+          setFormData((p) => {
+            const err = iso <= (p.checkIn || todayISO())
+              ? 'Check-out date must be after check-in date'
+              : undefined;
+            setFieldErrors((fe) => ({ ...fe, checkOut: err }));
+            return { ...p, checkOut: iso };
+          });
         },
-      });
+      }) as unknown as typeof fpCheckOut.current;
     });
 
     return () => {
-      destroyed = true;
-      fpCheckIn.current?.destroy();
-      fpCheckOut.current?.destroy();
+      cancelled = true;
+      (fpCheckIn.current  as any)?.destroy();
+      (fpCheckOut.current as any)?.destroy();
     };
   }, []);
 
@@ -153,102 +162,108 @@ export default function TourDetailsClient() {
   ];
 
   const itinerary = [
-    { day: 1, title: 'Cairo Arrival', description: 'Arrive at Cairo International Airport. Meet and greet by our representative. Transfer to your hotel. Overnight in Cairo.' },
+    { day: 1, title: 'Cairo Arrival',             description: 'Arrive at Cairo International Airport. Meet and greet by our representative. Transfer to your hotel. Overnight in Cairo.' },
     { day: 2, title: 'Pyramids & Egyptian Museum', description: 'Visit the Great Pyramids of Giza, the Sphinx, and the Valley Temple. Afternoon visit to the Egyptian Museum to see the treasures of Tutankhamun.' },
     { day: 3, title: 'Fly to Luxor - Nile Cruise', description: 'Flight to Luxor. Visit Karnak Temple and Luxor Temple. Board your Nile cruise ship. Dinner and overnight on board.' },
-    { day: 4, title: 'Valley of the Kings', description: 'Visit the West Bank including Valley of the Kings, Hatshepsut Temple, and Colossi of Memnon. Sail to Edfu.' },
-    { day: 5, title: 'Edfu & Kom Ombo', description: 'Visit Edfu Temple dedicated to Horus. Sail to Kom Ombo. Visit the unique double temple. Continue sailing to Aswan.' },
+    { day: 4, title: 'Valley of the Kings',        description: 'Visit the West Bank including Valley of the Kings, Hatshepsut Temple, and Colossi of Memnon. Sail to Edfu.' },
+    { day: 5, title: 'Edfu & Kom Ombo',            description: 'Visit Edfu Temple dedicated to Horus. Sail to Kom Ombo. Visit the unique double temple. Continue sailing to Aswan.' },
   ];
 
   const priceTable: PriceRow[] = [
-    { category: 'Solo Traveler', price: 1450 },
-    { category: '2-3 Persons', price: 950 },
-    { category: '4-6 Persons', price: 850 },
-    { category: '7-10 Persons', price: 750 },
-    { category: 'Child (6-11 years)', price: 425 },
+    { category: 'Solo Traveler',      price: 1450 },
+    { category: '2-3 Persons',        price: 950  },
+    { category: '4-6 Persons',        price: 850  },
+    { category: '7-10 Persons',       price: 750  },
+    { category: 'Child (6-11 years)', price: 425  },
   ];
 
-  const included = [
-    'Accommodation in 5-star hotels',
-    'All transfers in private air-conditioned vehicle',
-    'Domestic flight tickets',
-    'Professional Egyptologist guide',
-    'All entrance fees to mentioned sites',
-    'Meals as mentioned in itinerary',
-  ];
+  const included  = ['Accommodation in 5-star hotels','All transfers in private air-conditioned vehicle','Domestic flight tickets','Professional Egyptologist guide','All entrance fees to mentioned sites','Meals as mentioned in itinerary'];
+  const excluded  = ['International flights','Entry visa to Egypt','Personal expenses','Tipping','Optional tours'];
 
-  const excluded = [
-    'International flights',
-    'Entry visa to Egypt',
-    'Personal expenses',
-    'Tipping',
-    'Optional tours',
-  ];
-
-  const relatedTours: Tour[] = [
+  const relatedTours: TourItem[] = [
     { id: '1', title: 'Cairo & Alexandria Discovery', image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', price: 599, duration: '4 Days', rating: 4.8, reviews: 245 },
-    { id: '2', title: 'Luxor & Aswan Highlights', image: '/assets/images/tours/49-webp.webp', price: 899, duration: '5 Days', rating: 4.9, reviews: 312 },
-    { id: '3', title: 'Red Sea Adventure', image: '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp', price: 450, duration: '3 Days', rating: 4.7, reviews: 189 },
+    { id: '2', title: 'Luxor & Aswan Highlights',     image: '/assets/images/tours/49-webp.webp',                                                           price: 899, duration: '5 Days', rating: 4.9, reviews: 312 },
+    { id: '3', title: 'Red Sea Adventure',             image: '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp',                      price: 450, duration: '3 Days', rating: 4.7, reviews: 189 },
   ];
 
-  /* ── Articles now include date + readTime (requirement 5) ── */
   const relatedArticles: Article[] = [
-    { id: '1', title: 'Luxury tourism boom in Egypt', image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'June 14, 2024', readTime: '5 min read' },
-    { id: '2', title: 'Covid-rules for traveling from USA to Egypt', image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'May 28, 2024', readTime: '7 min read' },
-    { id: '3', title: 'Luxor Temple: A Complete Visitor Guide', image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'April 10, 2024', readTime: '9 min read' },
+    { id: '1', title: 'Luxury tourism boom in Egypt',                         image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'June 14, 2024',  readTime: '5 min read' },
+    { id: '2', title: 'Covid-rules for traveling from USA to Egypt',           image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'May 28, 2024',   readTime: '7 min read' },
+    { id: '3', title: 'Luxor Temple: A Complete Visitor Guide',                image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'April 10, 2024', readTime: '9 min read' },
   ];
 
   /* ── Handlers ── */
-  const handleInputChange = useCallback((
+
+  /** Generic text/select change — clears error while typing */
+  const handleChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
-    setFieldErrors((p) => { const n = { ...p }; delete n[name]; return n; });
+    /* Clear error immediately so the user isn't stuck on a stale message */
+    setFieldErrors((p) => ({ ...p, [name]: undefined }));
   }, []);
 
-  const handleNumberChange = useCallback((field: 'adults' | 'children', increment: boolean) => {
+  /** Validate a text/select field when it loses focus */
+  const handleBlur = useCallback((
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    const err = validateField(
+      name as keyof TourDetailsFormData,
+      value,
+      formData as unknown as Partial<TourDetailsFormData>
+    );
+    setFieldErrors((p) => ({ ...p, [name]: err }));
+  }, [formData]);
+
+  /** Adults / Children counter */
+  const handleCounter = useCallback((field: 'adults' | 'children', inc: boolean) => {
     setFormData((prev) => {
-      const min = field === 'adults' ? 1 : 0;
-      const next = Math.min(20, Math.max(min, prev[field] + (increment ? 1 : -1)));
-      /* When children changes, resize childAges array */
+      const min  = field === 'adults' ? 1 : 0;
+      const next = Math.min(20, Math.max(min, prev[field] + (inc ? 1 : -1)));
+
       if (field === 'children') {
-        const prevAges = prev.childAges;
-        const newAges =
-          next > prevAges.length
-            ? [...prevAges, ...Array(next - prevAges.length).fill('')]
-            : prevAges.slice(0, next);
+        const ages = prev.childAges;
+        const newAges = next > ages.length
+          ? [...ages, ...Array(next - ages.length).fill('')]
+          : ages.slice(0, next);
         return { ...prev, children: next, childAges: newAges };
       }
       return { ...prev, [field]: next };
     });
-    setFieldErrors((p) => { const n = { ...p }; delete n[field]; return n; });
+    setFieldErrors((p) => ({ ...p, [field]: undefined }));
   }, []);
 
-  /* Update individual child age by index */
+  /** Individual child-age input change */
   const handleChildAgeChange = useCallback((index: number, value: string) => {
     setFormData((p) => {
       const ages = [...p.childAges];
       ages[index] = value;
       return { ...p, childAges: ages };
     });
-    setFieldErrors((p) => { const n = { ...p }; delete n[`childAge_${index}`]; delete n.childAges; return n; });
+    setFieldErrors((p) => ({ ...p, [`childAges_${index}`]: undefined, childAges: undefined }));
   }, []);
 
+  /** Individual child-age blur */
+  const handleChildAgeBlur = useCallback((index: number, value: string) => {
+    const err = validateChildAge(index, value, formData.children);
+    setFieldErrors((p) => ({ ...p, [`childAges_${index}`]: err }));
+  }, [formData.children]);
+
+  /** Form submit — full schema parse */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = tourDetailsSchema.safeParse(formData);
 
     if (!parsed.success) {
-      const nextErrors: Record<string, string> = {};
+      const errs: Record<string, string> = {};
       for (const issue of parsed.error.issues) {
         const key = issue.path.join('_') || 'form';
-        if (!nextErrors[key]) nextErrors[key] = issue.message;
+        if (!errs[key]) errs[key] = issue.message;
       }
-      setFieldErrors(nextErrors);
-      /* Scroll to first error */
-      const firstErrEl = document.querySelector('[data-field-error]');
-      firstErrEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setFieldErrors(errs);
+      document.querySelector('[data-err]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -257,119 +272,61 @@ export default function TourDetailsClient() {
     window.location.href = '/thank-you';
   };
 
-  const openLightbox = (index: number) => {
-    if (lightGalleryRef.current) {
-      lightGalleryRef.current.openGallery(index);
-    }
-  };
-
-  const navigateLightbox = (direction: 'prev' | 'next') => {
-    setSelectedImageIndex((prev) =>
-      direction === 'prev'
-        ? prev === 0 ? tourImages.length - 1 : prev - 1
-        : prev === tourImages.length - 1 ? 0 : prev + 1
+  const openLightbox    = (i: number) => lightGalleryRef.current?.openGallery(i);
+  const navigateLightbox = (dir: 'prev' | 'next') =>
+    setSelectedImageIndex((p) =>
+      dir === 'prev' ? (p === 0 ? tourImages.length - 1 : p - 1) : (p === tourImages.length - 1 ? 0 : p + 1)
     );
-  };
 
+  /* ── Render ── */
   return (
     <>
-      {/* ── Flatpickr theme override + sidebar polish ── */}
       <style>{`
-        /* Flatpickr calendar theming */
-        .flatpickr-calendar {
-          border-radius: 14px !important;
-          box-shadow: 0 20px 60px rgba(39,34,98,.18) !important;
-          font-family: inherit !important;
-          border: none !important;
-        }
-        .flatpickr-day.selected,
-        .flatpickr-day.selected:hover {
-          background: var(--second-color) !important;
-          border-color: var(--second-color) !important;
-        }
-        .flatpickr-day:hover {
-          background: var(--main-color) !important;
-          border-color: var(--main-color) !important;
-          color: #fff !important;
-        }
-        .flatpickr-day.inRange {
-          background: rgba(227,183,94,.18) !important;
-          border-color: rgba(227,183,94,.18) !important;
-        }
-        .flatpickr-months .flatpickr-month,
-        .flatpickr-current-month { background: var(--second-color) !important; color: #fff !important; border-radius: 14px 14px 0 0 !important; }
-        .flatpickr-weekday { color: var(--second-color) !important; font-weight: 700 !important; }
-        .numInputWrapper span:hover { background: var(--main-color) !important; }
-        .flatpickr-input[readonly] { cursor: pointer; }
-        .flatpickr-input.active { border-color: var(--second-color) !important; }
+        /* Flatpickr theme — navy + gold */
+        .flatpickr-calendar{border-radius:14px!important;box-shadow:0 20px 60px rgba(39,34,98,.18)!important;font-family:inherit!important;border:none!important}
+        .flatpickr-months .flatpickr-month,.flatpickr-current-month{background:var(--second-color)!important;color:#fff!important;border-radius:14px 14px 0 0!important}
+        .flatpickr-weekday{color:var(--second-color)!important;font-weight:700!important}
+        .flatpickr-day.selected,.flatpickr-day.selected:hover{background:var(--second-color)!important;border-color:var(--second-color)!important}
+        .flatpickr-day:hover{background:var(--main-color)!important;border-color:var(--main-color)!important;color:#fff!important}
+        .flatpickr-day.today{border-color:var(--second-color)!important}
+        /* Disabled / past days clearly greyed out */
+        .flatpickr-day.flatpickr-disabled,.flatpickr-day.prevMonthDay,.flatpickr-day.nextMonthDay{opacity:.3!important;cursor:not-allowed!important}
+        .flatpickr-prev-month svg,.flatpickr-next-month svg{fill:#fff!important}
+        .flatpickr-prev-month:hover svg,.flatpickr-next-month:hover svg{fill:var(--main-color)!important}
 
-        /* Sidebar refinements (requirement 4) */
-        .sidebar-form-header {
-          background: linear-gradient(135deg, var(--second-color) 0%, #3d3586 100%);
-        }
-        .sidebar-contact-header {
-          background: linear-gradient(135deg, #1a1a2e 0%, var(--second-color) 100%);
-        }
-        .sidebar-articles-header {
-          background: linear-gradient(135deg, var(--second-color) 0%, #2d2566 100%);
-        }
-        .counter-btn {
-          width: 34px;
-          height: 34px;
-          border-radius: 50%;
-          border: 2px solid #e5e7eb;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all .2s;
-          font-size: 18px;
-          line-height: 1;
-          color: #555;
-          cursor: pointer;
-          background: white;
-          flex-shrink: 0;
-        }
-        .counter-btn:hover {
-          border-color: var(--second-color);
-          color: var(--second-color);
-          background: rgba(39,34,98,.06);
-        }
-        .counter-btn:disabled {
-          opacity: .4;
-          cursor: not-allowed;
-        }
-        .child-age-input {
-          animation: slideIn .22s ease;
-        }
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateY(-6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        /* Strip native date picker icon so flatpickr altInput looks clean */
-        input[data-fp] { display: none !important; }
+        /* Sidebar headers */
+        .sh-form{background:linear-gradient(135deg,var(--second-color) 0%,#3d3586 100%)}
+        .sh-contact{background:linear-gradient(135deg,#1a1a2e 0%,var(--second-color) 100%)}
+        .sh-articles{background:linear-gradient(135deg,var(--second-color) 0%,#2d2566 100%)}
+
+        /* Counter buttons */
+        .ctr-btn{width:32px;height:32px;border-radius:50%;border:2px solid #e5e7eb;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:17px;line-height:1;color:#555;cursor:pointer;background:#fff;flex-shrink:0}
+        .ctr-btn:hover{border-color:var(--second-color);color:var(--second-color);background:rgba(39,34,98,.06)}
+        .ctr-btn:disabled{opacity:.35;cursor:not-allowed}
+
+        /* Child age slide-in */
+        .child-in{animation:cIn .22s ease}
+        @keyframes cIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
       `}</style>
 
     <div className="min-h-screen">
 
       {/* ── Hero Gallery ── */}
-      <section className="relative w-full h-[320px] sm:h-[420px] md:h-[550px] overflow-hidden">
+      <section className="relative w-full h-[300px] sm:h-[420px] md:h-[550px] overflow-hidden">
         <div className="grid grid-cols-4 grid-rows-2 gap-1 h-full md:gap-2">
-          {/* Main image */}
           <div
             className="col-span-4 md:col-span-2 row-span-2 relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat"
             onClick={() => openLightbox(0)}
             style={{ backgroundImage: `url(${tourImages[0]})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
-            <span className="absolute bottom-4 left-4 text-white font-semibold text-base z-20 flex items-center gap-2">
+            <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
               View Gallery ({tourImages.length})
             </span>
           </div>
-
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
+          {[1,2,3,4].map((i) => (
+            <div key={i}
               className="relative rounded-xl cursor-pointer group overflow-hidden hidden md:block w-full h-full bg-center bg-cover bg-no-repeat"
               style={{ backgroundImage: `url(${tourImages[i]})` }}
               onClick={() => openLightbox(i)}
@@ -384,12 +341,10 @@ export default function TourDetailsClient() {
       <div className="container mx-auto px-4 py-8 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* ════════════════════════════════════════
-              LEFT — Main Content
-          ════════════════════════════════════════ */}
+          {/* ════ LEFT — Main Content ════ */}
           <div className="lg:col-span-2 space-y-8">
 
-            {/* Tour meta badges */}
+            {/* Meta badges */}
             <div>
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--main-color)]/10 text-[var(--main-color)] rounded-full text-sm font-semibold">
@@ -429,21 +384,19 @@ export default function TourDetailsClient() {
               <h2 className="text-2xl font-bold text-[var(--second-color)] mb-5">Itinerary</h2>
               <div className="space-y-3">
                 {itinerary.map((day) => {
-                  const isOpen = activeDay === day.day;
+                  const open = activeDay === day.day;
                   return (
                     <div key={day.day} className="border border-gray-200 rounded-xl overflow-hidden">
                       <button
                         type="button"
-                        onClick={() => setActiveDay(isOpen ? null : day.day)}
+                        onClick={() => setActiveDay(open ? null : day.day)}
                         className="w-full flex items-center gap-3 p-4 bg-gray-50/70 hover:bg-gray-100 transition-colors text-left"
                       >
-                        <div className="w-9 h-9 bg-[var(--second-color)] rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                          {day.day}
-                        </div>
+                        <div className="w-9 h-9 bg-[var(--second-color)] rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{day.day}</div>
                         <h3 className="flex-1 text-base font-semibold text-[var(--second-color)]">{day.title}</h3>
-                        <span className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>▾</span>
+                        <span className={`text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▾</span>
                       </button>
-                      <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                      <div className={`grid transition-all duration-300 ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
                         <div className="overflow-hidden">
                           <div className="p-4 text-gray-600 text-sm leading-relaxed border-t border-gray-100">{day.description}</div>
                         </div>
@@ -487,9 +440,7 @@ export default function TourDetailsClient() {
             <div className="grid sm:grid-cols-2 gap-5">
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <h3 className="text-lg font-bold text-[var(--second-color)] mb-4 flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center">
-                    <Check className="w-4 h-4 text-green-600" />
-                  </span>
+                  <span className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center"><Check className="w-4 h-4 text-green-600" /></span>
                   What&apos;s Included
                 </h3>
                 <ul className="space-y-2">
@@ -502,9 +453,7 @@ export default function TourDetailsClient() {
               </div>
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <h3 className="text-lg font-bold text-[var(--second-color)] mb-4 flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center">
-                    <X className="w-4 h-4 text-red-500" />
-                  </span>
+                  <span className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center"><X className="w-4 h-4 text-red-500" /></span>
                   What&apos;s Excluded
                 </h3>
                 <ul className="space-y-2">
@@ -518,15 +467,12 @@ export default function TourDetailsClient() {
             </div>
           </div>
 
-          {/* ════════════════════════════════════════
-              RIGHT SIDEBAR
-          ════════════════════════════════════════ */}
+          {/* ════ RIGHT SIDEBAR ════ */}
           <div className="lg:col-span-1 space-y-5">
 
             {/* ── Booking Form ── */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-              {/* Header — navy gradient (req 4: no all-gold header) */}
-              <div className="sidebar-form-header px-6 py-4 text-center">
+              <div className="sh-form px-6 py-4 text-center">
                 <h3 className="text-lg font-bold text-white tracking-wide">Check Availability</h3>
                 <p className="text-white/70 text-xs mt-0.5">Fill in your details to request this trip</p>
               </div>
@@ -536,158 +482,103 @@ export default function TourDetailsClient() {
                 {/* Name */}
                 <div>
                   <label className={labelCls}>Full Name</label>
-                  <input type="text" name="name" value={formData.name} onChange={handleInputChange}
-                    className={`${inputCls} ${fieldErrors.name ? 'border-red-400 focus:ring-red-300' : ''}`}
-                    placeholder="Mahmoud Abozeid" />
-                  {fieldErrors.name && <p className={errorCls} data-field-error>{fieldErrors.name}</p>}
+                  <input
+                    type="text" name="name" value={formData.name}
+                    onChange={handleChange} onBlur={handleBlur}
+                    className={inputCls(fieldErrors.name)}
+                    placeholder="Mahmoud Abozeid"
+                  />
+                  {fieldErrors.name && <p className={errCls} data-err>{fieldErrors.name}</p>}
                 </div>
 
                 {/* Email */}
                 <div>
                   <label className={labelCls}>Email Address</label>
-                  <input type="email" name="email" value={formData.email} onChange={handleInputChange}
-                    className={`${inputCls} ${fieldErrors.email ? 'border-red-400 focus:ring-red-300' : ''}`}
-                    placeholder="you@email.com" />
-                  {fieldErrors.email && <p className={errorCls} data-field-error>{fieldErrors.email}</p>}
+                  <input
+                    type="email" name="email" value={formData.email}
+                    onChange={handleChange} onBlur={handleBlur}
+                    className={inputCls(fieldErrors.email)}
+                    placeholder="you@email.com"
+                  />
+                  {fieldErrors.email && <p className={errCls} data-err>{fieldErrors.email}</p>}
                 </div>
 
                 {/* Nationality */}
                 <div>
                   <label className={labelCls}>Nationality</label>
-                  <select name="nationality" value={formData.nationality} onChange={handleInputChange}
-                    className={`${inputCls} appearance-none cursor-pointer ${fieldErrors.nationality ? 'border-red-400' : ''}`}>
+                  <select
+                    name="nationality" value={formData.nationality}
+                    onChange={handleChange} onBlur={handleBlur}
+                    className={`${inputCls(fieldErrors.nationality)} appearance-none cursor-pointer`}
+                  >
                     <option value="">Select nationality…</option>
-                    <option value="Afghanistan">Afghanistan</option>
-                    <option value="Albania">Albania</option>
-                    <option value="Algeria">Algeria</option>
-                    <option value="Argentina">Argentina</option>
-                    <option value="Armenia">Armenia</option>
-                    <option value="Australia">Australia</option>
-                    <option value="Austria">Austria</option>
-                    <option value="Azerbaijan">Azerbaijan</option>
-                    <option value="Bahrain">Bahrain</option>
-                    <option value="Bangladesh">Bangladesh</option>
-                    <option value="Belgium">Belgium</option>
-                    <option value="Brazil">Brazil</option>
-                    <option value="Canada">Canada</option>
-                    <option value="Chile">Chile</option>
-                    <option value="China">China</option>
-                    <option value="Colombia">Colombia</option>
-                    <option value="Czech Republic">Czech Republic</option>
-                    <option value="Denmark">Denmark</option>
-                    <option value="Egypt">Egypt</option>
-                    <option value="Finland">Finland</option>
-                    <option value="France">France</option>
-                    <option value="Germany">Germany</option>
-                    <option value="Greece">Greece</option>
-                    <option value="Hungary">Hungary</option>
-                    <option value="India">India</option>
-                    <option value="Indonesia">Indonesia</option>
-                    <option value="Iran">Iran</option>
-                    <option value="Iraq">Iraq</option>
-                    <option value="Ireland">Ireland</option>
-                    <option value="Israel">Israel</option>
-                    <option value="Italy">Italy</option>
-                    <option value="Japan">Japan</option>
-                    <option value="Jordan">Jordan</option>
-                    <option value="Kazakhstan">Kazakhstan</option>
-                    <option value="Kenya">Kenya</option>
-                    <option value="Kuwait">Kuwait</option>
-                    <option value="Lebanon">Lebanon</option>
-                    <option value="Libya">Libya</option>
-                    <option value="Malaysia">Malaysia</option>
-                    <option value="Mexico">Mexico</option>
-                    <option value="Morocco">Morocco</option>
-                    <option value="Netherlands">Netherlands</option>
-                    <option value="New Zealand">New Zealand</option>
-                    <option value="Nigeria">Nigeria</option>
-                    <option value="Norway">Norway</option>
-                    <option value="Oman">Oman</option>
-                    <option value="Pakistan">Pakistan</option>
-                    <option value="Palestine">Palestine</option>
-                    <option value="Peru">Peru</option>
-                    <option value="Philippines">Philippines</option>
-                    <option value="Poland">Poland</option>
-                    <option value="Portugal">Portugal</option>
-                    <option value="Qatar">Qatar</option>
-                    <option value="Romania">Romania</option>
-                    <option value="Russia">Russia</option>
-                    <option value="Saudi Arabia">Saudi Arabia</option>
-                    <option value="Singapore">Singapore</option>
-                    <option value="South Africa">South Africa</option>
-                    <option value="South Korea">South Korea</option>
-                    <option value="Spain">Spain</option>
-                    <option value="Sri Lanka">Sri Lanka</option>
-                    <option value="Sudan">Sudan</option>
-                    <option value="Sweden">Sweden</option>
-                    <option value="Switzerland">Switzerland</option>
-                    <option value="Syria">Syria</option>
-                    <option value="Taiwan">Taiwan</option>
-                    <option value="Thailand">Thailand</option>
-                    <option value="Tunisia">Tunisia</option>
-                    <option value="Turkey">Turkey</option>
-                    <option value="UAE">UAE</option>
-                    <option value="Uganda">Uganda</option>
-                    <option value="United Kingdom">United Kingdom</option>
-                    <option value="Ukraine">Ukraine</option>
-                    <option value="United States">United States</option>
-                    <option value="Uzbekistan">Uzbekistan</option>
-                    <option value="Venezuela">Venezuela</option>
-                    <option value="Vietnam">Vietnam</option>
-                    <option value="Yemen">Yemen</option>
-                    <option value="Zambia">Zambia</option>
-                    <option value="Zimbabwe">Zimbabwe</option>
+                    {['Afghanistan','Algeria','Argentina','Armenia','Australia','Austria','Azerbaijan',
+                      'Bahrain','Bangladesh','Belgium','Brazil','Canada','Chile','China','Colombia',
+                      'Czech Republic','Denmark','Egypt','Finland','France','Germany','Greece',
+                      'Hungary','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy',
+                      'Japan','Jordan','Kazakhstan','Kenya','Kuwait','Lebanon','Libya','Malaysia',
+                      'Mexico','Morocco','Netherlands','New Zealand','Nigeria','Norway','Oman',
+                      'Pakistan','Palestine','Peru','Philippines','Poland','Portugal','Qatar',
+                      'Romania','Russia','Saudi Arabia','Singapore','South Africa','South Korea',
+                      'Spain','Sri Lanka','Sudan','Sweden','Switzerland','Syria','Taiwan',
+                      'Thailand','Tunisia','Turkey','UAE','Uganda','Ukraine','United Kingdom',
+                      'United States','Uzbekistan','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe',
+                    ].map((n) => <option key={n} value={n}>{n}</option>)}
                   </select>
-                  {fieldErrors.nationality && <p className={errorCls} data-field-error>{fieldErrors.nationality}</p>}
+                  {fieldErrors.nationality && <p className={errCls} data-err>{fieldErrors.nationality}</p>}
                 </div>
 
                 {/* Country Code + Phone */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={labelCls}>Code</label>
-                    <input type="text" name="countryCode" value={formData.countryCode} onChange={handleInputChange}
-                      className={`${inputCls} ${fieldErrors.countryCode ? 'border-red-400' : ''}`}
-                      placeholder="+20" />
-                    {fieldErrors.countryCode && <p className={errorCls} data-field-error>{fieldErrors.countryCode}</p>}
+                    <input
+                      type="text" name="countryCode" value={formData.countryCode}
+                      onChange={handleChange} onBlur={handleBlur}
+                      className={inputCls(fieldErrors.countryCode)}
+                      placeholder="+20"
+                    />
+                    {fieldErrors.countryCode && <p className={errCls} data-err>{fieldErrors.countryCode}</p>}
                   </div>
                   <div>
                     <label className={labelCls}>Phone</label>
-                    <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange}
-                      className={`${inputCls} ${fieldErrors.phone ? 'border-red-400' : ''}`}
-                      placeholder="1155131838" />
-                    {fieldErrors.phone && <p className={errorCls} data-field-error>{fieldErrors.phone}</p>}
+                    <input
+                      type="tel" name="phone" value={formData.phone}
+                      onChange={handleChange} onBlur={handleBlur}
+                      className={inputCls(fieldErrors.phone)}
+                      placeholder="1155131838"
+                    />
+                    {fieldErrors.phone && <p className={errCls} data-err>{fieldErrors.phone}</p>}
                   </div>
                 </div>
 
-                {/* Check In / Check Out — flatpickr (req 3) */}
+                {/* Check In / Check Out — flatpickr (minDate = tomorrow) */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={labelCls}>Check In</label>
                     <div className="relative">
                       <input
                         ref={checkInRef}
-                        data-fp
                         readOnly
-                        placeholder="Select date"
-                        className={`${inputCls} pr-9 ${fieldErrors.checkIn ? 'border-red-400' : ''}`}
+                        placeholder="Pick date"
+                        className={`${inputCls(fieldErrors.checkIn)} pr-9 cursor-pointer`}
                       />
                       <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
-                    {fieldErrors.checkIn && <p className={errorCls} data-field-error>{fieldErrors.checkIn}</p>}
+                    {fieldErrors.checkIn && <p className={errCls} data-err>{fieldErrors.checkIn}</p>}
                   </div>
                   <div>
                     <label className={labelCls}>Check Out</label>
                     <div className="relative">
                       <input
                         ref={checkOutRef}
-                        data-fp
                         readOnly
-                        placeholder="Select date"
-                        className={`${inputCls} pr-9 ${fieldErrors.checkOut ? 'border-red-400' : ''}`}
+                        placeholder="Pick date"
+                        className={`${inputCls(fieldErrors.checkOut)} pr-9 cursor-pointer`}
                       />
                       <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
-                    {fieldErrors.checkOut && <p className={errorCls} data-field-error>{fieldErrors.checkOut}</p>}
+                    {fieldErrors.checkOut && <p className={errCls} data-err>{fieldErrors.checkOut}</p>}
                   </div>
                 </div>
 
@@ -697,26 +588,25 @@ export default function TourDetailsClient() {
                   <div>
                     <label className={labelCls}>Adults</label>
                     <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-2 py-2 border border-gray-200">
-                      <button type="button" className="counter-btn" onClick={() => handleNumberChange('adults', false)} disabled={formData.adults <= 1}>−</button>
+                      <button type="button" className="ctr-btn" onClick={() => handleCounter('adults', false)} disabled={formData.adults <= 1}>−</button>
                       <span className="flex-1 text-center font-bold text-[var(--second-color)] text-sm">{formData.adults}</span>
-                      <button type="button" className="counter-btn" onClick={() => handleNumberChange('adults', true)} disabled={formData.adults >= 20}>+</button>
+                      <button type="button" className="ctr-btn" onClick={() => handleCounter('adults', true)}  disabled={formData.adults >= 20}>+</button>
                     </div>
-                    {fieldErrors.adults && <p className={errorCls}>{fieldErrors.adults}</p>}
+                    {fieldErrors.adults && <p className={errCls}>{fieldErrors.adults}</p>}
                   </div>
-
                   {/* Children */}
                   <div>
                     <label className={labelCls}>Children</label>
                     <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-2 py-2 border border-gray-200">
-                      <button type="button" className="counter-btn" onClick={() => handleNumberChange('children', false)} disabled={formData.children <= 0}>−</button>
+                      <button type="button" className="ctr-btn" onClick={() => handleCounter('children', false)} disabled={formData.children <= 0}>−</button>
                       <span className="flex-1 text-center font-bold text-[var(--second-color)] text-sm">{formData.children}</span>
-                      <button type="button" className="counter-btn" onClick={() => handleNumberChange('children', true)} disabled={formData.children >= 20}>+</button>
+                      <button type="button" className="ctr-btn" onClick={() => handleCounter('children', true)}  disabled={formData.children >= 20}>+</button>
                     </div>
-                    {fieldErrors.children && <p className={errorCls}>{fieldErrors.children}</p>}
+                    {fieldErrors.children && <p className={errCls}>{fieldErrors.children}</p>}
                   </div>
                 </div>
 
-                {/* Dynamic child age inputs (req 2) */}
+                {/* Dynamic child-age inputs */}
                 {formData.children > 0 && (
                   <div className="space-y-2.5">
                     <label className={`${labelCls} flex items-center gap-1.5`}>
@@ -725,30 +615,25 @@ export default function TourDetailsClient() {
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       {Array.from({ length: formData.children }).map((_, i) => (
-                        <div key={i} className="child-age-input">
+                        <div key={i} className="child-in">
                           <div className="relative">
                             <input
-                              type="number"
-                              min={0}
-                              max={17}
+                              type="number" min={0} max={17}
                               value={formData.childAges[i] ?? ''}
                               onChange={(e) => handleChildAgeChange(i, e.target.value)}
-                              className={`${inputCls} pl-7 ${fieldErrors[`childAges_${i}`] ? 'border-red-400' : ''}`}
+                              onBlur={(e)  => handleChildAgeBlur(i, e.target.value)}
+                              className={`${inputCls(fieldErrors[`childAges_${i}`])} pl-7`}
                               placeholder={`Child ${i + 1}`}
                             />
-                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">
-                              {i + 1}
-                            </span>
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold select-none">{i + 1}</span>
                           </div>
                           {fieldErrors[`childAges_${i}`] && (
-                            <p className={errorCls} data-field-error>{fieldErrors[`childAges_${i}`]}</p>
+                            <p className={errCls} data-err>{fieldErrors[`childAges_${i}`]}</p>
                           )}
                         </div>
                       ))}
                     </div>
-                    {fieldErrors.childAges && (
-                      <p className={errorCls} data-field-error>{fieldErrors.childAges}</p>
-                    )}
+                    {fieldErrors.childAges && <p className={errCls} data-err>{fieldErrors.childAges}</p>}
                   </div>
                 )}
 
@@ -756,14 +641,13 @@ export default function TourDetailsClient() {
                 <div>
                   <label className={labelCls}>Message (optional)</label>
                   <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
+                    name="message" value={formData.message}
+                    onChange={handleChange} onBlur={handleBlur}
                     rows={3}
-                    className={`${inputCls} resize-none ${fieldErrors.message ? 'border-red-400' : ''}`}
+                    className={`${inputCls(fieldErrors.message)} resize-none`}
                     placeholder="Any special requests or questions…"
                   />
-                  {fieldErrors.message && <p className={errorCls} data-field-error>{fieldErrors.message}</p>}
+                  {fieldErrors.message && <p className={errCls} data-err>{fieldErrors.message}</p>}
                 </div>
 
                 <button
@@ -776,9 +660,9 @@ export default function TourDetailsClient() {
               </form>
             </div>
 
-            {/* ── Contact Box (req 4: navy instead of gold) ── */}
+            {/* ── Contact Box ── */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-              <div className="sidebar-contact-header px-6 py-4 text-center">
+              <div className="sh-contact px-6 py-4 text-center">
                 <p className="text-white/80 text-xs uppercase tracking-widest mb-1">Need Help?</p>
                 <h3 className="text-base font-bold text-white">Talk to Our Team</h3>
               </div>
@@ -798,7 +682,7 @@ export default function TourDetailsClient() {
                   <span className="text-lg font-bold">+201110008407</span>
                 </a>
                 <a href="https://wa.me/201110008407" target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-green-600 hover:text-green-700 transition-colors font-semibold text-sm group">
+                  className="flex items-center gap-3 text-green-600 hover:text-green-700 transition-colors font-semibold text-sm">
                   <span className="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
                     <MessageCircle className="w-4 h-4 text-green-500" />
                   </span>
@@ -810,25 +694,22 @@ export default function TourDetailsClient() {
               </div>
             </div>
 
-            {/* ── Related Articles (req 4 + req 5: date + readTime) ── */}
+            {/* ── Related Articles ── */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-              <div className="sidebar-articles-header px-6 py-4 text-center">
+              <div className="sh-articles px-6 py-4 text-center">
                 <h3 className="text-base font-bold text-white">Related Articles</h3>
               </div>
               <div className="p-4 space-y-3">
                 {relatedArticles.map((article) => (
                   <a key={article.id} href={`/articles/${article.id}`}
                     className="group flex gap-3 rounded-xl overflow-hidden border border-gray-100 hover:border-[var(--second-color)]/30 hover:shadow-md transition-all p-2">
-                    {/* Thumbnail */}
                     <div className="relative w-20 h-16 flex-shrink-0 rounded-lg overflow-hidden">
                       <Image src={article.image} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
-                    {/* Text */}
                     <div className="flex flex-col justify-center min-w-0">
                       <h4 className="text-xs font-semibold text-[var(--second-color)] group-hover:text-[var(--main-color)] transition-colors line-clamp-2 leading-tight mb-1">
                         {article.title}
                       </h4>
-                      {/* Date + read time — requirement 5 */}
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[10px] text-gray-400 flex items-center gap-1">
                           <Calendar className="w-2.5 h-2.5" />{article.date}
@@ -883,7 +764,7 @@ export default function TourDetailsClient() {
             ))}
           </div>
         </div>
-      </div>{/* end container */}
+      </div>
 
       {/* ── Custom Lightbox ── */}
       {isLightboxOpen && (
@@ -897,7 +778,7 @@ export default function TourDetailsClient() {
           <button onClick={() => navigateLightbox('next')} className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-[var(--main-color)] transition-colors z-10">
             <ChevronRight className="w-12 h-12" />
           </button>
-          <div className="relative w-full max-w-5xl aspect-video flex items-center justify-center">
+          <div className="relative w-full max-w-5xl aspect-video">
             <div className="w-full h-full bg-gradient-to-br from-amber-300 to-stone-400 rounded-lg" />
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm font-semibold bg-black/50 px-3 py-1 rounded-full">
               {selectedImageIndex + 1} / {tourImages.length}
