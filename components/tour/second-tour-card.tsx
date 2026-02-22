@@ -89,7 +89,7 @@ export default function SecondTourCard({
   };
   
   return (
-    <div className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 max-w-sm mx-auto">
+    <div className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 max-w-sm mx-auto animate-on-scroll">
       {/* Image - Fixed className typos */}
       <Link href={tourLink} className="relative h-56 w-full block">
         <Image
@@ -107,7 +107,7 @@ export default function SecondTourCard({
 
       <div className="p-6">
         <Link href={tourLink}>
-          <h3 className="text-xl font-bold text-navy mb-2 line-clamp-2 hover:text-gold transition h-[calc(1.5*2em)]">
+          <h3 className="text-xl text-left font-bold text-navy mb-2 line-clamp-2 hover:text-gold transition h-[calc(1.5*2em)]">
             {title}
           </h3>
         </Link>
@@ -149,7 +149,7 @@ export default function SecondTourCard({
         <div className="flex items-center gap-3">
           <Link
             href={tourLink}
-            className="flex-1 !bg-navy !text-white text-center py-3 hover:bg-gold hover:text-navy transition btn-effect rounded-lg"
+            className="flex-1 !bg-navy !text-white text-center py-3 hover:bg-gold hover:text-navy transition btn-effect !rounded-md"
           >
             Book Now
           </Link>

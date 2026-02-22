@@ -1,9 +1,11 @@
-// Category Page //
+// All Category Page //
 import Link from "next/link";
 import Image from "next/image";
+
 type CategoryPageProps = {
   params: Promise<{ categorySlug: string }>;
 };
+
 const photos = [
   "/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp",
   "/assets/images/tours/camel front of giza pyramids.jpg",
@@ -13,19 +15,16 @@ const photos = [
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { categorySlug } = await params;
 
-  // fetch categories (use same env as rest of app; avoid relative URL on server)
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (!baseUrl) {
     throw new Error(
       "NEXT_PUBLIC_API_BASE_URL is not set. Add it to .env.local"
     );
   }
+
   const res = await fetch(`${baseUrl}/general`, { cache: "no-store" });
   const data = await res.json();
-
   const categories = data.data.header.headerCategories;
-
-  // parent category
   const category = categories.find((cat: any) => cat.slug === categorySlug);
 
   if (!category) {
@@ -34,73 +33,137 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <>
-      {/* Breadcrumb */}
-      <div className="bg-white border border-gray-200">
+      {/* ── Breadcrumb ── */}
+      <div className="bg-white border-b border-gray-100">
         <div className="container mx-auto px-4 md:px-8 lg:px-16 py-4">
-          <nav className="flex items-center gap-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-[var(--main-color)] underline-offset-4">
+          <nav className="flex items-center gap-2 text-sm text-gray-500">
+            <Link
+              href="/"
+              className="hover:text-[var(--main-color)] transition-colors duration-200 font-medium"
+            >
               Home
             </Link>
-            <span className="mx-2">/</span>
-            <span className="text-navy font-medium">
+            <span className="text-gray-300 select-none">&gt;</span>
+            <span className="text-[var(--second-color)] font-semibold capitalize">
               {categorySlug.replace(/-/g, " ")}
             </span>
           </nav>
         </div>
       </div>
-      <section className="sub-category max-w-7xl mx-auto py-16">
-        <h1 className="text-3xl font-bold mb-6 text-center text-[var(--second-color)] capitalize">
-          {category.name.en.toLowerCase()}
-        </h1>
-        {/* {categorySlug} */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {(category.children ?? []).map((child: any) => (
-            // <Link
-            //   key={child.id}
-            //   href={`/${category.slug}/${child.slug}`}
-            //   className="p-4 border rounded-lg hover:shadow-lg hover:border-[var(--main-color)] transition-all block"
-            // >
-            //   {child.name.en}
-            // </Link>
-            <div
-              key={child.id}
-              className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer"
+
+      {/* ── Page Hero ── */}
+      <div
+        className="relative py-14 overflow-hidden"
+        style={{ backgroundColor: "var(--second-color)" }}
+      >
+        {/* Decorative circles */}
+        <div className="absolute -top-10 -left-10 w-56 h-56 rounded-full opacity-10 bg-[var(--main-color)]" />
+        <div className="absolute -bottom-14 -right-14 w-72 h-72 rounded-full opacity-10 bg-[var(--main-color)]" />
+
+        <div className="relative z-10 text-center px-4">
+          <p className="text-[var(--main-color)] font-semibold tracking-widest uppercase text-xs mb-3">
+            Explore
+          </p>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white capitalize leading-tight">
+            {category.name.en.toLowerCase()}
+          </h1>
+          {/* Gold divider */}
+          <div className="flex items-center justify-center gap-3 mt-5">
+            <span className="h-px w-16 bg-[var(--main-color)] opacity-60" />
+            <svg
+              className="w-4 h-4 text-[var(--main-color)]"
+              viewBox="0 0 24 24"
+              fill="currentColor"
             >
-              <Link href={`/${category.slug}/${child.slug}`}>
-                {/* Image Container */}
-                <div className="relative h-64 overflow-hidden">
-                {photos.map((photo, index) => (
-                    <div
-                      key={index}
-                      className="group relative overflow-hidden rounded-2xl"
-                    >
-                      <Image
-                        src={photos[child.id % photos.length]}
-                        alt={child.name?.en ?? "category"}
-                        width={500}
-                        height={500}
-                        className="w-full h-full object-cover transform group-hover:scale-110 group-hover:rotate-2 transition-all duration-700 ease-out"
-                      />
-                    </div>
-                  ))}
+              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+            </svg>
+            <span className="h-px w-16 bg-[var(--main-color)] opacity-60" />
+          </div>
+        </div>
+      </div>
 
-                  {/* Overlay Gradient */}
-                  <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500"
-                    style={{
-                      background:
-                        "linear-gradient(to bottom, transparent, var(--second-color))",
-                    }}
-                  ></div>
+      {/* ── Cards Grid ── */}
+      <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {(category.children ?? []).map((child: any, index: number) => (
+            <Link
+              key={child.id}
+              href={`/${category.slug}/${child.slug}`}
+              className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-400 border border-gray-100 hover:border-[var(--main-color)]"
+              style={{ animationDelay: `${index * 60}ms` }}
+            >
+              {/* ── Image ── */}
+              <div className="relative h-56 overflow-hidden flex-shrink-0">
+                <Image
+                  src={photos[child.id % photos.length]}
+                  alt={child.name?.en ?? "category"}
+                  fill
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                />
 
-                  {/* Decorative Corner Badge */}
-                  <div
-                    className="absolute top-4 right-4 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transform translate-x-16 group-hover:translate-x-0 transition-transform duration-500"
-                    style={{ backgroundColor: "var(--main-color)" }}
+                {/* Dark scrim for readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+
+                {/* Category label pill */}
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-[var(--main-color)] shadow-md">
+                  {category.name.en}
+                </div>
+
+                {/* Arrow icon on hover */}
+                <div className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                  <svg
+                    className="w-4 h-4 text-[var(--second-color)]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* ── Body ── */}
+              <div className="flex flex-col flex-1 p-6 gap-4">
+                {/* Title */}
+                <h3
+                  className="text-xl font-bold capitalize leading-snug transition-colors duration-200 group-hover:text-[var(--main-color)]"
+                  style={{ color: "var(--second-color)" }}
+                >
+                  {child.name.en.toLowerCase()}
+                </h3>
+
+                {/* Description — max 4 lines */}
+                <p
+                  className="text-sm leading-relaxed flex-1 overflow-hidden"
+                  style={{
+                    color: "var(--black-color)",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 4,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde
+                  doloribus dolorem perferendis ab corporis eum natus asperiores
+                  rem esse mollitia dicta nihil sunt consequatur, voluptates
+                  adipisci sint nulla alias numquam. Quisquam vitae nemo
+                  excepturi labore iure similique.
+                </p>
+
+                {/* ── CTA — always visible ── */}
+                <div className="pt-2 border-t border-gray-100">
+                  <span
+                    className="inline-flex items-center gap-2 w-full justify-center py-3 px-6 rounded-xl font-semibold text-sm text-white transition-all duration-300 group-hover:gap-3"
+                    style={{ backgroundColor: "var(--second-color)" }}
+                  >
+                    View Tours
                     <svg
-                      className="w-6 h-6"
-                      style={{ color: "var(--white-color)" }}
+                      className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -109,68 +172,19 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
                       />
                     </svg>
-                  </div>
+                  </span>
                 </div>
+              </div>
 
-                {/* Content */}
-                <div className="p-6">
-                  <h3
-                    className="text-2xl font-bold mb-3 group-hover:translate-x-1 transition-transform duration-300"
-                    style={{ color: "var(--second-color)" }}
-                  >
-                    {child.name.en.toLowerCase()}
-                  </h3>
-
-                  <p
-                    className="mb-6 leading-relaxed"
-                    style={{ color: "var(--black-color)" }}
-                  >
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                    Unde doloribus dolorem perferendis ab corporis eum natus
-                    asperiores rem esse mollitia dicta nihil sunt consequatur,
-                    voluptates adipisci sint nulla alias numquam.
-                  </p>
-
-                  {/* CTA Button */}
-                  <button
-                    className="w-full py-3 px-6 rounded-lg font-semibold text-white relative overflow-hidden group/btn transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 opacity-0 group-hover:opacity-100"
-                    style={{ backgroundColor: "var(--second-color)" }}
-                  >
-                    <span className="relative z-10 flex items-center justify-center gap-2">
-                      go to tours
-                      <svg
-                        className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform duration-300"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 7l5 5m0 0l-5 5m5-5H6"
-                        />
-                      </svg>
-                    </span>
-
-                    {/* Button Hover Effect */}
-                    <div
-                      className="absolute inset-0 transform translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"
-                      style={{ backgroundColor: "var(--main-color)" }}
-                    ></div>
-                  </button>
-                </div>
-
-                {/* Bottom Accent Line */}
-                <div
-                  className="h-1 w-0 group-hover:w-full transition-all duration-500 ease-out"
-                  style={{ backgroundColor: "var(--main-color)" }}
-                ></div>
-              </Link>
-            </div>
+              {/* Gold bottom accent bar */}
+              <div
+                className="h-1 w-full transition-all duration-500"
+                style={{ backgroundColor: "var(--main-color)" }}
+              />
+            </Link>
           ))}
         </div>
       </section>

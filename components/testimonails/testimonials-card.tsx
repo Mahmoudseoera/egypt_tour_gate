@@ -61,7 +61,7 @@ export default function TestimonialSlider() {
               {/* Header */}
               <div className="text-center mb-12"> 
         <div className="inline-block mb-4">
-        <h2 className="text-4xl md:text-3xl font-bold text-[var(--second-color)] mb-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-[var(--second-color)] mb-4">
         What Peoples Say About Us
         </h2>
           <span

@@ -30,6 +30,12 @@ const socialData: SocialItem[] = [
   }
 ];
 
+function stripHtml(html: string) {
+  if (typeof window === "undefined") return html;
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.body.textContent || "";
+}
+
 export default function Footer() {
   const { data, loading, error } = useGeneralData();
   const currentYear = new Date().getFullYear();
@@ -63,8 +69,9 @@ export default function Footer() {
               Discover the wonders of ancient Egypt with expertly curated tours to the Pyramids, Nile cruises, and historic temples.
             </p>
             
-            <div className="space-y-3 pt-2 border-t border-[var(--main-color)]/15">
-              <div className="flex items-start gap-3 group">
+            <div className="flex flex-col gap-1 space-y-3 pt-2 border-t border-[var(--main-color)]/15">
+            <Link href="/">
+            <div className="flex items-start gap-3 group">
                 <div className="p-2 bg-[var(--main-color)]/10 rounded-full group-hover:bg-[var(--main-color)]/20 transition-colors">
                   <MapPin className="h-4 w-4 text-[var(--main-color)] mt-0.5" aria-hidden="true" />
                 </div>
@@ -74,6 +81,8 @@ export default function Footer() {
                     : footerData?.site_address || "Cairo, Egypt"}
                 </span>
               </div>
+            </Link>
+
               <Link href="tel:+20212345678">
                 <div className="flex items-start gap-3 group">
                   <div className="p-2 bg-[var(--main-color)]/10 rounded-full group-hover:bg-[var(--main-color)]/20 transition-colors">
@@ -82,7 +91,7 @@ export default function Footer() {
                     <span className="text-white/90">+20 2 1234 5678</span>
                 </div>
               </Link>
-              <Link href="/">
+              <Link href="mailto:info@egypttourgate.com">
               <div className="flex items-start gap-3 group">
                 <div className="p-2 bg-[var(--main-color)]/10 rounded-full group-hover:bg-[var(--main-color)]/20 transition-colors">
                   <Mail className="h-4 w-4 text-[var(--main-color)] mt-0.5" aria-hidden="true" />
@@ -186,12 +195,12 @@ export default function Footer() {
 
         {/* Bottom bar - Golden divider and copyright */}
         <div className="mt-12 pt-8 border-t border-[var(--main-color)]/15 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <p className="text-white/70 text-sm text-center md:text-left max-w-2xl">
-            © {currentYear}{" "}
-            {isErrorState 
-              ? "Egypt Tour Gate. All rights reserved." 
-              : `${footerData?.copy_rights || "Egypt Tour Gate. All rights reserved."}`}
-          </p>
+        <p className="text-white/70 text-sm text-center md:text-left max-w-2xl">
+          © {currentYear}{" "}
+          {isErrorState
+            ? "Egypt Tour Gate. All rights reserved."
+            : stripHtml(footerData?.copy_rights || "Egypt Tour Gate. All rights reserved.")}
+        </p>
           
           <div 
             className="flex flex-wrap items-center justify-center gap-3 md:justify-end" 
@@ -250,7 +259,7 @@ export default function Footer() {
       className="relative bg-[var(--second-color)] text-white pt-16 pb-10 overflow-hidden"
     >
       {/* Subtle decorative pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22none%22/><path d=%22M20,20 Q40,5 60,20 T100,20 L100,100 L0,100 Z%22 fill=%22%23e3b75e%22 opacity=%220.03%22/></svg>')]"></div>
+      {/* <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22none%22/><path d=%22M20,20 Q40,5 60,20 T100,20 L100,100 L0,100 Z%22 fill=%22%23e3b75e%22 opacity=%220.03%22/></svg>')]"></div> */}
       
       {/* Golden top accent bar */}
       <div className="absolute top-0 left-0 w-full h-1 bg-[var(--main-color)]"></div>

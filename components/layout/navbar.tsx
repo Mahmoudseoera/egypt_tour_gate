@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -25,6 +25,8 @@ import {
   Palmtree,
   Camera,
   User,
+  ArrowRight,
+  Star,
 } from "lucide-react";
 import { useGeneralData } from "@/lib/api/GeneralApi";
 import SimpleSocialIcon, {
@@ -39,7 +41,7 @@ const socialData: SocialItem[] = [
   { icon: "fa-brands fa-youtube", url: "https://youtube.com", title: "YouTube" },
 ];
 
-// Map category slugs to icons
+// Map category slugs to icons and descriptions
 function getCategoryIcon(slug: string) {
   const map: Record<string, React.ReactNode> = {
     "egypt-day-tours": <Compass size={20} />,
@@ -51,10 +53,51 @@ function getCategoryIcon(slug: string) {
   return map[slug] ?? <Sparkles size={20} />;
 }
 
+function getCategoryDescription(slug: string) {
+  const map: Record<string, string> = {
+    "egypt-day-tours": "Explore iconic sites in a single day with expert guides",
+    "egypt-tour-packages": "Complete multi-day itineraries across Egypt",
+    "nile-cruises": "Sail the legendary Nile River in style & comfort",
+    "beach-tours": "Pristine Red Sea beaches and coastal adventures",
+    "photography-tours": "Capture Egypt's beauty through a professional lens",
+  };
+  return map[slug] ?? "Discover unforgettable experiences across Egypt";
+}
+
+function getCategoryColor(slug: string) {
+  const map: Record<string, string> = {
+    "egypt-day-tours": "#e3b75e",
+    "egypt-tour-packages": "#272262",
+    "nile-cruises": "#1e6fa5",
+    "beach-tours": "#27a06e",
+    "photography-tours": "#a0522d",
+  };
+  return map[slug] ?? "#e3b75e";
+}
+
+// Featured highlights shown inside mega menu
+const featuredHighlights = [
+  {
+    title: "Pyramids of Giza",
+    tag: "Most Popular",
+    img: "/assets/images/tours/camel front of giza pyramids.jpg",
+    href: "/egypt-day-tours/cairo",
+  },
+  {
+    title: "Nile Cruise Package",
+    tag: "Best Value",
+    img: "/assets/images/tours/49-webp.webp",
+    href: "/nile-cruises/luxor-aswan-nile-crusie",
+  },
+];
+
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | number | null>(null);
+  const [activeMegaMenu, setActiveMegaMenu] = useState<string | number | null>(null);
+  const megaMenuRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
 
   const { data, error, loading } = useGeneralData();
 
@@ -64,13 +107,20 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Lock body scroll when menu is open
+  // Close mega menu on outside click
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    const handleClick = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setActiveMegaMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
@@ -112,37 +162,150 @@ export default function Navbar() {
           from { max-height: 0; opacity: 0; }
           to   { max-height: 400px; opacity: 1; }
         }
-        @keyframes slideUp {
-          from { max-height: 400px; opacity: 1; }
-          to   { max-height: 0;    opacity: 0; }
+        @keyframes megaFadeIn {
+          from { opacity: 0; transform: translateY(-8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes dropdownFadeIn {
+          from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .mobile-overlay {
-          animation: fadeInOverlay 0.28s ease forwards;
-        }
-        .mobile-drawer {
-          animation: slideInLeft 0.32s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-        }
-        .submenu-open {
-          animation: slideDown 0.28s ease forwards;
-          overflow: hidden;
-        }
+        .mobile-overlay { animation: fadeInOverlay 0.28s ease forwards; }
+        .mobile-drawer  { animation: slideInLeft 0.32s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+        .submenu-open   { animation: slideDown 0.28s ease forwards; overflow: hidden; }
 
-        /* Nav item hover underline */
-        .nav-link-underline {
-          position: relative;
-        }
+        /* ---- Desktop: nav underline ---- */
+        .nav-link-underline { position: relative; }
         .nav-link-underline::after {
           content: '';
           position: absolute;
-          bottom: -2px;
-          left: 0;
-          width: 0;
-          height: 2px;
+          bottom: -2px; left: 0;
+          width: 0; height: 2px;
           background: var(--main-color);
           transition: width 0.25s ease;
         }
-        .nav-link-underline:hover::after { width: 100%; }
+        .nav-link-underline:hover::after,
+        .nav-link-underline.active::after { width: 100%; }
+
+        /* ---- Simple dropdown (Static Pages) ---- */
+        .simple-dropdown {
+          animation: dropdownFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          transform-origin: top center;
+        }
+        .simple-dropdown-item {
+          position: relative;
+          transition: all 0.18s ease;
+        }
+        .simple-dropdown-item::before {
+          content: '';
+          position: absolute;
+          left: 0; top: 0; bottom: 0;
+          width: 0;
+          background: var(--main-color);
+          opacity: 0.12;
+          transition: width 0.2s ease;
+          border-radius: 0 4px 4px 0;
+        }
+        .simple-dropdown-item:hover::before { width: 100%; }
+        .simple-dropdown-item .item-arrow {
+          opacity: 0;
+          transform: translateX(-4px);
+          transition: all 0.18s ease;
+        }
+        .simple-dropdown-item:hover .item-arrow {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        /* ---- Mega menu ---- */
+        .mega-menu {
+          animation: megaFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          transform-origin: top center;
+        }
+        .mega-cat-card {
+          position: relative;
+          overflow: hidden;
+          transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mega-cat-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: var(--main-color);
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          border-radius: 12px;
+          z-index: 0;
+        }
+        .mega-cat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(39,34,98,0.13); }
+        .mega-cat-card:hover::before { opacity: 0.07; }
+        .mega-cat-card .cat-icon-wrap {
+          transition: all 0.2s ease;
+        }
+        .mega-cat-card:hover .cat-icon-wrap {
+          transform: scale(1.1);
+        }
+        .mega-cat-card .cat-arrow {
+          opacity: 0;
+          transform: translateX(-6px);
+          transition: all 0.2s ease;
+        }
+        .mega-cat-card:hover .cat-arrow { opacity: 1; transform: translateX(0); }
+
+        .mega-sub-link {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 7px 12px;
+          border-radius: 8px;
+          font-size: 13.5px;
+          color: #555;
+          transition: all 0.16s ease;
+          font-weight: 500;
+        }
+        .mega-sub-link::before {
+          content: '';
+          position: absolute;
+          left: 8px;
+          width: 4px; height: 4px;
+          border-radius: 50%;
+          background: var(--main-color);
+          opacity: 0;
+          transition: opacity 0.16s ease;
+        }
+        .mega-sub-link:hover {
+          background: rgba(227,183,94,0.1);
+          color: var(--second-color);
+          padding-left: 20px;
+        }
+        .mega-sub-link:hover::before { opacity: 1; }
+
+        .featured-card {
+          position: relative;
+          overflow: hidden;
+          border-radius: 12px;
+          transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+        .featured-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.18); }
+        .featured-card img { transition: transform 0.4s ease; }
+        .featured-card:hover img { transform: scale(1.06); }
+
+        /* Nav item active indicator dot */
+        .nav-active-dot {
+          position: absolute;
+          bottom: 6px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 4px; height: 4px;
+          border-radius: 50%;
+          background: var(--main-color);
+          opacity: 0;
+          transition: opacity 0.2s;
+        }
+        li:hover .nav-active-dot,
+        li.menu-open .nav-active-dot { opacity: 1; }
       `}</style>
 
       <header>
@@ -196,69 +359,326 @@ export default function Navbar() {
         </div>
 
         {/* ===== MAIN NAV ===== */}
-        <nav className={`w-full z-50 border-gray-200 transition-all duration-300 ${isScrolled ? "fixed top-0 bg-white shadow-xl" : "relative bg-white"}`}>
-          <div className="mx-auto flex max-w-screen-xl items-center justify-between p-4">
+        <nav
+          ref={navRef}
+          className={`w-full z-50 border-gray-200 transition-all duration-300 ${
+            isScrolled ? "fixed top-0 bg-white shadow-xl" : "relative bg-white"
+          }`}
+        >
+          <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-2">
+            {/* Logo */}
             <Link href="/">
-              <Image src="/assets/images/egypt-tour-gate-logo.png" alt="Egypt Tour Gate" width={70} height={30} />
+              <Image
+                src="/assets/images/egypt-tour-gate-logo.png"
+                alt="Egypt Tour Gate"
+                width={70}
+                height={30}
+              />
             </Link>
+
+            {/* Right: CTA + Hamburger */}
             <div className="flex items-center gap-3 md:order-2">
-              <Link href="/tailor-made" className="btn-effect hidden md:block">Get started</Link>
+              <Link href="/tailor-made" className="btn-effect hidden md:block">
+                Get started
+              </Link>
               <button
                 onClick={() => setMobileOpen(true)}
                 className="md:hidden flex flex-col gap-[5px] p-2 group"
                 aria-label="Open menu"
               >
-                <span className="block w-6 h-0.5 bg-[var(--second-color)] transition-all duration-300"></span>
-                <span className="block w-4 h-0.5 bg-[var(--second-color)] transition-all duration-300 group-hover:w-6"></span>
-                <span className="block w-6 h-0.5 bg-[var(--second-color)] transition-all duration-300"></span>
+                <span className="block w-6 h-0.5 bg-[var(--second-color)] transition-all duration-300" />
+                <span className="block w-4 h-0.5 bg-[var(--second-color)] transition-all duration-300 group-hover:w-6" />
+                <span className="block w-6 h-0.5 bg-[var(--second-color)] transition-all duration-300" />
               </button>
             </div>
-            <ul className="hidden md:flex gap-8 font-medium navbar-main">
-              <li><Link href="/">Home</Link></li>
-              {data.header.headerCategories.map((cat) => (
-                <li key={cat.id} className="relative group has-dropdown">
-                  <Link href={`/${cat.slug}`} className="flex items-center gap-1 nav-link-underline">
-                    {cat.name.en.toLowerCase()}
-                    <ChevronDown className="h-4 w-4" />
-                  </Link>
-                  {cat.children.length > 0 && (
-                    <ul className="absolute left-0 top-4 hidden min-w-[200px] bg-white shadow-lg group-hover:block rounded-sm overflow-hidden">
-                      {cat.children.map((child) => (
-                        <li key={child.id}>
-                          <Link href={`/${cat.slug}/${child.slug}`} className="block px-4 py-2 text-sm hover:bg-gray-100">
-                            {child.name.en.toLowerCase()}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
-              <li className="relative group has-dropdown">
-                <span className="cursor-pointer flex items-center gap-1 nav-link-underline">
-                  Static Pages <ChevronDown className="h-4 w-4" />
-                </span>
-                <ul className="absolute left-0 top-4 hidden bg-white shadow-lg group-hover:block rounded-sm overflow-hidden">
-                  <li><Link href="/contact" className="block px-4 py-2">Contact</Link></li>
-                  <li><Link href="/about-us" className="block px-4 py-2">About Us</Link></li>
-                  <li><Link href="/free-page" className="block px-4 py-2">Free Page</Link></li>
-                </ul>
+
+            {/* ===== DESKTOP NAV LINKS ===== */}
+            <ul className="hidden md:flex gap-1 font-medium navbar-main items-center">
+
+              {/* Home */}
+              <li className="py-4">
+                <Link
+                  href="/"
+                  className="px-3 py-2 rounded-md text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 text-[14.5px] font-semibold nav-link-underline"
+                >
+                  Home
+                </Link>
               </li>
-              <li><Link href="/blogs">Blogs</Link></li>
+
+              {/* ===== CATEGORY MEGA MENUS ===== */}
+              {data.header.headerCategories.map((cat) => {
+                const isOpen = activeMegaMenu === cat.id;
+                const hasSubs = cat.children.length > 0;
+                const catColor = getCategoryColor(cat.slug);
+
+                return (
+                  <li
+                    key={cat.id}
+                    className={`relative py-4 ${isOpen ? "menu-open" : ""}`}
+                    onMouseEnter={() => setActiveMegaMenu(cat.id)}
+                    onMouseLeave={() => setActiveMegaMenu(null)}
+                  >
+                    <Link
+                      href={`/${cat.slug}`}
+                      className={`flex items-center gap-1 px-3 py-2 rounded-md text-[14.5px] font-semibold transition-all duration-200 nav-link-underline capitalize ${
+                        isOpen
+                          ? "text-[var(--main-color)]"
+                          : "text-[var(--second-color)] hover:text-[var(--main-color)]"
+                      }`}
+                    >
+                      {cat.name.en.toLowerCase()}
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "rotate-180 text-[var(--main-color)]" : ""}`}
+                      />
+                    </Link>
+
+                    {/* Active dot indicator */}
+                    <span className="nav-active-dot" />
+
+                    {/* ===== MEGA MENU PANEL ===== */}
+                    {hasSubs && isOpen && (
+                      <div
+                        className="mega-menu absolute top-full left-1/2 -translate-x-1/2 z-[200]"
+                        style={{ minWidth: "780px" }}
+                      >
+                        {/* Top connector gap cover */}
+                        <div className="h-2 w-full" />
+
+                        <div className="bg-white rounded-2xl shadow-[0_20px_60px_rgba(39,34,98,0.14)] border border-gray-100 overflow-hidden">
+                          {/* Colored top accent bar */}
+                          <div
+                            className="h-1 w-full"
+                            style={{ background: `linear-gradient(90deg, ${catColor}, var(--main-color))` }}
+                          />
+
+                          <div className="flex">
+                            {/* LEFT: Category cards */}
+                            <div className="flex-1 p-6">
+                              {/* Header */}
+                              <div className="flex items-center gap-3 mb-5">
+                                <div
+                                  className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
+                                  style={{ background: catColor }}
+                                >
+                                  {getCategoryIcon(cat.slug)}
+                                </div>
+                                <div>
+                                  <h3 className="font-bold text-[var(--second-color)] text-[15px] capitalize leading-tight">
+                                    {cat.name.en}
+                                  </h3>
+                                  <p className="text-xs text-gray-400 leading-tight mt-0.5">
+                                    {getCategoryDescription(cat.slug)}
+                                  </p>
+                                </div>
+                                <Link
+                                  href={`/${cat.slug}`}
+                                  className="ml-auto flex items-center gap-1 text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full border transition-all duration-200 hover:text-white"
+                                  style={{
+                                    color: catColor,
+                                    borderColor: catColor,
+                                  }}
+                                  onMouseEnter={e => {
+                                    (e.currentTarget as HTMLElement).style.background = catColor;
+                                    (e.currentTarget as HTMLElement).style.color = "#fff";
+                                  }}
+                                  onMouseLeave={e => {
+                                    (e.currentTarget as HTMLElement).style.background = "transparent";
+                                    (e.currentTarget as HTMLElement).style.color = catColor;
+                                  }}
+                                >
+                                  View all
+                                  <ArrowRight size={12} />
+                                </Link>
+                              </div>
+
+                              {/* Subcategory grid */}
+                              <div className="grid grid-cols-2 gap-2">
+                                {cat.children.map((child) => (
+                                  <Link
+                                    key={child.id}
+                                    href={`/${cat.slug}/${child.slug}`}
+                                    className="mega-cat-card flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/60 group/card"
+                                  >
+                                    {/* Icon */}
+                                    <div
+                                      className="cat-icon-wrap w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
+                                      style={{ background: `${catColor}18` }}
+                                    >
+                                      <span style={{ color: catColor }} className="text-sm">
+                                        {getCategoryIcon(cat.slug)}
+                                      </span>
+                                    </div>
+
+                                    {/* Text */}
+                                    <div className="flex-1 min-w-0 relative z-10">
+                                      <span className="block text-[13px] font-semibold text-[var(--second-color)] capitalize truncate leading-tight">
+                                        {child.name.en.toLowerCase()}
+                                      </span>
+                                    </div>
+
+                                    {/* Arrow */}
+                                    <ChevronRight
+                                      size={14}
+                                      className="cat-arrow flex-shrink-0 relative z-10"
+                                      style={{ color: catColor }}
+                                    />
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* DIVIDER */}
+                            <div className="w-px bg-gray-100 my-4" />
+
+                            {/* RIGHT: Featured highlights */}
+                            <div className="w-[220px] flex-shrink-0 p-5 bg-gray-50/50">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">
+                                Featured
+                              </p>
+                              <div className="flex flex-col gap-3">
+                                {featuredHighlights.map((item) => (
+                                  <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="featured-card block group/feat"
+                                  >
+                                    <div className="relative h-[100px] w-full overflow-hidden rounded-xl">
+                                      <Image
+                                        src={item.img}
+                                        alt={item.title}
+                                        fill
+                                        className="object-cover"
+                                      />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                                      {/* Tag */}
+                                      <span
+                                        className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
+                                        style={{ background: catColor }}
+                                      >
+                                        {item.tag}
+                                      </span>
+                                      {/* Title */}
+                                      <p className="absolute bottom-2 left-2 right-2 text-white text-[12px] font-bold leading-tight">
+                                        {item.title}
+                                      </p>
+                                    </div>
+                                  </Link>
+                                ))}
+                              </div>
+
+                              {/* Bottom promo */}
+                              <div
+                                className="mt-4 p-3 rounded-xl text-center"
+                                style={{ background: `${catColor}15`, border: `1px dashed ${catColor}60` }}
+                              >
+                                <Star size={14} className="mx-auto mb-1" style={{ color: catColor }} />
+                                <p className="text-[11px] font-bold text-[var(--second-color)] leading-tight">
+                                  Tailor-made tours available
+                                </p>
+                                <Link
+                                  href="/tailor-made"
+                                  className="inline-block mt-1.5 text-[10px] font-bold underline"
+                                  style={{ color: catColor }}
+                                >
+                                  Build my trip →
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+
+              {/* ===== STATIC PAGES: Improved simple dropdown ===== */}
+              <li
+                className={`relative py-4 ${activeMegaMenu === "static" ? "menu-open" : ""}`}
+                onMouseEnter={() => setActiveMegaMenu("static")}
+                onMouseLeave={() => setActiveMegaMenu(null)}
+              >
+                <span
+                  className={`flex items-center gap-1 cursor-pointer px-3 py-2 rounded-md text-[14.5px] font-semibold transition-all duration-200 nav-link-underline ${
+                    activeMegaMenu === "static"
+                      ? "text-[var(--main-color)]"
+                      : "text-[var(--second-color)] hover:text-[var(--main-color)]"
+                  }`}
+                >
+                  More Pages
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-300 ${activeMegaMenu === "static" ? "rotate-180" : ""}`}
+                  />
+                </span>
+                <span className="nav-active-dot" />
+
+                {activeMegaMenu === "static" && (
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full z-[200]">
+                    <div className="h-2 w-full" />
+                    <div className="simple-dropdown bg-white rounded-2xl shadow-[0_16px_48px_rgba(39,34,98,0.12)] border border-gray-100 overflow-hidden min-w-[200px]">
+                      {/* Top accent */}
+                      <div className="h-1 w-full bg-gradient-to-r from-[var(--second-color)] to-[var(--main-color)]" />
+                      <div className="py-2">
+                        {[
+                          { href: "/contact", label: "Contact Us", icon: <Phone size={14} /> },
+                          { href: "/about-us", label: "About Us", icon: <User size={14} /> },
+                          { href: "/free-page", label: "Free Page", icon: <Sparkles size={14} /> },
+                        ].map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className="simple-dropdown-item flex items-center gap-3 px-4 py-2.5 hover:text-[var(--second-color)] text-gray-600 font-medium text-[13.5px]"
+                          >
+                            <span
+                              className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                              style={{ background: "rgba(39,34,98,0.07)", color: "var(--second-color)" }}
+                            >
+                              {item.icon}
+                            </span>
+                            {item.label}
+                            <ArrowRight size={13} className="item-arrow ml-auto" style={{ color: "var(--main-color)" }} />
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </li>
+
+              {/* Blogs */}
+              <li className="py-4">
+                <Link
+                  href="/blogs"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-md text-[14.5px] font-semibold text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 nav-link-underline"
+                >
+                  <BookOpen size={15} />
+                  Blogs
+                </Link>
+              </li>
             </ul>
           </div>
         </nav>
 
         {/* ===== MOBILE DRAWER ===== */}
         {mobileOpen && (
-          <div className="fixed inset-0 z-[999] md:hidden mobile-overlay" style={{ backgroundColor: "rgba(0,0,0,0.55)" }} onClick={closeMenu}>
+          <div
+            className="fixed inset-0 z-[999] md:hidden mobile-overlay"
+            style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
+            onClick={closeMenu}
+          >
             <div
               className="mobile-drawer absolute left-0 top-0 h-full w-[88%] max-w-[360px] bg-white flex flex-col overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4" style={{ background: "var(--second-color)" }}>
-                <Image src="/assets/images/egypt-tour-gate-logo.png" alt="Egypt Tour Gate" width={60} height={26} className="brightness-0 invert" />
+                <Image
+                  src="/assets/images/egypt-tour-gate-logo.png"
+                  alt="Egypt Tour Gate"
+                  width={60}
+                  height={26}
+                  className="brightness-0 invert"
+                />
                 <button
                   onClick={closeMenu}
                   className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:bg-white/20"
@@ -268,28 +688,8 @@ export default function Navbar() {
                 </button>
               </div>
 
-              {/* Login CTA */}
-              {/* <div className="px-5 py-4 border-b border-gray-100" style={{ background: "#f9f9f9" }}>
-                <Link
-                  href="/login"
-                  onClick={closeMenu}
-                  className="flex items-center gap-3 group"
-                >
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "var(--second-color)" }}>
-                    <User size={18} className="text-white" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm" style={{ color: "var(--second-color)" }}>Log in or sign up</p>
-                    <p className="text-xs text-gray-500">Access your bookings & wishlist</p>
-                  </div>
-                  <ChevronRight size={16} className="ml-auto text-gray-400 group-hover:translate-x-1 transition-transform duration-200" />
-                </Link>
-              </div> */}
-
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto">
-
-                {/* Explore section */}
                 <div className="px-5 pt-5 pb-2">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Explore</p>
                 </div>
@@ -308,7 +708,7 @@ export default function Navbar() {
                 </Link>
 
                 {/* Dynamic Categories */}
-                {data.header.headerCategories.map((cat, idx) => (
+                {data.header.headerCategories.map((cat) => (
                   <div key={cat.id}>
                     <button
                       onClick={() => setActiveDropdown(activeDropdown === cat.id ? null : cat.id)}
@@ -341,7 +741,6 @@ export default function Navbar() {
                       />
                     </button>
 
-                    {/* Subcategories */}
                     {activeDropdown === cat.id && cat.children.length > 0 && (
                       <div className="submenu-open bg-gray-50 border-l-2 ml-5" style={{ borderColor: "var(--main-color)" }}>
                         {cat.children.map((child) => (
@@ -351,7 +750,7 @@ export default function Navbar() {
                             onClick={closeMenu}
                             className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--main-color)" }}></span>
+                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--main-color)" }} />
                             <span className="text-[14px] text-gray-700 capitalize group-hover:text-[var(--second-color)] transition-colors font-medium">
                               {child.name.en}
                             </span>
@@ -376,7 +775,7 @@ export default function Navbar() {
                   <ChevronRight size={15} className="ml-auto text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all duration-200" />
                 </Link>
 
-                {/* Static pages */}
+                {/* Static Pages */}
                 <div>
                   <button
                     onClick={() => setActiveDropdown(activeDropdown === "static" ? null : "static")}
@@ -397,14 +796,18 @@ export default function Navbar() {
                   </button>
                   {activeDropdown === "static" && (
                     <div className="submenu-open bg-gray-50 border-l-2 ml-5" style={{ borderColor: "var(--main-color)" }}>
-                      {[{ href: "/contact", label: "Contact" }, { href: "/about-us", label: "About Us" }, { href: "/free-page", label: "Free Page" }].map((item) => (
+                      {[
+                        { href: "/contact", label: "Contact" },
+                        { href: "/about-us", label: "About Us" },
+                        { href: "/free-page", label: "Free Page" },
+                      ].map((item) => (
                         <Link
                           key={item.href}
                           href={item.href}
                           onClick={closeMenu}
                           className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                         >
-                          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--main-color)" }}></span>
+                          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--main-color)" }} />
                           <span className="text-[14px] text-gray-700 group-hover:text-[var(--second-color)] transition-colors font-medium">{item.label}</span>
                           <ChevronRight size={13} className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
                         </Link>
@@ -414,9 +817,8 @@ export default function Navbar() {
                 </div>
 
                 {/* Divider */}
-                <div className="mx-5 my-4 border-t border-gray-100"></div>
+                <div className="mx-5 my-4 border-t border-gray-100" />
 
-                {/* Settings section */}
                 <div className="px-5 pb-2">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Preferences</p>
                 </div>
@@ -454,17 +856,7 @@ export default function Navbar() {
                   <ChevronRight size={15} className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
                 </Link>
 
-                {/* Download app */}
-                {/* <div className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(39,34,98,0.08)" }}>
-                    <Smartphone size={18} style={{ color: "var(--second-color)" }} />
-                  </div>
-                  <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>Download the app</span>
-                  <ChevronRight size={15} className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
-                </div> */}
-
-                {/* Bottom padding */}
-                <div className="pb-8"></div>
+                <div className="pb-8" />
               </div>
 
               {/* Footer CTA */}

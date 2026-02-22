@@ -1,3 +1,4 @@
+// sub Category Page //
 import Link from "next/link";
 import categoriesData from "@/lib/api/categories";
 import SecondTourCard from "@/components/tour/second-tour-card";
