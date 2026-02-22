@@ -1,13 +1,15 @@
 "use client";
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Check, Calendar, MapPin, User, Phone, Globe, Hotel, MessageSquare, ChevronRight, ChevronLeft, DollarSign, Users, Baby, UserCheck } from "lucide-react";
+import "flatpickr/dist/flatpickr.min.css";
 import {
   tailorMadeSchema,
   type TailorMadeFormData,
 } from "@/lib/validations/tailor-made.schema";
+import { NATIONALITIES, PHONE_CODES } from "@/lib/constants/country-data";
 
 // ─── Floating Label Input ───────────────────────────────────────────────────
 interface FloatingInputProps {
@@ -19,6 +21,8 @@ interface FloatingInputProps {
   required?: boolean;
   icon?: React.ReactNode;
   autoComplete?: string;
+  onBlur?: () => void;
+  error?: string;
 }
 
 function FloatingInput({
@@ -29,6 +33,8 @@ function FloatingInput({
   required,
   icon,
   autoComplete,
+  onBlur,
+  error,
 }: FloatingInputProps) {
   return (
     <div className="relative w-full">
@@ -43,7 +49,8 @@ function FloatingInput({
         value={value}
         autoComplete={autoComplete}
         onChange={(e) => onChange(e.target.value)}
-        className={`peer w-full border-[1.5px] border-solid border-[#9e9e9e] rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] valid:border-[#272262] outline-none ${icon ? "pl-11 pr-4" : "px-4"}`}
+        onBlur={onBlur}
+        className={`peer w-full border-[1.5px] border-solid ${error ? "border-red-400" : "border-[#9e9e9e]"} rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] valid:border-[#272262] outline-none ${icon ? "pl-11 pr-4" : "px-4"}`}
       />
       <label
         className={`absolute text-[#aaa] pointer-events-none translate-y-4 transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]
@@ -53,6 +60,7 @@ function FloatingInput({
       >
         {label}
       </label>
+      {error && <p className="mt-1 text-xs text-red-500 font-medium">{error}</p>}
     </div>
   );
 }
@@ -64,9 +72,11 @@ interface FloatingSelectProps {
   onChange: (val: string) => void;
   children: React.ReactNode;
   icon?: React.ReactNode;
+  onBlur?: () => void;
+  error?: string;
 }
 
-function FloatingSelect({ label, value, onChange, children, icon }: FloatingSelectProps) {
+function FloatingSelect({ label, value, onChange, children, icon, onBlur, error }: FloatingSelectProps) {
   return (
     <div className="relative w-full">
       {icon && (
@@ -77,7 +87,8 @@ function FloatingSelect({ label, value, onChange, children, icon }: FloatingSele
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`peer w-full border-[1.5px] border-solid border-[#9e9e9e] rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] outline-none appearance-none cursor-pointer ${icon ? "pl-11 pr-4" : "px-4"} ${value ? "border-[#272262]" : ""}`}
+        onBlur={onBlur}
+        className={`peer w-full border-[1.5px] border-solid ${error ? "border-red-400" : "border-[#9e9e9e]"} rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] outline-none appearance-none cursor-pointer ${icon ? "pl-11 pr-4" : "px-4"} ${value ? "border-[#272262]" : ""}`}
       >
         {children}
       </select>
@@ -95,6 +106,7 @@ function FloatingSelect({ label, value, onChange, children, icon }: FloatingSele
       <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#9e9e9e]">
         <ChevronRight size={16} className="rotate-90" />
       </span>
+      {error && <p className="mt-1 text-xs text-red-500 font-medium">{error}</p>}
     </div>
   );
 }
@@ -106,9 +118,11 @@ interface FlatpickrInputProps {
   onChange: (val: string) => void;
   options?: Record<string, unknown>;
   icon?: React.ReactNode;
+  onBlur?: () => void;
+  error?: string;
 }
 
-function FlatpickrInput({ label, value, onChange, options = {}, icon }: FlatpickrInputProps) {
+function FlatpickrInput({ label, value, onChange, options = {}, icon, onBlur, error }: FlatpickrInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const fpRef = useRef<{ destroy: () => void } | null>(null);
 
@@ -155,8 +169,9 @@ function FlatpickrInput({ label, value, onChange, options = {}, icon }: Flatpick
         ref={inputRef}
         readOnly
         value={value}
+        onBlur={onBlur}
         placeholder=" "
-        className={`peer w-full border-[1.5px] border-solid rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none outline-none cursor-pointer ${icon ? "pl-11 pr-4" : "px-4"} ${isValid ? "border-[#272262]" : "border-[#9e9e9e] focus:border-[#272262]"}`}
+        className={`peer w-full border-[1.5px] border-solid rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none outline-none cursor-pointer ${icon ? "pl-11 pr-4" : "px-4"} ${error ? "border-red-400" : isValid ? "border-[#272262]" : "border-[#9e9e9e] focus:border-[#272262]"}`}
       />
       <label
         className={`absolute text-[#aaa] pointer-events-none transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]
@@ -168,6 +183,7 @@ function FlatpickrInput({ label, value, onChange, options = {}, icon }: Flatpick
       >
         {label}
       </label>
+      {error && <p className="mt-1 text-xs text-red-500 font-medium">{error}</p>}
     </div>
   );
 }
@@ -178,9 +194,11 @@ interface FloatingTextareaProps {
   value: string;
   onChange: (val: string) => void;
   icon?: React.ReactNode;
+  onBlur?: () => void;
+  error?: string;
 }
 
-function FloatingTextarea({ label, value, onChange, icon }: FloatingTextareaProps) {
+function FloatingTextarea({ label, value, onChange, icon, onBlur, error }: FloatingTextareaProps) {
   return (
     <div className="relative w-full">
       {icon && (
@@ -191,8 +209,9 @@ function FloatingTextarea({ label, value, onChange, icon }: FloatingTextareaProp
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
         rows={4}
-        className={`peer w-full border-[1.5px] border-solid border-[#9e9e9e] rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] valid:border-[#272262] outline-none resize-none ${icon ? "pl-11 pr-4" : "px-4"} ${value ? "border-[#272262]" : ""}`}
+        className={`peer w-full border-[1.5px] border-solid ${error ? "border-red-400" : "border-[#9e9e9e]"} rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] valid:border-[#272262] outline-none resize-none ${icon ? "pl-11 pr-4" : "px-4"} ${value ? "border-[#272262]" : ""}`}
       />
       <label
         className={`absolute text-[#aaa] pointer-events-none transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]
@@ -204,6 +223,7 @@ function FloatingTextarea({ label, value, onChange, icon }: FloatingTextareaProp
       >
         {label}
       </label>
+      {error && <p className="mt-1 text-xs text-red-500 font-medium">{error}</p>}
     </div>
   );
 }
@@ -214,6 +234,7 @@ export default function TailorMadePage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const [formData, setFormData] = useState<{
     cities: string[];
@@ -256,28 +277,16 @@ export default function TailorMadePage() {
   });
 
   const cities = [
-    { id: "cairo", name: "Cairo", image: "https://images.unsplash.com/photo-1572252009286-268acec5ca0a?w=400&h=200&fit=crop" },
-    { id: "giza", name: "Giza", image: "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?w=400&h=200&fit=crop" },
-    { id: "luxor", name: "Luxor", image: "https://images.unsplash.com/photo-1566127444979-b3d2b654e3d7?w=400&h=200&fit=crop" },
-    { id: "aswan", name: "Aswan", image: "https://images.unsplash.com/photo-1539650116455-2514c1a88b5f?w=400&h=200&fit=crop" },
-    { id: "alexandria", name: "Alexandria", image: "https://images.unsplash.com/photo-1571189434050-646ec5fe65f7?w=400&h=200&fit=crop" },
-    { id: "dahab", name: "Dahab", image: "https://images.unsplash.com/photo-1518182170546-0766ce6fec56?w=400&h=200&fit=crop" },
-    { id: "sharm", name: "Sharm El-Sheikh", image: "https://images.unsplash.com/photo-1573331518732-72155500f194?w=400&h=200&fit=crop" },
-    { id: "taba", name: "Taba", image: "https://images.unsplash.com/photo-1580674285054-bed31e145f59?w=400&h=200&fit=crop" },
+    { id: "cairo", name: "Cairo", image: "/assets/images/tours/Pyramids-in-Egypt-webp.webp" },
+    { id: "giza", name: "Giza", image: "/assets/images/tours/great-pyramid-webp.webp" },
+    { id: "luxor", name: "Luxor", image: "/assets/images/about-us/The-front-façade-of-Karnak-Temple-webp.webp" },
+    { id: "aswan", name: "Aswan", image: "/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp" },
+    { id: "alexandria", name: "Alexandria", image: "/assets/images/tours/Cairo day tours in Egypt-webp.webp" },
+    { id: "dahab", name: "Dahab", image: "/assets/images/tours/luxurytours-webp.webp" },
+    { id: "sharm", name: "Sharm El-Sheikh", image: "/assets/images/tours/Egypt Budget Tours-webp.webp" },
+    { id: "taba", name: "Taba", image: "/assets/images/tours/egypt family tours-webp.webp" },
   ];
 
-  const phoneCodes = [
-    { code: "20", country: "Egypt (+20)" },
-    { code: "1", country: "USA (+1)" },
-    { code: "44", country: "UK (+44)" },
-    { code: "971", country: "UAE (+971)" },
-    { code: "966", country: "Saudi Arabia (+966)" },
-  ];
-
-  const nationalities = [
-    "Egyptian", "American", "British", "Canadian", "Australian",
-    "German", "French", "Italian", "Spanish", "Chinese", "Japanese",
-  ];
 
   const steps = [
     { num: 1, label: "Cities" },
@@ -328,6 +337,20 @@ export default function TailorMadePage() {
     return issue?.message ?? null;
   };
 
+
+  const validationIssues = useMemo(() => {
+    const parsed = tailorMadeSchema.safeParse(formData);
+    if (parsed.success) return {} as Record<string, string>;
+    const map: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const key = String(issue.path[0] ?? 'form');
+      if (!map[key]) map[key] = issue.message;
+    }
+    return map;
+  }, [formData]);
+
+  const fieldError = (name: string) => (touched[name] ? validationIssues[name] : undefined);
+  const markTouched = (name: string) => setTouched((prev) => ({ ...prev, [name]: true }));
   const nextStep = () => {
     if (isStepValid() && currentStep < 5) {
       setStepError(null);
@@ -357,7 +380,7 @@ export default function TailorMadePage() {
         body: JSON.stringify(validatedData.data),
       });
       if (res.ok) {
-        toast.success("Trip request submitted successfully! We'll contact you soon. ✈️");
+        toast.success("Trip request submitted successfully! We&apos;ll contact you soon. ✈️");
         router.push("/thank-you");
       } else {
         toast.error("Something went wrong. Please try again.");
@@ -539,6 +562,8 @@ export default function TailorMadePage() {
                         onChange={(v) => updateFormData("checkIn", v)}
                         options={flatpickrDateOpts}
                         icon={<Calendar size={16} />}
+                        onBlur={() => markTouched("checkIn")}
+                        error={fieldError("checkIn")}
                       />
                       <FlatpickrInput
                         label="Check-out Date"
@@ -546,6 +571,8 @@ export default function TailorMadePage() {
                         onChange={(v) => updateFormData("checkOut", v)}
                         options={{ ...flatpickrDateOpts, minDate: formData.checkIn || "today" }}
                         icon={<Calendar size={16} />}
+                        onBlur={() => markTouched("checkOut")}
+                        error={fieldError("checkOut")}
                       />
                     </div>
                   )}
@@ -555,8 +582,10 @@ export default function TailorMadePage() {
                       label="Select Month"
                       value={formData.monthSelect}
                       onChange={(v) => updateFormData("monthSelect", v)}
-                      options={{ dateFormat: "Y-m", minDate: "today" as const, plugins: [] }}
+                      options={{ dateFormat: "Y-m", minDate: "today" as const, plugins: [], disableMobile: true }}
                       icon={<Calendar size={16} />}
+                      onBlur={() => markTouched("monthSelect")}
+                      error={fieldError("monthSelect")}
                     />
                   )}
 
@@ -567,6 +596,8 @@ export default function TailorMadePage() {
                       value={formData.vacationDays}
                       onChange={(v) => updateFormData("vacationDays", v)}
                       icon={<Calendar size={16} />}
+                      onBlur={() => markTouched("vacationDays")}
+                      error={fieldError("vacationDays")}
                     />
                   )}
                 </div>
@@ -587,6 +618,8 @@ export default function TailorMadePage() {
                       required
                       autoComplete="name"
                       icon={<User size={16} />}
+                      onBlur={() => markTouched("fullName")}
+                      error={fieldError("fullName")}
                     />
                     <FloatingInput
                       label="Email Address"
@@ -596,16 +629,20 @@ export default function TailorMadePage() {
                       required
                       autoComplete="email"
                       icon={<MessageSquare size={16} />}
+                      onBlur={() => markTouched("email")}
+                      error={fieldError("email")}
                     />
                     <FloatingSelect
                       label="Phone Code"
                       value={formData.phoneCode}
                       onChange={(v) => updateFormData("phoneCode", v)}
                       icon={<Phone size={16} />}
+                      onBlur={() => markTouched("phoneCode")}
+                      error={fieldError("phoneCode")}
                     >
                       <option value="">Select country code</option>
-                      {phoneCodes.map((pc) => (
-                        <option key={pc.code} value={pc.code}>{pc.country}</option>
+                      {PHONE_CODES.map((pc) => (
+                        <option key={`${pc.code}-${pc.label}`} value={pc.code.replace("+", "")}>{pc.label}</option>
                       ))}
                     </FloatingSelect>
                     <FloatingInput
@@ -616,21 +653,27 @@ export default function TailorMadePage() {
                       required
                       autoComplete="tel"
                       icon={<Phone size={16} />}
+                      onBlur={() => markTouched("phoneNumber")}
+                      error={fieldError("phoneNumber")}
                     />
                     <FloatingSelect
                       label="Nationality"
                       value={formData.nationality}
                       onChange={(v) => updateFormData("nationality", v)}
                       icon={<Globe size={16} />}
+                      onBlur={() => markTouched("nationality")}
+                      error={fieldError("nationality")}
                     >
                       <option value="">Select nationality</option>
-                      {nationalities.map((n) => <option key={n} value={n}>{n}</option>)}
+                      {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
                     </FloatingSelect>
                     <FloatingInput
                       label="Hotel Preference (Optional)"
                       value={formData.hotel}
                       onChange={(v) => updateFormData("hotel", v)}
                       icon={<Hotel size={16} />}
+                      onBlur={() => markTouched("hotel")}
+                      error={fieldError("hotel")}
                     />
                   </div>
                   <FloatingTextarea
@@ -638,6 +681,8 @@ export default function TailorMadePage() {
                     value={formData.additionalInfo}
                     onChange={(v) => updateFormData("additionalInfo", v)}
                     icon={<MessageSquare size={16} />}
+                    onBlur={() => markTouched("additionalInfo")}
+                    error={fieldError("additionalInfo")}
                   />
                 </div>
               )}
@@ -735,15 +780,11 @@ export default function TailorMadePage() {
                     <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">
                       {formData.fullName ? `Almost there, ${formData.fullName.split(" ")[0]}! ✈️` : "Review & Submit"}
                     </h3>
-                    <p className="text-[#888] text-sm mt-1">Please review your trip details before submitting</p>
+                    <p className="text-[#888] text-sm mt-1">Welcome to Egypt Tour Gate. We&apos;ll craft your trip and contact you shortly.</p>
                   </div>
-                  <div className="bg-[#f8f9fc] rounded-2xl border-[1.5px] border-[#e8eaf0] divide-y divide-[#e8eaf0] overflow-hidden">
-                    {summaryItems.map((item) => (
-                      <div key={item.label} className="flex justify-between items-start gap-4 px-5 py-3">
-                        <span className="text-xs font-bold text-[#aaa] uppercase tracking-wide whitespace-nowrap">{item.label}</span>
-                        <span className="text-sm font-semibold text-[#272262] text-right">{item.value}</span>
-                      </div>
-                    ))}
+                  <div className="bg-[#f8f9fc] rounded-2xl border-[1.5px] border-[#e8eaf0] px-5 py-6 text-center">
+                    <p className="text-lg font-bold text-[#272262]">Welcome{formData.fullName ? `, ${formData.fullName}` : ""}! 👋</p>
+                    <p className="text-sm text-[#888] mt-2">Your request is almost ready. Click submit and our travel specialist will contact you.</p>
                   </div>
                   <form onSubmit={handleSubmit}>
                     <button
@@ -803,7 +844,7 @@ export default function TailorMadePage() {
           <div className="bg-white rounded-3xl shadow-xl border border-[#e8eaf0] overflow-hidden sticky top-4">
             <div className="relative h-36 w-full">
               <Image
-                src="https://images.unsplash.com/photo-1539768942893-daf53e448371?w=600&h=300&fit=crop"
+                src="/assets/images/tours/Pyramids-in-Egypt-webp.webp"
                 alt="Egypt"
                 fill
                 className="object-cover"
@@ -853,6 +894,8 @@ export default function TailorMadePage() {
       <style jsx global>{`
         /* Flatpickr calendar theme */
         .flatpickr-calendar {
+          z-index: 9999 !important;
+          max-width: 320px !important;
           border-radius: 16px !important;
           box-shadow: 0 20px 60px rgba(0,0,0,0.12) !important;
           border: 1.5px solid #e8eaf0 !important;

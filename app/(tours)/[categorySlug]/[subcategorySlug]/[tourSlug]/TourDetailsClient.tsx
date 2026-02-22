@@ -3,6 +3,7 @@
 import LightGallery from "lightgallery/react";
 import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
+import "flatpickr/dist/flatpickr.min.css";
 import lgZoom from "lightgallery/plugins/zoom";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -14,6 +15,7 @@ import {
   todayISO,
   type TourDetailsFormData,
 } from '@/lib/validations/tour-details.schema';
+import { NATIONALITIES, PHONE_CODES } from '@/lib/constants/country-data';
 import Image from 'next/image';
 import {
   X, ChevronLeft, ChevronRight, MapPin, Clock,
@@ -102,7 +104,7 @@ export default function TourDetailsClient() {
         dateFormat:   'Y-m-d',
         altInput:     true,
         altFormat:    'D, M j Y',
-        disableMobile: false,
+        disableMobile: true,
         onChange([date]) {
           if (!date) return;
           const iso = date.toISOString().slice(0, 10);
@@ -121,7 +123,7 @@ export default function TourDetailsClient() {
         dateFormat:   'Y-m-d',
         altInput:     true,
         altFormat:    'D, M j Y',
-        disableMobile: false,
+        disableMobile: true,
         onChange([date]) {
           if (!date) return;
           const iso = date.toISOString().slice(0, 10);
@@ -283,7 +285,7 @@ export default function TourDetailsClient() {
     <>
       <style>{`
         /* Flatpickr theme — navy + gold */
-        .flatpickr-calendar{border-radius:14px!important;box-shadow:0 20px 60px rgba(39,34,98,.18)!important;font-family:inherit!important;border:none!important}
+        .flatpickr-calendar{border-radius:14px!important;box-shadow:0 20px 60px rgba(39,34,98,.18)!important;font-family:inherit!important;border:none!important;z-index:9999!important;max-width:320px!important}
         .flatpickr-months .flatpickr-month,.flatpickr-current-month{background:var(--second-color)!important;color:#fff!important;border-radius:14px 14px 0 0!important}
         .flatpickr-weekday{color:var(--second-color)!important;font-weight:700!important}
         .flatpickr-day.selected,.flatpickr-day.selected:hover{background:var(--second-color)!important;border-color:var(--second-color)!important}
@@ -296,7 +298,7 @@ export default function TourDetailsClient() {
 
         /* Sidebar headers */
         .sh-form{background:linear-gradient(135deg,var(--second-color) 0%,#3d3586 100%)}
-        .sh-contact{background:linear-gradient(135deg,#1a1a2e 0%,var(--second-color) 100%)}
+        .sh-contact{background:linear-gradient(135deg,var(--main-color) 0%,#d19e3d 100%)}
         .sh-articles{background:linear-gradient(135deg,var(--second-color) 0%,#2d2566 100%)}
 
         /* Counter buttons */
@@ -512,18 +514,7 @@ export default function TourDetailsClient() {
                     className={`${inputCls(fieldErrors.nationality)} appearance-none cursor-pointer`}
                   >
                     <option value="">Select nationality…</option>
-                    {['Afghanistan','Algeria','Argentina','Armenia','Australia','Austria','Azerbaijan',
-                      'Bahrain','Bangladesh','Belgium','Brazil','Canada','Chile','China','Colombia',
-                      'Czech Republic','Denmark','Egypt','Finland','France','Germany','Greece',
-                      'Hungary','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy',
-                      'Japan','Jordan','Kazakhstan','Kenya','Kuwait','Lebanon','Libya','Malaysia',
-                      'Mexico','Morocco','Netherlands','New Zealand','Nigeria','Norway','Oman',
-                      'Pakistan','Palestine','Peru','Philippines','Poland','Portugal','Qatar',
-                      'Romania','Russia','Saudi Arabia','Singapore','South Africa','South Korea',
-                      'Spain','Sri Lanka','Sudan','Sweden','Switzerland','Syria','Taiwan',
-                      'Thailand','Tunisia','Turkey','UAE','Uganda','Ukraine','United Kingdom',
-                      'United States','Uzbekistan','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe',
-                    ].map((n) => <option key={n} value={n}>{n}</option>)}
+                    {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
                   </select>
                   {fieldErrors.nationality && <p className={errCls} data-err>{fieldErrors.nationality}</p>}
                 </div>
@@ -532,12 +523,16 @@ export default function TourDetailsClient() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={labelCls}>Code</label>
-                    <input
-                      type="text" name="countryCode" value={formData.countryCode}
+                    <select
+                      name="countryCode" value={formData.countryCode}
                       onChange={handleChange} onBlur={handleBlur}
-                      className={inputCls(fieldErrors.countryCode)}
-                      placeholder="+20"
-                    />
+                      className={`${inputCls(fieldErrors.countryCode)} appearance-none cursor-pointer`}
+                    >
+                      <option value="">Select code…</option>
+                      {PHONE_CODES.map((item) => (
+                        <option key={item.label} value={item.code}>{item.label}</option>
+                      ))}
+                    </select>
                     {fieldErrors.countryCode && <p className={errCls} data-err>{fieldErrors.countryCode}</p>}
                   </div>
                   <div>
@@ -559,6 +554,9 @@ export default function TourDetailsClient() {
                     <div className="relative">
                       <input
                         ref={checkInRef}
+                        name="checkIn"
+                        value={formData.checkIn}
+                        onBlur={handleBlur}
                         readOnly
                         placeholder="Pick date"
                         className={`${inputCls(fieldErrors.checkIn)} pr-9 cursor-pointer`}
@@ -572,6 +570,9 @@ export default function TourDetailsClient() {
                     <div className="relative">
                       <input
                         ref={checkOutRef}
+                        name="checkOut"
+                        value={formData.checkOut}
+                        onBlur={handleBlur}
                         readOnly
                         placeholder="Pick date"
                         className={`${inputCls(fieldErrors.checkOut)} pr-9 cursor-pointer`}
