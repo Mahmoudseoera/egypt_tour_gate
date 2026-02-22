@@ -89,7 +89,7 @@ export default function SecondTourCard({
   };
   
   return (
-    <div className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 max-w-sm mx-auto animate-on-scroll">
+    <div className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 max-w-sm mx-auto">
       {/* Image - Fixed className typos */}
       <Link href={tourLink} className="relative h-56 w-full block">
         <Image

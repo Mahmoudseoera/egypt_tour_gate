@@ -118,7 +118,7 @@ export default function RoavioAboutSection() {
             {/* Right - Image Cards */}
             <div className="grid grid-cols-2 gap-4">
               {/* Colosseum Image */}
-              <div className="col-span-2 lg:col-span-1 roavio-card-hover">
+              <div className="col-span-1 roavio-card-hover">
                 <div className="rounded-3xl overflow-hidden h-72 lg:h-full">
                   <Image
                     src="/assets/images/tours/Pyramids-in-Egypt-webp.webp" 
@@ -131,7 +131,7 @@ export default function RoavioAboutSection() {
               </div>
 
               {/* Trust Card */}
-              <div className="col-span-2 lg:col-span-1 bg-gray-900 rounded-3xl p-8 flex flex-col justify-center items-start text-white h-72 lg:h-full">
+              <div className="col-span-1 bg-gray-900 rounded-3xl p-8 flex flex-col justify-center items-start text-white h-72 lg:h-full">
                 <div className="roavio-icon-float mb-6">
                   <svg 
                     width="64" 
