@@ -119,7 +119,7 @@ export default function RoavioAboutSection() {
             <div className="grid grid-cols-2 gap-4">
               {/* Colosseum Image */}
               <div className="col-span-1 roavio-card-hover">
-                <div className="rounded-3xl overflow-hidden h-72 lg:h-full">
+                <div className="rounded-3xl overflow-hidden h-50  lg:h-full">
                   <Image
                     src="/assets/images/tours/Pyramids-in-Egypt-webp.webp" 
                     alt="Colosseum Rome" 
@@ -131,8 +131,8 @@ export default function RoavioAboutSection() {
               </div>
 
               {/* Trust Card */}
-              <div className="col-span-1 bg-gray-900 rounded-3xl p-8 flex flex-col justify-center items-start text-white h-72 lg:h-full">
-                <div className="roavio-icon-float mb-6">
+              <div className="col-span-1 bg-gray-900 rounded-3xl p-2 md:p-8 flex flex-col justify-center items-start text-white h-50 lg:h-full text-center">
+                <div className="roavio-icon-float mb-2 mx-auto md:mb-6">
                   <svg 
                     width="64" 
                     height="64" 
@@ -161,7 +161,7 @@ export default function RoavioAboutSection() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold mb-3">Trusted & Secure</h3>
+                <h3 className="text-1xl md-text-2x1 font-bold mb-3">Trusted & Secure</h3>
                 <p className="text-gray-300 text-base">
                   Your safety and trust are our top priorities.
                 </p>
