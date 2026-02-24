@@ -101,7 +101,7 @@ export default function RoavioAboutSection() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
             {/* Left - Text Content */}
             <div className="flex flex-col justify-center">
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--second-color)] mb-4 leading-tight">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[var(--second-color)] mb-4 leading-tight">
                 Passionate about your adventures with
                 <br className='hidden md:block'/>
                 <span className="text-gray-900">Egypt Tour Gate</span>
@@ -161,7 +161,7 @@ export default function RoavioAboutSection() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-1xl md-text-2x1 font-bold mb-3">Trusted & Secure</h3>
+                <h3 className="text-1xl md-text-2x1 text-center  font-semibold mb-3">Trusted & Secure</h3>
                 <p className="text-gray-300 text-base">
                   Your safety and trust are our top priorities.
                 </p>

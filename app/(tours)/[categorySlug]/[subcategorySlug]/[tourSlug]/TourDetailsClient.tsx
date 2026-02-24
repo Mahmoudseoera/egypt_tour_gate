@@ -5,7 +5,7 @@ import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
 import "flatpickr/dist/flatpickr.min.css";
 import lgZoom from "lightgallery/plugins/zoom";
-
+import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   tourDetailsSchema,
@@ -21,6 +21,7 @@ import {
   X, ChevronLeft, ChevronRight, MapPin, Clock,
   Star, Check, Phone, Mail, MessageCircle,
   Calendar, BookOpen, ArrowRight, Baby,
+  ChevronsDownUp, ChevronsUpDown,
 } from 'lucide-react';
 
 /* ─── Types ─── */
@@ -75,8 +76,62 @@ const INITIAL: FormState = {
   message:     '',
 };
 
+/* ─── Children Policy data ─── */
+const childrenPolicy = [
+  {
+    icon: '🍼',
+    label: 'Infants (Under 2)',
+    price: 'FREE',
+    color: 'bg-green-50 border-green-200 text-green-700',
+    badgeColor: 'bg-green-500',
+    note: 'No seat or meal included. Must sit on parent\'s lap.',
+  },
+  {
+    icon: '🧒',
+    label: 'Children (2–5)',
+    price: 'FREE',
+    color: 'bg-blue-50 border-blue-200 text-blue-700',
+    badgeColor: 'bg-blue-500',
+    note: 'Seat included, no meals. Entrance fees apply at child rate.',
+  },
+  {
+    icon: '👦',
+    label: 'Children (6–11)',
+    price: '50% off',
+    color: 'bg-amber-50 border-amber-200 text-amber-700',
+    badgeColor: 'bg-[var(--main-color)]',
+    note: 'Half price on all tour services and site entrance fees.',
+  },
+  {
+    icon: '🧑',
+    label: 'Youth (12–17)',
+    price: '75% of adult',
+    color: 'bg-purple-50 border-purple-200 text-purple-700',
+    badgeColor: 'bg-purple-500',
+    note: 'Discounted rate applies to tours, cruises, and most services.',
+  },
+  {
+    icon: '🧑‍💼',
+    label: 'Adults (18+)',
+    price: 'Full price',
+    color: 'bg-gray-50 border-gray-200 text-gray-700',
+    badgeColor: 'bg-[var(--second-color)]',
+    note: 'Standard pricing as listed in the pricing table above.',
+  },
+];
+
+const policyRules = [
+  'Age is calculated at the time of travel, not at the time of booking.',
+  'Children must be accompanied by at least one adult (18+) at all times.',
+  'Proof of age (passport or birth certificate) may be required at check-in.',
+  'Child prices apply to shared accommodation with parents only.',
+  'Some activities (e.g. horse riding, quad bikes) have minimum age restrictions.',
+  'Infant seats on domestic flights are subject to airline availability.',
+];
+
 export default function TourDetailsClient() {
   const [activeDay,          setActiveDay]          = useState<number | null>(1);
+  const [allOpen,            setAllOpen]            = useState(false);
   const [isLightboxOpen,     setIsLightboxOpen]     = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [formData,           setFormData]           = useState<FormState>(INITIAL);
@@ -98,7 +153,6 @@ export default function TourDetailsClient() {
       if (cancelled) return;
       const fp = mod.default;
 
-      /* Check-in: minDate = tomorrow so "today" is never selectable */
       fpCheckIn.current = fp(checkInRef.current!, {
         minDate:      tomorrowISO(),
         dateFormat:   'Y-m-d',
@@ -109,15 +163,12 @@ export default function TourDetailsClient() {
           if (!date) return;
           const iso = date.toISOString().slice(0, 10);
           setFormData((p) => ({ ...p, checkIn: iso }));
-          /* Live-validate on pick */
           const err = validateField('checkIn', iso);
           setFieldErrors((p) => ({ ...p, checkIn: err }));
-          /* Push checkout minDate forward */
           (fpCheckOut.current as any)?.set('minDate', date);
         },
       }) as unknown as typeof fpCheckIn.current;
 
-      /* Check-out: minDate starts at tomorrow, updated when check-in chosen */
       fpCheckOut.current = fp(checkOutRef.current!, {
         minDate:      tomorrowISO(),
         dateFormat:   'Y-m-d',
@@ -189,24 +240,45 @@ export default function TourDetailsClient() {
   ];
 
   const relatedArticles: Article[] = [
-    { id: '1', title: 'Luxury tourism boom in Egypt',                         image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'June 14, 2024',  readTime: '5 min read' },
-    { id: '2', title: 'Covid-rules for traveling from USA to Egypt',           image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'May 28, 2024',   readTime: '7 min read' },
-    { id: '3', title: 'Luxor Temple: A Complete Visitor Guide',                image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'April 10, 2024', readTime: '9 min read' },
+    { id: '1', title: 'Luxury tourism boom in Egypt',               image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'June 14, 2024',  readTime: '5 min read' },
+    { id: '2', title: 'Covid-rules for traveling from USA to Egypt', image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'May 28, 2024',   readTime: '7 min read' },
+    { id: '3', title: 'Luxor Temple: A Complete Visitor Guide',      image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'April 10, 2024', readTime: '9 min read' },
   ];
 
-  /* ── Handlers ── */
+  /* ── Toggle All Itinerary ── */
+  const handleToggleAll = () => {
+    if (allOpen) {
+      // Close all
+      setAllOpen(false);
+      setActiveDay(null);
+    } else {
+      // Open all — use a special sentinel value
+      setAllOpen(true);
+      setActiveDay(null);
+    }
+  };
 
-  /** Generic text/select change — clears error while typing */
+  const isDayOpen = (day: number) => allOpen || activeDay === day;
+
+  const handleDayToggle = (day: number) => {
+    if (allOpen) {
+      // When all are open, clicking one collapses all-open mode and keeps only that one closed
+      setAllOpen(false);
+      setActiveDay(null);
+    } else {
+      setActiveDay((prev) => (prev === day ? null : day));
+    }
+  };
+
+  /* ── Handlers ── */
   const handleChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
-    /* Clear error immediately so the user isn't stuck on a stale message */
     setFieldErrors((p) => ({ ...p, [name]: undefined }));
   }, []);
 
-  /** Validate a text/select field when it loses focus */
   const handleBlur = useCallback((
     e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -219,7 +291,6 @@ export default function TourDetailsClient() {
     setFieldErrors((p) => ({ ...p, [name]: err }));
   }, [formData]);
 
-  /** Adults / Children counter */
   const handleCounter = useCallback((field: 'adults' | 'children', inc: boolean) => {
     setFormData((prev) => {
       const min  = field === 'adults' ? 1 : 0;
@@ -237,7 +308,6 @@ export default function TourDetailsClient() {
     setFieldErrors((p) => ({ ...p, [field]: undefined }));
   }, []);
 
-  /** Individual child-age input change */
   const handleChildAgeChange = useCallback((index: number, value: string) => {
     setFormData((p) => {
       const ages = [...p.childAges];
@@ -247,13 +317,11 @@ export default function TourDetailsClient() {
     setFieldErrors((p) => ({ ...p, [`childAges_${index}`]: undefined, childAges: undefined }));
   }, []);
 
-  /** Individual child-age blur */
   const handleChildAgeBlur = useCallback((index: number, value: string) => {
     const err = validateChildAge(index, value, formData.children);
     setFieldErrors((p) => ({ ...p, [`childAges_${index}`]: err }));
   }, [formData.children]);
 
-  /** Form submit — full schema parse */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = tourDetailsSchema.safeParse(formData);
@@ -291,7 +359,6 @@ export default function TourDetailsClient() {
         .flatpickr-day.selected,.flatpickr-day.selected:hover{background:var(--second-color)!important;border-color:var(--second-color)!important}
         .flatpickr-day:hover{background:var(--main-color)!important;border-color:var(--main-color)!important;color:#fff!important}
         .flatpickr-day.today{border-color:var(--second-color)!important}
-        /* Disabled / past days clearly greyed out */
         .flatpickr-day.flatpickr-disabled,.flatpickr-day.prevMonthDay,.flatpickr-day.nextMonthDay{opacity:.3!important;cursor:not-allowed!important}
         .flatpickr-prev-month svg,.flatpickr-next-month svg{fill:#fff!important}
         .flatpickr-prev-month:hover svg,.flatpickr-next-month:hover svg{fill:var(--main-color)!important}
@@ -309,6 +376,77 @@ export default function TourDetailsClient() {
         /* Child age slide-in */
         .child-in{animation:cIn .22s ease}
         @keyframes cIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+
+        /* Toggle-all button */
+        .toggle-all-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 14px;
+          border-radius: 8px;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: 2px solid var(--second-color);
+          color: var(--second-color);
+          background: transparent;
+        }
+        .toggle-all-btn:hover {
+          background: var(--second-color);
+          color: #fff;
+        }
+        .toggle-all-btn.all-open {
+          background: var(--second-color);
+          color: #fff;
+        }
+        .toggle-all-btn.all-open:hover {
+          background: transparent;
+          color: var(--second-color);
+        }
+
+        /* Children Policy cards */
+        .policy-card {
+          border-radius: 14px;
+          border: 1.5px solid;
+          padding: 14px 16px;
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .policy-card:hover {
+          box-shadow: 0 4px 20px rgba(39,34,98,0.10);
+          transform: translateY(-2px);
+        }
+        .policy-badge {
+          display: inline-block;
+          color: #fff;
+          font-size: 11px;
+          font-weight: 800;
+          padding: 2px 10px;
+          border-radius: 999px;
+          white-space: nowrap;
+          letter-spacing: 0.03em;
+        }
+        .policy-rule-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          font-size: 13px;
+          color: #555;
+          line-height: 1.5;
+        }
+        .policy-rule-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--main-color);
+          flex-shrink: 0;
+          margin-top: 7px;
+        }
       `}</style>
 
     <div className="min-h-screen">
@@ -366,39 +504,54 @@ export default function TourDetailsClient() {
               </p>
             </div>
 
-            {/* Highlights */}
+            {/* ── Itinerary ── */}
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-bold text-[var(--second-color)] mb-5">Highlights</h2>
-              <ul className="space-y-3">
-                {highlights.map((h, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-full bg-[var(--main-color)]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 text-[var(--main-color)]" />
-                    </span>
-                    <span className="text-gray-700 text-sm leading-relaxed">{h}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {/* Header row with Toggle All button */}
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-2xl font-bold text-[var(--second-color)]">Itinerary</h2>
+                <button
+                  type="button"
+                  onClick={handleToggleAll}
+                  className={`toggle-all-btn ${allOpen ? 'all-open' : ''}`}
+                  aria-label={allOpen ? 'Collapse all days' : 'Expand all days'}
+                >
+                  {allOpen ? (
+                    <>
+                      <ChevronsDownUp className="w-3.5 h-3.5" />
+                      Collapse All
+                    </>
+                  ) : (
+                    <>
+                      <ChevronsUpDown className="w-3.5 h-3.5" />
+                      Expand All
+                    </>
+                  )}
+                </button>
+              </div>
 
-            {/* Itinerary */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-bold text-[var(--second-color)] mb-5">Itinerary</h2>
               <div className="space-y-3">
                 {itinerary.map((day) => {
-                  const open = activeDay === day.day;
+                  const open = isDayOpen(day.day);
                   return (
                     <div key={day.day} className="border border-gray-200 rounded-xl overflow-hidden">
                       <button
                         type="button"
-                        onClick={() => setActiveDay(open ? null : day.day)}
+                        onClick={() => handleDayToggle(day.day)}
                         className="w-full flex items-center gap-3 p-4 bg-gray-50/70 hover:bg-gray-100 transition-colors text-left"
                       >
-                        <div className="w-9 h-9 bg-[var(--second-color)] rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{day.day}</div>
+                        <div className="w-9 h-9 bg-[var(--main-color)] rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{day.day}</div>
                         <h3 className="flex-1 text-base font-semibold text-[var(--second-color)]">{day.title}</h3>
-                        <span className={`text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▾</span>
+                        <span
+                          className="text-gray-400 transition-transform duration-200"
+                          style={{ display: 'inline-block', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                        >
+                          ▾
+                        </span>
                       </button>
-                      <div className={`grid transition-all duration-300 ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                      <div
+                        className="grid transition-all duration-300"
+                        style={{ gridTemplateRows: open ? '1fr' : '0fr', opacity: open ? 1 : 0 }}
+                      >
                         <div className="overflow-hidden">
                           <div className="p-4 text-gray-600 text-sm leading-relaxed border-t border-gray-100">{day.description}</div>
                         </div>
@@ -406,35 +559,6 @@ export default function TourDetailsClient() {
                     </div>
                   );
                 })}
-              </div>
-            </div>
-
-            {/* Pricing */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-bold text-[var(--second-color)] mb-5">Pricing</h2>
-              <div className="overflow-x-auto rounded-xl border border-gray-200">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-[var(--second-color)] text-white">
-                      <th className="text-left py-3 px-5 text-sm font-semibold">Category</th>
-                      <th className="text-right py-3 px-5 text-sm font-semibold">Price / Person</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {priceTable.map((row, i) => (
-                      <tr key={i} className={`border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'} hover:bg-[var(--main-color)]/5 transition-colors`}>
-                        <td className="py-3.5 px-5 text-gray-700 text-sm">{row.category}</td>
-                        <td className="py-3.5 px-5 text-right font-bold text-[var(--second-color)]">${row.price}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-4 p-4 bg-blue-50 rounded-xl border-l-4 border-blue-400">
-                <p className="text-sm text-gray-600">
-                  <strong>Note:</strong> Prices are subject to availability and may vary during peak seasons.
-                  Contact us for group discounts and special offers.
-                </p>
               </div>
             </div>
 
@@ -467,6 +591,118 @@ export default function TourDetailsClient() {
                 </ul>
               </div>
             </div>
+
+            {/* Highlights */}
+            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+              <h2 className="text-2xl font-bold text-[var(--second-color)] mb-5">Highlights</h2>
+              <ul className="space-y-3">
+                {highlights.map((h, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="w-5 h-5 rounded-full bg-[var(--main-color)]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-3 h-3 text-[var(--main-color)]" />
+                    </span>
+                    <span className="text-gray-700 text-sm leading-relaxed">{h}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Pricing */}
+            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+              <h2 className="text-2xl font-bold text-[var(--second-color)] mb-5">Pricing</h2>
+              <div className="overflow-x-auto rounded-xl border border-gray-200">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-[var(--second-color)] text-white">
+                      <th className="text-left py-3 px-5 text-sm font-semibold">Category</th>
+                      <th className="text-right py-3 px-5 text-sm font-semibold">Price / Person</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {priceTable.map((row, i) => (
+                      <tr key={i} className={`border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'} hover:bg-[var(--main-color)]/5 transition-colors`}>
+                        <td className="py-3.5 px-5 text-gray-700 text-sm">{row.category}</td>
+                        <td className="py-3.5 px-5 text-right font-bold text-[var(--second-color)]">${row.price}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-4 p-4 bg-blue-50 rounded-xl border-l-4 border-blue-400">
+                <p className="text-sm text-gray-600">
+                  <strong>Note:</strong> Prices are subject to availability and may vary during peak seasons.
+                  Contact us for group discounts and special offers.
+                </p>
+              </div>
+            </div>
+
+            {/* ── Children Policy ── */}
+            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+              {/* Section header */}
+              <div className="flex items-center gap-3 mb-6">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg, var(--second-color) 0%, #3d3586 100%)' }}
+                >
+                  <Baby className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-[var(--second-color)] leading-tight">Children Policy</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">Age-based pricing for this tour</p>
+                </div>
+              </div>
+
+              {/* Age bracket cards */}
+              <div className="grid sm:grid-cols-2 gap-3 mb-6">
+                {childrenPolicy.map((item, i) => (
+                  <div key={i} className={`policy-card ${item.color}`}>
+                    <span className="text-2xl flex-shrink-0 mt-0.5">{item.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                        <span className="font-bold text-sm">{item.label}</span>
+                        <span className={`policy-badge ${item.badgeColor}`}>{item.price}</span>
+                      </div>
+                      <p className="text-xs opacity-80 leading-relaxed">{item.note}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Divider */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-1 h-px bg-gray-200" />
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">Important Rules</span>
+                <div className="flex-1 h-px bg-gray-200" />
+              </div>
+
+              {/* Policy rules */}
+              <div className="space-y-2.5">
+                {policyRules.map((rule, i) => (
+                  <div key={i} className="policy-rule-item">
+                    <div className="policy-rule-dot" />
+                    <span>{rule}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer callout */}
+              <div
+                className="mt-6 rounded-xl p-4 flex items-start gap-3"
+                style={{ background: 'linear-gradient(135deg, rgba(39,34,98,0.06) 0%, rgba(227,183,94,0.10) 100%)', border: '1.5px solid rgba(227,183,94,0.3)' }}
+              >
+                <span className="text-xl flex-shrink-0">💡</span>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  Traveling with a family? We offer{' '}
+                  <strong className="text-[var(--second-color)]">customized family packages</strong> with dedicated child-friendly guides,
+                  kid-safe activities, and flexible scheduling.{' '}
+                  <Link href="/contact" className="text-[var(--main-color)] font-bold underline underline-offset-2 hover:text-[var(--second-color)] transition-colors">
+                    Contact us
+                  </Link>{' '}
+                  for a tailored quote.
+                </p>
+              </div>
+            </div>
+
           </div>
 
           {/* ════ RIGHT SIDEBAR ════ */}
@@ -547,7 +783,7 @@ export default function TourDetailsClient() {
                   </div>
                 </div>
 
-                {/* Check In / Check Out — flatpickr (minDate = tomorrow) */}
+                {/* Check In / Check Out */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={labelCls}>Check In</label>
@@ -585,7 +821,6 @@ export default function TourDetailsClient() {
 
                 {/* Adults + Children counters */}
                 <div className="grid grid-cols-2 gap-3">
-                  {/* Adults */}
                   <div>
                     <label className={labelCls}>Adults</label>
                     <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-2 py-2 border border-gray-200">
@@ -595,7 +830,6 @@ export default function TourDetailsClient() {
                     </div>
                     {fieldErrors.adults && <p className={errCls}>{fieldErrors.adults}</p>}
                   </div>
-                  {/* Children */}
                   <div>
                     <label className={labelCls}>Children</label>
                     <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-2 py-2 border border-gray-200">

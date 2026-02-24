@@ -1,6 +1,7 @@
 
 import RoavioAboutSection from "../../components/home/about";
 import TravelServicesSection from "../../components/home/services";
+import PartnersMarquee from "../../components/home/partners";
 import Link from "next/link";
 
 export default function AboutPage() {
@@ -20,8 +21,13 @@ export default function AboutPage() {
           </nav>
         </div>
       </div>
+      
       <RoavioAboutSection />
+
       <TravelServicesSection />
+
+      <PartnersMarquee />
+
     </>
   )
 }

@@ -210,7 +210,7 @@ export default function TravelServicesSection() {
 
           {/* Header */}
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+            <h2 className="text-2xl md:text-3xl font-semibold text-white mb-3">
               Our Amazing Services
             </h2>
             <span
