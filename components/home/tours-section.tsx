@@ -279,13 +279,12 @@ export default function TravelTourSlider() {
     transition: all 0.3s ease;
   }
 
-  /* ✅ Fix last card cutoff: Add right padding to swiper wrapper */
-  .swiper {
-    padding-right: 20px !important;
-    padding-left: 20px !important;
-    margin-left: -20px !important;
-    margin-right: -20px !important;
-    width: calc(100% + 40px) !important;
+  /* Keep slider fully inside viewport to prevent horizontal page scroll */
+  .home-tours .swiper {
+    padding-right: 12px !important;
+    padding-left: 12px !important;
+    width: 100% !important;
+    margin: 0 !important;
   }
 
   /* ✅ Mobile: show partial next card */
@@ -295,12 +294,9 @@ export default function TravelTourSlider() {
 
   /* ✅ Desktop: ensure all 3 cards fit without cutoff */
   @media (min-width: 1024px) {
-    .swiper {
-      padding-right: 30px !important;
-      padding-left: 30px !important;
-      margin-left: -30px !important;
-      margin-right: -30px !important;
-      width: calc(100% + 60px) !important;
+    .home-tours .swiper {
+      padding-right: 20px !important;
+      padding-left: 20px !important;
     }
   }
 
