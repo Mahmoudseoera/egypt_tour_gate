@@ -257,7 +257,7 @@ export default function EgyptToursBanner() {
 
 
         {/* ── Scroll Indicator ── */}
-        <Link href="#tours-section" className="scroll-indicator bottom-0 md:bottom-2" aria-label="Scroll to tours">
+        <Link href="#tours-section" className="scroll-indicator  bottom-3 md:bottom-4" aria-label="Scroll to tours">
           <span className="scroll-label">Scroll</span>
           <div className="scroll-pill">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
@@ -266,7 +266,6 @@ export default function EgyptToursBanner() {
             </svg>
           </div>
         </Link>
-
       </section>
     </>
   );
