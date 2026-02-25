@@ -6,6 +6,7 @@ import Footer from "../components/layout/footer"
 import ScrollToTop from  "../components/layout/scrollTop"
 import MobileFooter from "../components/layout/MobileFooter";
 import WhatsappIcon from "../components/layout/Whatsapp-icon";
+import GlobalSeoSchema from "@/components/seo/global-seo-schema";
 
 import "../styles/globals.css";
 
@@ -41,6 +42,7 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning className={`${montserrat.variable} antialiased`}>
+        <GlobalSeoSchema />
         <Navbar />
         {children}
         <ScrollToTop />

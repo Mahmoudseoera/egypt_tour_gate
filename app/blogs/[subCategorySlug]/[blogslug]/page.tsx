@@ -2,9 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Clock, User, Calendar, ArrowLeft, Share2, Tag, MapPin, Star } from "lucide-react";
 import { getPostBySlug, getRelatedPosts, getCategoryBySlug, blogCategories } from "@/lib/api/blogData";
+import Breadcrumb from "@/components/layout/breadcrumb";
+import SchemaScript from "@/components/seo/schema-script";
+import ExpandableDescription from "@/components/shared/expandable-description";
 import categoriesData from "@/lib/api/categories";
 
 type BlogDetailsPageProps = {
@@ -61,6 +65,21 @@ function getRelatedTours(post: any, limit: number = 3) {
     .slice(0, limit);
 }
 
+
+export async function generateMetadata({ params }: BlogDetailsPageProps): Promise<Metadata> {
+  const { blogslug } = await params;
+  const post = getPostBySlug(blogslug);
+
+  if (!post) {
+    return { title: "Blog Not Found" };
+  }
+
+  return {
+    title: `${post.title} | Egypt Tours Gate Blog`,
+    description: post.excerpt,
+  };
+}
+
 export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) {
   const { subCategorySlug, blogslug } = await params;
 
@@ -82,33 +101,31 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
 
   const publishDate = new Date(post.publishedAt);
 
+  const blogSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.publishedAt,
+    author: {
+      "@type": "Person",
+      name: post.author.name,
+    },
+    image: post.image,
+    url: `https://www.egypttoursgate.com/blogs/${post.categorySlug}/${post.slug}`,
+  };
+
   return (
     <div className="min-h-screen bg-[var(--main-grey)]">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 md:px-8 lg:px-16 py-4">
-          <nav className="flex items-center gap-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-[var(--main-color)] transition-colors">
-              Home
-            </Link>
-            <span>/</span>
-            <Link href="/blogs" className="hover:text-[var(--main-color)] transition-colors">
-              Blogs
-            </Link>
-            <span>/</span>
-            <Link
-              href={`/blogs/${post.categorySlug}`}
-              className="hover:text-[var(--main-color)] transition-colors"
-            >
-              {category?.title || post.categorySlug}
-            </Link>
-            <span>/</span>
-            <span className="text-[var(--second-color)] font-medium line-clamp-1">
-              {post.title}
-            </span>
-          </nav>
-        </div>
-      </div>
+      <SchemaScript schema={blogSchema} />
+      <Breadcrumb
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Blogs', href: '/blogs' },
+          { label: category?.title || post.categorySlug, href: `/blogs/${post.categorySlug}` },
+          { label: post.title, href: `/blogs/${post.categorySlug}/${post.slug}` },
+        ]}
+      />
 
       {/* Hero Section */}
       <div className="relative h-[500px] w-full">
@@ -183,7 +200,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
             <article className="bg-white rounded-3xl shadow-lg p-8 md:p-12">
               {/* Excerpt */}
               <div className="text-xl text-gray-700 leading-relaxed mb-8 pb-8 border-b border-gray-200 italic">
-                {post.excerpt}
+                <ExpandableDescription text={post.excerpt} maxLength={140} />
               </div>
 
               {/* Content */}
