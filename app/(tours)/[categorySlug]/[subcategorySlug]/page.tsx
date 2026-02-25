@@ -1,8 +1,13 @@
 // sub Category Page //
+import type { Metadata } from 'next';
 import Link from "next/link";
+import { notFound } from 'next/navigation';
 import categoriesData from "@/lib/api/categories";
 import SecondTourCard from "@/components/tour/second-tour-card";
 import type { Tour, TourPackage, NileCruise } from "@/lib/api/categories";
+import Breadcrumb from '@/components/layout/breadcrumb';
+import ExpandableDescription from '@/components/shared/expandable-description';
+import SchemaScript from '@/components/seo/schema-script';
 
 type SubcategoryPageProps = {
   params: Promise<{ categorySlug: string; subcategorySlug: string }>;
@@ -14,38 +19,44 @@ async function getGeneralCategories(baseUrl: string) {
   return data.data?.header?.headerCategories ?? [];
 }
 
+async function getPageData(categorySlug: string, subcategorySlug: string) {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (!baseUrl) {
+    throw new Error('NEXT_PUBLIC_API_BASE_URL is not set. Add it to .env.local');
+  }
+
+  const headerCategories = await getGeneralCategories(baseUrl);
+  const category = headerCategories.find((c: { slug: string }) => c.slug === categorySlug);
+  const subcategory = category?.children?.find((ch: { slug: string }) => ch.slug === subcategorySlug);
+
+  return { category, subcategory };
+}
+
+export async function generateMetadata({ params }: SubcategoryPageProps): Promise<Metadata> {
+  const { categorySlug, subcategorySlug } = await params;
+  const { category, subcategory } = await getPageData(categorySlug, subcategorySlug);
+
+  if (!category || !subcategory) {
+    return { title: 'Subcategory Not Found' };
+  }
+
+  const categoryName = category.name?.en ?? categorySlug;
+  const subcategoryName = subcategory.name?.en ?? subcategorySlug;
+
+  return {
+    title: `${subcategoryName} ${categoryName} | Egypt Tours Gate`,
+    description: `Discover ${subcategoryName} experiences in ${categoryName} with curated programs and flexible itineraries.`,
+  };
+}
+
 export default async function SubcategoryPage({
   params,
 }: SubcategoryPageProps) {
   const { categorySlug, subcategorySlug } = await params;
-
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!baseUrl) {
-    throw new Error(
-      "NEXT_PUBLIC_API_BASE_URL is not set. Add it to .env.local"
-    );
-  }
-
-  const headerCategories = await getGeneralCategories(baseUrl);
-  const category = headerCategories.find(
-    (c: { slug: string }) => c.slug === categorySlug
-  );
-  const subcategory = category?.children?.find(
-    (ch: { slug: string }) => ch.slug === subcategorySlug
-  );
+  const { category, subcategory } = await getPageData(categorySlug, subcategorySlug);
 
   if (!category || !subcategory) {
-    return (
-      <div className="container py-10">
-        <p className="text-lg">Category or subcategory not found.</p>
-        <Link
-          href="/"
-          className="text-[var(--main-color)] underline mt-4 inline-block"
-        >
-          Back to home
-        </Link>
-      </div>
-    );
+    notFound();
   }
 
   const { tours, packages, nile_cruises } = categoriesData;
@@ -62,7 +73,6 @@ export default async function SubcategoryPage({
     (c: NileCruise) => c.categorySlug === categorySlug && c.subcategorySlug === subcategorySlug
   );
 
-  // Normalize all items to a common structure for SecondTourCard
   const normalizedItems = [
     ...dayTours.map((tour: Tour) => ({
       id: tour.id,
@@ -110,39 +120,38 @@ export default async function SubcategoryPage({
 
   const categoryName = category.name?.en ?? categorySlug;
   const subcategoryName = subcategory.name?.en ?? subcategorySlug;
+  const shortDescription = `Explore the top ${subcategoryName} tours in ${categoryName} and choose the itinerary that matches your travel style.`;
+
+  const subcategorySchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `${subcategoryName} ${categoryName}`,
+    description: shortDescription,
+    url: `https://www.egypttoursgate.com/${categorySlug}/${subcategorySlug}`,
+  };
 
   return (
     <>
-      {/* Breadcrumb */}
-      <div className="bg-white border border-gray-200">
-        <div className="container mx-auto px-4 md:px-8 lg:px-16 py-4">
-          <nav className="flex items-center gap-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-[var(--main-color)]">
-              Home
-            </Link>
-            <span className="mx-2">/</span>
-            <Link
-              href={`/${categorySlug}`}
-              className="hover:text-[var(--main-color)] transition-colors"
-            >
-              {categorySlug.replace(/-/g, " ")}
-            </Link>
-            <span className="mx-2">/</span>
-            <span className="text-navy font-medium uppercase">
-              {subcategorySlug.replace(/-/g, " ")}
-            </span>
-          </nav>
-        </div>
-      </div>
-      
+      <SchemaScript schema={subcategorySchema} />
+      <Breadcrumb
+        items={[
+          { label: 'Home', href: '/' },
+          { label: categoryName, href: `/${categorySlug}` },
+          { label: subcategoryName, href: `/${categorySlug}/${subcategorySlug}` },
+        ]}
+      />
+
       <section className="container py-10 max-w-7xl mx-auto">
         <div className="container mx-auto">
           <h1 className="text-3xl font-bold mb-2 text-center text-[var(--second-color)]">
             {categoryName}
           </h1>
-          <h2 className="text-xl text-gray-600 mb-8 text-center">
+          <h2 className="text-xl text-gray-600 mb-4 text-center">
             {subcategoryName}
           </h2>
+          <div className="max-w-2xl mx-auto text-center mb-8">
+            <ExpandableDescription text={shortDescription} />
+          </div>
 
           {normalizedItems.length === 0 ? (
             <p className="text-lg text-center">No tours found for this subcategory.</p>

@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getCategoryBySlug, getPostsByCategory } from '../../../lib/api/blogData';
 import Breadcrumb from '@/components/layout/breadcrumb';
+import ExpandableDescription from '@/components/shared/expandable-description';
+import SchemaScript from '@/components/seo/schema-script';
 
 interface CategoryPageProps {
   params: Promise<{
@@ -37,8 +39,17 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   const posts = getPostsByCategory(resolvedParams.subCategorySlug);
 
+  const categorySchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: category.title,
+    description: category.description,
+    url: `https://www.egypttoursgate.com/blogs/${resolvedParams.subCategorySlug}`
+  };
+
   return (
     <div className="min-h-screen bg-grey-light">
+      <SchemaScript schema={categorySchema} />
       {/* Breadcrumb */}
       <Breadcrumb 
         items={[
@@ -63,9 +74,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
               {category.title}
             </h1>
-            <p className="text-xl text-white/90 leading-relaxed">
-              {category.description}
-            </p>
+            <ExpandableDescription
+              text={category.description}
+              maxLength={110}
+              className="text-xl text-white/90 leading-relaxed [&>p]:text-white/90 [&>button]:text-gold"
+            />
             <div className="mt-8 inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-white">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
