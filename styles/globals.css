@@ -330,6 +330,11 @@
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
 /*==================================
     start Header CSS
 ===================================*/
@@ -371,6 +376,9 @@
   font-size: 14px;
   color: #333;
   transition: background 0.2s ease;
+  border: 0;
+  background: transparent;
+  text-align: left;
 }
 
 .lang-item:hover {
@@ -379,6 +387,18 @@
 
 .lang-flag {
   border-radius: 9999px;
+}
+
+
+[dir="rtl"] .lang-menu {
+  left: 0;
+  right: auto;
+}
+
+[dir="rtl"] .mobile-drawer {
+  left: auto !important;
+  right: 0;
+  animation-name: slideInRight !important;
 }
 
 nav.fixed {

@@ -2,9 +2,11 @@
 
 import { useEffect } from 'react'
 import { useScrollAnimation } from '../lib/hooks/useScrollAnimation';
+import { I18nProvider } from '@/lib/i18n/i18n-provider';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  useScrollAnimation()
+  useScrollAnimation();
+
   useEffect(() => {
     const removeAttributes = () => {
       const html = document.documentElement
@@ -31,5 +33,5 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     return () => observer.disconnect()
   }, [])
 
-  return <>{children}</>
-} 
+  return <I18nProvider>{children}</I18nProvider>
+}

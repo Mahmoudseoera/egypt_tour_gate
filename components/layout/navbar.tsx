@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useI18n } from "@/lib/i18n/i18n-provider";
+import { type SupportedLanguage } from "@/lib/mock/i18n-data";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -98,8 +100,15 @@ export default function Navbar() {
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | number | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
+  const { t, language, languages, setLanguage, localizePath } = useI18n();
 
   const { data, error, loading } = useGeneralData();
+
+  const selectedLanguage = languages.find((option) => option.code === language) ?? languages[0];
+
+  const handleLanguageChange = (languageCode: SupportedLanguage) => {
+    setLanguage(languageCode);
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -327,7 +336,7 @@ export default function Navbar() {
                 className="flex items-center gap-2 pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
               >
                 <Phone className="h-4 w-4" />
-                <span className="hidden md:inline font-medium">Call Free :</span>
+                <span className="hidden md:inline font-medium">{t("navbar.callFree")}</span>
                 <span className="hidden lg:inline">+201110008407</span>
               </Link>
             </div>
@@ -340,18 +349,31 @@ export default function Navbar() {
                 <span className="hidden lg:inline font-medium">info@example.com</span>
               </Link>
               <div className="relative group flex items-center gap-1 px-4 border-r border-white/20 cursor-pointer text-[var(--second-color)]">
-                <Image src="https://flagcdn.com/w40/us.png" alt="ENG" width={16} height={16} className="rounded-full" />
-                <span className="hidden md:inline">ENG</span>
+                {selectedLanguage ? (
+                  <>
+                    <Image src={selectedLanguage.flag} alt={selectedLanguage.label} width={16} height={16} className="rounded-full" />
+                    <span className="hidden md:inline">{selectedLanguage.shortLabel}</span>
+                  </>
+                ) : (
+                  <span className="hidden md:inline">{language.toUpperCase()}</span>
+                )}
                 <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                 <div className="lang-menu">
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/us.png" alt="English" width={20} height={20} className="lang-flag" />English</Link>
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/fr.png" alt="Français" width={20} height={20} className="lang-flag" />Français</Link>
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/de.png" alt="Deutsch" width={20} height={20} className="lang-flag" />Deutsch</Link>
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/eg.png" alt="Arabic" width={20} height={20} className="lang-flag" />العربية</Link>
+                  {languages.map((language) => (
+                    <button
+                      key={language.code}
+                      type="button"
+                      className="lang-item w-full"
+                      onClick={() => void handleLanguageChange(language.code)}
+                    >
+                      <Image src={language.flag} alt={language.label} width={20} height={20} className="lang-flag" />
+                      {language.label}
+                    </button>
+                  ))}
                 </div>
               </div>
               <div className="flex items-center gap-1 pl-4 cursor-pointer text-[var(--second-color)]">
-                <span className="hidden md:inline">USD</span>
+                <span className="hidden md:inline">{t("navbar.currency")}</span>
                 <ChevronDown className="h-4 w-4" />
               </div>
             </div>
@@ -367,7 +389,7 @@ export default function Navbar() {
         >
           <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-2">
             {/* Logo */}
-            <Link href="/">
+            <Link href={localizePath("/")}>
               <Image
                 src="/assets/images/egypt-tour-gate-logo.png"
                 alt="Egypt Tour Gate"
@@ -378,13 +400,13 @@ export default function Navbar() {
 
             {/* Right: CTA + Hamburger */}
             <div className="flex items-center gap-3 md:order-2">
-              <Link href="/tailor-made" className="btn-effect hidden md:block">
-                Get started
+              <Link href={localizePath("/tailor-made")} className="btn-effect hidden md:block">
+                {t("navbar.getStarted")}
               </Link>
               <button
                 onClick={() => setMobileOpen(true)}
                 className="md:hidden flex flex-col gap-[5px] p-2 group"
-                aria-label="Open menu"
+                aria-label={t("navbar.menu")}
               >
                 <span className="block w-6 h-0.5 bg-[var(--second-color)] transition-all duration-300" />
                 <span className="block w-4 h-0.5 bg-[var(--second-color)] transition-all duration-300 group-hover:w-6" />
@@ -398,10 +420,10 @@ export default function Navbar() {
               {/* Home */}
               <li className="py-4">
                 <Link
-                  href="/"
+                  href={localizePath("/")}
                   className="px-3 py-2 rounded-md text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 text-[14.5px] font-semibold nav-link-underline"
                 >
-                  Home
+                  {t("navbar.home")}
                 </Link>
               </li>
 
@@ -419,7 +441,7 @@ export default function Navbar() {
                     onMouseLeave={() => setActiveMegaMenu(null)}
                   >
                     <Link
-                      href={`/${cat.slug}`}
+                      href={localizePath(`/${cat.slug}`)}
                       className={`flex items-center gap-1 px-3 py-2 rounded-md text-[14.5px] font-semibold transition-all duration-200 nav-link-underline capitalize ${
                         isOpen
                           ? "text-[var(--main-color)]"
@@ -471,7 +493,7 @@ export default function Navbar() {
                                   </p>
                                 </div>
                                 <Link
-                                  href={`/${cat.slug}`}
+                                  href={localizePath(`/${cat.slug}`)}
                                   className="ml-auto flex items-center gap-1 text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full border transition-all duration-200 hover:text-white"
                                   style={{
                                     color: catColor,
@@ -496,7 +518,7 @@ export default function Navbar() {
                                 {cat.children.map((child) => (
                                   <Link
                                     key={child.id}
-                                    href={`/${cat.slug}/${child.slug}`}
+                                    href={localizePath(`/${cat.slug}/${child.slug}`)}
                                     className="mega-cat-card flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/60 group/card"
                                   >
                                     {/* Icon */}
@@ -539,7 +561,7 @@ export default function Navbar() {
                                 {featuredHighlights.map((item) => (
                                   <Link
                                     key={item.href}
-                                    href={item.href}
+                                    href={localizePath(item.href)}
                                     className="featured-card block group/feat"
                                   >
                                     <div className="relative h-[100px] w-full overflow-hidden rounded-xl">
@@ -576,7 +598,7 @@ export default function Navbar() {
                                   Tailor-made tours available
                                 </p>
                                 <Link
-                                  href="/tailor-made"
+                                  href={localizePath("/tailor-made")}
                                   className="inline-block mt-1.5 text-[10px] font-bold underline"
                                   style={{ color: catColor }}
                                 >
@@ -605,7 +627,7 @@ export default function Navbar() {
                       : "text-[var(--second-color)] hover:text-[var(--main-color)]"
                   }`}
                 >
-                  More Pages
+                  {t("navbar.staticPages")}
                   <ChevronDown
                     className={`h-4 w-4 transition-transform duration-300 ${activeMegaMenu === "static" ? "rotate-180" : ""}`}
                   />
@@ -626,7 +648,7 @@ export default function Navbar() {
                         ].map((item) => (
                           <Link
                             key={item.href}
-                            href={item.href}
+                            href={localizePath(item.href)}
                             className="simple-dropdown-item flex items-center gap-3 px-4 py-2.5 hover:text-[var(--second-color)] text-gray-600 font-medium text-[13.5px]"
                           >
                             <span
@@ -648,7 +670,7 @@ export default function Navbar() {
               {/* Blogs */}
               <li className="py-4">
                 <Link
-                  href="/blogs"
+                  href={localizePath("/blogs")}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-md text-[14.5px] font-semibold text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 nav-link-underline"
                 >
                   <BookOpen size={15} />
@@ -682,7 +704,7 @@ export default function Navbar() {
                 <button
                   onClick={closeMenu}
                   className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:bg-white/20"
-                  aria-label="Close menu"
+                  aria-label={t("navbar.closeMenu")}
                 >
                   <X size={20} />
                 </button>
@@ -696,7 +718,7 @@ export default function Navbar() {
 
                 {/* Home */}
                 <Link
-                  href="/"
+                  href={localizePath("/")}
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -746,7 +768,7 @@ export default function Navbar() {
                         {cat.children.map((child) => (
                           <Link
                             key={child.id}
-                            href={`/${cat.slug}/${child.slug}`}
+                            href={localizePath(`/${cat.slug}/${child.slug}`)}
                             onClick={closeMenu}
                             className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                           >
@@ -764,7 +786,7 @@ export default function Navbar() {
 
                 {/* Blogs */}
                 <Link
-                  href="/blogs"
+                  href={localizePath("/blogs")}
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -787,7 +809,7 @@ export default function Navbar() {
                     >
                       <Sparkles size={18} style={{ color: activeDropdown === "static" ? "#fff" : "var(--second-color)" }} />
                     </div>
-                    <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>More Pages</span>
+                    <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>{t("navbar.staticPages")}</span>
                     <ChevronDown
                       size={16}
                       className="ml-auto text-gray-400 flex-shrink-0 transition-transform duration-300"
@@ -803,7 +825,7 @@ export default function Navbar() {
                       ].map((item) => (
                         <Link
                           key={item.href}
-                          href={item.href}
+                          href={localizePath(item.href)}
                           onClick={closeMenu}
                           className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                         >
@@ -845,7 +867,7 @@ export default function Navbar() {
 
                 {/* Support */}
                 <Link
-                  href="/contact"
+                  href={localizePath("/contact")}
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -862,7 +884,7 @@ export default function Navbar() {
               {/* Footer CTA */}
               <div className="px-5 py-4 border-t border-gray-100 bg-white">
                 <Link
-                  href="/tailor-made"
+                  href={localizePath("/tailor-made")}
                   onClick={closeMenu}
                   className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-white font-bold text-[15px] transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
                   style={{ background: "var(--main-color)" }}
