@@ -1,14 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getI18nData } from "@/lib/api/i18n";
-import {
-  fallbackLanguage,
-  getLanguageFromPathname,
-  isSupportedLanguage,
-  withLanguagePrefix,
-} from "./config";
+import { fallbackLanguage, isSupportedLanguage } from "./config";
 import type {
   I18nPayload,
   LanguageOption,
@@ -22,7 +16,6 @@ type I18nContextValue = {
   isReady: boolean;
   setLanguage: (language: SupportedLanguage) => void;
   t: (key: string) => string;
-  localizePath: (path: string) => string;
 };
 
 const defaultContext: I18nContextValue = {
@@ -31,7 +24,6 @@ const defaultContext: I18nContextValue = {
   isReady: false,
   setLanguage: () => undefined,
   t: (key) => key,
-  localizePath: (path) => path,
 };
 
 const I18nContext = createContext<I18nContextValue>(defaultContext);
@@ -48,10 +40,8 @@ function resolveCurrentMessages(payload: I18nPayload, language: SupportedLanguag
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const router = useRouter();
   const [payload, setPayload] = useState<I18nPayload | null>(null);
-  const [language, setLanguageState] = useState<SupportedLanguage>(fallbackLanguage);
+  const [language, setLanguage] = useState<SupportedLanguage>(fallbackLanguage);
 
   useEffect(() => {
     let mounted = true;
@@ -63,17 +53,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       }
 
       setPayload(response);
-
-      const pathLanguage = getLanguageFromPathname(pathname || "/", response.languages);
       const savedLanguage = getSavedLanguage();
+      const nextLanguage = isSupportedLanguage(savedLanguage, response.languages)
+        ? savedLanguage
+        : response.defaultLanguage;
 
-      const nextLanguage = pathLanguage !== fallbackLanguage
-        ? pathLanguage
-        : isSupportedLanguage(savedLanguage, response.languages)
-          ? savedLanguage
-          : response.defaultLanguage;
-
-      setLanguageState(nextLanguage);
+      setLanguage(nextLanguage);
     };
 
     void load();
@@ -81,7 +66,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false;
     };
-  }, [pathname]);
+  }, []);
 
   useEffect(() => {
     if (!payload) {
@@ -95,19 +80,6 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.dir = direction;
     localStorage.setItem("app-language", language);
   }, [language, payload]);
-
-  const setLanguage = useCallback((nextLanguage: SupportedLanguage) => {
-    if (!payload) {
-      setLanguageState(nextLanguage);
-      return;
-    }
-
-    setLanguageState(nextLanguage);
-    const targetPath = withLanguagePrefix(pathname || "/", nextLanguage, payload.languages);
-    if (targetPath !== (pathname || "/")) {
-      router.push(targetPath);
-    }
-  }, [payload, pathname, router]);
 
   const value = useMemo<I18nContextValue>(() => {
     if (!payload) {
@@ -123,9 +95,8 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       isReady: true,
       setLanguage,
       t: (key: string) => messages[key] ?? fallbackMessages[key] ?? key,
-      localizePath: (path: string) => withLanguagePrefix(path, language, payload.languages),
     };
-  }, [language, payload, setLanguage]);
+  }, [language, payload]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

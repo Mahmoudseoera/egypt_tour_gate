@@ -1,6 +1,6 @@
 export type Direction = "ltr" | "rtl";
 
-export type SupportedLanguage = "en" | "ar" | "de" | "fra";
+export type SupportedLanguage = "en" | "ar" | "fr" | "de";
 
 export type LanguageOption = {
   code: SupportedLanguage;
@@ -23,8 +23,8 @@ export const i18nMockData: I18nPayload = {
   defaultLanguage: "en",
   languages: [
     { code: "en", label: "English", shortLabel: "ENG", flag: "https://flagcdn.com/w40/us.png", dir: "ltr" },
-    { code: "fra", label: "Français", shortLabel: "FRA", flag: "https://flagcdn.com/w40/fr.png", dir: "ltr" },
-    { code: "de", label: "Deutsch", shortLabel: "DE", flag: "https://flagcdn.com/w40/de.png", dir: "ltr" },
+    { code: "fr", label: "Français", shortLabel: "FRA", flag: "https://flagcdn.com/w40/fr.png", dir: "ltr" },
+    { code: "de", label: "Deutsch", shortLabel: "DEU", flag: "https://flagcdn.com/w40/de.png", dir: "ltr" },
     { code: "ar", label: "العربية", shortLabel: "AR", flag: "https://flagcdn.com/w40/eg.png", dir: "rtl" },
   ],
   messages: {
@@ -46,7 +46,7 @@ export const i18nMockData: I18nPayload = {
       "navbar.menu": "القائمة",
       "navbar.closeMenu": "إغلاق القائمة",
     },
-    fra: {
+    fr: {
       "navbar.callFree": "Appel gratuit :",
       "navbar.currency": "USD",
       "navbar.getStarted": "Commencer",

@@ -100,7 +100,7 @@ export default function Navbar() {
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | number | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
-  const { t, language, languages, setLanguage, localizePath } = useI18n();
+  const { t, language, languages, setLanguage } = useI18n();
 
   const { data, error, loading } = useGeneralData();
 
@@ -400,7 +400,7 @@ export default function Navbar() {
 
             {/* Right: CTA + Hamburger */}
             <div className="flex items-center gap-3 md:order-2">
-              <Link href={localizePath("/tailor-made")} className="btn-effect hidden md:block">
+              <Link href="/tailor-made" className="btn-effect hidden md:block">
                 {t("navbar.getStarted")}
               </Link>
               <button
