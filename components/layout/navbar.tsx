@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useI18n } from "@/lib/i18n/i18n-provider";
+import { type SupportedLanguage } from "@/lib/mock/i18n-data";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -98,8 +100,15 @@ export default function Navbar() {
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | number | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
+  const { t, language, languages, setLanguage } = useI18n();
 
   const { data, error, loading } = useGeneralData();
+
+  const selectedLanguage = languages.find((option) => option.code === language) ?? languages[0];
+
+  const handleLanguageChange = (languageCode: SupportedLanguage) => {
+    setLanguage(languageCode);
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -327,7 +336,7 @@ export default function Navbar() {
                 className="flex items-center gap-2 pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
               >
                 <Phone className="h-4 w-4" />
-                <span className="hidden md:inline font-medium">Call Free :</span>
+                <span className="hidden md:inline font-medium">{t("navbar.callFree")}</span>
                 <span className="hidden lg:inline">+201110008407</span>
               </Link>
             </div>
@@ -340,18 +349,31 @@ export default function Navbar() {
                 <span className="hidden lg:inline font-medium">info@example.com</span>
               </Link>
               <div className="relative group flex items-center gap-1 px-4 border-r border-white/20 cursor-pointer text-[var(--second-color)]">
-                <Image src="https://flagcdn.com/w40/us.png" alt="ENG" width={16} height={16} className="rounded-full" />
-                <span className="hidden md:inline">ENG</span>
+                {selectedLanguage ? (
+                  <>
+                    <Image src={selectedLanguage.flag} alt={selectedLanguage.label} width={16} height={16} className="rounded-full" />
+                    <span className="hidden md:inline">{selectedLanguage.shortLabel}</span>
+                  </>
+                ) : (
+                  <span className="hidden md:inline">{language.toUpperCase()}</span>
+                )}
                 <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                 <div className="lang-menu">
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/us.png" alt="English" width={20} height={20} className="lang-flag" />English</Link>
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/fr.png" alt="Français" width={20} height={20} className="lang-flag" />Français</Link>
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/de.png" alt="Deutsch" width={20} height={20} className="lang-flag" />Deutsch</Link>
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/eg.png" alt="Arabic" width={20} height={20} className="lang-flag" />العربية</Link>
+                  {languages.map((language) => (
+                    <button
+                      key={language.code}
+                      type="button"
+                      className="lang-item w-full"
+                      onClick={() => void handleLanguageChange(language.code)}
+                    >
+                      <Image src={language.flag} alt={language.label} width={20} height={20} className="lang-flag" />
+                      {language.label}
+                    </button>
+                  ))}
                 </div>
               </div>
               <div className="flex items-center gap-1 pl-4 cursor-pointer text-[var(--second-color)]">
-                <span className="hidden md:inline">USD</span>
+                <span className="hidden md:inline">{t("navbar.currency")}</span>
                 <ChevronDown className="h-4 w-4" />
               </div>
             </div>
@@ -379,12 +401,12 @@ export default function Navbar() {
             {/* Right: CTA + Hamburger */}
             <div className="flex items-center gap-3 md:order-2">
               <Link href="/tailor-made" className="btn-effect hidden md:block">
-                Get started
+                {t("navbar.getStarted")}
               </Link>
               <button
                 onClick={() => setMobileOpen(true)}
                 className="md:hidden flex flex-col gap-[5px] p-2 group"
-                aria-label="Open menu"
+                aria-label={t("navbar.menu")}
               >
                 <span className="block w-6 h-0.5 bg-[var(--second-color)] transition-all duration-300" />
                 <span className="block w-4 h-0.5 bg-[var(--second-color)] transition-all duration-300 group-hover:w-6" />
@@ -401,7 +423,7 @@ export default function Navbar() {
                   href="/"
                   className="px-3 py-2 rounded-md text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 text-[14.5px] font-semibold nav-link-underline"
                 >
-                  Home
+                  {t("navbar.home")}
                 </Link>
               </li>
 
@@ -605,7 +627,7 @@ export default function Navbar() {
                       : "text-[var(--second-color)] hover:text-[var(--main-color)]"
                   }`}
                 >
-                  More Pages
+                  {t("navbar.staticPages")}
                   <ChevronDown
                     className={`h-4 w-4 transition-transform duration-300 ${activeMegaMenu === "static" ? "rotate-180" : ""}`}
                   />
@@ -682,7 +704,7 @@ export default function Navbar() {
                 <button
                   onClick={closeMenu}
                   className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:bg-white/20"
-                  aria-label="Close menu"
+                  aria-label={t("navbar.closeMenu")}
                 >
                   <X size={20} />
                 </button>
@@ -787,7 +809,7 @@ export default function Navbar() {
                     >
                       <Sparkles size={18} style={{ color: activeDropdown === "static" ? "#fff" : "var(--second-color)" }} />
                     </div>
-                    <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>More Pages</span>
+                    <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>{t("navbar.staticPages")}</span>
                     <ChevronDown
                       size={16}
                       className="ml-auto text-gray-400 flex-shrink-0 transition-transform duration-300"
