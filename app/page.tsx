@@ -1,5 +1,4 @@
 'use client'
-import Providers from '../components/providers'
 import EgyptToursBanner  from '../components/home/hero-banner'
 import TestimonialSlider from "../components/testimonails/testimonials-card";
 import SecondTourCard from "../components/tour/second-tour-card";
@@ -17,7 +16,6 @@ import "@/styles/home.css";
 
 export default function Home() {
   return (
-    <Providers>
       <main className="min-h-screen bg-light">
         <EgyptToursBanner />
         <RoavioAboutSection />
@@ -83,6 +81,5 @@ export default function Home() {
           <PartnersMarquee />
         </div>
       </main>
-    </Providers>
   )
 }
