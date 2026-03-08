@@ -36,7 +36,7 @@ import SimpleSocialIcon, {
   SocialItem,
 } from "@/components/layout/simpleSocialIcon";
 
-/* Social */
+/* ── Static social links ─────────────────────────────────────────────────── */
 const socialData: SocialItem[] = [
   { icon: "fa-brands fa-facebook-f", url: "https://facebook.com", title: "Facebook" },
   { icon: "fa-brands fa-instagram", url: "https://instagram.com", title: "Instagram" },
@@ -44,12 +44,15 @@ const socialData: SocialItem[] = [
   { icon: "fa-brands fa-youtube", url: "https://youtube.com", title: "YouTube" },
 ];
 
-// Map category slugs to icons and descriptions
+/* ── Category helpers ────────────────────────────────────────────────────── */
 function getCategoryIcon(slug: string) {
   const map: Record<string, React.ReactNode> = {
     "egypt-day-tours": <Compass size={20} />,
     "egypt-tour-packages": <Map size={20} />,
+    "egypt-travel-packages": <Map size={20} />,
     "nile-cruises": <Ship size={20} />,
+    "egypt-nile-cruises": <Ship size={20} />,
+    "egypt-shore-excursions": <Palmtree size={20} />,
     "beach-tours": <Palmtree size={20} />,
     "photography-tours": <Camera size={20} />,
   };
@@ -60,9 +63,10 @@ function getCategoryDescription(slug: string) {
   const map: Record<string, string> = {
     "egypt-day-tours": "Explore iconic sites in a single day with expert guides",
     "egypt-tour-packages": "Complete multi-day itineraries across Egypt",
+    "egypt-travel-packages": "Complete multi-day itineraries across Egypt",
     "nile-cruises": "Sail the legendary Nile River in style & comfort",
-    "beach-tours": "Pristine Red Sea beaches and coastal adventures",
-    "photography-tours": "Capture Egypt's beauty through a professional lens",
+    "egypt-nile-cruises": "Sail the legendary Nile River in style & comfort",
+    "egypt-shore-excursions": "Pristine Red Sea shores and coastal adventures",
   };
   return map[slug] ?? "Discover unforgettable experiences across Egypt";
 }
@@ -71,34 +75,38 @@ function getCategoryColor(slug: string) {
   const map: Record<string, string> = {
     "egypt-day-tours": "#e3b75e",
     "egypt-tour-packages": "#272262",
+    "egypt-travel-packages": "#272262",
     "nile-cruises": "#1e6fa5",
-    "beach-tours": "#27a06e",
-    "photography-tours": "#a0522d",
+    "egypt-nile-cruises": "#1e6fa5",
+    "egypt-shore-excursions": "#27a06e",
   };
   return map[slug] ?? "#e3b75e";
 }
 
-// Featured highlights shown inside mega menu
+/* ── Featured highlights (static) ───────────────────────────────────────── */
 const featuredHighlights = [
   {
     title: "Pyramids of Giza",
     tag: "Most Popular",
     img: "/assets/images/tours/camel front of giza pyramids.jpg",
-    href: "/egypt-day-tours/cairo",
+    href: "/egypt-day-tours/cairo-day-tours",
   },
   {
     title: "Nile Cruise Package",
     tag: "Best Value",
     img: "/assets/images/tours/49-webp.webp",
-    href: "/nile-cruises/luxor-aswan-nile-crusie",
+    href: "/egypt-nile-cruises/luxor-aswan-nile-cruises",
   },
 ];
+
+/* ══════════════════════════════════════════════════════════════════════════ */
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<string | number | null>(null);
-  const [activeMegaMenu, setActiveMegaMenu] = useState<string | number | null>(null);
+  // KEY CHANGE: use slug as the dropdown key (no more cat.id — real API has no id)
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
 
@@ -106,8 +114,11 @@ export default function Navbar() {
   const router = useRouter();
   const activeLocale = getPathLocale(pathname);
   const { data, error, loading } = useGeneralData(activeLocale);
+  const localizePath = (path: string) => buildLocalizedPath(path, activeLocale);
 
-  const currentLanguage = data?.header.languages.find((lang) => lang.slug === activeLocale);
+  const currentLanguage = data?.header.languages.find(
+    (lang) => lang.slug === activeLocale
+  );
 
   const onLanguageChange = (slug: string) => {
     const targetPath = buildLocalizedPath(pathname, slug);
@@ -120,7 +131,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mega menu on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
@@ -131,7 +141,6 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -142,6 +151,7 @@ export default function Navbar() {
     setActiveDropdown(null);
   };
 
+  /* ── Loading ─────────────────────────────────────────────────────────── */
   if (loading) {
     return (
       <nav className="w-full bg-white p-4">
@@ -159,10 +169,19 @@ export default function Navbar() {
     return <div>Error loading navbar</div>;
   }
 
+  const logoSrc =
+    data.header.logo?.image || "/assets/images/egypt-tour-gate-logo.png";
+  const logoAlt = data.header.logo?.alt || "Egypt Tour Gate";
+  const logoUnoptimized =
+    logoSrc.startsWith("http://127.0.0.1") ||
+    logoSrc.startsWith("http://localhost");
+
+  /* ── Real API categories: use subs (not children), slug as key ─────── */
+  const categories = data.header.categories;
+
   return (
     <>
       <style jsx global>{`
-        /* ---- Mobile Menu Animations ---- */
         @keyframes slideInLeft {
           from { transform: translateX(-100%); opacity: 0; }
           to   { transform: translateX(0);    opacity: 1; }
@@ -188,7 +207,6 @@ export default function Navbar() {
         .mobile-drawer  { animation: slideInLeft 0.32s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
         .submenu-open   { animation: slideDown 0.28s ease forwards; overflow: hidden; }
 
-        /* ---- Desktop: nav underline ---- */
         .nav-link-underline { position: relative; }
         .nav-link-underline::after {
           content: '';
@@ -201,7 +219,6 @@ export default function Navbar() {
         .nav-link-underline:hover::after,
         .nav-link-underline.active::after { width: 100%; }
 
-        /* ---- Simple dropdown (Static Pages) ---- */
         .simple-dropdown {
           animation: dropdownFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           transform-origin: top center;
@@ -231,7 +248,6 @@ export default function Navbar() {
           transform: translateX(0);
         }
 
-        /* ---- Mega menu ---- */
         .mega-menu {
           animation: megaFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           transform-origin: top center;
@@ -253,12 +269,8 @@ export default function Navbar() {
         }
         .mega-cat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(39,34,98,0.13); }
         .mega-cat-card:hover::before { opacity: 0.07; }
-        .mega-cat-card .cat-icon-wrap {
-          transition: all 0.2s ease;
-        }
-        .mega-cat-card:hover .cat-icon-wrap {
-          transform: scale(1.1);
-        }
+        .mega-cat-card .cat-icon-wrap { transition: all 0.2s ease; }
+        .mega-cat-card:hover .cat-icon-wrap { transform: scale(1.1); }
         .mega-cat-card .cat-arrow {
           opacity: 0;
           transform: translateX(-6px);
@@ -305,7 +317,6 @@ export default function Navbar() {
         .featured-card img { transition: transform 0.4s ease; }
         .featured-card:hover img { transform: scale(1.06); }
 
-        /* Nav item active indicator dot */
         .nav-active-dot {
           position: absolute;
           bottom: 6px;
@@ -319,14 +330,42 @@ export default function Navbar() {
         }
         li:hover .nav-active-dot,
         li.menu-open .nav-active-dot { opacity: 1; }
+
+        /* Top bar styles */
+        .topbar-wrapper {
+          background: var(--main-grey, #f9f9f9);
+          border-bottom: 1px solid rgba(39,34,98,0.08);
+        }
+        .lang-menu {
+          display: none;
+          position: absolute;
+          top: calc(100% + 8px);
+          right: 0;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+          border: 1px solid rgba(0,0,0,0.07);
+          min-width: 120px;
+          overflow: hidden;
+          z-index: 999;
+        }
+        .group:hover .lang-menu { display: block; }
+        .lang-item {
+          padding: 8px 14px;
+          font-size: 13px;
+          color: var(--second-color);
+          font-weight: 500;
+          transition: background 0.15s;
+        }
+        .lang-item:hover { background: rgba(227,183,94,0.1); }
       `}</style>
 
       <header>
         {/* ===== TOP BAR ===== */}
         <div className="topbar-wrapper">
-          <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-2 text-sm text-white">
+          <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-2 text-sm">
             <div className="flex items-center">
-              <div className="flex items-center gap-2 pr-4 border-r border-white/20">
+              <div className="flex items-center gap-2 pr-4 border-r border-gray-200">
                 {socialData.map((item, index) => (
                   <SimpleSocialIcon
                     key={index}
@@ -336,25 +375,34 @@ export default function Navbar() {
                 ))}
               </div>
               <Link
-                href="tel:+201110008407"
+                href={`tel:${data.header.info?.phone ?? "+201110008407"}`}
                 className="flex items-center gap-2 pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
               >
                 <Phone className="h-4 w-4" />
                 <span className="hidden md:inline font-medium">Call Free :</span>
-                <span className="hidden lg:inline">+201110008407</span>
+                <span className="hidden lg:inline">
+                  {data.header.info?.phone ?? "+201110008407"}
+                </span>
               </Link>
             </div>
+
             <div className="flex items-center">
               <Link
-                href="mailto:info@example.com"
-                className="flex items-center gap-2 pr-4 border-r border-white/20 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
+                href={`mailto:${data.header.info?.email ?? "info@egypttoursgate.com"}`}
+                className="flex items-center gap-2 pr-4 border-r border-gray-200 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
               >
                 <Mail className="h-4 w-4" />
-                <span className="hidden lg:inline font-medium">info@example.com</span>
+                <span className="hidden lg:inline font-medium">
+                  {data.header.info?.email ?? "info@egypttoursgate.com"}
+                </span>
               </Link>
-              <div className="relative group flex items-center gap-1 px-4 border-r border-white/20 cursor-pointer text-[var(--second-color)]">
+
+              {/* Language switcher — real API: data.header.languages[].slug / .name */}
+              <div className="relative group flex items-center gap-1 px-4 border-r border-gray-200 cursor-pointer text-[var(--second-color)]">
                 <Globe className="h-4 w-4" />
-                <span className="hidden md:inline uppercase">{currentLanguage?.slug ?? DEFAULT_LOCALE}</span>
+                <span className="hidden md:inline uppercase font-medium">
+                  {currentLanguage?.slug ?? DEFAULT_LOCALE}
+                </span>
                 <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                 <div className="lang-menu">
                   {data.header.languages.map((lang) => (
@@ -369,6 +417,7 @@ export default function Navbar() {
                   ))}
                 </div>
               </div>
+
               <div className="flex items-center gap-1 pl-4 cursor-pointer text-[var(--second-color)]">
                 <span className="hidden md:inline">USD</span>
                 <ChevronDown className="h-4 w-4" />
@@ -386,12 +435,13 @@ export default function Navbar() {
         >
           <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-2">
             {/* Logo */}
-            <Link href="/">
+            <Link href={localizePath("/")}>
               <Image
-                src="/assets/images/egypt-tour-gate-logo.png"
-                alt="Egypt Tour Gate"
+                src={logoSrc}
+                alt={logoAlt}
                 width={70}
                 height={30}
+                unoptimized={logoUnoptimized}
               />
             </Link>
 
@@ -413,45 +463,49 @@ export default function Navbar() {
 
             {/* ===== DESKTOP NAV LINKS ===== */}
             <ul className="hidden md:flex gap-1 font-medium navbar-main items-center">
-
               {/* Home */}
               <li className="py-4">
                 <Link
-                  href="/"
+                  href={localizePath("/")}
                   className="px-3 py-2 rounded-md text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 text-[14.5px] font-semibold nav-link-underline"
                 >
                   Home
                 </Link>
               </li>
 
-              {/* ===== CATEGORY MEGA MENUS ===== */}
-              {data.header.categories.map((cat) => {
-                const isOpen = activeMegaMenu === cat.id;
-                const hasSubs = cat.children.length > 0;
+              {/* ===== CATEGORY MEGA MENUS =====
+                  KEY CHANGES from old API → real API:
+                    cat.id       → cat.slug   (used as key & activeMegaMenu value)
+                    cat.children → cat.subs   ← real API field name
+                    child.id     → child.slug (used as key)
+                    child.name   → plain string (no .en needed)
+              */}
+              {categories.map((cat) => {
+                const isOpen = activeMegaMenu === cat.slug;
+                const hasSubs = cat.subs.length > 0;   // ← subs, not children
                 const catColor = getCategoryColor(cat.slug);
 
                 return (
                   <li
-                    key={cat.id}
+                    key={cat.slug}                        // ← slug as key
                     className={`relative py-4 ${isOpen ? "menu-open" : ""}`}
-                    onMouseEnter={() => setActiveMegaMenu(cat.id)}
+                    onMouseEnter={() => setActiveMegaMenu(cat.slug)}  // ← slug
                     onMouseLeave={() => setActiveMegaMenu(null)}
                   >
                     <Link
-                      href={`/${cat.slug}`}
+                      href={localizePath(`/${cat.slug}`)}
                       className={`flex items-center gap-1 px-3 py-2 rounded-md text-[14.5px] font-semibold transition-all duration-200 nav-link-underline capitalize ${
                         isOpen
                           ? "text-[var(--main-color)]"
                           : "text-[var(--second-color)] hover:text-[var(--main-color)]"
                       }`}
                     >
-                      {cat.name.toLowerCase()}
+                      {cat.name.toLowerCase()}             {/* ← plain string */}
                       <ChevronDown
                         className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "rotate-180 text-[var(--main-color)]" : ""}`}
                       />
                     </Link>
 
-                    {/* Active dot indicator */}
                     <span className="nav-active-dot" />
 
                     {/* ===== MEGA MENU PANEL ===== */}
@@ -460,20 +514,15 @@ export default function Navbar() {
                         className="mega-menu absolute top-full left-1/2 -translate-x-1/2 z-[200]"
                         style={{ minWidth: "780px" }}
                       >
-                        {/* Top connector gap cover */}
                         <div className="h-2 w-full" />
-
                         <div className="bg-white rounded-2xl shadow-[0_20px_60px_rgba(39,34,98,0.14)] border border-gray-100 overflow-hidden">
-                          {/* Colored top accent bar */}
                           <div
                             className="h-1 w-full"
                             style={{ background: `linear-gradient(90deg, ${catColor}, var(--main-color))` }}
                           />
-
                           <div className="flex">
                             {/* LEFT: Category cards */}
                             <div className="flex-1 p-6">
-                              {/* Header */}
                               <div className="flex items-center gap-3 mb-5">
                                 <div
                                   className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
@@ -483,24 +532,21 @@ export default function Navbar() {
                                 </div>
                                 <div>
                                   <h3 className="font-bold text-[var(--second-color)] text-[15px] capitalize leading-tight">
-                                    {cat.name}
+                                    {cat.name}               {/* ← plain string */}
                                   </h3>
                                   <p className="text-xs text-gray-400 leading-tight mt-0.5">
                                     {getCategoryDescription(cat.slug)}
                                   </p>
                                 </div>
                                 <Link
-                                  href={`/${cat.slug}`}
-                                  className="ml-auto flex items-center gap-1 text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full border transition-all duration-200 hover:text-white"
-                                  style={{
-                                    color: catColor,
-                                    borderColor: catColor,
-                                  }}
-                                  onMouseEnter={e => {
+                                  href={localizePath(`/${cat.slug}`)}
+                                  className="ml-auto flex items-center gap-1 text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full border transition-all duration-200"
+                                  style={{ color: catColor, borderColor: catColor }}
+                                  onMouseEnter={(e) => {
                                     (e.currentTarget as HTMLElement).style.background = catColor;
                                     (e.currentTarget as HTMLElement).style.color = "#fff";
                                   }}
-                                  onMouseLeave={e => {
+                                  onMouseLeave={(e) => {
                                     (e.currentTarget as HTMLElement).style.background = "transparent";
                                     (e.currentTarget as HTMLElement).style.color = catColor;
                                   }}
@@ -510,32 +556,41 @@ export default function Navbar() {
                                 </Link>
                               </div>
 
-                              {/* Subcategory grid */}
+                              {/* Subcategory grid — cat.subs, keyed by sub.slug */}
                               <div className="grid grid-cols-2 gap-2">
-                                {cat.children.map((child) => (
+                                {cat.subs.map((sub) => (
                                   <Link
-                                    key={child.id}
-                                    href={`/${cat.slug}/${child.slug}`}
+                                    key={sub.slug}
+                                    href={localizePath(`/${cat.slug}/${sub.slug}`)}
                                     className="mega-cat-card flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/60 group/card"
                                   >
-                                    {/* Icon */}
-                                    <div
-                                      className="cat-icon-wrap w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
-                                      style={{ background: `${catColor}18` }}
-                                    >
-                                      <span style={{ color: catColor }} className="text-sm">
-                                        {getCategoryIcon(cat.slug)}
-                                      </span>
-                                    </div>
+                                    {sub.media?.image ? (
+                                      <div className="cat-icon-wrap w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 relative z-10">
+                                        <Image
+                                          src={sub.media.image}
+                                          alt={sub.media.alt || sub.name}
+                                          width={32}
+                                          height={32}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div
+                                        className="cat-icon-wrap w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
+                                        style={{ background: `${catColor}18` }}
+                                      >
+                                        <span style={{ color: catColor }} className="text-sm">
+                                          {getCategoryIcon(cat.slug)}
+                                        </span>
+                                      </div>
+                                    )}
 
-                                    {/* Text */}
                                     <div className="flex-1 min-w-0 relative z-10">
                                       <span className="block text-[13px] font-semibold text-[var(--second-color)] capitalize truncate leading-tight">
-                                        {child.name.toLowerCase()}
+                                        {sub.name.toLowerCase()} {/* ← plain string */}
                                       </span>
                                     </div>
 
-                                    {/* Arrow */}
                                     <ChevronRight
                                       size={14}
                                       className="cat-arrow flex-shrink-0 relative z-10"
@@ -558,8 +613,8 @@ export default function Navbar() {
                                 {featuredHighlights.map((item) => (
                                   <Link
                                     key={item.href}
-                                    href={item.href}
-                                    className="featured-card block group/feat"
+                                    href={localizePath(item.href)}
+                                    className="featured-card block"
                                   >
                                     <div className="relative h-[100px] w-full overflow-hidden rounded-xl">
                                       <Image
@@ -569,14 +624,12 @@ export default function Navbar() {
                                         className="object-cover"
                                       />
                                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                                      {/* Tag */}
                                       <span
                                         className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
                                         style={{ background: catColor }}
                                       >
                                         {item.tag}
                                       </span>
-                                      {/* Title */}
                                       <p className="absolute bottom-2 left-2 right-2 text-white text-[12px] font-bold leading-tight">
                                         {item.title}
                                       </p>
@@ -585,7 +638,6 @@ export default function Navbar() {
                                 ))}
                               </div>
 
-                              {/* Bottom promo */}
                               <div
                                 className="mt-4 p-3 rounded-xl text-center"
                                 style={{ background: `${catColor}15`, border: `1px dashed ${catColor}60` }}
@@ -611,7 +663,7 @@ export default function Navbar() {
                 );
               })}
 
-              {/* ===== STATIC PAGES: Improved simple dropdown ===== */}
+              {/* ===== STATIC PAGES dropdown ===== */}
               <li
                 className={`relative py-4 ${activeMegaMenu === "static" ? "menu-open" : ""}`}
                 onMouseEnter={() => setActiveMegaMenu("static")}
@@ -635,7 +687,6 @@ export default function Navbar() {
                   <div className="absolute left-1/2 -translate-x-1/2 top-full z-[200]">
                     <div className="h-2 w-full" />
                     <div className="simple-dropdown bg-white rounded-2xl shadow-[0_16px_48px_rgba(39,34,98,0.12)] border border-gray-100 overflow-hidden min-w-[200px]">
-                      {/* Top accent */}
                       <div className="h-1 w-full bg-gradient-to-r from-[var(--second-color)] to-[var(--main-color)]" />
                       <div className="py-2">
                         {[
@@ -645,7 +696,7 @@ export default function Navbar() {
                         ].map((item) => (
                           <Link
                             key={item.href}
-                            href={item.href}
+                            href={localizePath(item.href)}
                             className="simple-dropdown-item flex items-center gap-3 px-4 py-2.5 hover:text-[var(--second-color)] text-gray-600 font-medium text-[13.5px]"
                           >
                             <span
@@ -667,7 +718,7 @@ export default function Navbar() {
               {/* Blogs */}
               <li className="py-4">
                 <Link
-                  href="/blogs"
+                  href={localizePath("/blogs")}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-md text-[14.5px] font-semibold text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 nav-link-underline"
                 >
                   <BookOpen size={15} />
@@ -691,13 +742,15 @@ export default function Navbar() {
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4" style={{ background: "var(--second-color)" }}>
-                <Image
-                  src="/assets/images/egypt-tour-gate-logo.png"
-                  alt="Egypt Tour Gate"
-                  width={60}
-                  height={26}
-                  className="brightness-0 invert"
-                />
+                <Link href={localizePath("/")} aria-label="Homepage">
+                  <Image
+                    src="/assets/images/egypt-tour-gate-logo.png"
+                    alt="Egypt Tour Gate"
+                    width={60}
+                    height={26}
+                    className="brightness-0 invert"
+                  />
+                </Link>
                 <button
                   onClick={closeMenu}
                   className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:bg-white/20"
@@ -715,7 +768,7 @@ export default function Navbar() {
 
                 {/* Home */}
                 <Link
-                  href="/"
+                  href={localizePath("/")}
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -726,52 +779,52 @@ export default function Navbar() {
                   <ChevronRight size={15} className="ml-auto text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all duration-200" />
                 </Link>
 
-                {/* Dynamic Categories */}
-                {data.header.categories.map((cat) => (
-                  <div key={cat.id}>
+                {/* Dynamic Categories — real API: .subs, .slug as key, plain .name */}
+                {categories.map((cat) => (
+                  <div key={cat.slug}>
                     <button
-                      onClick={() => setActiveDropdown(activeDropdown === cat.id ? null : cat.id)}
+                      onClick={() => setActiveDropdown(activeDropdown === cat.slug ? null : cat.slug)}
                       className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group text-left"
                     >
                       <div
                         className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200"
                         style={{
-                          background: activeDropdown === cat.id
+                          background: activeDropdown === cat.slug
                             ? "var(--main-color)"
-                            : "rgba(39,34,98,0.08)"
+                            : "rgba(39,34,98,0.08)",
                         }}
                       >
-                        <span style={{ color: activeDropdown === cat.id ? "#fff" : "var(--second-color)" }}>
+                        <span style={{ color: activeDropdown === cat.slug ? "#fff" : "var(--second-color)" }}>
                           {getCategoryIcon(cat.slug)}
                         </span>
                       </div>
                       <div className="flex-1">
                         <span className="font-semibold text-[15px] capitalize" style={{ color: "var(--second-color)" }}>
-                          {cat.name}
+                          {cat.name}                         {/* ← plain string */}
                         </span>
-                        {cat.children.length > 0 && (
-                          <span className="block text-xs text-gray-400">{cat.children.length} subcategories</span>
+                        {cat.subs.length > 0 && (            // ← .subs
+                          <span className="block text-xs text-gray-400">{cat.subs.length} subcategories</span>
                         )}
                       </div>
                       <ChevronDown
                         size={16}
                         className="text-gray-400 flex-shrink-0 transition-transform duration-300"
-                        style={{ transform: activeDropdown === cat.id ? "rotate(180deg)" : "rotate(0deg)" }}
+                        style={{ transform: activeDropdown === cat.slug ? "rotate(180deg)" : "rotate(0deg)" }}
                       />
                     </button>
 
-                    {activeDropdown === cat.id && cat.children.length > 0 && (
+                    {activeDropdown === cat.slug && cat.subs.length > 0 && (
                       <div className="submenu-open bg-gray-50 border-l-2 ml-5" style={{ borderColor: "var(--main-color)" }}>
-                        {cat.children.map((child) => (
+                        {cat.subs.map((sub) => (
                           <Link
-                            key={child.id}
-                            href={`/${cat.slug}/${child.slug}`}
+                            key={sub.slug}
+                            href={localizePath(`/${cat.slug}/${sub.slug}`)}
                             onClick={closeMenu}
                             className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                           >
                             <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--main-color)" }} />
                             <span className="text-[14px] text-gray-700 capitalize group-hover:text-[var(--second-color)] transition-colors font-medium">
-                              {child.name}
+                              {sub.name}                      {/* ← plain string */}
                             </span>
                             <ChevronRight size={13} className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
                           </Link>
@@ -783,7 +836,7 @@ export default function Navbar() {
 
                 {/* Blogs */}
                 <Link
-                  href="/blogs"
+                  href={localizePath("/blogs")}
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -822,7 +875,7 @@ export default function Navbar() {
                       ].map((item) => (
                         <Link
                           key={item.href}
-                          href={item.href}
+                          href={localizePath(item.href)}
                           onClick={closeMenu}
                           className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                         >
@@ -837,7 +890,6 @@ export default function Navbar() {
 
                 {/* Divider */}
                 <div className="mx-5 my-4 border-t border-gray-100" />
-
                 <div className="px-5 pb-2">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Preferences</p>
                 </div>
@@ -858,13 +910,15 @@ export default function Navbar() {
                     <Globe size={18} style={{ color: "var(--second-color)" }} />
                   </div>
                   <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>Language</span>
-                  <span className="ml-auto text-sm text-gray-400 font-medium">English</span>
+                  <span className="ml-auto text-sm text-gray-400 font-medium capitalize">
+                    {currentLanguage?.name ?? "English"}
+                  </span>
                   <ChevronRight size={15} className="text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
                 </div>
 
                 {/* Support */}
                 <Link
-                  href="/contact"
+                  href={localizePath("/contact")}
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -881,7 +935,7 @@ export default function Navbar() {
               {/* Footer CTA */}
               <div className="px-5 py-4 border-t border-gray-100 bg-white">
                 <Link
-                  href="/tailor-made"
+                  href={localizePath("/tailor-made")}
                   onClick={closeMenu}
                   className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-white font-bold text-[15px] transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
                   style={{ background: "var(--main-color)" }}

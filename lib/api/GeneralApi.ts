@@ -1,242 +1,274 @@
-import React from "react";
+// lib/api/GeneralApi.ts
+// Rebuilt to match the real backend API:
+//   GET http://127.0.0.1:8000/api/v1/general-data?locale=en
+//
+// Real API response structure:
+//   data.header.categories[].name          → string
+//   data.header.categories[].slug          → string
+//   data.header.categories[].subs[]        → { name, slug, media? }
+//   data.header.languages[]                → { name, slug }
+//   data.header.info                       → { phone, email, address }
+//   data.header.logo                       → { image, alt, title }
+//   data.footer.logo                       → { image, alt, title }
+//   data.footer.info                       → { phone, email, address }
+//   data.footer.categories[].name          → string
+//   data.footer.categories[].slug          → string
+//   data.footer.categories[].subs[]        → { name, slug }
 
-// lib/services/api.ts
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  DEFAULT_LOCALE,
+  type SupportedLocale,
+} from "@/lib/i18n/config";
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
+
+export interface CategoryMedia {
+  image: string;
+  title: string;
+  alt: string;
+}
+
+/** A sub-category as returned by the real API */
+export interface SubCategory {
+  name: string;
+  slug: string;
+  media?: CategoryMedia;
+}
+
+/** A top-level category as returned by the real API */
+export interface Category {
+  name: string;
+  slug: string;
+  subs: SubCategory[];
+}
+
+export interface Logo {
+  image: string;
+  alt: string;
+  title: string;
+}
+
+export interface ContactInfo {
+  phone?: string;
+  email?: string;
+  address?: string;
+}
+
+export interface Language {
+  name: string;
+  slug: string;
+}
+
 export interface HeaderData {
-  logo?: string;
-  categories: Array<{
-    id: string;
-    name: string;
-    slug: string;
-    children: Array<{
-      id: string;
-      name: string;
-      slug: string;
-    }>;
-  }>;
-  languages: Array<{
-    name: string;
-    slug: string;
-  }>;
-  info?: {
-    email?: string;
-    phone?: string;
-  };
-  social?: Array<{
-    title?: string;
-    url: string;
-    icon?: string;
-  }>;
+  logo: Logo;
+  categories: Category[];
+  languages: Language[];
+  info: ContactInfo;
 }
+
 export interface FooterData {
-  site_address?: string;
-  site_address_2?: string | null;
-  copy_rights?: string;
-  footerCategories: Array<{
-    id: number | string;
-    name: { en: string };
-    slug: string;
-    children: Array<{
-      id: number | string;
-      name: { en: string };
-      slug: string;
-    }>;
-  }>;
-  [key: string]: unknown;
+  logo?: Logo;
+  info?: ContactInfo;
+  /** The footer categories use the same shape as header categories */
+  categories: Category[];
 }
 
-export interface ApiResponse {
-  data: {
-    header: HeaderData;
-    footer: FooterData;
-  };
-}
-
-
-// Base API configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-// Generic fetch function with error handling
-export async function fetchApi<T>(endpoint: string): Promise<T> {
-  if (!API_BASE_URL) {
-    throw new Error('API_BASE_URL is not configured. Please set NEXT_PUBLIC_API_BASE_URL in your .env.local file');
-  }
-
-  // Ensure endpoint starts with /
-  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const url = `${API_BASE_URL}${normalizedEndpoint}`;
-  console.log('🌐 Fetching:', url);
-
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      cache: "no-store",
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      // Add mode and credentials for CORS handling
-      mode: 'cors',
-      credentials: 'omit',
-    });
-
-    console.log('📡 Response status:', response.status, response.statusText);
-    console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
-
-    if (!response.ok) {
-      let errorText = '';
-      try {
-        errorText = await response.text();
-        console.error('❌ API Error Response:', errorText);
-      } catch (e) {
-        console.error('❌ Could not read error response');
-      }
-      throw new Error(`API Error: ${response.status} - ${response.statusText}${errorText ? `. ${errorText.substring(0, 100)}` : ''}`);
-    }
-
-    const jsonData = await response.json();
-    console.log('📦 Response data:', jsonData);
-    return jsonData;
-  } catch (err) {
-    console.error('❌ Fetch Error Details:', {
-      error: err,
-      message: err instanceof Error ? err.message : String(err),
-      name: err instanceof Error ? err.name : undefined,
-      stack: err instanceof Error ? err.stack : undefined,
-    });
-    
-    if (err instanceof TypeError) {
-      if (err.message.includes('fetch') || err.message.includes('Failed to fetch')) {
-        throw new Error(`Failed to connect to API at ${url}. This might be a CORS issue or network problem. Please check: 1) CORS settings on the API server, 2) Network connection, 3) API URL is correct.`);
-      }
-    }
-    throw err;
-  }
-}
-
-
-// Specific API functions
-export const apiService = {
-  // Fetch general data - using Next.js API route as proxy to avoid CORS issues
-  async getGeneralData(locale?: string): Promise<ApiResponse> {
-    const localeQuery = locale ? `?locale=${locale}` : "";
-    const response = await fetch(`/api/general${localeQuery}`, {
-      next: { revalidate: 3600 },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `API Error: ${response.status}`);
-    }
-
-    return response.json();
-  },
-  
-  // You can add more API methods here
-  async getTours(): Promise<any> {
-    return fetchApi('/tours');
-  },
-  
-  async getCategories(): Promise<any> {
-    return fetchApi('/categories');
-  },
-  
-  // Add more methods as needed
-};
-type GeneralData = {
+export interface GeneralData {
   header: HeaderData;
   footer: FooterData;
-};
+}
 
-const normalizeResponse = (result: ApiResponse | unknown): GeneralData => {
-  const candidate =
-    result && typeof result === "object" && "data" in (result as Record<string, unknown>)
-      ? (result as { data: unknown }).data
-      : result;
+// ─── Raw API types (what actually comes back from the server) ──────────────────
 
-  if (!candidate || typeof candidate !== "object") {
-    throw new Error("Unexpected API response structure");
+interface RawMedia {
+  image?: string;
+  title?: string;
+  alt?: string;
+}
+
+interface RawSub {
+  name?: string;
+  slug?: string;
+  media?: RawMedia;
+}
+
+interface RawCategory {
+  name?: string;
+  slug?: string;
+  subs?: RawSub[];
+}
+
+interface RawLogo {
+  image?: string;
+  alt?: string;
+  title?: string;
+}
+
+interface RawInfo {
+  phone?: string;
+  email?: string;
+  address?: string;
+}
+
+interface RawLanguage {
+  name?: string;
+  slug?: string;
+}
+
+interface RawHeader {
+  logo?: RawLogo;
+  categories?: RawCategory[];
+  languages?: RawLanguage[];
+  info?: RawInfo;
+}
+
+interface RawFooter {
+  logo?: RawLogo;
+  info?: RawInfo;
+  categories?: RawCategory[];
+}
+
+interface RawApiResponse {
+  success?: boolean;
+  data?: {
+    header?: RawHeader;
+    footer?: RawFooter;
+    general?: unknown;
+  };
+  message?: string;
+}
+
+// ─── Normalizers ───────────────────────────────────────────────────────────────
+
+function normalizeMedia(raw?: RawMedia): CategoryMedia | undefined {
+  if (!raw) return undefined;
+  return {
+    image: raw.image ?? "",
+    title: raw.title ?? "",
+    alt: raw.alt ?? "",
+  };
+}
+
+function normalizeSubs(raw?: RawSub[]): SubCategory[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((s) => ({
+    name: s.name ?? "",
+    slug: s.slug ?? "",
+    media: normalizeMedia(s.media),
+  }));
+}
+
+function normalizeCategories(raw?: RawCategory[]): Category[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((c) => ({
+    name: c.name ?? "",
+    slug: c.slug ?? "",
+    subs: normalizeSubs(c.subs),
+  }));
+}
+
+function normalizeLogo(raw?: RawLogo): Logo {
+  return {
+    image: raw?.image ?? "",
+    alt: raw?.alt ?? "",
+    title: raw?.title ?? "",
+  };
+}
+
+function normalizeInfo(raw?: RawInfo): ContactInfo {
+  return {
+    phone: raw?.phone,
+    email: raw?.email,
+    address: raw?.address,
+  };
+}
+
+function normalizeLanguages(raw?: RawLanguage[]): Language[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((l) => l.slug && l.name)
+    .map((l) => ({ name: l.name!, slug: l.slug! }));
+}
+
+function normalizeResponse(raw: RawApiResponse): GeneralData {
+  if (!raw.success || !raw.data) {
+    throw new Error(`API error: ${raw.message ?? "Unknown error"}`);
   }
 
-  const record = candidate as Record<string, unknown>;
-  const headerRaw = (record.header ?? {}) as Record<string, unknown>;
-  const footerCandidate = (record.footer ?? {}) as FooterData;
-  const footerRaw: FooterData = {
-    ...footerCandidate,
-    footerCategories: Array.isArray(footerCandidate.footerCategories) ? footerCandidate.footerCategories : [],
-  };
-
-  const languages = Array.isArray(headerRaw.languages)
-    ? (headerRaw.languages as Array<Record<string, unknown>>)
-        .filter((item) => typeof item?.slug === "string" && typeof item?.name === "string")
-        .map((item) => ({ name: String(item.name), slug: String(item.slug) }))
-    : [];
-
-  const categoriesSource = Array.isArray(headerRaw.categories)
-    ? (headerRaw.categories as Array<Record<string, unknown>>)
-    : Array.isArray(headerRaw.headerCategories)
-      ? (headerRaw.headerCategories as Array<Record<string, unknown>>)
-      : [];
-
-  const categories = categoriesSource.map((item) => ({
-    id: String(item.id ?? item.slug ?? Math.random()),
-    name: typeof item.name === "string" ? item.name : String((item.name as { en?: string })?.en ?? item.slug ?? ""),
-    slug: String(item.slug ?? ""),
-    children: Array.isArray(item.children)
-      ? (item.children as Array<Record<string, unknown>>).map((child) => ({
-          id: String(child.id ?? child.slug ?? Math.random()),
-          name: typeof child.name === "string" ? child.name : String((child.name as { en?: string })?.en ?? child.slug ?? ""),
-          slug: String(child.slug ?? ""),
-        }))
-      : [],
-  }));
+  const { header: h = {}, footer: f = {} } = raw.data;
 
   return {
     header: {
-      logo: typeof headerRaw.logo === "string" ? headerRaw.logo : undefined,
-      categories,
-      languages,
-      info: (headerRaw.info as HeaderData["info"]) ?? undefined,
-      social: (headerRaw.social as HeaderData["social"]) ?? [],
+      logo: normalizeLogo(h.logo),
+      categories: normalizeCategories(h.categories),
+      languages: normalizeLanguages(h.languages),
+      info: normalizeInfo(h.info),
     },
-    footer: footerRaw,
+    footer: {
+      logo: f.logo ? normalizeLogo(f.logo) : undefined,
+      info: normalizeInfo(f.info),
+      // The real API uses `categories` inside footer too
+      categories: normalizeCategories(f.categories),
+    },
   };
-};
+}
 
-export const useGeneralData = (locale?: string) => {
-  const [data, setData] = React.useState<GeneralData | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+// ─── Next.js proxy fetcher (avoids browser CORS) ──────────────────────────────
+// Make sure you have: app/api/general/route.ts (see below)
 
-  React.useEffect(() => {
-    async function loadData() {
+async function fetchGeneralData(locale: SupportedLocale): Promise<GeneralData> {
+  const res = await fetch(`/api/general?locale=${locale}`, {
+    // Next.js App Router fetch options
+    next: { revalidate: 3600 },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Proxy fetch failed: ${res.status} ${res.statusText}`);
+  }
+
+  const raw: RawApiResponse = await res.json();
+  return normalizeResponse(raw);
+}
+
+// ─── React hook ────────────────────────────────────────────────────────────────
+
+export interface UseGeneralDataResult {
+  data: GeneralData | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export function useGeneralData(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): UseGeneralDataResult {
+  const [data, setData] = useState<GeneralData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
       try {
         setLoading(true);
         setError(null);
-        
-        const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-        console.log('🔍 API URL:', API_URL);
-        console.log('🔍 Fetching from:', `${API_URL}/general`);
-        
-        const result = await apiService.getGeneralData(locale);
-        console.log('✅ API Response:', result);
-        
-        const extractedData = normalizeResponse(result);
-        setData(extractedData);
+        const result = await fetchGeneralData(locale);
+        if (!cancelled) setData(result);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-        console.error('❌ API Error:', err);
-        console.error('❌ Error details:', {
-          message: errorMessage,
-          stack: err instanceof Error ? err.stack : undefined
-        });
-        setError(errorMessage);
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : String(err));
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
-    loadData();
+    load();
+    return () => { cancelled = true; };
   }, [locale]);
 
   return { data, loading, error };
-};
+}

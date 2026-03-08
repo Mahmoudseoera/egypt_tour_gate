@@ -1,47 +1,43 @@
+// app/api/general/route.ts
+// Server-side proxy – forwards to the real backend so the browser never
+// hits a CORS wall, and keeps the backend URL out of client bundles.
+//
+// Usage from client:
+//   fetch("/api/general?locale=en")
+//   fetch("/api/general?locale=de")
+
 import { NextRequest, NextResponse } from "next/server";
-import { DEFAULT_LOCALE, isSupportedLocale } from "@/lib/i18n/config";
+import { API_BASE_URL } from "@/lib/api/client";
 
-export async function GET(request: NextRequest) {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-  if (!API_BASE_URL) {
-    return NextResponse.json(
-      { error: "API_BASE_URL is not configured" },
-      { status: 500 }
-    );
-  }
-
-  const queryLocale = request.nextUrl.searchParams.get("locale");
-  const headerLocale = request.headers.get("x-locale");
-  const locale =
-    (queryLocale && isSupportedLocale(queryLocale) && queryLocale) ||
-    (headerLocale && isSupportedLocale(headerLocale) && headerLocale) ||
-    DEFAULT_LOCALE;
+export async function GET(req: NextRequest) {
+  const locale = req.nextUrl.searchParams.get("locale") ?? "en";
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/general-data?locale=${locale}`, {
-      cache: "no-store",
+    const upstream = await fetch(`${API_BASE_URL}/general-data?locale=${locale}`, {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
+      next: { revalidate: 3600 },
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error:', response.status, errorText);
+    if (!upstream.ok) {
       return NextResponse.json(
-        { error: `API Error: ${response.status} - ${response.statusText}` },
-        { status: response.status }
+        {
+          success: false,
+          message: `Backend responded with ${upstream.status} ${upstream.statusText}`,
+        },
+        { status: upstream.status }
       );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Fetch Error:', error);
+    const json = await upstream.json();
+    return NextResponse.json(json);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to fetch data" },
+      { success: false, message },
       { status: 500 }
     );
   }

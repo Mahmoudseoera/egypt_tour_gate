@@ -1,11 +1,12 @@
 // All Category Page //
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from 'next/navigation';
-import Breadcrumb from '@/components/layout/breadcrumb';
-import ExpandableDescription from '@/components/shared/expandable-description';
-import SchemaScript from '@/components/seo/schema-script';
+import { notFound } from "next/navigation";
+import Breadcrumb from "@/components/layout/breadcrumb";
+import ExpandableDescription from "@/components/shared/expandable-description";
+import SchemaScript from "@/components/seo/schema-script";
+import { apiGet } from "@/lib/api/client";
 
 type CategoryPageProps = {
   params: Promise<{ categorySlug: string }>;
@@ -18,27 +19,25 @@ const photos = [
 ];
 
 async function getCategoryData(categorySlug: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!baseUrl) {
-    throw new Error('NEXT_PUBLIC_API_BASE_URL is not set. Add it to .env.local');
-  }
-
-  const res = await fetch(`${baseUrl}/general`, { cache: 'no-store' });
-  const data = await res.json();
-  const categories = data.data?.header?.headerCategories ?? [];
+  // Use the same real API as the navbar/footer via the unified client.
+  const data = await apiGet<any>("/general-data?locale=en");
+  const categories =
+    data.data?.header?.categories ?? data.data?.header?.headerCategories ?? [];
 
   return categories.find((cat: any) => cat.slug === categorySlug);
 }
 
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: CategoryPageProps): Promise<Metadata> {
   const { categorySlug } = await params;
   const category = await getCategoryData(categorySlug);
 
   if (!category) {
-    return { title: 'Category Not Found' };
+    return { title: "Category Not Found" };
   }
 
-  const categoryName = category.name?.en ?? categorySlug;
+  const categoryName = category.name ?? categorySlug;
 
   return {
     title: `${categoryName} Tours | Egypt Tours Gate`,
@@ -54,12 +53,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
-  const categoryName = category.name?.en ?? categorySlug;
+  const categoryName = category.name ?? categorySlug;
   const categoryDescription = `Browse all available ${categoryName} options and discover the best experiences curated by Egypt Tours Gate.`;
 
   const categorySchema = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
     name: categoryName,
     description: categoryDescription,
     url: `https://www.egypttoursgate.com/${categorySlug}`,
@@ -70,7 +69,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <SchemaScript schema={categorySchema} />
       <Breadcrumb
         items={[
-          { label: 'Home', href: '/' },
+          { label: "Home", href: "/" },
           { label: categoryName, href: `/${categorySlug}` },
         ]}
       />
@@ -78,7 +77,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       {/* ── Page Hero ── */}
       <div
         className="relative py-14 overflow-hidden"
-        style={{ backgroundColor: 'var(--second-color)' }}
+        style={{ backgroundColor: "var(--second-color)" }}
       >
         <div className="absolute -top-10 -left-10 w-56 h-56 rounded-full opacity-10 bg-[var(--main-color)]" />
         <div className="absolute -bottom-14 -right-14 w-72 h-72 rounded-full opacity-10 bg-[var(--main-color)]" />
@@ -98,17 +97,17 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
       <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {(category.children ?? []).map((child: any, index: number) => (
+          {(category.subs ?? []).map((child: any, index: number) => (
             <Link
-              key={child.id}
+              key={child.slug}
               href={`/${category.slug}/${child.slug}`}
               className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-400 border border-gray-100 hover:border-[var(--main-color)]"
               style={{ animationDelay: `${index * 60}ms` }}
             >
               <div className="relative h-56 overflow-hidden flex-shrink-0">
                 <Image
-                  src={photos[child.id % photos.length]}
-                  alt={child.name?.en ?? 'category'}
+                  src={photos[index % photos.length]}
+                  alt={child.name ?? "category"}
                   fill
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
@@ -116,16 +115,16 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
 
                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-[var(--main-color)] shadow-md">
-                  {category.name.en}
+                  {category.name}
                 </div>
               </div>
 
               <div className="flex flex-col flex-1 p-6 gap-4">
                 <h3
                   className="text-xl font-bold capitalize leading-snug transition-colors duration-200 group-hover:text-[var(--main-color)]"
-                  style={{ color: 'var(--second-color)' }}
+                  style={{ color: "var(--second-color)" }}
                 >
-                  {child.name.en.toLowerCase()}
+                  {String(child.name).toLowerCase()}
                 </h3>
 
                 <p className="text-sm leading-relaxed flex-1 text-[var(--black-color)] line-clamp-4">

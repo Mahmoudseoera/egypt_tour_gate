@@ -1,47 +1,44 @@
 // sub Category Page //
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from 'next/navigation';
+import { notFound } from "next/navigation";
 import categoriesData from "@/lib/api/categories";
 import SecondTourCard from "@/components/tour/second-tour-card";
 import type { Tour, TourPackage, NileCruise } from "@/lib/api/categories";
-import Breadcrumb from '@/components/layout/breadcrumb';
-import ExpandableDescription from '@/components/shared/expandable-description';
-import SchemaScript from '@/components/seo/schema-script';
+import Breadcrumb from "@/components/layout/breadcrumb";
+import ExpandableDescription from "@/components/shared/expandable-description";
+import SchemaScript from "@/components/seo/schema-script";
+import { apiGet } from "@/lib/api/client";
 
 type SubcategoryPageProps = {
   params: Promise<{ categorySlug: string; subcategorySlug: string }>;
 };
 
-async function getGeneralCategories(baseUrl: string) {
-  const res = await fetch(`${baseUrl}/general`, { cache: "no-store" });
-  const data = await res.json();
-  return data.data?.header?.headerCategories ?? [];
+async function getGeneralCategories() {
+  const data = await apiGet<any>("/general-data?locale=en");
+  return data.data?.header?.categories ?? data.data?.header?.headerCategories ?? [];
 }
 
 async function getPageData(categorySlug: string, subcategorySlug: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!baseUrl) {
-    throw new Error('NEXT_PUBLIC_API_BASE_URL is not set. Add it to .env.local');
-  }
-
-  const headerCategories = await getGeneralCategories(baseUrl);
+  const headerCategories = await getGeneralCategories();
   const category = headerCategories.find((c: { slug: string }) => c.slug === categorySlug);
-  const subcategory = category?.children?.find((ch: { slug: string }) => ch.slug === subcategorySlug);
+  const subcategory = category?.subs?.find((ch: { slug: string }) => ch.slug === subcategorySlug);
 
   return { category, subcategory };
 }
 
-export async function generateMetadata({ params }: SubcategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: SubcategoryPageProps): Promise<Metadata> {
   const { categorySlug, subcategorySlug } = await params;
   const { category, subcategory } = await getPageData(categorySlug, subcategorySlug);
 
   if (!category || !subcategory) {
-    return { title: 'Subcategory Not Found' };
+    return { title: "Subcategory Not Found" };
   }
 
-  const categoryName = category.name?.en ?? categorySlug;
-  const subcategoryName = subcategory.name?.en ?? subcategorySlug;
+  const categoryName = category.name ?? categorySlug;
+  const subcategoryName = subcategory.name ?? subcategorySlug;
 
   return {
     title: `${subcategoryName} ${categoryName} | Egypt Tours Gate`,
@@ -118,8 +115,8 @@ export default async function SubcategoryPage({
     })),
   ];
 
-  const categoryName = category.name?.en ?? categorySlug;
-  const subcategoryName = subcategory.name?.en ?? subcategorySlug;
+  const categoryName = category.name ?? categorySlug;
+  const subcategoryName = subcategory.name ?? subcategorySlug;
   const shortDescription = `Explore the top ${subcategoryName} tours in ${categoryName} and choose the itinerary that matches your travel style.`;
 
   const subcategorySchema = {
