@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { DEFAULT_LOCALE, isSupportedLocale } from "@/lib/i18n/config";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   if (!API_BASE_URL) {
@@ -10,8 +11,15 @@ export async function GET() {
     );
   }
 
+  const queryLocale = request.nextUrl.searchParams.get("locale");
+  const headerLocale = request.headers.get("x-locale");
+  const locale =
+    (queryLocale && isSupportedLocale(queryLocale) && queryLocale) ||
+    (headerLocale && isSupportedLocale(headerLocale) && headerLocale) ||
+    DEFAULT_LOCALE;
+
   try {
-    const response = await fetch(`${API_BASE_URL}/general`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/general-data?locale=${locale}`, {
       cache: "no-store",
       headers: {
         'Content-Type': 'application/json',
@@ -38,4 +46,3 @@ export async function GET() {
     );
   }
 }
-
