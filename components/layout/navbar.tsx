@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -29,6 +30,8 @@ import {
   Star,
 } from "lucide-react";
 import { useGeneralData } from "@/lib/api/GeneralApi";
+import { buildLocalizedPath, getPathLocale } from "@/lib/i18n/routing";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import SimpleSocialIcon, {
   SocialItem,
 } from "@/components/layout/simpleSocialIcon";
@@ -99,7 +102,17 @@ export default function Navbar() {
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
 
-  const { data, error, loading } = useGeneralData();
+  const pathname = usePathname();
+  const router = useRouter();
+  const activeLocale = getPathLocale(pathname);
+  const { data, error, loading } = useGeneralData(activeLocale);
+
+  const currentLanguage = data?.header.languages.find((lang) => lang.slug === activeLocale);
+
+  const onLanguageChange = (slug: string) => {
+    const targetPath = buildLocalizedPath(pathname, slug);
+    router.push(targetPath);
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -340,14 +353,20 @@ export default function Navbar() {
                 <span className="hidden lg:inline font-medium">info@example.com</span>
               </Link>
               <div className="relative group flex items-center gap-1 px-4 border-r border-white/20 cursor-pointer text-[var(--second-color)]">
-                <Image src="https://flagcdn.com/w40/us.png" alt="ENG" width={16} height={16} className="rounded-full" />
-                <span className="hidden md:inline">ENG</span>
+                <Globe className="h-4 w-4" />
+                <span className="hidden md:inline uppercase">{currentLanguage?.slug ?? DEFAULT_LOCALE}</span>
                 <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                 <div className="lang-menu">
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/us.png" alt="English" width={20} height={20} className="lang-flag" />English</Link>
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/fr.png" alt="Français" width={20} height={20} className="lang-flag" />Français</Link>
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/de.png" alt="Deutsch" width={20} height={20} className="lang-flag" />Deutsch</Link>
-                  <Link href="/" className="lang-item"><Image src="https://flagcdn.com/w40/eg.png" alt="Arabic" width={20} height={20} className="lang-flag" />العربية</Link>
+                  {data.header.languages.map((lang) => (
+                    <button
+                      key={lang.slug}
+                      type="button"
+                      onClick={() => onLanguageChange(lang.slug)}
+                      className="lang-item w-full text-left"
+                    >
+                      {lang.name}
+                    </button>
+                  ))}
                 </div>
               </div>
               <div className="flex items-center gap-1 pl-4 cursor-pointer text-[var(--second-color)]">
@@ -406,7 +425,7 @@ export default function Navbar() {
               </li>
 
               {/* ===== CATEGORY MEGA MENUS ===== */}
-              {data.header.headerCategories.map((cat) => {
+              {data.header.categories.map((cat) => {
                 const isOpen = activeMegaMenu === cat.id;
                 const hasSubs = cat.children.length > 0;
                 const catColor = getCategoryColor(cat.slug);
@@ -426,7 +445,7 @@ export default function Navbar() {
                           : "text-[var(--second-color)] hover:text-[var(--main-color)]"
                       }`}
                     >
-                      {cat.name.en.toLowerCase()}
+                      {cat.name.toLowerCase()}
                       <ChevronDown
                         className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "rotate-180 text-[var(--main-color)]" : ""}`}
                       />
@@ -464,7 +483,7 @@ export default function Navbar() {
                                 </div>
                                 <div>
                                   <h3 className="font-bold text-[var(--second-color)] text-[15px] capitalize leading-tight">
-                                    {cat.name.en}
+                                    {cat.name}
                                   </h3>
                                   <p className="text-xs text-gray-400 leading-tight mt-0.5">
                                     {getCategoryDescription(cat.slug)}
@@ -512,7 +531,7 @@ export default function Navbar() {
                                     {/* Text */}
                                     <div className="flex-1 min-w-0 relative z-10">
                                       <span className="block text-[13px] font-semibold text-[var(--second-color)] capitalize truncate leading-tight">
-                                        {child.name.en.toLowerCase()}
+                                        {child.name.toLowerCase()}
                                       </span>
                                     </div>
 
@@ -708,7 +727,7 @@ export default function Navbar() {
                 </Link>
 
                 {/* Dynamic Categories */}
-                {data.header.headerCategories.map((cat) => (
+                {data.header.categories.map((cat) => (
                   <div key={cat.id}>
                     <button
                       onClick={() => setActiveDropdown(activeDropdown === cat.id ? null : cat.id)}
@@ -728,7 +747,7 @@ export default function Navbar() {
                       </div>
                       <div className="flex-1">
                         <span className="font-semibold text-[15px] capitalize" style={{ color: "var(--second-color)" }}>
-                          {cat.name.en}
+                          {cat.name}
                         </span>
                         {cat.children.length > 0 && (
                           <span className="block text-xs text-gray-400">{cat.children.length} subcategories</span>
@@ -752,7 +771,7 @@ export default function Navbar() {
                           >
                             <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--main-color)" }} />
                             <span className="text-[14px] text-gray-700 capitalize group-hover:text-[var(--second-color)] transition-colors font-medium">
-                              {child.name.en}
+                              {child.name}
                             </span>
                             <ChevronRight size={13} className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
                           </Link>

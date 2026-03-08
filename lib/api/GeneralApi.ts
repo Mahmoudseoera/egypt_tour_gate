@@ -2,42 +2,46 @@ import React from "react";
 
 // lib/services/api.ts
 export interface HeaderData {
-  logo: string;
-  email: string;
-  phone: string;
-  headerCategories: Array<{
+  logo?: string;
+  categories: Array<{
     id: string;
-    name: {
-      en: string;
-    };
+    name: string;
     slug: string;
     children: Array<{
       id: string;
-      name: {
-        en: string;
-      };
+      name: string;
       slug: string;
     }>;
+  }>;
+  languages: Array<{
+    name: string;
+    slug: string;
+  }>;
+  info?: {
+    email?: string;
+    phone?: string;
+  };
+  social?: Array<{
+    title?: string;
+    url: string;
+    icon?: string;
   }>;
 }
 export interface FooterData {
-  site_address: string;
-  site_address_2: string | null;
-  copy_rights: string;
+  site_address?: string;
+  site_address_2?: string | null;
+  copy_rights?: string;
   footerCategories: Array<{
-    id: number;
-    name: {
-      en: string;
-    };
+    id: number | string;
+    name: { en: string };
     slug: string;
     children: Array<{
-      id: number;
-      name: {
-        en: string;
-      };
+      id: number | string;
+      name: { en: string };
       slug: string;
     }>;
   }>;
+  [key: string]: unknown;
 }
 
 export interface ApiResponse {
@@ -113,10 +117,9 @@ export async function fetchApi<T>(endpoint: string): Promise<T> {
 // Specific API functions
 export const apiService = {
   // Fetch general data - using Next.js API route as proxy to avoid CORS issues
-  async getGeneralData(): Promise<ApiResponse> {
-    // Use Next.js API route instead of direct external API call
-    // This avoids CORS issues since the server makes the request
-    const response = await fetch('/api/general', {
+  async getGeneralData(locale?: string): Promise<ApiResponse> {
+    const localeQuery = locale ? `?locale=${locale}` : "";
+    const response = await fetch(`/api/general${localeQuery}`, {
       next: { revalidate: 3600 },
     });
 
@@ -144,7 +147,62 @@ type GeneralData = {
   footer: FooterData;
 };
 
-export const useGeneralData = () => {
+const normalizeResponse = (result: ApiResponse | unknown): GeneralData => {
+  const candidate =
+    result && typeof result === "object" && "data" in (result as Record<string, unknown>)
+      ? (result as { data: unknown }).data
+      : result;
+
+  if (!candidate || typeof candidate !== "object") {
+    throw new Error("Unexpected API response structure");
+  }
+
+  const record = candidate as Record<string, unknown>;
+  const headerRaw = (record.header ?? {}) as Record<string, unknown>;
+  const footerCandidate = (record.footer ?? {}) as FooterData;
+  const footerRaw: FooterData = {
+    ...footerCandidate,
+    footerCategories: Array.isArray(footerCandidate.footerCategories) ? footerCandidate.footerCategories : [],
+  };
+
+  const languages = Array.isArray(headerRaw.languages)
+    ? (headerRaw.languages as Array<Record<string, unknown>>)
+        .filter((item) => typeof item?.slug === "string" && typeof item?.name === "string")
+        .map((item) => ({ name: String(item.name), slug: String(item.slug) }))
+    : [];
+
+  const categoriesSource = Array.isArray(headerRaw.categories)
+    ? (headerRaw.categories as Array<Record<string, unknown>>)
+    : Array.isArray(headerRaw.headerCategories)
+      ? (headerRaw.headerCategories as Array<Record<string, unknown>>)
+      : [];
+
+  const categories = categoriesSource.map((item) => ({
+    id: String(item.id ?? item.slug ?? Math.random()),
+    name: typeof item.name === "string" ? item.name : String((item.name as { en?: string })?.en ?? item.slug ?? ""),
+    slug: String(item.slug ?? ""),
+    children: Array.isArray(item.children)
+      ? (item.children as Array<Record<string, unknown>>).map((child) => ({
+          id: String(child.id ?? child.slug ?? Math.random()),
+          name: typeof child.name === "string" ? child.name : String((child.name as { en?: string })?.en ?? child.slug ?? ""),
+          slug: String(child.slug ?? ""),
+        }))
+      : [],
+  }));
+
+  return {
+    header: {
+      logo: typeof headerRaw.logo === "string" ? headerRaw.logo : undefined,
+      categories,
+      languages,
+      info: (headerRaw.info as HeaderData["info"]) ?? undefined,
+      social: (headerRaw.social as HeaderData["social"]) ?? [],
+    },
+    footer: footerRaw,
+  };
+};
+
+export const useGeneralData = (locale?: string) => {
   const [data, setData] = React.useState<GeneralData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -159,31 +217,10 @@ export const useGeneralData = () => {
         console.log('🔍 API URL:', API_URL);
         console.log('🔍 Fetching from:', `${API_URL}/general`);
         
-        const result = await apiService.getGeneralData();
+        const result = await apiService.getGeneralData(locale);
         console.log('✅ API Response:', result);
         
-        // Handle different response structures
-        let extractedData: GeneralData;
-        
-        // Check if response has nested data structure
-        if (result && result.data && result.data.header && result.data.footer) {
-          // Standard structure: { data: { header, footer } }
-          extractedData = result.data;
-        } else if (result && 'header' in result && 'footer' in result) {
-          // Direct structure: { header, footer } - need to cast through unknown first
-          extractedData = (result as unknown as { header: HeaderData; footer: FooterData }) as GeneralData;
-        } else {
-          console.error('❌ Unexpected API response structure:', result);
-          throw new Error('Unexpected API response structure. Expected { data: { header, footer } } or { header, footer }');
-        }
-        
-        console.log('✅ Extracted Data:', extractedData);
-        
-        // Validate data structure
-        if (!extractedData.header || !extractedData.footer) {
-          throw new Error('API response missing header or footer data');
-        }
-        
+        const extractedData = normalizeResponse(result);
         setData(extractedData);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
@@ -199,7 +236,7 @@ export const useGeneralData = () => {
     }
 
     loadData();
-  }, []);
+  }, [locale]);
 
   return { data, loading, error };
 };
