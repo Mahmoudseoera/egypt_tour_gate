@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useGeneralData } from "@/lib/api/GeneralApi";
-import { getPathLocale } from "@/lib/i18n/routing";
+import { buildLocalizedPath, getPathLocale } from "@/lib/i18n/routing";
 import SimpleSocialIcon, { SocialItem } from "@/components/layout/simpleSocialIcon";
 
 // Static social data
@@ -20,6 +20,7 @@ export default function Footer() {
   const pathname = usePathname();
   const activeLocale = getPathLocale(pathname);
   const { data, loading } = useGeneralData(activeLocale);
+  const homePath = buildLocalizedPath("/", activeLocale);
   const currentYear = new Date().getFullYear();
 
   // ── Derived values (safe-access with fallbacks) ────────────────────────────
@@ -66,7 +67,7 @@ export default function Footer() {
 
           {/* ── Brand column ─────────────────────────────────────────────── */}
           <div className="space-y-6 lg:col-span-1">
-            <Link href="/" className="inline-flex items-center hover:opacity-90 transition-opacity" aria-label="Homepage">
+            <Link href={homePath} className="inline-flex items-center hover:opacity-90 transition-opacity" aria-label="Homepage">
               <div className="relative w-32 h-10">
                 <Image
                   src={footerLogo?.image || "/assets/images/egypt-tour-gate-logo.png"}
