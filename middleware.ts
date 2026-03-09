@@ -34,10 +34,9 @@ export function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-locale", firstSegment);
 
-    const rewriteUrl = request.nextUrl.clone();
-    rewriteUrl.pathname = strippedPath;
-
-    const response = NextResponse.rewrite(rewriteUrl, {
+    // Keep locale-prefixed URL as-is so Next resolves app/[locale] routes
+    // (e.g. /fr, /de, /fr/about-us) and client pathname reflects the locale.
+    const response = NextResponse.next({
       request: { headers: requestHeaders },
     });
 
