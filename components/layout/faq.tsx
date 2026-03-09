@@ -1,255 +1,53 @@
-// app/components/FAQSection.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from "react";
+import type { Faq } from "@/lib/api/homeTypes";
 
-interface FAQItem {
-  id: number;
-  question: string;
-  answer: string;
-}
-
-const faqData: FAQItem[] = [
-  {
-    id: 1,
-    question: 'How does it work?',
-    answer: 'There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form.'
-  },
-  {
-    id: 2,
-    question: 'Do I need a designer to use Travosy?',
-    answer: 'No, Travosy is designed to be user-friendly and intuitive. Our platform provides pre-designed templates and drag-and-drop functionality that allows anyone to create professional-looking designs without any design experience. You can easily customize colors, layouts, and content to match your brand identity.'
-  },
-  {
-    id: 3,
-    question: 'What do I need to do to start selling?',
-    answer: 'To start selling, simply sign up for an account, set up your store, add your products, configure payment methods, and launch your store. The entire process can be completed in under 30 minutes. We provide step-by-step guidance throughout the setup process.'
-  },
-  {
-    id: 4,
-    question: 'What happens when I receive an order?',
-    answer: 'When you receive an order, you will get an instant notification via email and in your dashboard. You can then process the order, update its status, and manage shipping directly from your Travosy admin panel. We also provide order tracking and customer communication tools.'
-  },
-  {
-    id: 5,
-    question: 'Can I customize my store?',
-    answer: 'Yes! Travosy offers extensive customization options including themes, color schemes, fonts, and layout modifications. You can also add custom CSS for advanced styling. Our theme editor allows you to preview changes in real-time before publishing.'
-  },
-  {
-    id: 6,
-    question: 'What payment methods are supported?',
-    answer: 'Travosy supports all major payment gateways including Stripe, PayPal, Apple Pay, Google Pay, and more. You can also accept credit/debit cards and bank transfers. All transactions are secured with SSL encryption and PCI compliance.'
-  },
-  {
-    id: 7,
-    question: 'Is there a mobile app?',
-    answer: 'Yes, Travosy offers mobile apps for both iOS and Android. You can manage your store, process orders, and view analytics on the go. The app provides all essential features from the desktop dashboard optimized for mobile devices.'
-  },
-  {
-    id: 8,
-    question: 'How much does it cost?',
-    answer: 'Travosy offers flexible pricing plans starting from free with basic features. Our premium plans start at $29/month and include advanced features like custom domains, priority support, and advanced analytics. No hidden fees or transaction charges.'
-  }
+const staticFaqs: Faq[] = [
+  { title: "Is it safe to travel to Egypt 2024?", answer: "Egypt has been one of the most secure tourist destinations for decades. With sensible precautions you'll explore safely." },
+  { title: "How might I acquire my visa to visit Egypt?", answer: "Many nationalities can purchase a 1-month entry visa on arrival, including Australia, Canada, EU, USA, UK, and more." },
+  { title: "What can female tourists wear in Egypt?", answer: "The dress code is conservative by western standards. For temple and mosque visits, covering shoulders and knees is recommended." },
+  { title: "What is the best time to visit Egypt?", answer: "October to April offers mild weather (15–25°C). Summer is very hot but offers significant discounts." },
 ];
 
-const FAQSection = () => {
-  const [openItem, setOpenItem] = useState<number | null>(1);
-  const [isMobile, setIsMobile] = useState(false);
+interface FAQSectionProps {
+  faqs?: Faq[];
+}
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const handleToggle = (id: number) => {
-    setOpenItem(openItem === id ? null : id);
-  };
-
-  // Split FAQ items into two columns
-  const firstColumnFaqs = faqData.slice(0, Math.ceil(faqData.length / 2));
-  const secondColumnFaqs = faqData.slice(Math.ceil(faqData.length / 2));
+export default function FAQSection({ faqs = [] }: FAQSectionProps) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const items = faqs.length > 0 ? faqs : staticFaqs;
 
   return (
-    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-[#f9f9f9]">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <section className="py-16 px-4 md:px-8 bg-white">
+      <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-        <h2 className="text-2xl md:text-3xl font-semibold text-[var(--second-color)] mb-4">
-        Frequently Asked Questions
-        </h2>
-        <span
-        className="relative block h-1 w-40 mb-6 bg-gradient-to-r from-[var(--second-color)] via-[var(--main-color)] to-[var(--second-color)] mx-auto relative block  w-40 mx-auto rounded-md
-
-          before:content-['']
-          before:absolute
-          before:top-1/2
-          before:left-1/2
-          before:-translate-x-1/2
-          before:-translate-y-1/2
-          before:w-4
-          before:h-4
-          before:bg-[url('/assets/images/pryamids-2.svg')]
-          before:bg-contain
-          before:bg-no-repeat
-          before:z-20
-
-          after:content-['']
-          after:absolute
-          after:top-1/2
-          after:left-1/2
-          after:-translate-x-1/2
-          after:-translate-y-1/2
-          after:w-[26px]
-          after:h-[26px]
-          after:bg-[var(--main-grey)]
-          after:rounded-full
-          after:z-0
-        ">
-        </span>
-        <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
-        Find answers to common questions about using Travosy platform
-        </p>
-      </div>
-        {/* FAQ Columns */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Column */}
-          <div className="flex-1 space-y-4">
-            {firstColumnFaqs.map((item) => {
-              const isOpen = openItem === item.id;
-              
-              return (
-                <div 
-                  key={item.id}
-                  className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 overflow-hidden"
-                >
-                  <button
-                    onClick={() => handleToggle(item.id)}
-                    className="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-[#e3b75e] focus:ring-offset-2 rounded-xl transition-colors duration-200"
-                    aria-expanded={isOpen}
-                  >
-                    <h3 className="text-lg font-semibold text-[#272262] pr-4">
-                      {item.question}
-                    </h3>
-                    <span className="flex-shrink-0 ml-2">
-                      <svg 
-                        className={`w-5 h-5 text-[#e3b75e] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth="2.5" 
-                          d={isOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
-                        />
-                      </svg>
-                    </span>
-                  </button>
-                  
-                  <div 
-                    className={`px-6 overflow-hidden transition-all duration-300 ease-in-out ${
-                      isOpen ? 'max-h-96 pb-5 opacity-100' : 'max-h-0 opacity-0'
-                    }`}
-                  >
-                    <div className="pt-4 border-t border-gray-100">
-                      <p className="text-[#333] leading-relaxed opacity-90">
-                        {item.answer}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Right Column */}
-          <div className="flex-1 space-y-4">
-            {secondColumnFaqs.map((item) => {
-              const isOpen = openItem === item.id;
-              
-              return (
-                <div 
-                  key={item.id}
-                  className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 overflow-hidden"
-                >
-                  <button
-                    onClick={() => handleToggle(item.id)}
-                    className="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-[#e3b75e] focus:ring-offset-2 rounded-xl transition-colors duration-200"
-                    aria-expanded={isOpen}
-                  >
-                    <h3 className="text-lg font-semibold text-[#272262] pr-4">
-                      {item.question}
-                    </h3>
-                    <span className="flex-shrink-0 ml-2">
-                      <svg 
-                        className={`w-5 h-5 text-[#e3b75e] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth="2.5" 
-                          d={isOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
-                        />
-                      </svg>
-                    </span>
-                  </button>
-                  
-                  <div 
-                    className={`px-6 overflow-hidden transition-all duration-300 ease-in-out ${
-                      isOpen ? 'max-h-96 pb-5 opacity-100' : 'max-h-0 opacity-0'
-                    }`}
-                  >
-                    <div className="pt-4 border-t border-gray-100">
-                      <p className="text-[#333] leading-relaxed opacity-90">
-                        {item.answer}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <h2 className="text-2xl md:text-3xl font-semibold text-[var(--second-color)] mb-4">Most Asked Questions</h2>
+          <span className="relative block h-1 w-40 mb-6 bg-gradient-to-r from-[var(--second-color)] via-[var(--main-color)] to-[var(--second-color)] mx-auto rounded-md before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-4 before:h-4 before:bg-[url('/assets/images/pryamids-2.svg')] before:bg-contain before:bg-no-repeat before:z-20 after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-[26px] after:h-[26px] after:bg-white after:rounded-full after:z-0" />
         </div>
-
-        {/* Contact Support */}
-        {/* <div className="mt-16 p-8 bg-gradient-to-r from-[#272262]/5 to-[#e3b75e]/10 rounded-2xl border border-[#e3b75e]/20 text-center">
-          <div className="max-w-4xl mx-auto">
-            <div className="mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-[#e3b75e] to-[#272262] rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-[#272262] mb-2">
-                Still have questions?
-              </h3>
-              <p className="text-[#333] opacity-90">
-                Our support team is here to help you 24/7
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-3.5 bg-[#272262] text-white font-semibold rounded-xl hover:bg-[#272262]/90 focus:outline-none focus:ring-2 focus:ring-[#272262] focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg">
-                Contact Support
+        <div className="space-y-4">
+          {items.map((faq, index) => (
+            <div key={index} className="border border-gray-200 rounded-2xl overflow-hidden">
+              <button
+                className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition-colors"
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              >
+                <span className="font-semibold text-[var(--second-color)] pr-4">{faq.title}</span>
+                <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${openIndex === index ? 'bg-[var(--main-color)]' : 'bg-gray-100'}`}>
+                  <svg className={`w-4 h-4 transition-transform duration-300 ${openIndex === index ? 'rotate-180 text-white' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </span>
               </button>
-              <button className="px-8 py-3.5 bg-white text-[#272262] font-semibold rounded-xl border-2 border-[#e3b75e] hover:bg-[#e3b75e]/10 focus:outline-none focus:ring-2 focus:ring-[#e3b75e] focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow">
-                View Documentation
-              </button>
+              {openIndex === index && (
+                <div className="px-6 pb-6">
+                  <div className="text-gray-600 leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: faq.answer }}/>
+                </div>
+              )}
             </div>
-          </div>
-        </div> */}
+          ))}
+        </div>
       </div>
     </section>
   );
-};
-
-export default FAQSection;
+}
