@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>API Performance Checker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+  <div class="bg-white shadow-xl rounded-2xl p-6 w-full max-w-xl">
+
+    <h1 class="text-2xl font-bold mb-4 text-center">
+      🚀 API Performance Checker
+    </h1>
+
+    <!-- Input + Button -->
+    <div class="flex gap-2">
+      <input
+        id="apiUrl"
+        type="text"
+        placeholder="Enter API URL..."
+        class="flex-1 border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
+      <button
+        onclick="checkAPI()"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+      >
+        Check
+      </button>
+    </div>
+
+    <!-- Loader -->
+    <div id="loading" class="hidden mt-4 text-center text-blue-600">
+      Checking...
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="hidden mt-6 border rounded-lg p-4 bg-gray-50">
+      <p><strong>📡 Status:</strong> <span id="status"></span></p>
+      <p><strong>⏱ Time:</strong> <span id="time"></span> ms</p>
+      <p><strong>📦 Size:</strong> <span id="size"></span> bytes</p>
+      <p><strong>📊 Performance:</strong> <span id="performance"></span></p>
+    </div>
+
+    <!-- Suggestions -->
+    <div id="suggestionsBox" class="hidden mt-4 p-4 bg-yellow-50 border rounded-lg">
+      <h3 class="font-semibold mb-2">💡 Suggestions:</h3>
+      <ul id="suggestions" class="list-disc ml-5 text-sm"></ul>
+    </div>
+
+  </div>
+
+  <script>
+    async function checkAPI() {
+      const url = document.getElementById("apiUrl").value;
+      const loading = document.getElementById("loading");
+      const resultBox = document.getElementById("result");
+      const suggestionsBox = document.getElementById("suggestionsBox");
+
+      if (!url) {
+        alert("Please enter API URL");
+        return;
+      }
+
+      loading.classList.remove("hidden");
+      resultBox.classList.add("hidden");
+      suggestionsBox.classList.add("hidden");
+
+      const start = performance.now();
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const end = performance.now();
+
+        const time = Math.round(end - start);
+        const size = new Blob([JSON.stringify(data)]).size;
+
+        // Fill data
+        document.getElementById("status").innerText = response.status;
+        document.getElementById("time").innerText = time;
+        document.getElementById("size").innerText = size;
+
+        // Performance label
+        let performanceText = "";
+        if (time < 200) performanceText = "🚀 Excellent";
+        else if (time < 500) performanceText = "✅ Good";
+        else if (time < 1000) performanceText = "⚠️ Acceptable";
+        else performanceText = "❌ Slow";
+
+        document.getElementById("performance").innerText = performanceText;
+
+        // Suggestions
+        const suggestions = [];
+
+        if (time > 500) {
+          suggestions.push("Use caching (Next.js revalidate or SWR)");
+        }
+
+        if (size > 50000) {
+          suggestions.push("Reduce payload size (remove unused fields)");
+        }
+
+        if (response.status !== 200) {
+          suggestions.push("Check API status handling");
+        }
+
+        const suggestionsList = document.getElementById("suggestions");
+        suggestionsList.innerHTML = "";
+
+        suggestions.forEach(s => {
+          const li = document.createElement("li");
+          li.innerText = s;
+          suggestionsList.appendChild(li);
+        });
+
+        if (suggestions.length > 0) {
+          suggestionsBox.classList.remove("hidden");
+        }
+
+        resultBox.classList.remove("hidden");
+
+      } catch (error) {
+        alert("❌ Error fetching API (CORS or invalid URL)");
+      }
+
+      loading.classList.add("hidden");
+    }
+  </script>
+</body>
+</html>

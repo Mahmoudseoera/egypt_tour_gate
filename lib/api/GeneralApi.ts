@@ -222,7 +222,7 @@ function normalizeResponse(raw: RawApiResponse): GeneralData {
 async function fetchGeneralData(locale: SupportedLocale): Promise<GeneralData> {
   const res = await fetch(`/api/general?locale=${locale}`, {
     // Next.js App Router fetch options
-    next: { revalidate: 3600 },
+    next: { revalidate: 3600, tags: ['general'] },
   });
 
   if (!res.ok) {

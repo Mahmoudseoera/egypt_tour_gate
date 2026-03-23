@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       "flagcdn.com",
       "localhost",
       "127.0.0.1",
-      "www.wondertravelegypt.com",
+      "www.egypttoursgate.com",
     ],
     remotePatterns: [
       {
@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "www.wondertravelegypt.com",
+        hostname: "www.egypttoursgate.com",
         pathname: "/storage/**",
       },
     ],
