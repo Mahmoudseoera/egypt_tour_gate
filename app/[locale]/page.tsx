@@ -16,9 +16,14 @@ import type { HomeSections } from "@/lib/api/homeTypes";
 
 import "@/styles/home.css";
 
-export default async function Home() {
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params;
   // ── Server-side data fetch ─────────────────────────────────────────────────
-  const sections: HomeSections | null = await fetchHomeSections();
+  const sections: HomeSections | null = await fetchHomeSections(locale);
 
   // ── Derived slices ─────────────────────────────────────────────────────────
   const sliderData      = sections?.sliders_section                        ?? [];

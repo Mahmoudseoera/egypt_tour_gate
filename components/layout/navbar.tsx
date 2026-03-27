@@ -29,7 +29,7 @@ import {
   ArrowRight,
   Star,
 } from "lucide-react";
-import { useGeneralData } from "@/lib/api/GeneralApi";
+import type { GeneralData } from "@/lib/api/GeneralApi";
 import { buildLocalizedPath, getPathLocale } from "@/lib/i18n/routing";
 import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import SimpleSocialIcon, {
@@ -101,7 +101,11 @@ const featuredHighlights = [
 
 /* ══════════════════════════════════════════════════════════════════════════ */
 
-export default function Navbar() {
+export default function Navbar({
+  generalData,
+}: {
+  generalData: GeneralData;
+}) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   // KEY CHANGE: use slug as the dropdown key (no more cat.id — real API has no id)
@@ -113,7 +117,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const activeLocale = getPathLocale(pathname);
-  const { data, error, loading } = useGeneralData(activeLocale);
+  const data = generalData;
   const localizePath = (path: string) => buildLocalizedPath(path, activeLocale);
 
   const currentLanguage = data?.header.languages.find(
@@ -150,24 +154,6 @@ export default function Navbar() {
     setMobileOpen(false);
     setActiveDropdown(null);
   };
-
-  /* ── Loading ─────────────────────────────────────────────────────────── */
-  if (loading) {
-    return (
-      <nav className="w-full bg-white p-4">
-        <Image
-          src="/assets/images/egypt-tour-gate-logo.png"
-          alt="Egypt Tour Gate"
-          width={70}
-          height={30}
-        />
-      </nav>
-    );
-  }
-
-  if (error || !data) {
-    return <div>Error loading navbar</div>;
-  }
 
   const logoSrc =
     data.header.logo?.image || "/assets/images/egypt-tour-gate-logo.png";

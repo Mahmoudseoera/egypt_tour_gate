@@ -1,29 +1,5 @@
-// lib/api/GeneralApi.ts
-// Rebuilt to match the real backend API:
-//   GET http://127.0.0.1:8000/api/v1/general-data?locale=en
-//
-// Real API response structure:
-//   data.header.categories[].name          → string
-//   data.header.categories[].slug          → string
-//   data.header.categories[].subs[]        → { name, slug, media? }
-//   data.header.languages[]                → { name, slug }
-//   data.header.info                       → { phone, email, address }
-//   data.header.logo                       → { image, alt, title }
-//   data.footer.logo                       → { image, alt, title }
-//   data.footer.info                       → { phone, email, address }
-//   data.footer.categories[].name          → string
-//   data.footer.categories[].slug          → string
-//   data.footer.categories[].subs[]        → { name, slug }
-
-"use client";
-
-import { useEffect, useState } from "react";
-import {
-  DEFAULT_LOCALE,
-  type SupportedLocale,
-} from "@/lib/i18n/config";
-
-// ─── Types ─────────────────────────────────────────────────────────────────────
+import { API_BASE_URL } from "@/lib/api/client";
+import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from "@/lib/i18n/config";
 
 export interface CategoryMedia {
   image: string;
@@ -31,14 +7,12 @@ export interface CategoryMedia {
   alt: string;
 }
 
-/** A sub-category as returned by the real API */
 export interface SubCategory {
   name: string;
   slug: string;
   media?: CategoryMedia;
 }
 
-/** A top-level category as returned by the real API */
 export interface Category {
   name: string;
   slug: string;
@@ -72,7 +46,6 @@ export interface HeaderData {
 export interface FooterData {
   logo?: Logo;
   info?: ContactInfo;
-  /** The footer categories use the same shape as header categories */
   categories: Category[];
 }
 
@@ -80,8 +53,6 @@ export interface GeneralData {
   header: HeaderData;
   footer: FooterData;
 }
-
-// ─── Raw API types (what actually comes back from the server) ──────────────────
 
 interface RawMedia {
   image?: string;
@@ -136,12 +107,9 @@ interface RawApiResponse {
   data?: {
     header?: RawHeader;
     footer?: RawFooter;
-    general?: unknown;
   };
   message?: string;
 }
-
-// ─── Normalizers ───────────────────────────────────────────────────────────────
 
 function normalizeMedia(raw?: RawMedia): CategoryMedia | undefined {
   if (!raw) return undefined;
@@ -210,65 +178,52 @@ function normalizeResponse(raw: RawApiResponse): GeneralData {
     footer: {
       logo: f.logo ? normalizeLogo(f.logo) : undefined,
       info: normalizeInfo(f.info),
-      // The real API uses `categories` inside footer too
       categories: normalizeCategories(f.categories),
     },
   };
 }
 
-// ─── Next.js proxy fetcher (avoids browser CORS) ──────────────────────────────
-// Make sure you have: app/api/general/route.ts (see below)
+const FALLBACK_GENERAL_DATA: GeneralData = {
+  header: {
+    logo: { image: "", alt: "", title: "" },
+    categories: [],
+    languages: [
+      { slug: "en", name: "English" },
+      { slug: "de", name: "Deutsch" },
+      { slug: "fr", name: "Français" },
+      { slug: "pl", name: "Polski" },
+      { slug: "pt", name: "Português" },
+    ],
+    info: {},
+  },
+  footer: {
+    categories: [],
+    info: {},
+  },
+};
 
-async function fetchGeneralData(locale: SupportedLocale): Promise<GeneralData> {
-  const res = await fetch(`/api/general?locale=${locale}`, {
-    // Next.js App Router fetch options
-    next: { revalidate: 3600, tags: ['general'] },
-  });
+export async function getGeneralData(locale: string = DEFAULT_LOCALE): Promise<GeneralData> {
+  const safeLocale: SupportedLocale = isSupportedLocale(locale) ? locale : DEFAULT_LOCALE;
 
-  if (!res.ok) {
-    throw new Error(`Proxy fetch failed: ${res.status} ${res.statusText}`);
-  }
+  try {
+    const upstream = await fetch(`${API_BASE_URL}/general-data?locale=${safeLocale}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      next: { revalidate: 3600, tags: [`general-${safeLocale}`] },
+      signal: AbortSignal.timeout(6000),
+    });
 
-  const raw: RawApiResponse = await res.json();
-  return normalizeResponse(raw);
-}
-
-// ─── React hook ────────────────────────────────────────────────────────────────
-
-export interface UseGeneralDataResult {
-  data: GeneralData | null;
-  loading: boolean;
-  error: string | null;
-}
-
-export function useGeneralData(
-  locale: SupportedLocale = DEFAULT_LOCALE
-): UseGeneralDataResult {
-  const [data, setData] = useState<GeneralData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        setLoading(true);
-        setError(null);
-        const result = await fetchGeneralData(locale);
-        if (!cancelled) setData(result);
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : String(err));
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+    if (!upstream.ok) {
+      throw new Error(`Backend responded with ${upstream.status} ${upstream.statusText}`);
     }
 
-    load();
-    return () => { cancelled = true; };
-  }, [locale]);
-
-  return { data, loading, error };
+    const raw: RawApiResponse = await upstream.json();
+    return normalizeResponse(raw);
+  } catch (error) {
+    console.error("[getGeneralData] failed, falling back:", error);
+    return FALLBACK_GENERAL_DATA;
+  }
 }

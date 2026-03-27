@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useGeneralData } from "@/lib/api/GeneralApi";
+import type { GeneralData } from "@/lib/api/GeneralApi";
 import { buildLocalizedPath, getPathLocale } from "@/lib/i18n/routing";
 import SimpleSocialIcon, { SocialItem } from "@/components/layout/simpleSocialIcon";
 
@@ -16,10 +16,14 @@ const socialData: SocialItem[] = [
   { icon: "fa-brands fa-youtube", url: "https://youtube.com", title: "YouTube" },
 ];
 
-export default function Footer() {
+export default function Footer({
+  generalData,
+}: {
+  generalData: GeneralData;
+}) {
   const pathname = usePathname();
   const activeLocale = getPathLocale(pathname);
-  const { data, loading } = useGeneralData(activeLocale);
+  const data = generalData;
   const homePath = buildLocalizedPath("/", activeLocale);
   const currentYear = new Date().getFullYear();
 
@@ -28,26 +32,6 @@ export default function Footer() {
   const info = data?.footer.info ?? data?.header.info;
   // Real API: footer.categories (same shape as header.categories)
   const footerCategories = data?.footer.categories ?? [];
-
-  // ── Loading skeleton ────────────────────────────────────────────────────────
-  if (loading) {
-    return (
-      <footer className="relative bg-[var(--second-color)] text-white pt-16 pb-10 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-[var(--main-color)]" />
-        <div className="container mx-auto px-4 md:px-6 flex items-center justify-center min-h-[300px]">
-          <div className="text-center">
-            <div className="relative w-16 h-16 mx-auto mb-4">
-              <div className="w-16 h-16 border-2 border-[var(--main-color)] border-r-transparent rounded-full animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-2 h-2 bg-[var(--main-color)] rounded-full" />
-              </div>
-            </div>
-            <p className="text-white/85 text-lg font-medium">Loading…</p>
-          </div>
-        </div>
-      </footer>
-    );
-  }
 
   // ── Main footer ─────────────────────────────────────────────────────────────
   return (
@@ -139,7 +123,7 @@ export default function Footer() {
                 {category.subs.map((sub) => (
                   <li key={sub.slug}>
                     <Link
-                      href={`/${category.slug}/${sub.slug}`}
+                      href={buildLocalizedPath(`/${category.slug}/${sub.slug}`, activeLocale)}
                       className="flex items-center gap-2 text-white/75 hover:text-[var(--main-color)] transition-colors py-0.5 group text-sm"
                     >
                       <span className="w-1 h-1 bg-[var(--main-color)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />

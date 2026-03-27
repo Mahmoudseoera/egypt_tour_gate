@@ -1,14 +1,11 @@
+import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from "@/lib/i18n/config";
 import type { HomeApiResponse, HomeSections } from "./homeTypes";
 
 /**
  * Fetches all home page sections from the API.
- *
- * Usage (Server Component):
- *   const data = await fetchHomeSections();
- *
- * The base URL is read from NEXT_PUBLIC_API_BASE_URL (e.g. http://127.0.0.1:8000/api/v1/).
+ * Uses Next.js data cache (revalidate every 5 minutes) and locale-aware requests.
  */
-export async function fetchHomeSections(): Promise<HomeSections | null> {
+export async function fetchHomeSections(locale: string = DEFAULT_LOCALE): Promise<HomeSections | null> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   if (!baseUrl) {
@@ -18,15 +15,15 @@ export async function fetchHomeSections(): Promise<HomeSections | null> {
     return null;
   }
 
-  // Strip trailing slash so we can safely append the path
+  const safeLocale: SupportedLocale = isSupportedLocale(locale) ? locale : DEFAULT_LOCALE;
+
   const normalizedBase = baseUrl.replace(/\/+$/, "");
-  const url = `${normalizedBase}?locale=en`;
+  const url = `${normalizedBase}?locale=${safeLocale}`;
 
   try {
     const res = await fetch(url, {
-      // In development we want fresh data on every request.
-      // Switch to { next: { revalidate: 60 } } in production.
-      cache: "no-store",
+      next: { revalidate: 300, tags: [`home-${safeLocale}`] },
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!res.ok) {
@@ -45,7 +42,7 @@ export async function fetchHomeSections(): Promise<HomeSections | null> {
 
     return json.data.sections;
   } catch (err) {
-    console.error("[fetchHomeSections] Network / parse error:", err);
+    console.error(`[fetchHomeSections] Network / parse error for locale=${safeLocale}:`, err);
     return null;
   }
 }

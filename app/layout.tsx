@@ -9,6 +9,7 @@ import MobileFooter from "../components/layout/MobileFooter";
 import WhatsappIcon from "../components/layout/Whatsapp-icon";
 import GlobalSeoSchema from "@/components/seo/global-seo-schema";
 import { DEFAULT_LOCALE, isSupportedLocale } from "@/lib/i18n/config";
+import { getGeneralData } from "@/lib/api/GeneralApi";
 
 import "../styles/globals.css";
 
@@ -33,6 +34,7 @@ export default async function RootLayout({
 }>) {
   const localeHeader = (await headers()).get("x-locale");
   const htmlLang = localeHeader && isSupportedLocale(localeHeader) ? localeHeader : DEFAULT_LOCALE;
+  const generalData = await getGeneralData(htmlLang);
 
   return (
     <html lang={htmlLang} suppressHydrationWarning>
@@ -47,12 +49,12 @@ export default async function RootLayout({
       </head>
       <body suppressHydrationWarning className={`${montserrat.variable} antialiased`}>
         <GlobalSeoSchema />
-        <Navbar />
+        <Navbar generalData={generalData} />
         {children}
         <ScrollToTop />
         <MobileFooter />
         <WhatsappIcon />
-        <Footer />
+        <Footer generalData={generalData} />
                 {/* Sonner Toaster */}
                 <Toaster
           position="top-right"

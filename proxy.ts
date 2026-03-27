@@ -58,6 +58,21 @@ export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-locale", locale);
 
+  if (pathname !== "/") {
+    const rewriteUrl = request.nextUrl.clone();
+    rewriteUrl.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
+
+    const response = NextResponse.rewrite(rewriteUrl, {
+      request: { headers: requestHeaders },
+    });
+
+    if (!cookieLocale || !isSupportedLocale(cookieLocale)) {
+      response.cookies.set(LOCALE_COOKIE, locale, { path: "/" });
+    }
+
+    return response;
+  }
+
   const response = NextResponse.next({
     request: { headers: requestHeaders },
   });

@@ -13,12 +13,13 @@ import TravelTourSlider from "../components/home/tours-section";
 
 import { fetchHomeSections } from "@/lib/api/homeApi";
 import type { HomeSections } from "@/lib/api/homeTypes";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 
 import "@/styles/home.css";
 
 export default async function Home() {
   // ── Server-side data fetch ─────────────────────────────────────────────────
-  const sections: HomeSections | null = await fetchHomeSections();
+  const sections: HomeSections | null = await fetchHomeSections(DEFAULT_LOCALE);
 
   // ── Derived slices ─────────────────────────────────────────────────────────
   const sliderData      = sections?.sliders_section                        ?? [];
