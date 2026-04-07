@@ -1,11 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { useGeneralData } from "@/lib/api/GeneralApi";
-import { buildLocalizedPath, getPathLocale } from "@/lib/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
+import { useLocale, useTranslations } from "next-intl";
 import SimpleSocialIcon, { SocialItem } from "@/components/layout/simpleSocialIcon";
 
 // Static social data
@@ -17,10 +16,10 @@ const socialData: SocialItem[] = [
 ];
 
 export default function Footer() {
-  const pathname = usePathname();
-  const activeLocale = getPathLocale(pathname);
-  const { data, loading } = useGeneralData(activeLocale);
-  const homePath = buildLocalizedPath("/", activeLocale);
+  const locale = useLocale();
+  const t = useTranslations("Footer");
+  const { data, loading } = useGeneralData(locale as "en" | "de" | "fr" | "pl" | "pt");
+  const homePath = "/";
   const currentYear = new Date().getFullYear();
 
   // ── Derived values (safe-access with fallbacks) ────────────────────────────
@@ -42,7 +41,7 @@ export default function Footer() {
                 <div className="w-2 h-2 bg-[var(--main-color)] rounded-full" />
               </div>
             </div>
-            <p className="text-white/85 text-lg font-medium">Loading…</p>
+            <p className="text-white/85 text-lg font-medium">{t("loading")}</p>
           </div>
         </div>
       </footer>
@@ -86,7 +85,7 @@ export default function Footer() {
             </Link>
 
             <p className="text-white/80 text-sm leading-relaxed">
-              Discover the wonders of ancient Egypt with expertly curated tours to the Pyramids, Nile cruises, and historic temples.
+              {t("about")}
             </p>
 
             {/* Contact info from API */}
@@ -101,21 +100,21 @@ export default function Footer() {
               )}
 
               {info?.phone && (
-                <Link href={`tel:${info.phone}`} className="flex items-start gap-3 group">
+                <a href={`tel:${info.phone}`} className="flex items-start gap-3 group">
                   <div className="p-2 bg-[var(--main-color)]/10 rounded-full group-hover:bg-[var(--main-color)]/20 transition-colors">
                     <Phone className="h-4 w-4 text-[var(--main-color)]" aria-hidden="true" />
                   </div>
                   <span className="text-white/80 text-sm">{info.phone}</span>
-                </Link>
+                </a>
               )}
 
               {info?.email && (
-                <Link href={`mailto:${info.email}`} className="flex items-start gap-3 group">
+                <a href={`mailto:${info.email}`} className="flex items-start gap-3 group">
                   <div className="p-2 bg-[var(--main-color)]/10 rounded-full group-hover:bg-[var(--main-color)]/20 transition-colors">
                     <Mail className="h-4 w-4 text-[var(--main-color)]" aria-hidden="true" />
                   </div>
                   <span className="text-white/80 text-sm">{info.email}</span>
-                </Link>
+                </a>
               )}
             </div>
           </div>
@@ -183,11 +182,11 @@ export default function Footer() {
         {/* ── Bottom bar ────────────────────────────────────────────────────── */}
         <div className="mt-12 pt-8 border-t border-[var(--main-color)]/15 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <p className="text-white/60 text-sm text-center md:text-left">
-            © {currentYear} Egypt Tour Gate. All rights reserved.
+            © {currentYear} {t("rights")}
           </p>
 
           <div className="flex items-center justify-center gap-3 md:justify-end" role="region" aria-label="Social media links">
-            <span className="text-white/60 text-sm hidden md:inline">Follow our journey:</span>
+            <span className="text-white/60 text-sm hidden md:inline">{t("follow")}</span>
             <div className="flex gap-3">
               {socialData.map((item, index) => (
                 <div

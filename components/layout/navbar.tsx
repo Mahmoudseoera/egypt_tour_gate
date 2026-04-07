@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import {
   Phone,
   Mail,
@@ -30,8 +28,9 @@ import {
   Star,
 } from "lucide-react";
 import { useGeneralData } from "@/lib/api/GeneralApi";
-import { buildLocalizedPath, getPathLocale } from "@/lib/i18n/routing";
+import { Link, usePathname, useRouter } from "@/lib/i18n/routing";
 import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { useLocale } from "next-intl";
 import SimpleSocialIcon, {
   SocialItem,
 } from "@/components/layout/simpleSocialIcon";
@@ -112,17 +111,17 @@ export default function Navbar() {
 
   const pathname = usePathname();
   const router = useRouter();
-  const activeLocale = getPathLocale(pathname);
+  const locale = useLocale();
+  const activeLocale = locale as any;
   const { data, error, loading } = useGeneralData(activeLocale);
-  const localizePath = (path: string) => buildLocalizedPath(path, activeLocale);
+  const localizePath = (path: string) => path;
 
   const currentLanguage = data?.header.languages.find(
     (lang) => lang.slug === activeLocale
   );
 
   const onLanguageChange = (slug: string) => {
-    const targetPath = buildLocalizedPath(pathname, slug);
-    router.push(targetPath);
+    router.replace(pathname, {locale: slug as any});
   };
 
   useEffect(() => {

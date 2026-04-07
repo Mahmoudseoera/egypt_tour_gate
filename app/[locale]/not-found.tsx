@@ -1,14 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { buildLocalizedPath, getPathLocale } from "@/lib/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 
 export default function NotFound() {
-  const pathname = usePathname();
-  const locale = getPathLocale(pathname);
-  const homePath = buildLocalizedPath("/", locale);
-
   return (
     <div className="main-error bg-[#f9f9f9] h-[600px] relative">
       <div className="container max-w-7xl mx-auto h-full">
@@ -34,7 +28,7 @@ export default function NotFound() {
               <div className="buttons-con mt-[20px]">
                 <div className="action-link-wrap">
                   <button className="btn-effect">
-                    <Link href={homePath}>Go to Home Page</Link>
+                    <Link href="/">Go to Home Page</Link>
                   </button>
                 </div>
               </div>

@@ -1,7 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from '@/lib/i18n/routing';
+import { useTranslations } from 'next-intl';
 import '@/styles/animations.css';
 import type { SliderItem } from '@/lib/api/homeTypes';
 
@@ -15,12 +16,6 @@ const fallback = {
   backgroundImg: 'https://images.unsplash.com/photo-1539768942893-daf53e448371?q=80&w=1600&auto=format&fit=crop',
 };
 
-const badgeContent = {
-  brandLine: 'Egypt Tour Gate',
-  titleLine: 'Traveler',
-  subLine: 'Bright Ideas in Travel',
-  yearLine: '2025 WINNER',
-};
 
 // ─── Props ────────────────────────────────────────────────────────────────
 interface EgyptToursBannerProps {
@@ -29,6 +24,8 @@ interface EgyptToursBannerProps {
 }
 
 export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerProps) {
+  const t = useTranslations("Hero");
+
   // Use first slider item from the API when available
   const firstSlide = sliderData[0];
 
@@ -113,11 +110,11 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
         <div className="pendulum-wrapper">
           <div className="pendulum-string" />
           <div className="pendulum-box">
-            <span className="badge-brand">{badgeContent.brandLine}</span>
-            <span className="badge-title">{badgeContent.titleLine}</span>
+            <span className="badge-brand">{t("brandLine")}</span>
+            <span className="badge-title">{t("titleLine")}</span>
             <div className="badge-divider" />
-            <span className="badge-sub">{badgeContent.subLine}</span>
-            <span className="badge-year">{badgeContent.yearLine}</span>
+            <span className="badge-sub">{t("subLine")}</span>
+            <span className="badge-year">{t("yearLine")}</span>
           </div>
         </div>
 
@@ -127,20 +124,20 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
             <div className="hero-left animate-slide-in-left">
               <div className="hero-label-row">
                 <span className="hero-label-line" />
-                <span className="hero-label-text">Premium Egypt Travel</span>
+                <span className="hero-label-text">{t("premiumLabel")}</span>
                 <span className="hero-label-line" />
               </div>
               <h1 className="hero-title">{title}</h1>
               <p className="hero-desc">{description}</p>
               <div className="hero-btns">
                 <Link href="/contact" className="btn-primary">
-                  Explore Tours
+                  {t("exploreTours")}
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                   </svg>
                 </Link>
                 <Link href="#tours-section" className="btn-secondary">
-                  View Tours
+                  {t("viewTours")}
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
                   </svg>
@@ -152,14 +149,14 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
               <div className="photo-wrapper-1 animate-floating">
                 <div className="photo-ring" />
                 <div className="photo-frame photo-frame-1">
-                  <Image src={fallback.imageOne} alt="Egypt Tour" fill className="object-cover"/>
+                  <Image src={fallback.imageOne} alt={t("imageAlt")} fill className="object-cover"/>
                   <div className="photo-shimmer overlay-animated opacity-10" />
                 </div>
               </div>
               <div className="photo-wrapper-2 animate-floating-delayed">
                 <div className="photo-ring photo-ring-2" />
                 <div className="photo-frame photo-frame-2">
-                  <Image src={fallback.imageTwo} alt="Luxury Tour" fill className="object-cover"/>
+                  <Image src={fallback.imageTwo} alt={t("imageAltLuxury")} fill className="object-cover"/>
                   <div className="photo-shimmer overlay-animated opacity-10" />
                 </div>
               </div>
@@ -168,8 +165,8 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
         </div>
 
         {/* Scroll Indicator */}
-        <Link href="#tours-section" className="scroll-indicator bottom-3 md:bottom-4" aria-label="Scroll to tours">
-          <span className="scroll-label">Scroll</span>
+        <Link href="#tours-section" className="scroll-indicator bottom-3 md:bottom-4" aria-label={t("scrollToTours")}>
+          <span className="scroll-label">{t("scroll")}</span>
           <div className="scroll-pill">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
               stroke="#c4973e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

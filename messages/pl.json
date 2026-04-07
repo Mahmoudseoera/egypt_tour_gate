@@ -1,0 +1,25 @@
+{
+  "Hero": {
+    "brandLine": "Egypt Tour Gate",
+    "titleLine": "Traveler",
+    "subLine": "Bright Ideas in Travel",
+    "yearLine": "2025 WINNER",
+    "premiumLabel": "Premium Egypt Travel",
+    "exploreTours": "Explore Tours",
+    "viewTours": "View Tours",
+    "scroll": "Scroll",
+    "scrollToTours": "Scroll to tours",
+    "imageAlt": "Egypt Tour",
+    "imageAltLuxury": "Luxury Tour"
+  },
+  "Home": {
+    "exploreTitle": "Explore Our Amazing Tours",
+    "exploreDescription": "Discover unforgettable travel experiences tailored just for you"
+  },
+  "Footer": {
+    "loading": "Loading…",
+    "about": "Discover the wonders of ancient Egypt with expertly curated tours to the Pyramids, Nile cruises, and historic temples.",
+    "rights": "Egypt Tour Gate. All rights reserved.",
+    "follow": "Follow our journey:"
+  }
+}

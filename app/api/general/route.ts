@@ -8,9 +8,12 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { API_BASE_URL } from "@/lib/api/client";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { isSupportedLocale } from "@/lib/i18n/routing";
 
 export async function GET(req: NextRequest) {
-  const locale = req.nextUrl.searchParams.get("locale") ?? "en";
+  const queryLocale = req.nextUrl.searchParams.get("locale");
+  const locale = queryLocale && isSupportedLocale(queryLocale) ? queryLocale : DEFAULT_LOCALE;
 
   try {
     const upstream = await fetch(`${API_BASE_URL}/general-data?locale=${locale}`, {

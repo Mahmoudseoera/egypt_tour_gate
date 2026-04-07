@@ -1,27 +1,20 @@
-import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from "./config";
+import {createNavigation} from 'next-intl/navigation';
+import {defineRouting} from 'next-intl/routing';
+import {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  isSupportedLocale,
+  type SupportedLocale
+} from './config';
 
-export function getPathLocale(pathname: string): SupportedLocale {
-  const [, maybeLocale] = pathname.split("/");
-  if (maybeLocale && isSupportedLocale(maybeLocale)) {
-    return maybeLocale;
-  }
-  return DEFAULT_LOCALE;
-}
+export const routing = defineRouting({
+  locales: [...SUPPORTED_LOCALES],
+  defaultLocale: DEFAULT_LOCALE,
+  localePrefix: 'always'
+});
 
-export function stripLocalePrefix(pathname: string): string {
-  const segments = pathname.split("/").filter(Boolean);
-  if (segments.length > 0 && isSupportedLocale(segments[0])) {
-    const rest = segments.slice(1).join("/");
-    return rest ? `/${rest}` : "/";
-  }
-  return pathname || "/";
-}
+export const {Link, redirect, usePathname, useRouter, getPathname} =
+  createNavigation(routing);
 
-export function buildLocalizedPath(pathname: string, locale: string): string {
-  const cleanPath = stripLocalePrefix(pathname);
-  if (!isSupportedLocale(locale) || locale === DEFAULT_LOCALE) {
-    return cleanPath;
-  }
-
-  return cleanPath === "/" ? `/${locale}` : `/${locale}${cleanPath}`;
-}
+export {isSupportedLocale};
+export type {SupportedLocale};
