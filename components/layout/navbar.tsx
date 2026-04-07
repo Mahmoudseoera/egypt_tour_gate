@@ -433,7 +433,7 @@ export default function Navbar() {
             isScrolled ? "fixed top-0 bg-white shadow-xl" : "relative bg-white"
           }`}
         >
-          <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-2">
+          <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-2">
             {/* Logo */}
             <Link href={localizePath("/")}>
               <Image

@@ -29,6 +29,7 @@ const { locale } = await params;
   const sliderData      = sections?.sliders_section                        ?? [];
   const aboutData       = sections?.about_section                          ?? null;
   const firstTours      = sections?.first_tours_section?.tours             ?? [];
+  const services        = sections?.why_choose_section                     ?? [];
   const reviews         = sections?.reviews_section?.reviews               ?? [];
   const secondTours     = sections?.second_tours_section?.tours            ?? [];
   const articles        = sections?.articles_section?.articles             ?? [];
@@ -91,7 +92,7 @@ const { locale } = await params;
 
         {/* ── Services ────────────────────────────────────────────────────── */}
         <div className="animate-on-scroll">
-          <TravelServicesSection />
+          <TravelServicesSection whyChooseSection={sections?.why_choose_section ?? null} />
         </div>
 
         {/* ── Testimonials ────────────────────────────────────────────────── */}
