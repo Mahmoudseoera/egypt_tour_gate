@@ -8,7 +8,7 @@ import type { HomeApiResponse, HomeSections } from "./homeTypes";
  *
  * The base URL is read from NEXT_PUBLIC_API_BASE_URL (e.g. http://127.0.0.1:8000/api/v1/).
  */
-export async function fetchHomeSections(): Promise<HomeSections | null> {
+export async function fetchHomeSections(locale: string = "en"): Promise<HomeSections | null> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   if (!baseUrl) {
@@ -18,14 +18,11 @@ export async function fetchHomeSections(): Promise<HomeSections | null> {
     return null;
   }
 
-  // Strip trailing slash so we can safely append the path
   const normalizedBase = baseUrl.replace(/\/+$/, "");
-  const url = `${normalizedBase}?locale=en`;
+  const url = `${normalizedBase}?locale=${locale}`;
 
   try {
     const res = await fetch(url, {
-      // In development we want fresh data on every request.
-      // Switch to { next: { revalidate: 60 } } in production.
       cache: "no-store",
     });
 
