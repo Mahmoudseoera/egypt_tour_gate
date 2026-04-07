@@ -24,8 +24,6 @@ export default async function Home() {
   const sliderData      = sections?.sliders_section                        ?? [];
   const aboutData       = sections?.about_section                          ?? null;
   const firstTours      = sections?.first_tours_section?.tours             ?? [];
-  const tagCategories   = sections?.tag_categories_section?.tag_categories ?? [];
-  const whyChoose       = sections?.why_choose_section                     ?? null;
   const reviews         = sections?.reviews_section?.reviews               ?? [];
   const secondTours     = sections?.second_tours_section?.tours            ?? [];
   const articles        = sections?.articles_section?.articles             ?? [];
@@ -81,12 +79,14 @@ export default async function Home() {
 
         {/* ── Destination Grid ────────────────────────────────────────────── */}
         <div className="animate-on-scroll">
-          <DestinationGrid tagCategories={tagCategories} />
+          <DestinationGrid
+            tagCategoriesSection={sections?.tag_categories_section ?? null}
+          />
         </div>
 
         {/* ── Services ────────────────────────────────────────────────────── */}
         <div className="animate-on-scroll">
-          <TravelServicesSection whyChoose={whyChoose} />
+          <TravelServicesSection />
         </div>
 
         {/* ── Testimonials ────────────────────────────────────────────────── */}

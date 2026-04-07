@@ -3,11 +3,32 @@
 import { useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
-import { destinations } from '../../lib/api/destinations';
+import type { TagCategoriesSection, TagCategory } from "@/lib/api/homeTypes";
 
-export default function DestinationGrid() {
+const PLACEHOLDER = "/placeholder.svg";
+
+function tagCategoryImageUrl(media: TagCategory["media"] | undefined): string {
+  if (!media) return PLACEHOLDER;
+  const url = media.image ?? media.image_url;
+  return url && url.length > 0 ? url : PLACEHOLDER;
+}
+
+type DestinationGridProps = {
+  /** Full `tag_categories_section` object from `fetchHomeSections().tag_categories_section`. */
+  tagCategoriesSection: TagCategoriesSection | null;
+};
+
+export default function DestinationGrid({ tagCategoriesSection }: DestinationGridProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
+  const sectionTitle =
+    tagCategoriesSection?.title?.trim() || "Destinations";
+  const sectionDescription =
+    tagCategoriesSection?.description?.trim() ||
+    "Discover breathtaking locations around the world and create unforgettable memories";
+  const categories = tagCategoriesSection?.tag_categories ?? [];
+
+  const cat = (index: number): TagCategory | undefined => categories[index];
 
   return (
     <section className=" bg-[var(--main-grey)] py-16 px-4">
@@ -15,7 +36,7 @@ export default function DestinationGrid() {
         {/* Header */}
         <div className="text-center mb-12">
         <h2 className="text-2xl md:text-3xl font-semibold text-[var(--second-color)] mb-4">
-        Explore Our Amazing Destinations
+        {sectionTitle}
         </h2>
         <span
         className="relative block h-1 w-40 mb-6 bg-gradient-to-r from-[var(--second-color)] via-[var(--main-color)] to-[var(--second-color)] mx-auto relative block  w-40 mx-auto rounded-md
@@ -47,7 +68,7 @@ export default function DestinationGrid() {
         ">
         </span>
         <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
-          Discover breathtaking locations around the world and create unforgettable memories
+          {sectionDescription}
         </p>
       </div>
 
@@ -59,12 +80,12 @@ export default function DestinationGrid() {
             onMouseEnter={() => setHoveredIndex(0)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <Link href="/contact">
+            <Link href={cat(0)?.slug ? `/${cat(0)!.slug}` : "/contact"}>
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 0 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-100">
               <Image
-                src={destinations[0].image || "/placeholder.svg"}
-                alt={destinations[0].title}
+                src={tagCategoryImageUrl(cat(0)?.media)}
+                alt={cat(0)?.media?.alt ?? cat(0)?.name ?? "Destination"}
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-300"
               />
@@ -72,8 +93,8 @@ export default function DestinationGrid() {
             </div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 0 ? 'opacity-100' : 'opacity-70'}`}></div>
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform transition-transform duration-300">
-              <div className="text-sm font-medium opacity-90 mb-1">{destinations[0].location}</div>
-              <h3 className="text-2xl font-bold">{destinations[0].title}</h3>
+              <div className="text-sm font-medium opacity-90 mb-1">{cat(0)?.name ?? ""}</div>
+              <h3 className="text-2xl font-bold">{cat(0)?.name ?? ""}</h3>
             </div>
             </Link>
 
@@ -85,12 +106,12 @@ export default function DestinationGrid() {
             onMouseEnter={() => setHoveredIndex(1)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <Link href="/contact">
+            <Link href={cat(1)?.slug ? `/${cat(1)!.slug}` : "/contact"}>
             <div className={`absolute inset-0 bg-gradient-to-br transition-transform duration-500 ${hoveredIndex === 1 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-100">
                 <Image
-                src={destinations[1].image || "/placeholder.svg"}
-                alt={destinations[1].title}
+                src={tagCategoryImageUrl(cat(1)?.media)}
+                alt={cat(1)?.media?.alt ?? cat(1)?.name ?? "Destination"}
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-300"
               />
@@ -98,8 +119,8 @@ export default function DestinationGrid() {
             </div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 1 ? 'opacity-100' : 'opacity-70'}`}></div>
             <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-              <div className="text-xs font-medium opacity-90 mb-1">{destinations[1].location}</div>
-              <h3 className="text-xl font-bold">{destinations[1].title}</h3>
+              <div className="text-xs font-medium opacity-90 mb-1">{cat(1)?.name ?? ""}</div>
+              <h3 className="text-xl font-bold">{cat(1)?.name ?? ""}</h3>
             </div>
             </Link>
           </div>
@@ -110,12 +131,12 @@ export default function DestinationGrid() {
             onMouseEnter={() => setHoveredIndex(2)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <Link href="/contact">
+            <Link href={cat(2)?.slug ? `/${cat(2)!.slug}` : "/contact"}>
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 2 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-100">
                 <Image
-                src={destinations[2].image || "/placeholder.svg"}
-                alt={destinations[2].title}
+                src={tagCategoryImageUrl(cat(2)?.media)}
+                alt={cat(2)?.media?.alt ?? cat(2)?.name ?? "Destination"}
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-300"
               />
@@ -123,8 +144,8 @@ export default function DestinationGrid() {
             </div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 2 ? 'opacity-100' : 'opacity-70'}`}></div>
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <div className="text-sm font-medium opacity-90 mb-1">{destinations[2].location}</div>
-              <h3 className="text-2xl font-bold">{destinations[2].title}</h3>
+              <div className="text-sm font-medium opacity-90 mb-1">{cat(2)?.name ?? ""}</div>
+              <h3 className="text-2xl font-bold">{cat(2)?.name ?? ""}</h3>
             </div>
             </Link>
           </div>
@@ -135,12 +156,12 @@ export default function DestinationGrid() {
             onMouseEnter={() => setHoveredIndex(3)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <Link href="/contact">
+            <Link href={cat(3)?.slug ? `/${cat(3)!.slug}` : "/contact"}>
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 3 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-100">
                 <Image
-                src={destinations[3].image || "/placeholder.svg"}
-                alt={destinations[3].title}
+                src={tagCategoryImageUrl(cat(3)?.media)}
+                alt={cat(3)?.media?.alt ?? cat(3)?.name ?? "Destination"}
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-300"
               />
@@ -148,8 +169,8 @@ export default function DestinationGrid() {
             </div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 3 ? 'opacity-100' : 'opacity-70'}`}></div>
             <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-              <div className="text-xs font-medium opacity-90 mb-1">{destinations[3].location}</div>
-              <h3 className="text-xl font-bold">{destinations[3].title}</h3>
+              <div className="text-xs font-medium opacity-90 mb-1">{cat(3)?.name ?? ""}</div>
+              <h3 className="text-xl font-bold">{cat(3)?.name ?? ""}</h3>
             </div>
             </Link>
           </div>
@@ -160,12 +181,12 @@ export default function DestinationGrid() {
             onMouseEnter={() => setHoveredIndex(4)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <Link href="/contact">
+            <Link href={cat(4)?.slug ? `/${cat(4)!.slug}` : "/contact"}>
             <div className={`absolute inset-0 bg-gradient-to-br transition-transform duration-500 ${hoveredIndex === 4 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-8xl opacity-100">
                 <Image
-                src={destinations[4].image || "/placeholder.svg"}
-                alt={destinations[4].title}
+                src={tagCategoryImageUrl(cat(4)?.media)}
+                alt={cat(4)?.media?.alt ?? cat(4)?.name ?? "Destination"}
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-300"
               />
@@ -173,8 +194,8 @@ export default function DestinationGrid() {
             </div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 4 ? 'opacity-100' : 'opacity-70'}`}></div>
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <div className="text-sm font-medium opacity-90 mb-1">{destinations[4].location}</div>
-              <h3 className="text-2xl font-bold">{destinations[4].title}</h3>
+              <div className="text-sm font-medium opacity-90 mb-1">{cat(4)?.name ?? ""}</div>
+              <h3 className="text-2xl font-bold">{cat(4)?.name ?? ""}</h3>
             </div>
             </Link>
           </div>
@@ -186,12 +207,12 @@ export default function DestinationGrid() {
               onMouseEnter={() => setHoveredIndex(5)}
               onMouseLeave={() => setHoveredIndex(null)}
             >
-              <Link href="/contact">
+              <Link href={cat(5)?.slug ? `/${cat(5)!.slug}` : "/contact"}>
               <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 5 ? 'scale-110' : 'scale-100'}`}>
                 <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-100">
                   <Image
-                  src={destinations[5].image || "/placeholder.svg"}
-                  alt={destinations[5].title}
+                  src={tagCategoryImageUrl(cat(5)?.media)}
+                  alt={cat(5)?.media?.alt ?? cat(5)?.name ?? "Destination"}
                   fill
                   className="object-cover group-hover:scale-110 transition-transform duration-300"
                 />
@@ -199,8 +220,8 @@ export default function DestinationGrid() {
               </div>
               <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 5 ? 'opacity-100' : 'opacity-70'}`}></div>
               <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                <div className="text-xs font-medium opacity-90 mb-1">{destinations[5].location}</div>
-                <h3 className="text-base font-bold">{destinations[5].title}</h3>
+                <div className="text-xs font-medium opacity-90 mb-1">{cat(5)?.name ?? ""}</div>
+                <h3 className="text-base font-bold">{cat(5)?.name ?? ""}</h3>
               </div>
               </Link>
             </div>

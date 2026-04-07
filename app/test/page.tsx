@@ -15,7 +15,11 @@ const BENCHMARKS = [
 export default function Home() {
   const [url, setUrl] = useState("https://jsonplaceholder.typicode.com/todos/1");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ durationMs: number; status: number } | null>(null);
+  const [result, setResult] = useState<{
+    durationMs: number;
+    status: number;
+    url: string;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleTest = async (e: React.FormEvent) => {

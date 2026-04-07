@@ -2,8 +2,7 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getCategoryBySlug, getPostsByCategory } from '../../../lib/api/blogData';
-import Breadcrumb from '@/components/layout/breadcrumb';
+import { getCategoryBySlug, getPostsByCategory } from '@/lib/api/blogData';import Breadcrumb from '@/components/layout/breadcrumb';
 import ExpandableDescription from '@/components/shared/expandable-description';
 import SchemaScript from '@/components/seo/schema-script';
 

@@ -55,10 +55,12 @@ export interface SliderItem {
     tours: ApiTour[];
   }
   
+  /** Matches API `media` for tag categories (some responses use `image`, others `image_url`). */
   export interface TagCategoryMedia {
-    image: string;
-    title: string;
-    alt: string;
+    image?: string;
+    image_url?: string;
+    title?: string;
+    alt?: string;
   }
   
   export interface TagCategory {
@@ -66,7 +68,7 @@ export interface SliderItem {
     name: string;
     slug: string;
     description: string;
-    media: TagCategoryMedia;
+    media?: TagCategoryMedia;
   }
   
   export interface TagCategoriesSection {
