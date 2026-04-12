@@ -92,7 +92,7 @@ const { locale } = await params;
 
         {/* ── Services ────────────────────────────────────────────────────── */}
         <div className="animate-on-scroll">
-          <TravelServicesSection />
+          <TravelServicesSection whyChooseSection={sections?.why_choose_section ?? null} />
         </div>
 
         {/* ── Testimonials ────────────────────────────────────────────────── */}

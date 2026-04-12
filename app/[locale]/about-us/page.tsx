@@ -1,15 +1,15 @@
 // app/page.tsx  — Server Component (no 'use client')
-import Providers from "../components/providers";
-import EgyptToursBanner from "../components/home/hero-banner";
-import TestimonialSlider from "../components/testimonails/testimonials-card";
-import SecondTourCard from "../components/tour/second-tour-card";
-import DestinationGrid from "../components/home/destination-grid";
-import FAQSection from "../components/layout/faq";
-import RoavioAboutSection from "../components/home/about";
-import TravelServicesSection from "../components/home/services";
-import PartnersMarquee from "../components/home/partners";
-import TravelBlogSection from "../components/home/blog-section";
-import TravelTourSlider from "../components/home/tours-section";
+import Providers from "@/components/providers";
+import EgyptToursBanner from "@/components/home/hero-banner";
+import TestimonialSlider from "@/components/testimonails/testimonials-card";
+import SecondTourCard from "@/components/tour/second-tour-card";
+import DestinationGrid from "@/components/home/destination-grid";
+import FAQSection from "@/components/layout/faq";
+import RoavioAboutSection from "@/components/home/about";
+import TravelServicesSection from "@/components/home/services";
+import PartnersMarquee from "@/components/home/partners";
+import TravelBlogSection from "@/components/home/blog-section";
+import TravelTourSlider from "@/components/home/tours-section";
 
 import { fetchHomeSections } from "@/lib/api/homeApi";
 import type { HomeSections } from "@/lib/api/homeTypes";
