@@ -1,4 +1,6 @@
-// sub Category Page //
+
+// sub Category Page (expoerted in tours dynamics routes)//
+// Centralized API base URL and simple helpers (expoerted in tours dynamics routes)
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";

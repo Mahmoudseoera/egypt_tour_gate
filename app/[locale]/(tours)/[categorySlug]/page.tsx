@@ -1,4 +1,5 @@
 // All Category Page //
+// Centralized API base URL and simple helpers (expoerted in tours dynamics routes)
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";

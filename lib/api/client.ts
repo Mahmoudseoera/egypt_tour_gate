@@ -1,4 +1,4 @@
-// Centralized API base URL and simple helpers
+// Centralized API base URL and simple helpers (expoerted in tours dynamics routes)
 // Uses the same NEXT_PUBLIC_API_BASE_URL everywhere, with a safe local fallback.
 
 const RAW_BASE =

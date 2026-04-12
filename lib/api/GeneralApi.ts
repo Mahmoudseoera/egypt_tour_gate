@@ -1,29 +1,9 @@
-// lib/api/GeneralApi.ts
-// Rebuilt to match the real backend API:
-//   GET http://127.0.0.1:8000/api/v1/general-data?locale=en
-//
-// Real API response structure:
-//   data.header.categories[].name          → string
-//   data.header.categories[].slug          → string
-//   data.header.categories[].subs[]        → { name, slug, media? }
-//   data.header.languages[]                → { name, slug }
-//   data.header.info                       → { phone, email, address }
-//   data.header.logo                       → { image, alt, title }
-//   data.footer.logo                       → { image, alt, title }
-//   data.footer.info                       → { phone, email, address }
-//   data.footer.categories[].name          → string
-//   data.footer.categories[].slug          → string
-//   data.footer.categories[].subs[]        → { name, slug }
-
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  DEFAULT_LOCALE,
-  type SupportedLocale,
-} from "@/lib/i18n/config";
+import { routing, type AppLocale } from "@/lib/i18n/routing";
 
-// ─── Types ─────────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface CategoryMedia {
   image: string;
@@ -31,14 +11,12 @@ export interface CategoryMedia {
   alt: string;
 }
 
-/** A sub-category as returned by the real API */
 export interface SubCategory {
   name: string;
   slug: string;
   media?: CategoryMedia;
 }
 
-/** A top-level category as returned by the real API */
 export interface Category {
   name: string;
   slug: string;
@@ -72,7 +50,6 @@ export interface HeaderData {
 export interface FooterData {
   logo?: Logo;
   info?: ContactInfo;
-  /** The footer categories use the same shape as header categories */
   categories: Category[];
 }
 
@@ -81,7 +58,7 @@ export interface GeneralData {
   footer: FooterData;
 }
 
-// ─── Raw API types (what actually comes back from the server) ──────────────────
+// ─── Raw API types ────────────────────────────────────────────────────────────
 
 interface RawMedia {
   image?: string;
@@ -141,15 +118,11 @@ interface RawApiResponse {
   message?: string;
 }
 
-// ─── Normalizers ───────────────────────────────────────────────────────────────
+// ─── Normalizers ──────────────────────────────────────────────────────────────
 
 function normalizeMedia(raw?: RawMedia): CategoryMedia | undefined {
   if (!raw) return undefined;
-  return {
-    image: raw.image ?? "",
-    title: raw.title ?? "",
-    alt: raw.alt ?? "",
-  };
+  return { image: raw.image ?? "", title: raw.title ?? "", alt: raw.alt ?? "" };
 }
 
 function normalizeSubs(raw?: RawSub[]): SubCategory[] {
@@ -171,19 +144,11 @@ function normalizeCategories(raw?: RawCategory[]): Category[] {
 }
 
 function normalizeLogo(raw?: RawLogo): Logo {
-  return {
-    image: raw?.image ?? "",
-    alt: raw?.alt ?? "",
-    title: raw?.title ?? "",
-  };
+  return { image: raw?.image ?? "", alt: raw?.alt ?? "", title: raw?.title ?? "" };
 }
 
 function normalizeInfo(raw?: RawInfo): ContactInfo {
-  return {
-    phone: raw?.phone,
-    email: raw?.email,
-    address: raw?.address,
-  };
+  return { phone: raw?.phone, email: raw?.email, address: raw?.address };
 }
 
 function normalizeLanguages(raw?: RawLanguage[]): Language[] {
@@ -197,9 +162,7 @@ function normalizeResponse(raw: RawApiResponse): GeneralData {
   if (!raw.success || !raw.data) {
     throw new Error(`API error: ${raw.message ?? "Unknown error"}`);
   }
-
   const { header: h = {}, footer: f = {} } = raw.data;
-
   return {
     header: {
       logo: normalizeLogo(h.logo),
@@ -210,30 +173,38 @@ function normalizeResponse(raw: RawApiResponse): GeneralData {
     footer: {
       logo: f.logo ? normalizeLogo(f.logo) : undefined,
       info: normalizeInfo(f.info),
-      // The real API uses `categories` inside footer too
       categories: normalizeCategories(f.categories),
     },
   };
 }
 
-// ─── Next.js proxy fetcher (avoids browser CORS) ──────────────────────────────
-// Make sure you have: app/api/general/route.ts (see below)
+// ─── Fetcher ──────────────────────────────────────────────────────────────────
+// Calls the real public API directly:
+//   https://www.egypttoursgate.com/api/v1/general-data?locale=de
+//
+// Falls back to NEXT_PUBLIC_API_BASE_URL if set in .env, otherwise uses
+// the production URL above. No internal /api/general proxy needed.
 
-async function fetchGeneralData(locale: SupportedLocale): Promise<GeneralData> {
-  const res = await fetch(`/api/general?locale=${locale}`, {
-    // Next.js App Router fetch options
-    next: { revalidate: 3600, tags: ['general'] },
+const API_BASE =
+  (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://www.egypttoursgate.com/api/v1")
+    .replace(/\/+$/, "");
+
+async function fetchGeneralData(locale: AppLocale): Promise<GeneralData> {
+  const url = `${API_BASE}/general-data?locale=${locale}`;
+
+  const res = await fetch(url, {
+    next: { revalidate: 3600, tags: ["general"] },
   });
 
   if (!res.ok) {
-    throw new Error(`Proxy fetch failed: ${res.status} ${res.statusText}`);
+    throw new Error(`Failed to fetch general data [${locale}]: ${res.status} ${res.statusText}`);
   }
 
   const raw: RawApiResponse = await res.json();
   return normalizeResponse(raw);
 }
 
-// ─── React hook ────────────────────────────────────────────────────────────────
+// ─── React hook ───────────────────────────────────────────────────────────────
 
 export interface UseGeneralDataResult {
   data: GeneralData | null;
@@ -242,7 +213,7 @@ export interface UseGeneralDataResult {
 }
 
 export function useGeneralData(
-  locale: SupportedLocale = DEFAULT_LOCALE
+  locale: AppLocale = routing.defaultLocale
 ): UseGeneralDataResult {
   const [data, setData] = useState<GeneralData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -258,9 +229,7 @@ export function useGeneralData(
         const result = await fetchGeneralData(locale);
         if (!cancelled) setData(result);
       } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : String(err));
-        }
+        if (!cancelled) setError(err instanceof Error ? err.message : String(err));
       } finally {
         if (!cancelled) setLoading(false);
       }

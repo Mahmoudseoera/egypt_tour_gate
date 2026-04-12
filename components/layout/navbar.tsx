@@ -30,7 +30,8 @@ import {
   Star,
 } from "lucide-react";
 import { useGeneralData } from "@/lib/api/GeneralApi";
-import { buildLocalizedPath, getPathLocale } from "@/lib/i18n/routing";
+import { routing, type AppLocale } from "@/lib/i18n/routing";
+import { useLocale } from "next-intl";
 import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import SimpleSocialIcon, {
   SocialItem,
@@ -99,30 +100,72 @@ const featuredHighlights = [
   },
 ];
 
+/* ── Locale prefix helpers ───────────────────────────────────────────────── */
+
+/**
+ * Build a regex that matches any known locale prefix at the start of a path.
+ * e.g. for locales ['en','de','fr','pl'] → /^\/(en|de|fr|pl)(\/|$)/
+ * This is derived at runtime from routing.locales so it never goes stale.
+ */
+const LOCALE_PREFIX_RE = new RegExp(
+  `^\\/(${routing.locales.join("|")})(\\/?)`
+);
+
+/**
+ * Strip the locale prefix from any pathname, regardless of which locale it is.
+ * Returns the bare path starting with "/".
+ */
+function stripLocalePrefix(pathname: string): string {
+  // routing uses localePrefix: "as-needed", defaultLocale has no prefix
+  return pathname.replace(LOCALE_PREFIX_RE, "/").replace(/\/+$/, "") || "/";
+}
+
+/**
+ * Prepend the locale prefix when needed.
+ * localePrefix: "as-needed" → defaultLocale gets no prefix, others get one.
+ */
+function localizePath(path: string, locale: AppLocale): string {
+  if (locale === routing.defaultLocale) return path;
+  // Ensure path starts with /
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `/${locale}${cleanPath}`;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════ */
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  // KEY CHANGE: use slug as the dropdown key (no more cat.id — real API has no id)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
+
+  // useLocale() returns AppLocale — now matches useGeneralData() signature
+  const locale = useLocale() as AppLocale;
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
 
   const pathname = usePathname();
   const router = useRouter();
-  const activeLocale = getPathLocale(pathname);
-  const { data, error, loading } = useGeneralData(activeLocale);
-  const localizePath = (path: string) => buildLocalizedPath(path, activeLocale);
+
+  const { data, error, loading } = useGeneralData(locale);
 
   const currentLanguage = data?.header.languages.find(
-    (lang) => lang.slug === activeLocale
+    (lang) => lang.slug === locale
   );
 
-  const onLanguageChange = (slug: string) => {
-    const targetPath = buildLocalizedPath(pathname, slug);
-    router.push(targetPath);
+  /**
+   * FIX: Strip ALL locale prefixes dynamically using the regex built from
+   * routing.locales. Previously this was hardcoded to only strip /en and /de,
+   * which broke switching to /fr and /pl.
+   */
+  const onLanguageChange = (newLocale: string) => {
+    const barePath = stripLocalePrefix(pathname);
+
+    if (newLocale === routing.defaultLocale) {
+      router.push(barePath);
+    } else {
+      router.push(`/${newLocale}${barePath === "/" ? "" : barePath}`);
+    }
   };
 
   useEffect(() => {
@@ -143,7 +186,9 @@ export default function Navbar() {
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [mobileOpen]);
 
   const closeMenu = () => {
@@ -151,7 +196,6 @@ export default function Navbar() {
     setActiveDropdown(null);
   };
 
-  /* ── Loading ─────────────────────────────────────────────────────────── */
   if (loading) {
     return (
       <nav className="w-full bg-white p-4">
@@ -176,8 +220,10 @@ export default function Navbar() {
     logoSrc.startsWith("http://127.0.0.1") ||
     logoSrc.startsWith("http://localhost");
 
-  /* ── Real API categories: use subs (not children), slug as key ─────── */
   const categories = data.header.categories;
+
+  // Helper bound to current locale — used throughout JSX
+  const lp = (path: string) => localizePath(path, locale);
 
   return (
     <>
@@ -331,7 +377,6 @@ export default function Navbar() {
         li:hover .nav-active-dot,
         li.menu-open .nav-active-dot { opacity: 1; }
 
-        /* Top bar styles */
         .topbar-wrapper {
           background: var(--main-grey, #f9f9f9);
           border-bottom: 1px solid rgba(39,34,98,0.08);
@@ -397,11 +442,11 @@ export default function Navbar() {
                 </span>
               </Link>
 
-              {/* Language switcher — real API: data.header.languages[].slug / .name */}
+              {/* Language switcher */}
               <div className="relative group flex items-center gap-1 px-4 border-r border-gray-200 cursor-pointer text-[var(--second-color)]">
                 <Globe className="h-4 w-4" />
                 <span className="hidden md:inline uppercase font-medium">
-                  {currentLanguage?.slug ?? DEFAULT_LOCALE}
+                  {currentLanguage?.slug ?? locale}
                 </span>
                 <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                 <div className="lang-menu">
@@ -435,7 +480,7 @@ export default function Navbar() {
         >
           <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-2">
             {/* Logo */}
-            <Link href={localizePath("/")}>
+            <Link href={lp("/")}>
               <Image
                 src={logoSrc}
                 alt={logoAlt}
@@ -466,41 +511,34 @@ export default function Navbar() {
               {/* Home */}
               <li className="py-4">
                 <Link
-                  href={localizePath("/")}
+                  href={lp("/")}
                   className="px-3 py-2 rounded-md text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 text-[14.5px] font-semibold nav-link-underline"
                 >
                   Home
                 </Link>
               </li>
 
-              {/* ===== CATEGORY MEGA MENUS =====
-                  KEY CHANGES from old API → real API:
-                    cat.id       → cat.slug   (used as key & activeMegaMenu value)
-                    cat.children → cat.subs   ← real API field name
-                    child.id     → child.slug (used as key)
-                    child.name   → plain string (no .en needed)
-              */}
               {categories.map((cat) => {
                 const isOpen = activeMegaMenu === cat.slug;
-                const hasSubs = cat.subs.length > 0;   // ← subs, not children
+                const hasSubs = cat.subs.length > 0;
                 const catColor = getCategoryColor(cat.slug);
 
                 return (
                   <li
-                    key={cat.slug}                        // ← slug as key
+                    key={cat.slug}
                     className={`relative py-4 ${isOpen ? "menu-open" : ""}`}
-                    onMouseEnter={() => setActiveMegaMenu(cat.slug)}  // ← slug
+                    onMouseEnter={() => setActiveMegaMenu(cat.slug)}
                     onMouseLeave={() => setActiveMegaMenu(null)}
                   >
                     <Link
-                      href={localizePath(`/${cat.slug}`)}
+                      href={lp(`/${cat.slug}`)}
                       className={`flex items-center gap-1 px-3 py-2 rounded-md text-[14.5px] font-semibold transition-all duration-200 nav-link-underline capitalize ${
                         isOpen
                           ? "text-[var(--main-color)]"
                           : "text-[var(--second-color)] hover:text-[var(--main-color)]"
                       }`}
                     >
-                      {cat.name.toLowerCase()}             {/* ← plain string */}
+                      {cat.name.toLowerCase()}
                       <ChevronDown
                         className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "rotate-180 text-[var(--main-color)]" : ""}`}
                       />
@@ -508,7 +546,6 @@ export default function Navbar() {
 
                     <span className="nav-active-dot" />
 
-                    {/* ===== MEGA MENU PANEL ===== */}
                     {hasSubs && isOpen && (
                       <div
                         className="mega-menu absolute top-full left-1/2 -translate-x-1/2 z-[200]"
@@ -521,7 +558,6 @@ export default function Navbar() {
                             style={{ background: `linear-gradient(90deg, ${catColor}, var(--main-color))` }}
                           />
                           <div className="flex">
-                            {/* LEFT: Category cards */}
                             <div className="flex-1 p-6">
                               <div className="flex items-center gap-3 mb-5">
                                 <div
@@ -532,14 +568,14 @@ export default function Navbar() {
                                 </div>
                                 <div>
                                   <h3 className="font-bold text-[var(--second-color)] text-[15px] capitalize leading-tight">
-                                    {cat.name}               {/* ← plain string */}
+                                    {cat.name}
                                   </h3>
                                   <p className="text-xs text-gray-400 leading-tight mt-0.5">
                                     {getCategoryDescription(cat.slug)}
                                   </p>
                                 </div>
                                 <Link
-                                  href={localizePath(`/${cat.slug}`)}
+                                  href={lp(`/${cat.slug}`)}
                                   className="ml-auto flex items-center gap-1 text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full border transition-all duration-200"
                                   style={{ color: catColor, borderColor: catColor }}
                                   onMouseEnter={(e) => {
@@ -556,12 +592,11 @@ export default function Navbar() {
                                 </Link>
                               </div>
 
-                              {/* Subcategory grid — cat.subs, keyed by sub.slug */}
                               <div className="grid grid-cols-2 gap-2">
                                 {cat.subs.map((sub) => (
                                   <Link
                                     key={sub.slug}
-                                    href={localizePath(`/${cat.slug}/${sub.slug}`)}
+                                    href={lp(`/${cat.slug}/${sub.slug}`)}
                                     className="mega-cat-card flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/60 group/card"
                                   >
                                     {sub.media?.image ? (
@@ -587,7 +622,7 @@ export default function Navbar() {
 
                                     <div className="flex-1 min-w-0 relative z-10">
                                       <span className="block text-[13px] font-semibold text-[var(--second-color)] capitalize truncate leading-tight">
-                                        {sub.name.toLowerCase()} {/* ← plain string */}
+                                        {sub.name.toLowerCase()}
                                       </span>
                                     </div>
 
@@ -601,10 +636,8 @@ export default function Navbar() {
                               </div>
                             </div>
 
-                            {/* DIVIDER */}
                             <div className="w-px bg-gray-100 my-4" />
 
-                            {/* RIGHT: Featured highlights */}
                             <div className="w-[220px] flex-shrink-0 p-5 bg-gray-50/50">
                               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">
                                 Featured
@@ -613,7 +646,7 @@ export default function Navbar() {
                                 {featuredHighlights.map((item) => (
                                   <Link
                                     key={item.href}
-                                    href={localizePath(item.href)}
+                                    href={lp(item.href)}
                                     className="featured-card block"
                                   >
                                     <div className="relative h-[100px] w-full overflow-hidden rounded-xl">
@@ -696,7 +729,7 @@ export default function Navbar() {
                         ].map((item) => (
                           <Link
                             key={item.href}
-                            href={localizePath(item.href)}
+                            href={lp(item.href)}
                             className="simple-dropdown-item flex items-center gap-3 px-4 py-2.5 hover:text-[var(--second-color)] text-gray-600 font-medium text-[13.5px]"
                           >
                             <span
@@ -718,7 +751,7 @@ export default function Navbar() {
               {/* Blogs */}
               <li className="py-4">
                 <Link
-                  href={localizePath("/blogs")}
+                  href={lp("/blogs")}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-md text-[14.5px] font-semibold text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 nav-link-underline"
                 >
                   <BookOpen size={15} />
@@ -742,7 +775,7 @@ export default function Navbar() {
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4" style={{ background: "var(--second-color)" }}>
-                <Link href={localizePath("/")} aria-label="Homepage">
+                <Link href={lp("/")} aria-label="Homepage">
                   <Image
                     src="/assets/images/egypt-tour-gate-logo.png"
                     alt="Egypt Tour Gate"
@@ -768,7 +801,7 @@ export default function Navbar() {
 
                 {/* Home */}
                 <Link
-                  href={localizePath("/")}
+                  href={lp("/")}
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -779,7 +812,7 @@ export default function Navbar() {
                   <ChevronRight size={15} className="ml-auto text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all duration-200" />
                 </Link>
 
-                {/* Dynamic Categories — real API: .subs, .slug as key, plain .name */}
+                {/* Dynamic Categories */}
                 {categories.map((cat) => (
                   <div key={cat.slug}>
                     <button
@@ -800,9 +833,9 @@ export default function Navbar() {
                       </div>
                       <div className="flex-1">
                         <span className="font-semibold text-[15px] capitalize" style={{ color: "var(--second-color)" }}>
-                          {cat.name}                         {/* ← plain string */}
+                          {cat.name}
                         </span>
-                        {cat.subs.length > 0 && (            // ← .subs
+                        {cat.subs.length > 0 && (
                           <span className="block text-xs text-gray-400">{cat.subs.length} subcategories</span>
                         )}
                       </div>
@@ -818,13 +851,13 @@ export default function Navbar() {
                         {cat.subs.map((sub) => (
                           <Link
                             key={sub.slug}
-                            href={localizePath(`/${cat.slug}/${sub.slug}`)}
+                            href={lp(`/${cat.slug}/${sub.slug}`)}
                             onClick={closeMenu}
                             className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                           >
                             <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--main-color)" }} />
                             <span className="text-[14px] text-gray-700 capitalize group-hover:text-[var(--second-color)] transition-colors font-medium">
-                              {sub.name}                      {/* ← plain string */}
+                              {sub.name}
                             </span>
                             <ChevronRight size={13} className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
                           </Link>
@@ -836,7 +869,7 @@ export default function Navbar() {
 
                 {/* Blogs */}
                 <Link
-                  href={localizePath("/blogs")}
+                  href={lp("/blogs")}
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -875,7 +908,7 @@ export default function Navbar() {
                       ].map((item) => (
                         <Link
                           key={item.href}
-                          href={localizePath(item.href)}
+                          href={lp(item.href)}
                           onClick={closeMenu}
                           className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                         >
@@ -888,7 +921,6 @@ export default function Navbar() {
                   )}
                 </div>
 
-                {/* Divider */}
                 <div className="mx-5 my-4 border-t border-gray-100" />
                 <div className="px-5 pb-2">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Preferences</p>
@@ -918,7 +950,7 @@ export default function Navbar() {
 
                 {/* Support */}
                 <Link
-                  href={localizePath("/contact")}
+                  href={lp("/contact")}
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -935,7 +967,7 @@ export default function Navbar() {
               {/* Footer CTA */}
               <div className="px-5 py-4 border-t border-gray-100 bg-white">
                 <Link
-                  href={localizePath("/tailor-made")}
+                  href={lp("/tailor-made")}
                   onClick={closeMenu}
                   className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-white font-bold text-[15px] transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
                   style={{ background: "var(--main-color)" }}
