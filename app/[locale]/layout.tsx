@@ -1,6 +1,6 @@
 import { Toaster } from 'sonner';
 import {setRequestLocale} from 'next-intl/server';
-import {hasLocale} from 'next-intl';
+import {hasLocale, NextIntlClientProvider} from 'next-intl';
 import {notFound} from 'next/navigation';
 import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
@@ -28,7 +28,7 @@ export default async function LocaleLayout({children, params}: Props) {
   setRequestLocale(locale);
 
   return (
-    <>
+    <NextIntlClientProvider locale={locale}>
       <GlobalSeoSchema />
       <Navbar />
       {children}
@@ -37,6 +37,6 @@ export default async function LocaleLayout({children, params}: Props) {
       <WhatsappIcon />
       <Footer />
       <Toaster position="top-right" richColors closeButton />
-    </>
+    </NextIntlClientProvider>
   );
 }
