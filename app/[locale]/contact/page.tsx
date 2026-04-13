@@ -1,5 +1,4 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send, Phone, MapPin, Mail, ChevronRight, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -54,6 +53,7 @@ export default function ContactPage() {
   const {
     register,
     handleSubmit,
+    reset,
     watch,
     formState: { errors },
   } = useForm<ContactFormData>({
@@ -72,23 +72,39 @@ export default function ContactPage() {
 
   const watchedValues = watch();
 
+  // ─── Submit ───────────────────────────────────────────────────────────────
+  // البراوزر بيبعت لـ /api/contact (same origin → مفيش CORS)
+  // الـ route.ts بيعمل proxy للـ API الخارجي من الـ server
   async function onSubmit(values: ContactFormData) {
     setLoading(true);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        // بنبعت code و phone منفصلين → الـ route.ts هو اللي بيجمّعهم
+        body: JSON.stringify({
+          name: values.name,
+          email: values.email,
+          code: values.code,
+          phone: values.phone,
+          subject: values.subject,
+          country: values.country,
+          message: values.message,
+        }),
       });
+
       const data = await res.json();
-      if (data.success) {
-        toast.success("Message sent successfully");
-        router.push("/thank-you");
+
+      if (!res.ok || !data.success) {
+        toast.error(data.message || "Something went wrong. Please try again.");
         return;
       }
-      toast.error(data.message || "Something went wrong ❌");
+
+      toast.success("Message sent! We'll be in touch within 24 hours.");
+      reset(); // امسح الفورم بعد النجاح
+      router.push("/thank-you");
     } catch {
-      toast.error("Network error. Please try again.");
+      toast.error("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -125,7 +141,6 @@ export default function ContactPage() {
   return (
     <>
       <style>{`
-        /* ── Hero with background image + gradient overlay ── */
         .contact-hero {
           background-image:
             linear-gradient(
@@ -139,8 +154,6 @@ export default function ContactPage() {
           background-position: center;
           background-repeat: no-repeat;
         }
-
-        /* ── Breadcrumb link ── */
         .bc-link {
           position: relative;
           display: inline-flex;
@@ -158,8 +171,6 @@ export default function ContactPage() {
           font-weight: 600;
           pointer-events: none;
         }
-
-        /* ── Chevron separator ── */
         .bc-sep {
           display: inline-flex;
           align-items: center;
@@ -167,8 +178,6 @@ export default function ContactPage() {
           opacity: 0.55;
           flex-shrink: 0;
         }
-
-        /* ── Icon rotate + scale on card hover ── */
         .contact-card .card-icon {
           transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
           will-change: transform;
@@ -180,12 +189,8 @@ export default function ContactPage() {
 
       <section className="min-h-screen bg-[var(--main-grey)]">
 
-        {/* ══════════════════════════════════════════════
-            PAGE HEADER — background image + overlay
-        ══════════════════════════════════════════════ */}
+        {/* ── PAGE HEADER ── */}
         <div className="contact-hero relative py-14 sm:py-20 text-center overflow-hidden">
-
-          {/* Decorative rings */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
             <div className="absolute -top-10 -left-10 w-48 h-48 border-[3px] border-[var(--main-color)] rounded-full opacity-[0.12]" />
             <div className="absolute top-6 left-6 w-24 h-24 border-[2px] border-[var(--main-color)] rounded-full opacity-[0.10]" />
@@ -193,34 +198,19 @@ export default function ContactPage() {
             <div className="absolute bottom-8 right-10 w-20 h-20 border-[2px] border-[var(--main-color)] rotate-45 opacity-[0.14]" />
           </div>
 
-          {/* ── Breadcrumb ── */}
-          <nav
-            aria-label="Breadcrumb"
-            className="relative z-10 flex items-center justify-center gap-1.5 flex-wrap mb-7 px-4"
-          >
+          <nav aria-label="Breadcrumb" className="relative z-10 flex items-center justify-center gap-1.5 flex-wrap mb-7 px-4">
             {breadcrumbItems.map((item, index) => {
               const isLast = index === breadcrumbItems.length - 1;
               return (
                 <span key={item.href} className="flex items-center gap-1.5">
-                  {/* Home icon only on first item */}
                   {index === 0 && (
-                    <Home
-                      size={13}
-                      className="text-white/50 flex-shrink-0 -mr-0.5"
-                      aria-hidden
-                    />
+                    <Home size={13} className="text-white/50 flex-shrink-0 -mr-0.5" aria-hidden />
                   )}
-
                   {isLast ? (
-                    <span className="bc-link bc-active" aria-current="page">
-                      {item.label}
-                    </span>
+                    <span className="bc-link bc-active" aria-current="page">{item.label}</span>
                   ) : (
-                    <Link href={item.href} className="bc-link">
-                      {item.label}
-                    </Link>
+                    <Link href={item.href} className="bc-link">{item.label}</Link>
                   )}
-
                   {!isLast && (
                     <span className="bc-sep" aria-hidden>
                       <ChevronRight size={14} strokeWidth={2.5} />
@@ -231,7 +221,6 @@ export default function ContactPage() {
             })}
           </nav>
 
-          {/* Headline */}
           <div className="relative z-10 px-4">
             <p className="text-[var(--main-color)] font-semibold tracking-[0.22em] uppercase text-[11px] sm:text-xs mb-2">
               Get In Touch
@@ -246,56 +235,40 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* ══════════════════════════════════════════════
-            INFO CARDS  (overlap hero bottom)
-        ══════════════════════════════════════════════ */}
+        {/* ── INFO CARDS ── */}
         <div className="max-w-5xl mx-auto px-4 -mt-8 relative z-20">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
-            {contactCards.map(
-              ({ icon: Icon, label, lines, href, ariaLabel, target }) => (
-                <Link
-                  key={label}
-                  href={href}
-                  target={target as "_blank" | "_self"}
-                  rel={
-                    target === "_blank" ? "noopener noreferrer" : undefined
-                  }
-                  aria-label={ariaLabel}
-                  className="contact-card group flex flex-col items-center text-center bg-white rounded-2xl shadow-lg p-6 sm:p-7 border border-transparent hover:border-[var(--main-color)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                >
-                  {/* Icon bubble */}
-                  <div className="card-icon w-14 h-14 rounded-full bg-gradient-to-br from-[var(--second-color)] to-[#4a43a0] flex items-center justify-center mb-4 shadow-md">
-                    <Icon size={24} className="text-[var(--main-color)]" />
-                  </div>
-
-                  <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--main-color)] mb-2">
-                    {label}
-                  </p>
-
-                  {lines.map((line, i) => (
-                    <span
-                      key={i}
-                      className="text-xs sm:text-sm text-[var(--black-color)] leading-relaxed font-medium"
-                    >
-                      {line}
-                    </span>
-                  ))}
-
-                  {/* Hover accent bar */}
-                  <div className="mt-4 w-10 h-0.5 bg-gradient-to-r from-[var(--second-color)] to-[var(--main-color)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </Link>
-              )
-            )}
+            {contactCards.map(({ icon: Icon, label, lines, href, ariaLabel, target }) => (
+              <Link
+                key={label}
+                href={href}
+                target={target as "_blank" | "_self"}
+                rel={target === "_blank" ? "noopener noreferrer" : undefined}
+                aria-label={ariaLabel}
+                className="contact-card group flex flex-col items-center text-center bg-white rounded-2xl shadow-lg p-6 sm:p-7 border border-transparent hover:border-[var(--main-color)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="card-icon w-14 h-14 rounded-full bg-gradient-to-br from-[var(--second-color)] to-[#4a43a0] flex items-center justify-center mb-4 shadow-md">
+                  <Icon size={24} className="text-[var(--main-color)]" />
+                </div>
+                <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--main-color)] mb-2">
+                  {label}
+                </p>
+                {lines.map((line, i) => (
+                  <span key={i} className="text-xs sm:text-sm text-[var(--black-color)] leading-relaxed font-medium">
+                    {line}
+                  </span>
+                ))}
+                <div className="mt-4 w-10 h-0.5 bg-gradient-to-r from-[var(--second-color)] to-[var(--main-color)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </Link>
+            ))}
           </div>
         </div>
 
-        {/* ══════════════════════════════════════════════
-            FORM  +  MAP
-        ══════════════════════════════════════════════ */}
+        {/* ── FORM + MAP ── */}
         <div className="max-w-6xl mx-auto px-4 py-10 sm:py-14">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
 
-            {/* ── Contact Form ── */}
+            {/* Contact Form */}
             <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 flex flex-col">
               <div className="mb-7">
                 <div className="w-12 h-1 bg-[var(--main-color)] rounded-full mb-4" />
@@ -314,39 +287,20 @@ export default function ContactPage() {
               >
                 {/* Full Name */}
                 <div className="relative sm:col-span-1">
-                  <input
-                    type="text"
-                    autoComplete="name"
-                    className={inputClass("name")}
-                    {...register("name")}
-                  />
+                  <input type="text" autoComplete="name" className={inputClass("name")} {...register("name")} />
                   <label className={labelClass}>Full Name</label>
-                  {errors.name && (
-                    <p className="mt-1.5 text-xs text-red-600">
-                      {errors.name.message}
-                    </p>
-                  )}
+                  {errors.name && <p className="mt-1.5 text-xs text-red-600">{errors.name.message}</p>}
                 </div>
 
                 {/* Email */}
                 <div className="relative sm:col-span-1">
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    className={inputClass("email")}
-                    {...register("email")}
-                  />
+                  <input type="email" autoComplete="email" className={inputClass("email")} {...register("email")} />
                   <label className={labelClass}>Email Address</label>
-                  {errors.email && (
-                    <p className="mt-1.5 text-xs text-red-600">
-                      {errors.email.message}
-                    </p>
-                  )}
+                  {errors.email && <p className="mt-1.5 text-xs text-red-600">{errors.email.message}</p>}
                 </div>
 
                 {/* Phone Code + Phone */}
                 <div className="sm:col-span-2 flex gap-3">
-                  {/* Code select */}
                   <div className="relative w-[130px] sm:w-[155px] shrink-0">
                     <select
                       className={`${inputClass("code")} appearance-none cursor-pointer`}
@@ -421,44 +375,21 @@ export default function ContactPage() {
                       <option value="967">Yemen (+967)</option>
                     </select>
                     <label className={labelClass}>Code</label>
-                    {errors.code && (
-                      <p className="mt-1.5 text-xs text-red-600">
-                        {errors.code.message}
-                      </p>
-                    )}
+                    {errors.code && <p className="mt-1.5 text-xs text-red-600">{errors.code.message}</p>}
                   </div>
 
-                  {/* Phone number */}
                   <div className="relative flex-1">
-                    <input
-                      type="tel"
-                      autoComplete="tel"
-                      className={inputClass("phone")}
-                      {...register("phone")}
-                    />
+                    <input type="tel" autoComplete="tel" className={inputClass("phone")} {...register("phone")} />
                     <label className={labelClass}>Phone Number</label>
-                    {errors.phone && (
-                      <p className="mt-1.5 text-xs text-red-600">
-                        {errors.phone.message}
-                      </p>
-                    )}
+                    {errors.phone && <p className="mt-1.5 text-xs text-red-600">{errors.phone.message}</p>}
                   </div>
                 </div>
 
                 {/* Subject */}
                 <div className="relative sm:col-span-1">
-                  <input
-                    type="text"
-                    autoComplete="off"
-                    className={inputClass("subject")}
-                    {...register("subject")}
-                  />
+                  <input type="text" autoComplete="off" className={inputClass("subject")} {...register("subject")} />
                   <label className={labelClass}>Subject</label>
-                  {errors.subject && (
-                    <p className="mt-1.5 text-xs text-red-600">
-                      {errors.subject.message}
-                    </p>
-                  )}
+                  {errors.subject && <p className="mt-1.5 text-xs text-red-600">{errors.subject.message}</p>}
                 </div>
 
                 {/* Country */}
@@ -560,11 +491,7 @@ export default function ContactPage() {
                     <option value="Zimbabwe">Zimbabwe</option>
                   </select>
                   <label className={labelClass}>Country</label>
-                  {errors.country && (
-                    <p className="mt-1.5 text-xs text-red-600">
-                      {errors.country.message}
-                    </p>
-                  )}
+                  {errors.country && <p className="mt-1.5 text-xs text-red-600">{errors.country.message}</p>}
                 </div>
 
                 {/* Message */}
@@ -576,11 +503,7 @@ export default function ContactPage() {
                     {...register("message")}
                   />
                   <label className={labelClass}>Your Message</label>
-                  {errors.message && (
-                    <p className="mt-1.5 text-xs text-red-600">
-                      {errors.message.message}
-                    </p>
-                  )}
+                  {errors.message && <p className="mt-1.5 text-xs text-red-600">{errors.message.message}</p>}
                 </div>
 
                 {/* Submit */}
@@ -597,11 +520,8 @@ export default function ContactPage() {
               </form>
             </div>
 
-            {/* ── Map ── */}
-            <div
-              className="rounded-3xl overflow-hidden shadow-xl w-full"
-              style={{ minHeight: "360px" }}
-            >
+            {/* Map */}
+            <div className="rounded-3xl overflow-hidden shadow-xl w-full" style={{ minHeight: "360px" }}>
               <iframe
                 title="Egypt Tours Gate Location"
                 src="https://www.google.com/maps?q=43+Ahmed+Allam+St+Pyramids+Garden+Giza+Egypt&z=15&output=embed"

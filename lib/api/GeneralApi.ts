@@ -179,20 +179,18 @@ function normalizeResponse(raw: RawApiResponse): GeneralData {
 }
 
 // ─── Fetcher ──────────────────────────────────────────────────────────────────
-// Calls the real public API directly:
-//   https://www.egypttoursgate.com/api/v1/general-data?locale=de
 //
-// Falls back to NEXT_PUBLIC_API_BASE_URL if set in .env, otherwise uses
-// the production URL above. No internal /api/general proxy needed.
-
-const API_BASE =
-  (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://www.egypttoursgate.com/api/v1")
-    .replace(/\/+$/, "");
+// ❌ كان بيبعت مباشرة للـ external API من البراوزر → CORS error
+//    fetch("https://www.egypttoursgate.com/api/v1/general-data?locale=de")
+//
+// ✅ دلوقتي بيبعت للـ proxy route الداخلي (same origin → مفيش CORS)
+//    fetch("/api/general?locale=de")
+//    اللي بدوره بيبعت للـ external API من الـ server
 
 async function fetchGeneralData(locale: AppLocale): Promise<GeneralData> {
-  const url = `${API_BASE}/general-data?locale=${locale}`;
-
-  const res = await fetch(url, {
+  // /api/general هو proxy route محلي في Next.js
+  // same origin → مفيش CORS بين البراوزر والـ proxy
+  const res = await fetch(`/api/general?locale=${locale}`, {
     next: { revalidate: 3600, tags: ["general"] },
   });
 
