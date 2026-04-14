@@ -3,43 +3,67 @@
 import type { Metadata } from 'next';
 import TourDetailsClient from "./TourDetailsClient";
 import { notFound } from "next/navigation";
-import categoriesData from "@/lib/api/categories";
-import type { Tour, TourPackage, NileCruise } from "@/lib/api/categories";
 import Breadcrumb from '@/components/layout/breadcrumb';
 import ExpandableDescription from '@/components/shared/expandable-description';
 import SchemaScript from '@/components/seo/schema-script';
 import "@/styles/tour-details.css";
+import { getGeneralCategories, getTourBySlug, getToursBySubcategory } from '@/lib/api/toursApi';
+import { routing } from '@/lib/i18n/routing';
 
 type TourDetailPageProps = {
   params: Promise<{
+    locale: string;
     categorySlug: string;
     subcategorySlug: string;
     tourSlug: string;
   }>;
 };
-function findTourBySlug(slug: string): Tour | TourPackage | NileCruise | null {
-  const tour = categoriesData.tours.find((t) => t.slug === slug);
-  if (tour) return tour;
-  const pkg = categoriesData.packages.find((p) => p.slug === slug);
-  if (pkg) return pkg;
-  const cruise = categoriesData.nile_cruises.find((c) => c.slug === slug);
-  if (cruise) return cruise;
-  return null;
+
+export async function generateStaticParams() {
+  const result: Array<{
+    locale: string;
+    categorySlug: string;
+    subcategorySlug: string;
+    tourSlug: string;
+  }> = [];
+
+  for (const locale of routing.locales) {
+    try {
+      const categories = await getGeneralCategories(locale);
+      for (const category of categories) {
+        const subs = Array.isArray(category?.subs) ? category.subs : [];
+        for (const subcategory of subs) {
+          if (!category?.slug || !subcategory?.slug) continue;
+          const tours = await getToursBySubcategory(subcategory.slug, locale);
+          tours.forEach((tour) => {
+            if (tour.slug) {
+              result.push({
+                locale,
+                categorySlug: category.slug,
+                subcategorySlug: subcategory.slug,
+                tourSlug: tour.slug,
+              });
+            }
+          });
+        }
+      }
+    } catch {
+      // Keep build resilient if API is unavailable.
+    }
+  }
+
+  return result;
 }
 
 export async function generateMetadata({ params }: TourDetailPageProps): Promise<Metadata> {
-  const { tourSlug } = await params;
-  const item = findTourBySlug(tourSlug);
+  const { locale, tourSlug } = await params;
+  const item = await getTourBySlug(tourSlug, locale);
 
   if (!item) {
     return { title: 'Tour Not Found' };
   }
 
-  const description = 'short_description' in item && item.short_description
-    ? item.short_description
-    : 'description' in item && item.description
-      ? item.description
-      : `${item.title} with Egypt Tours Gate.`;
+  const description = item.short_description || item.description || `${item.title} with Egypt Tours Gate.`;
 
   return {
     title: `${item.title} | Egypt Tours Gate`,
@@ -48,18 +72,14 @@ export async function generateMetadata({ params }: TourDetailPageProps): Promise
 }
 
 export default async function TourDetailPage({ params }: TourDetailPageProps) {
-  const { categorySlug, subcategorySlug, tourSlug } = await params;
+  const { locale, categorySlug, subcategorySlug, tourSlug } = await params;
 
-  const item = findTourBySlug(tourSlug);
+  const item = await getTourBySlug(tourSlug, locale);
   if (!item) {
     notFound();
   }
 
-  const shortDescription = 'short_description' in item && item.short_description
-    ? item.short_description
-    : 'description' in item && item.description
-      ? item.description
-      : `${item.title} with Egypt Tours Gate.`;
+  const shortDescription = item.short_description || item.description || `${item.title} with Egypt Tours Gate.`;
 
   const schema = {
     '@context': 'https://schema.org',

@@ -2,45 +2,71 @@
 // sub Category Page (expoerted in tours dynamics routes)//
 // Centralized API base URL and simple helpers (expoerted in tours dynamics routes)
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import categoriesData from "@/lib/api/categories";
 import SecondTourCard from "@/components/tour/second-tour-card";
-import type { Tour, TourPackage, NileCruise } from "@/lib/api/categories";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
-import { apiGet } from "@/lib/api/client";
+import {
+  getGeneralCategories,
+  getToursBySubcategory,
+} from "@/lib/api/toursApi";
+import { routing } from "@/lib/i18n/routing";
 
 type SubcategoryPageProps = {
-  params: Promise<{ categorySlug: string; subcategorySlug: string }>;
+  params: Promise<{ locale: string; categorySlug: string; subcategorySlug: string }>;
 };
 
-async function getGeneralCategories() {
-  const data = await apiGet<any>("/general-data?locale=en");
-  return data.data?.header?.categories ?? data.data?.header?.headerCategories ?? [];
-}
-
-async function getPageData(categorySlug: string, subcategorySlug: string) {
-  const headerCategories = await getGeneralCategories();
-  const category = headerCategories.find((c: { slug: string }) => c.slug === categorySlug);
-  const subcategory = category?.subs?.find((ch: { slug: string }) => ch.slug === subcategorySlug);
+async function getPageData(categorySlug: string, subcategorySlug: string, locale: string) {
+  const headerCategories = await getGeneralCategories(locale);
+  const category = headerCategories.find((c) => c?.slug === categorySlug);
+  const subcategory = category?.subs?.find((ch: any) => ch?.slug === subcategorySlug);
 
   return { category, subcategory };
+}
+
+export async function generateStaticParams() {
+  const result: Array<{ locale: string; categorySlug: string; subcategorySlug: string }> = [];
+  for (const locale of routing.locales) {
+    try {
+      const categories = await getGeneralCategories(locale);
+      categories.forEach((category: any) => {
+        const subs = Array.isArray(category?.subs) ? category.subs : [];
+        subs.forEach((subcategory: any) => {
+          if (category?.slug && subcategory?.slug) {
+            result.push({
+              locale,
+              categorySlug: category.slug,
+              subcategorySlug: subcategory.slug,
+            });
+          }
+        });
+      });
+    } catch {
+      // Keep build resilient if remote API is unavailable.
+    }
+  }
+  return result;
 }
 
 export async function generateMetadata({
   params,
 }: SubcategoryPageProps): Promise<Metadata> {
-  const { categorySlug, subcategorySlug } = await params;
-  const { category, subcategory } = await getPageData(categorySlug, subcategorySlug);
+  const { locale, categorySlug, subcategorySlug } = await params;
+  const { category, subcategory } = await getPageData(categorySlug, subcategorySlug, locale);
 
   if (!category || !subcategory) {
     return { title: "Subcategory Not Found" };
   }
 
-  const categoryName = category.name ?? categorySlug;
-  const subcategoryName = subcategory.name ?? subcategorySlug;
+  const categoryName =
+    typeof category.name === "string"
+      ? category.name
+      : category.name?.[locale] ?? category.name?.en ?? categorySlug;
+  const subcategoryName =
+    typeof subcategory.name === "string"
+      ? subcategory.name
+      : subcategory.name?.[locale] ?? subcategory.name?.en ?? subcategorySlug;
 
   return {
     title: `${subcategoryName} ${categoryName} | Egypt Tours Gate`,
@@ -51,74 +77,37 @@ export async function generateMetadata({
 export default async function SubcategoryPage({
   params,
 }: SubcategoryPageProps) {
-  const { categorySlug, subcategorySlug } = await params;
-  const { category, subcategory } = await getPageData(categorySlug, subcategorySlug);
+  const { locale, categorySlug, subcategorySlug } = await params;
+  const { category, subcategory } = await getPageData(categorySlug, subcategorySlug, locale);
 
   if (!category || !subcategory) {
     notFound();
   }
 
-  const { tours, packages, nile_cruises } = categoriesData;
+  const tours = await getToursBySubcategory(subcategorySlug, locale);
+  const normalizedItems = tours.map((tour) => ({
+    id: tour.id,
+    image: tour.image,
+    title: tour.title,
+    description: tour.short_description,
+    price: tour.price_from,
+    rating: tour.rating,
+    reviewCount: 0,
+    duration: tour.duration,
+    location: tour.location,
+    slug: tour.slug,
+    categorySlug,
+    subcategorySlug,
+  }));
 
-  const dayTours = tours.filter(
-    (t: Tour) => t.category === categorySlug && t.city === subcategorySlug
-  );
-
-  const packageItems = packages.filter(
-    (p: TourPackage) => p.category === categorySlug
-  );
-
-  const cruises = nile_cruises.filter(
-    (c: NileCruise) => c.categorySlug === categorySlug && c.subcategorySlug === subcategorySlug
-  );
-
-  const normalizedItems = [
-    ...dayTours.map((tour: Tour) => ({
-      id: tour.id,
-      image: tour.image,
-      title: tour.title,
-      description: tour.short_description,
-      price: tour.price_from,
-      rating: tour.rating,
-      reviewCount: 0,
-      duration: tour.duration,
-      location: tour.city,
-      slug: tour.slug,
-      categorySlug: categorySlug,
-      subcategorySlug: subcategorySlug,
-    })),
-    ...packageItems.map((pkg: TourPackage) => ({
-      id: pkg.id,
-      image: pkg.image,
-      title: pkg.title,
-      description: pkg.includes?.join(", "),
-      price: pkg.price_from,
-      rating: pkg.rating,
-      reviewCount: 0,
-      duration: pkg.duration,
-      location: pkg.category,
-      slug: pkg.slug,
-      categorySlug: categorySlug,
-      subcategorySlug: subcategorySlug,
-    })),
-    ...cruises.map((cruise: NileCruise) => ({
-      id: cruise.id,
-      image: cruise.image,
-      title: cruise.title,
-      description: cruise.description,
-      price: cruise.price_from,
-      rating: cruise.rating,
-      reviewCount: cruise.reviewCount || 0,
-      duration: cruise.duration,
-      location: cruise.location,
-      slug: cruise.slug,
-      categorySlug: cruise.categorySlug,
-      subcategorySlug: cruise.subcategorySlug,
-    })),
-  ];
-
-  const categoryName = category.name ?? categorySlug;
-  const subcategoryName = subcategory.name ?? subcategorySlug;
+  const categoryName =
+    typeof category.name === "string"
+      ? category.name
+      : category.name?.[locale] ?? category.name?.en ?? categorySlug;
+  const subcategoryName =
+    typeof subcategory.name === "string"
+      ? subcategory.name
+      : subcategory.name?.[locale] ?? subcategory.name?.en ?? subcategorySlug;
   const shortDescription = `Explore the top ${subcategoryName} tours in ${categoryName} and choose the itinerary that matches your travel style.`;
 
   const subcategorySchema = {
