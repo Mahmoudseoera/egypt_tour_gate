@@ -54,12 +54,22 @@ function parsePrice(input: unknown): number {
 }
 
 function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
+  const candidatePrice =
+    item.price_from ??
+    item.price_after_discount ??
+    item.price_before_discount ??
+    item.price ??
+    item.start_from ??
+    item.start_price ??
+    item.from_price ??
+    item.cost;
+
   return {
     id: Number(item.id ?? 0),
     slug: item.slug ?? fallbackSlug,
     title: item.title ?? item.name ?? "",
     image: item.image ?? item.media?.image ?? "",
-    price_from: parsePrice(item.price_from ?? item.price ?? item.start_from),
+    price_from: parsePrice(candidatePrice),
     rating: Number(item.rating ?? 0),
     duration: item.duration ?? "",
     location: item.location ?? item.city ?? item.sub_category_name ?? "",

@@ -9,6 +9,36 @@ const API_BASE = (
 ).replace(/\/+$/, "");
 
 const CONTACT_ENDPOINT = `${API_BASE}/forms/contact`;
+const CONTACT_GET_ENDPOINT = `${API_BASE}/forms/get/contact`;
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const locale = searchParams.get("locale");
+  const url = locale ? `${CONTACT_GET_ENDPOINT}?locale=${locale}` : CONTACT_GET_ENDPOINT;
+
+  try {
+    const externalRes = await fetch(url, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 300, tags: ["contact-form-info"] },
+    });
+
+    const contentType = externalRes.headers.get("content-type") ?? "";
+    if (!contentType.includes("application/json")) {
+      return NextResponse.json(
+        { success: false, message: `External API error (${externalRes.status})` },
+        { status: 502 }
+      );
+    }
+
+    const data = await externalRes.json();
+    return NextResponse.json(data, { status: externalRes.status });
+  } catch {
+    return NextResponse.json(
+      { success: false, message: "Could not reach the server" },
+      { status: 502 }
+    );
+  }
+}
 
 export async function POST(req: NextRequest) {
   // ── STEP 1: استقبل الـ body ──────────────────────────────────────────────
@@ -22,15 +52,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  console.log("📥 Body received from frontend:", JSON.stringify(body, null, 2));
-
   // ── STEP 2: Validate بنفس الـ schema ────────────────────────────────────
   const result = contactSchema.safeParse(body);
 
   if (!result.success) {
     const fieldErrors = result.error.flatten().fieldErrors;
-    // ده هيظهر في terminal بتاعك بالظبط أي field فشل
-    console.error("❌ Validation failed:", JSON.stringify(fieldErrors, null, 2));
     return NextResponse.json(
       { success: false, message: "Validation failed", errors: fieldErrors },
       { status: 400 }
@@ -46,9 +72,6 @@ export async function POST(req: NextRequest) {
     phone: code ? `+${code}${phone}` : phone,
   };
 
-  console.log("📤 Payload being sent to external API:", JSON.stringify(payload, null, 2));
-  console.log("🌐 External endpoint:", CONTACT_ENDPOINT);
-
   // ── STEP 4: ابعت للـ API الخارجي ────────────────────────────────────────
   let externalRes: Response;
   try {
@@ -61,8 +84,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(payload),
     });
   } catch (networkErr) {
-    // مشكلة network — الـ API الخارجي مش متاح أصلاً
-    console.error("🔴 Network error reaching external API:", networkErr);
+    console.error("Network error reaching external API:", networkErr);
     return NextResponse.json(
       { success: false, message: "Could not reach the server. Please try again." },
       { status: 502 }
@@ -70,16 +92,14 @@ export async function POST(req: NextRequest) {
   }
 
   // ── STEP 5: اقرأ الـ response ────────────────────────────────────────────
-  const rawText = await externalRes.text(); // نقرأ كـ text الأول عشان نشوف أي حاجة
-  console.log(`📨 External API status: ${externalRes.status}`);
-  console.log("📨 External API raw response:", rawText);
+  const rawText = await externalRes.text();
 
   // لو الـ response مش JSON (HTML error page مثلاً)
   let data: Record<string, unknown>;
   try {
     data = JSON.parse(rawText);
   } catch {
-    console.error("🔴 External API returned non-JSON:", rawText.slice(0, 300));
+    console.error("External API returned non-JSON:", rawText.slice(0, 300));
     return NextResponse.json(
       {
         success: false,
@@ -88,8 +108,6 @@ export async function POST(req: NextRequest) {
       { status: 502 }
     );
   }
-
-  console.log("✅ External API parsed response:", JSON.stringify(data, null, 2));
 
   // ── STEP 6: رجّع نفس الـ response للـ client ─────────────────────────────
   return NextResponse.json(data, { status: externalRes.status });
