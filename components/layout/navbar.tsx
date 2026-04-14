@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "@/lib/i18n/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -159,13 +159,9 @@ export default function Navbar() {
    * which broke switching to /fr and /pl.
    */
   const onLanguageChange = (newLocale: string) => {
+    const nextLocale = newLocale as AppLocale;
     const barePath = stripLocalePrefix(pathname);
-
-    if (newLocale === routing.defaultLocale) {
-      router.push(barePath);
-    } else {
-      router.push(`/${newLocale}${barePath === "/" ? "" : barePath}`);
-    }
+    router.replace(barePath, { locale: nextLocale });
   };
 
   useEffect(() => {

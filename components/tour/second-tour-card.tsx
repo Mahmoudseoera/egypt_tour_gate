@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import Image, { StaticImageData } from "next/image";
+import { StaticImageData } from "next/image";
 import { MapPin, Calendar, Star, Heart , Ticket } from "lucide-react";
 import Link from "next/link";
+import FallbackImage from "@/components/shared/fallback-image";
 
 interface TourCardProps {
   id: number;
@@ -92,7 +93,7 @@ export default function SecondTourCard({
     <div className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 max-w-sm mx-auto">
       {/* Image - Fixed className typos */}
       <Link href={tourLink} className="relative h-56 w-full block">
-        <Image
+        <FallbackImage
           src={image || "/placeholder.svg"}
           alt={title}
           fill

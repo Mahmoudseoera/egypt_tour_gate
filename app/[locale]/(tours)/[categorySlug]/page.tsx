@@ -7,10 +7,11 @@ import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
-import { apiGet } from "@/lib/api/client";
+import { getCategoryBySlug, getGeneralCategories } from "@/lib/api/toursApi";
+import { routing } from "@/lib/i18n/routing";
 
 type CategoryPageProps = {
-  params: Promise<{ categorySlug: string }>;
+  params: Promise<{ locale: string; categorySlug: string }>;
 };
 
 const photos = [
@@ -19,26 +20,43 @@ const photos = [
   "/assets/images/tours/Pyramids-in-Egypt-webp.webp",
 ];
 
-async function getCategoryData(categorySlug: string) {
-  // Use the same real API as the navbar/footer via the unified client.
-  const data = await apiGet<any>("/general-data?locale=en");
-  const categories =
-    data.data?.header?.categories ?? data.data?.header?.headerCategories ?? [];
+async function getCategoryData(categorySlug: string, locale: string) {
+  const fromEndpoint = await getCategoryBySlug(categorySlug, locale);
+  if (fromEndpoint) return fromEndpoint;
 
-  return categories.find((cat: any) => cat.slug === categorySlug);
+  const categories = await getGeneralCategories(locale);
+  return categories.find((cat: any) => cat.slug === categorySlug) ?? null;
+}
+
+export async function generateStaticParams() {
+  const result: Array<{ locale: string; categorySlug: string }> = [];
+  for (const locale of routing.locales) {
+    try {
+      const categories = await getGeneralCategories(locale);
+      categories.forEach((category: any) => {
+        if (category?.slug) result.push({ locale, categorySlug: category.slug });
+      });
+    } catch {
+      // Keep build resilient if remote API is temporarily unavailable.
+    }
+  }
+  return result;
 }
 
 export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
-  const { categorySlug } = await params;
-  const category = await getCategoryData(categorySlug);
+  const { locale, categorySlug } = await params;
+  const category = await getCategoryData(categorySlug, locale);
 
   if (!category) {
     return { title: "Category Not Found" };
   }
 
-  const categoryName = category.name ?? categorySlug;
+  const categoryName =
+    typeof category.name === "string"
+      ? category.name
+      : category.name?.[locale] ?? category.name?.en ?? categorySlug;
 
   return {
     title: `${categoryName} Tours | Egypt Tours Gate`,
@@ -47,14 +65,17 @@ export async function generateMetadata({
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const { categorySlug } = await params;
-  const category = await getCategoryData(categorySlug);
+  const { locale, categorySlug } = await params;
+  const category = await getCategoryData(categorySlug, locale);
 
   if (!category) {
     notFound();
   }
 
-  const categoryName = category.name ?? categorySlug;
+  const categoryName =
+    typeof category.name === "string"
+      ? category.name
+      : category.name?.[locale] ?? category.name?.en ?? categorySlug;
   const categoryDescription = `Browse all available ${categoryName} options and discover the best experiences curated by Egypt Tours Gate.`;
 
   const categorySchema = {
@@ -116,7 +137,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
 
                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-[var(--main-color)] shadow-md">
-                  {category.name}
+                  {categoryName}
                 </div>
               </div>
 
@@ -125,11 +146,19 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                   className="text-xl font-bold capitalize leading-snug transition-colors duration-200 group-hover:text-[var(--main-color)]"
                   style={{ color: "var(--second-color)" }}
                 >
-                  {String(child.name).toLowerCase()}
+                  {String(
+                    typeof child.name === "string"
+                      ? child.name
+                      : child.name?.[locale] ?? child.name?.en ?? child.slug
+                  ).toLowerCase()}
                 </h3>
 
                 <p className="text-sm leading-relaxed flex-1 text-[var(--black-color)] line-clamp-4">
-                  Discover top {child.name.en} programs and tailor your perfect Egyptian journey.
+                  Discover top{" "}
+                  {typeof child.name === "string"
+                    ? child.name
+                    : child.name?.[locale] ?? child.name?.en ?? child.slug}{" "}
+                  programs and tailor your perfect Egyptian journey.
                 </p>
 
                 <div className="pt-2 border-t border-gray-100">
