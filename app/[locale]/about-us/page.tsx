@@ -1,6 +1,7 @@
 import RoavioAboutSection from "@/components/home/about";
 import TravelServicesSection from "@/components/home/services";
 import PartnersMarquee from "@/components/home/partners";
+import type { WhyChooseSection } from "@/lib/api/homeTypes";
 import Link from "next/link";
 
 export default async function AboutPage({
