@@ -160,8 +160,7 @@ export default function Navbar() {
    */
   const onLanguageChange = (newLocale: string) => {
     const nextLocale = newLocale as AppLocale;
-    const barePath = stripLocalePrefix(pathname);
-    router.replace(barePath, { locale: nextLocale });
+      router.replace("/", { locale: nextLocale });
   };
 
   useEffect(() => {

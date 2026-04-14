@@ -27,7 +27,7 @@ export default async function AboutPage({
 
       <RoavioAboutSection />
 
-      <TravelServicesSection />
+      <TravelServicesSection whyChooseSection={null} />
 
       <PartnersMarquee />
     </>
