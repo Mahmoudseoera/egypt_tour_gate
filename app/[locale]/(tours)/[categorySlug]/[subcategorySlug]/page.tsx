@@ -8,6 +8,7 @@ import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
 import {
+  getSubcategoryBySlug,
   getGeneralCategories,
   getToursBySubcategory,
 } from "@/lib/api/toursApi";
@@ -21,8 +22,12 @@ async function getPageData(categorySlug: string, subcategorySlug: string, locale
   const headerCategories = await getGeneralCategories(locale);
   const category = headerCategories.find((c) => c?.slug === categorySlug);
   const subcategory = category?.subs?.find((ch: any) => ch?.slug === subcategorySlug);
+  const directSubcategory = await getSubcategoryBySlug(subcategorySlug, locale);
 
-  return { category, subcategory };
+  return {
+    category,
+    subcategory: subcategory ?? directSubcategory,
+  };
 }
 
 export async function generateStaticParams() {
@@ -108,7 +113,10 @@ export default async function SubcategoryPage({
     typeof subcategory.name === "string"
       ? subcategory.name
       : subcategory.name?.[locale] ?? subcategory.name?.en ?? subcategorySlug;
-  const shortDescription = `Explore the top ${subcategoryName} tours in ${categoryName} and choose the itinerary that matches your travel style.`;
+  const shortDescription =
+    typeof subcategory.description === "string" && subcategory.description.trim()
+      ? subcategory.description
+      : `Explore the top ${subcategoryName} tours in ${categoryName} and choose the itinerary that matches your travel style.`;
 
   const subcategorySchema = {
     '@context': 'https://schema.org',

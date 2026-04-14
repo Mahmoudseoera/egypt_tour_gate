@@ -17,6 +17,12 @@ export interface ApiTourListItem {
 
 export interface ApiTourDetails extends ApiTourListItem {
   description?: string;
+  highlights?: string[];
+  itinerary?: Array<{ day?: number; title: string; description: string }>;
+  included?: string[];
+  excluded?: string[];
+  images?: string[];
+  pricing?: Array<{ category: string; price: number }>;
 }
 
 function normalizeLocale(locale?: string): AppLocale {
@@ -59,6 +65,20 @@ function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
     location: item.location ?? item.city ?? item.sub_category_name ?? "",
     short_description: item.short_description ?? item.summary ?? item.description ?? "",
   };
+}
+
+function pickStringArray(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((item) => {
+      if (typeof item === "string") return item;
+      if (item && typeof item === "object") {
+        const obj = item as AnyObj;
+        return obj.title ?? obj.name ?? obj.text ?? obj.description ?? "";
+      }
+      return "";
+    })
+    .filter((v) => typeof v === "string" && v.trim().length > 0);
 }
 
 export async function getGeneralCategories(locale?: string): Promise<AnyObj[]> {
@@ -108,8 +128,39 @@ export async function getTourBySlug(slug: string, locale?: string): Promise<ApiT
   const data = pickData(response);
   const raw = data?.tour ?? data;
   if (!raw || typeof raw !== "object") return null;
+
+  const highlights = pickStringArray(raw.highlights ?? raw.tour_highlights ?? raw.key_highlights);
+  const included = pickStringArray(raw.included ?? raw.includes ?? raw.inclusions);
+  const excluded = pickStringArray(raw.excluded ?? raw.excludes ?? raw.exclusions);
+
+  const itineraryRaw = asArray(raw.itinerary ?? raw.plan ?? raw.days ?? raw.program);
+  const itinerary = itineraryRaw
+    .map((day, index) => ({
+      day: Number(day?.day ?? day?.day_number ?? index + 1),
+      title: day?.title ?? day?.name ?? day?.day ?? "",
+      description: day?.description ?? day?.content ?? day?.text ?? "",
+    }))
+    .filter((day) => day.title || day.description);
+
+  const images = asArray(raw.images ?? raw.gallery ?? raw.media?.images)
+    .map((img) => (typeof img === "string" ? img : img?.image ?? img?.url ?? ""))
+    .filter(Boolean);
+
+  const pricing = asArray(raw.pricing ?? raw.price_table ?? raw.prices)
+    .map((row) => ({
+      category: row?.category ?? row?.name ?? "",
+      price: parsePrice(row?.price ?? row?.amount),
+    }))
+    .filter((row) => row.category || row.price);
+
   return {
     ...mapTour(raw, slug),
     description: raw.description ?? raw.short_description ?? "",
+    highlights,
+    itinerary,
+    included,
+    excluded,
+    images,
+    pricing,
   };
 }

@@ -22,10 +22,18 @@ const photos = [
 
 async function getCategoryData(categorySlug: string, locale: string) {
   const fromEndpoint = await getCategoryBySlug(categorySlug, locale);
-  if (fromEndpoint) return fromEndpoint;
-
   const categories = await getGeneralCategories(locale);
-  return categories.find((cat: any) => cat.slug === categorySlug) ?? null;
+  const fromGeneral = categories.find((cat: any) => cat.slug === categorySlug) ?? null;
+
+  if (fromEndpoint && Array.isArray(fromEndpoint.subs) && fromEndpoint.subs.length > 0) {
+    return fromEndpoint;
+  }
+
+  if (fromEndpoint && fromGeneral) {
+    return { ...fromEndpoint, subs: fromEndpoint.subs?.length ? fromEndpoint.subs : fromGeneral.subs };
+  }
+
+  return fromEndpoint ?? fromGeneral;
 }
 
 export async function generateStaticParams() {

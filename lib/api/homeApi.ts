@@ -22,9 +22,16 @@ export async function fetchHomeSections(locale: string = "en"): Promise<HomeSect
   const url = `${normalizedBase}?locale=${locale}`;
 
   try {
-    const res = await fetch(url, {
-      cache: "no-store",
-    });
+    let res: Response | null = null;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      res = await fetch(url, {
+        next: { revalidate: 300, tags: [`home:${locale}`] },
+      });
+      if (res.status !== 429 || attempt === 3) break;
+      await new Promise((resolve) => setTimeout(resolve, attempt * 600));
+    }
+
+    if (!res) return null;
 
     if (!res.ok) {
       console.error(

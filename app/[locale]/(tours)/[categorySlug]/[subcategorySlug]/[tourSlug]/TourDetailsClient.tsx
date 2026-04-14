@@ -23,6 +23,7 @@ import {
   Calendar, BookOpen, ArrowRight, Baby,
   ChevronsDownUp, ChevronsUpDown,
 } from 'lucide-react';
+import type { ApiTourDetails } from '@/lib/api/toursApi';
 
 /* ─── Types ─── */
 interface TourItem {
@@ -129,7 +130,11 @@ const policyRules = [
   'Infant seats on domestic flights are subject to airline availability.',
 ];
 
-export default function TourDetailsClient() {
+type TourDetailsClientProps = {
+  tour: ApiTourDetails;
+};
+
+export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   const [activeDay,          setActiveDay]          = useState<number | null>(1);
   const [allOpen,            setAllOpen]            = useState(false);
   const [isLightboxOpen,     setIsLightboxOpen]     = useState(false);
@@ -197,7 +202,7 @@ export default function TourDetailsClient() {
   }, []);
 
   /* ── Data ── */
-  const tourImages = [
+  const fallbackTourImages = [
     '/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp',
     '/assets/images/tours/great-pyramid-webp.webp',
     '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp',
@@ -206,7 +211,7 @@ export default function TourDetailsClient() {
     '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp',
   ];
 
-  const highlights = [
+  const fallbackHighlights = [
     'Visit the iconic Pyramids of Giza and the Sphinx',
     'Explore the treasures of Tutankhamun in the Egyptian Museum',
     'Walk through ancient history in the temples of Luxor and Karnak',
@@ -214,7 +219,7 @@ export default function TourDetailsClient() {
     'Professional English-speaking Egyptologist guide',
   ];
 
-  const itinerary = [
+  const fallbackItinerary = [
     { day: 1, title: 'Cairo Arrival',             description: 'Arrive at Cairo International Airport. Meet and greet by our representative. Transfer to your hotel. Overnight in Cairo.' },
     { day: 2, title: 'Pyramids & Egyptian Museum', description: 'Visit the Great Pyramids of Giza, the Sphinx, and the Valley Temple. Afternoon visit to the Egyptian Museum to see the treasures of Tutankhamun.' },
     { day: 3, title: 'Fly to Luxor - Nile Cruise', description: 'Flight to Luxor. Visit Karnak Temple and Luxor Temple. Board your Nile cruise ship. Dinner and overnight on board.' },
@@ -222,7 +227,7 @@ export default function TourDetailsClient() {
     { day: 5, title: 'Edfu & Kom Ombo',            description: 'Visit Edfu Temple dedicated to Horus. Sail to Kom Ombo. Visit the unique double temple. Continue sailing to Aswan.' },
   ];
 
-  const priceTable: PriceRow[] = [
+  const fallbackPriceTable: PriceRow[] = [
     { category: 'Solo Traveler',      price: 1450 },
     { category: '2-3 Persons',        price: 950  },
     { category: '4-6 Persons',        price: 850  },
@@ -230,8 +235,19 @@ export default function TourDetailsClient() {
     { category: 'Child (6-11 years)', price: 425  },
   ];
 
-  const included  = ['Accommodation in 5-star hotels','All transfers in private air-conditioned vehicle','Domestic flight tickets','Professional Egyptologist guide','All entrance fees to mentioned sites','Meals as mentioned in itinerary'];
-  const excluded  = ['International flights','Entry visa to Egypt','Personal expenses','Tipping','Optional tours'];
+  const fallbackIncluded  = ['Accommodation in 5-star hotels','All transfers in private air-conditioned vehicle','Domestic flight tickets','Professional Egyptologist guide','All entrance fees to mentioned sites','Meals as mentioned in itinerary'];
+  const fallbackExcluded  = ['International flights','Entry visa to Egypt','Personal expenses','Tipping','Optional tours'];
+
+  const tourImages = tour.images?.length ? tour.images : fallbackTourImages;
+  const highlights = tour.highlights?.length ? tour.highlights : fallbackHighlights;
+  const itinerary = tour.itinerary?.length
+    ? tour.itinerary.map((item, index) => ({ ...item, day: item.day ?? index + 1 }))
+    : fallbackItinerary;
+  const priceTable: PriceRow[] = tour.pricing?.length
+    ? tour.pricing.map((item) => ({ category: item.category, price: item.price }))
+    : fallbackPriceTable;
+  const included = tour.included?.length ? tour.included : fallbackIncluded;
+  const excluded = tour.excluded?.length ? tour.excluded : fallbackExcluded;
 
   const relatedTours: TourItem[] = [
     { id: '1', title: 'Cairo & Alexandria Discovery', image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', price: 599, duration: '4 Days', rating: 4.8, reviews: 245 },

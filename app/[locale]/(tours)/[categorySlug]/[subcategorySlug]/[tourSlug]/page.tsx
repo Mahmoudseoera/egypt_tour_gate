@@ -119,7 +119,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
           </div>
         </div>
 
-        <TourDetailsClient />
+        <TourDetailsClient tour={item} />
       </div>
     </main>
 
