@@ -1,4 +1,6 @@
 // app/page.tsx  — Server Component (no 'use client')
+export const dynamic = "force-static";
+export const revalidate = 300;
 import Providers from "../../components/providers";
 import EgyptToursBanner from "../../components/home/hero-banner";
 import TestimonialSlider from "../../components/testimonails/testimonials-card";
@@ -15,6 +17,7 @@ import { fetchHomeSections } from "@/lib/api/homeApi";
 import type { HomeSections } from "@/lib/api/homeTypes";
 
 import "@/styles/home.css";
+
 
 type PageProps = {
   params: Promise<{ 

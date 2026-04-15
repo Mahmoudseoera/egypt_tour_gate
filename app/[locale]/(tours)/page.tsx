@@ -1,7 +1,7 @@
 
 
 // import CategoryCard from "@/components/tour/category-card";
-import categoriesData from "@/lib/api/categories";
+// import categoriesData from "@/lib/api/categories";
 
 
 export default async function ToursPage({

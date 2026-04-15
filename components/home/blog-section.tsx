@@ -3,7 +3,7 @@
 import { ArrowRight, User, Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { getLatestPosts } from "@/lib/api/blogData";
+// import { getLatestPosts } fro@/lib/api/blogata";
 import type { Article } from "@/lib/api/homeTypes";
 
 interface TravelBlogSectionProps {

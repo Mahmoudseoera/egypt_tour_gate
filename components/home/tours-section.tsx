@@ -6,10 +6,7 @@ import Link from "next/link";
 import { Heart, MapPin } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
-import categoriesData from "@/lib/api/categories";
-import type { Tour, TourPackage, NileCruise } from "@/lib/api/categories";
 import type { ApiTour } from "@/lib/api/homeTypes";
-
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -29,25 +26,7 @@ type SliderItem = {
   link: string;
 };
 
-function buildStaticItems(): SliderItem[] {
-  const items: SliderItem[] = [];
-  categoriesData.tours.slice(0, 2).forEach(t => items.push({
-    id: t.id, image: t.image || "/placeholder.svg", title: t.title,
-    description: t.short_description || "", price: t.price_from,
-    location: t.city, link: `/${t.category}/${t.city}/${t.slug}`,
-  }));
-  categoriesData.packages.slice(0, 2).forEach(p => items.push({
-    id: p.id, image: p.image || "/placeholder.svg", title: p.title,
-    description: (p.includes ?? []).join(", "), price: p.price_from,
-    location: "Egypt", link: `/${p.category}/${p.slug}`,
-  }));
-  categoriesData.nile_cruises.slice(0, 2).forEach(c => items.push({
-    id: c.id, image: c.image || "/placeholder.svg", title: c.title,
-    description: c.description || "", price: c.price_from,
-    location: c.location, link: `/${c.categorySlug}/${c.subcategorySlug}/${c.slug}`,
-  }));
-  return items;
-}
+
 
 export default function TravelTourSlider({ apiTours = [] }: TravelTourSliderProps) {
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
@@ -67,7 +46,7 @@ export default function TravelTourSlider({ apiTours = [] }: TravelTourSliderProp
         location: t.city,
         link: `/${t.subCategory.categorySlug}/${t.subCategory.subCategorySlug}/${t.slug}`,
       }))
-    : buildStaticItems();
+    : [];
 
   return (
     <section className="home-tours min-h-screen bg-[var(--main-grey)] pt-16">

@@ -1,6 +1,4 @@
-
-// sub Category Page (expoerted in tours dynamics routes)//
-// Centralized API base URL and simple helpers (expoerted in tours dynamics routes)
+// sub Category Page //
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SecondTourCard from "@/components/tour/second-tour-card";
@@ -15,23 +13,42 @@ import {
 import { routing } from "@/lib/i18n/routing";
 
 type SubcategoryPageProps = {
-  params: Promise<{ locale: string; categorySlug: string; subcategorySlug: string }>;
+  params: Promise<{
+    locale: string;
+    categorySlug: string;
+    subcategorySlug: string;
+  }>;
 };
 
-async function getPageData(categorySlug: string, subcategorySlug: string, locale: string) {
+async function getPageData(
+  categorySlug: string,
+  subcategorySlug: string,
+  locale: string
+) {
   const headerCategories = await getGeneralCategories(locale);
   const category = headerCategories.find((c) => c?.slug === categorySlug);
-  const subcategory = category?.subs?.find((ch: any) => ch?.slug === subcategorySlug);
+
+  // `subs` is already normalised by getGeneralCategories (comes from general-data header)
+  const subcategoryFromHeader = category?.subs?.find(
+    (ch: any) => ch?.slug === subcategorySlug
+  );
+
+  // Fetch the full subcategory detail (includes desc, tours, media, seo…)
   const directSubcategory = await getSubcategoryBySlug(subcategorySlug, locale);
 
   return {
     category,
-    subcategory: subcategory ?? directSubcategory,
+    // Prefer the detailed endpoint; merge header stub as fallback
+    subcategory: directSubcategory ?? subcategoryFromHeader ?? null,
   };
 }
 
 export async function generateStaticParams() {
-  const result: Array<{ locale: string; categorySlug: string; subcategorySlug: string }> = [];
+  const result: Array<{
+    locale: string;
+    categorySlug: string;
+    subcategorySlug: string;
+  }> = [];
   for (const locale of routing.locales) {
     try {
       const categories = await getGeneralCategories(locale);
@@ -58,7 +75,11 @@ export async function generateMetadata({
   params,
 }: SubcategoryPageProps): Promise<Metadata> {
   const { locale, categorySlug, subcategorySlug } = await params;
-  const { category, subcategory } = await getPageData(categorySlug, subcategorySlug, locale);
+  const { category, subcategory } = await getPageData(
+    categorySlug,
+    subcategorySlug,
+    locale
+  );
 
   if (!category || !subcategory) {
     return { title: "Subcategory Not Found" };
@@ -73,9 +94,14 @@ export async function generateMetadata({
       ? subcategory.name
       : subcategory.name?.[locale] ?? subcategory.name?.en ?? subcategorySlug;
 
+  // Use meta description from SEO block if available, else generate one
+  const metaDescription =
+    subcategory.plainDesc ||
+    `Discover ${subcategoryName} experiences in ${categoryName} with curated programs and flexible itineraries.`;
+
   return {
     title: `${subcategoryName} ${categoryName} | Egypt Tours Gate`,
-    description: `Discover ${subcategoryName} experiences in ${categoryName} with curated programs and flexible itineraries.`,
+    description: metaDescription,
   };
 }
 
@@ -83,21 +109,29 @@ export default async function SubcategoryPage({
   params,
 }: SubcategoryPageProps) {
   const { locale, categorySlug, subcategorySlug } = await params;
-  const { category, subcategory } = await getPageData(categorySlug, subcategorySlug, locale);
+  const { category, subcategory } = await getPageData(
+    categorySlug,
+    subcategorySlug,
+    locale
+  );
 
   if (!category || !subcategory) {
     notFound();
   }
 
   const tours = await getToursBySubcategory(subcategorySlug, locale);
+
   const normalizedItems = tours.map((tour) => ({
     id: tour.id,
+    // mapTour already resolves media?.image
     image: tour.image,
     title: tour.title,
-    description: tour.short_description,
+    // mapTour now picks small_desc first
+    description: tour.short_description ?? "",
     price: tour.price_from,
     rating: tour.rating,
     reviewCount: 0,
+    // mapTour now combines duration + duration_type
     duration: tour.duration,
     location: tour.location,
     slug: tour.slug,
@@ -109,18 +143,24 @@ export default async function SubcategoryPage({
     typeof category.name === "string"
       ? category.name
       : category.name?.[locale] ?? category.name?.en ?? categorySlug;
+
   const subcategoryName =
     typeof subcategory.name === "string"
       ? subcategory.name
       : subcategory.name?.[locale] ?? subcategory.name?.en ?? subcategorySlug;
-  const shortDescription =
-    typeof subcategory.description === "string" && subcategory.description.trim()
-      ? subcategory.description
-      : `Explore the top ${subcategoryName} tours in ${categoryName} and choose the itinerary that matches your travel style.`;
+
+  // second_title is a subtitle (e.g. "Egypt Luxury Tours and Trips")
+  const subcategorySecondTitle: string = subcategory.second_title ?? "";
+
+  // plainDesc is the HTML-stripped `desc` field set by getSubcategoryBySlug
+  const shortDescription: string =
+    subcategory.plainDesc ||
+    subcategory.small_desc ||
+    `Explore the top ${subcategoryName} tours in ${categoryName} and choose the itinerary that matches your travel style.`;
 
   const subcategorySchema = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
     name: `${subcategoryName} ${categoryName}`,
     description: shortDescription,
     url: `https://www.egypttoursgate.com/${categorySlug}/${subcategorySlug}`,
@@ -131,9 +171,12 @@ export default async function SubcategoryPage({
       <SchemaScript schema={subcategorySchema} />
       <Breadcrumb
         items={[
-          { label: 'Home', href: '/' },
+          { label: "Home", href: "/" },
           { label: categoryName, href: `/${categorySlug}` },
-          { label: subcategoryName, href: `/${categorySlug}/${subcategorySlug}` },
+          {
+            label: subcategoryName,
+            href: `/${categorySlug}/${subcategorySlug}`,
+          },
         ]}
       />
 
@@ -142,15 +185,22 @@ export default async function SubcategoryPage({
           <h1 className="text-3xl font-bold mb-2 text-center text-[var(--second-color)]">
             {categoryName}
           </h1>
-          <h2 className="text-xl text-gray-600 mb-4 text-center">
+          <h2 className="text-xl text-gray-600 mb-1 text-center">
             {subcategoryName}
           </h2>
+          {subcategorySecondTitle && (
+            <p className="text-base text-[var(--main-color)] font-medium text-center mb-3">
+              {subcategorySecondTitle}
+            </p>
+          )}
           <div className="max-w-2xl mx-auto text-center mb-8">
             <ExpandableDescription text={shortDescription} />
           </div>
 
           {normalizedItems.length === 0 ? (
-            <p className="text-lg text-center">No tours found for this subcategory.</p>
+            <p className="text-lg text-center">
+              No tours found for this subcategory.
+            </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {normalizedItems.map((item) => (

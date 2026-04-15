@@ -64,6 +64,14 @@ function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
     item.from_price ??
     item.cost;
 
+  // Combine duration + duration_type if both are present (e.g. "9 Day")
+  const rawDuration = item.duration ?? "";
+  const durationType = item.duration_type ?? "";
+  const duration =
+    rawDuration && durationType
+      ? `${rawDuration} ${durationType}`
+      : rawDuration || durationType || "";
+
   return {
     id: Number(item.id ?? 0),
     slug: item.slug ?? fallbackSlug,
@@ -71,9 +79,15 @@ function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
     image: item.image ?? item.media?.image ?? "",
     price_from: parsePrice(candidatePrice),
     rating: Number(item.rating ?? 0),
-    duration: item.duration ?? "",
+    duration,
     location: item.location ?? item.city ?? item.sub_category_name ?? "",
-    short_description: item.short_description ?? item.summary ?? item.description ?? "",
+    // real API uses small_desc — added as first candidate
+    short_description:
+      item.small_desc ??
+      item.short_description ??
+      item.summary ??
+      item.description ??
+      "",
   };
 }
 
@@ -91,6 +105,15 @@ function pickStringArray(input: unknown): string[] {
     .filter((v) => typeof v === "string" && v.trim().length > 0);
 }
 
+// ─── Strip HTML tags from description strings ─────────────────────────────────
+function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&[a-z#0-9]+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export async function getGeneralCategories(locale?: string): Promise<AnyObj[]> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale("/general-data", l), {
@@ -100,37 +123,79 @@ export async function getGeneralCategories(locale?: string): Promise<AnyObj[]> {
   return asArray(data?.header?.categories ?? data?.header?.headerCategories);
 }
 
-export async function getCategoryBySlug(slug: string, locale?: string): Promise<AnyObj | null> {
+// ─── Category page ────────────────────────────────────────────────────────────
+// Real API: GET /categories/{slug}
+// Response shape: { success, data: { id, name, slug, second_title, desc, media, seo, subCategories[] } }
+// Note: subcategories are under `subCategories` (not `subs`).
+export async function getCategoryBySlug(
+  slug: string,
+  locale?: string
+): Promise<AnyObj | null> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/categories/${slug}`, l), {
     next: { revalidate: 3600, tags: [`category:${slug}`] },
   });
   const data = pickData(response);
-  return data?.category ?? data;
+
+  // Normalize: expose `subs` so the page can use a single field name,
+  // and expose plain `desc` / `second_title` for the description.
+  const raw = data?.category ?? data;
+  if (!raw || typeof raw !== "object") return null;
+
+  return {
+    ...raw,
+    // Unify subcategory field — real API returns `subCategories`
+    subs: asArray(raw.subs ?? raw.subCategories ?? raw.sub_categories),
+    // Plain-text description stripped of HTML
+    plainDesc: raw.desc ? stripHtml(raw.desc) : "",
+  };
 }
 
-export async function getSubcategoryBySlug(slug: string, locale?: string): Promise<AnyObj | null> {
+// ─── Subcategory page ─────────────────────────────────────────────────────────
+// Real API: GET /sub-category/{slug}
+// Response shape: { success, data: { id, name, slug, second_title, desc, media, seo, tours[] } }
+// Tours are at data.tours (after pickData unwraps the outer `data` key).
+export async function getSubcategoryBySlug(
+  slug: string,
+  locale?: string
+): Promise<AnyObj | null> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/sub-category/${slug}`, l), {
     next: { revalidate: 3600, tags: [`subcategory:${slug}`] },
   });
   const data = pickData(response);
-  return data?.sub_category ?? data?.subcategory ?? data;
+  // real API: data IS the subcategory object directly (id, name, slug, desc, tours…)
+  const raw = data?.sub_category ?? data?.subcategory ?? data;
+  if (!raw || typeof raw !== "object") return null;
+
+  return {
+    ...raw,
+    plainDesc: raw.desc ? stripHtml(raw.desc) : "",
+  };
 }
 
-export async function getToursBySubcategory(slug: string, locale?: string): Promise<ApiTourListItem[]> {
+export async function getToursBySubcategory(
+  slug: string,
+  locale?: string
+): Promise<ApiTourListItem[]> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/sub-category/${slug}`, l), {
     next: { revalidate: 3600, tags: [`subcategory:${slug}`, "tours"] },
   });
   const data = pickData(response);
+  // real API: tours live at data.tours (after pickData unwraps outer `data`)
+  const raw =
+    data?.sub_category ?? data?.subcategory ?? data;
   const rawTours = asArray(
-    data?.tours ?? data?.items ?? data?.sub_category?.tours ?? data?.subcategory?.tours
+    raw?.tours ?? data?.tours ?? data?.items
   );
   return rawTours.map((item) => mapTour(item, item?.slug ?? ""));
 }
 
-export async function getTourBySlug(slug: string, locale?: string): Promise<ApiTourDetails | null> {
+export async function getTourBySlug(
+  slug: string,
+  locale?: string
+): Promise<ApiTourDetails | null> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/tour/${slug}`, l), {
     next: { revalidate: 3600, tags: [`tour:${slug}`] },
@@ -139,11 +204,19 @@ export async function getTourBySlug(slug: string, locale?: string): Promise<ApiT
   const raw = data?.tour ?? data;
   if (!raw || typeof raw !== "object") return null;
 
-  const highlights = pickStringArray(raw.highlights ?? raw.tour_highlights ?? raw.key_highlights);
-  const included = pickStringArray(raw.included ?? raw.includes ?? raw.inclusions);
-  const excluded = pickStringArray(raw.excluded ?? raw.excludes ?? raw.exclusions);
+  const highlights = pickStringArray(
+    raw.highlights ?? raw.tour_highlights ?? raw.key_highlights
+  );
+  const included = pickStringArray(
+    raw.included ?? raw.includes ?? raw.inclusions
+  );
+  const excluded = pickStringArray(
+    raw.excluded ?? raw.excludes ?? raw.exclusions
+  );
 
-  const itineraryRaw = asArray(raw.itinerary ?? raw.plan ?? raw.days ?? raw.program);
+  const itineraryRaw = asArray(
+    raw.itinerary ?? raw.plan ?? raw.days ?? raw.program
+  );
   const itinerary = itineraryRaw
     .map((day, index) => ({
       day: Number(day?.day ?? day?.day_number ?? index + 1),
@@ -153,7 +226,9 @@ export async function getTourBySlug(slug: string, locale?: string): Promise<ApiT
     .filter((day) => day.title || day.description);
 
   const images = asArray(raw.images ?? raw.gallery ?? raw.media?.images)
-    .map((img) => (typeof img === "string" ? img : img?.image ?? img?.url ?? ""))
+    .map((img) =>
+      typeof img === "string" ? img : img?.image ?? img?.url ?? ""
+    )
     .filter(Boolean);
 
   const pricing = asArray(raw.pricing ?? raw.price_table ?? raw.prices)
@@ -165,7 +240,9 @@ export async function getTourBySlug(slug: string, locale?: string): Promise<ApiT
 
   return {
     ...mapTour(raw, slug),
-    description: raw.description ?? raw.short_description ?? "",
+    description: raw.desc
+      ? stripHtml(raw.desc)
+      : raw.description ?? raw.short_description ?? "",
     highlights,
     itinerary,
     included,
