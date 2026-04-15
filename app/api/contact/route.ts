@@ -1,58 +1,93 @@
 // app/api/contact/route.ts
-// ✅ لازم يكون هنا: app/api/contact/route.ts  (برّا [locale])
+// ✅ المكان الصح: app/api/contact/route.ts  (برّا [locale] تماماً)
+//
+// التصميم:
+//   - الـ validation كلها بتحصل على الـ frontend (react-hook-form + zod)
+//   - الـ server مش بيعمل validation تانية — بيثق في الـ frontend
+//   - الـ server بس بيجمّع code + phone ويبعت للـ external API
+//
+// GET  → proxy لـ /forms/get/contact  (بيانات الكروت)
+// POST → proxy لـ /forms/contact      (إرسال الفورم)
 
 import { NextRequest, NextResponse } from "next/server";
-import { contactSchema } from "@/lib/validations/contact.schema";
 
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://www.egypttoursgate.com/api/v1"
 ).replace(/\/+$/, "");
 
-const CONTACT_ENDPOINT = `${API_BASE}/forms/contact`;
+const CONTACT_POST_ENDPOINT = `${API_BASE}/forms/contact`;
+const CONTACT_GET_ENDPOINT  = `${API_BASE}/forms/get/contact`;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// GET — جيب بيانات الكروت (phone / email / address)
+// ─────────────────────────────────────────────────────────────────────────────
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const locale = searchParams.get("locale") ?? "en";
+  const url    = `${CONTACT_GET_ENDPOINT}?locale=${locale}`;
+
+  try {
+    const externalRes = await fetch(url, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 300, tags: ["contact-form-info"] },
+    });
+
+    const contentType = externalRes.headers.get("content-type") ?? "";
+    if (!contentType.includes("application/json")) {
+      return NextResponse.json(
+        { success: false, message: `External API error (${externalRes.status})` },
+        { status: 502 }
+      );
+    }
+
+    const data = await externalRes.json();
+    return NextResponse.json(data, { status: externalRes.status });
+
+  } catch (err) {
+    console.error("[GET /api/contact] network error:", err);
+    return NextResponse.json(
+      { success: false, message: "Could not reach the server" },
+      { status: 502 }
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST — إرسال الفورم
+// ─────────────────────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  // ── STEP 1: استقبل الـ body ──────────────────────────────────────────────
-  let body: unknown;
+  // ── 1. اقرأ الـ body ───────────────────────────────────────────────────────
+  let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
     return NextResponse.json(
-      { success: false, message: "Invalid JSON body" },
+      { success: false, message: "Invalid request body" },
       { status: 400 }
     );
   }
 
-  console.log("📥 Body received from frontend:", JSON.stringify(body, null, 2));
+  // ── 2. جمّع code + phone في field واحد ────────────────────────────────────
+  // الـ frontend بيبعت { code: "20", phone: "1110008407" }
+  // الـ external API بيتوقع { phone: "+201110008407" }
+  const code  = typeof body.code  === "string" ? body.code.trim()  : "";
+  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
 
-  // ── STEP 2: Validate بنفس الـ schema ────────────────────────────────────
-  const result = contactSchema.safeParse(body);
-
-  if (!result.success) {
-    const fieldErrors = result.error.flatten().fieldErrors;
-    // ده هيظهر في terminal بتاعك بالظبط أي field فشل
-    console.error("❌ Validation failed:", JSON.stringify(fieldErrors, null, 2));
-    return NextResponse.json(
-      { success: false, message: "Validation failed", errors: fieldErrors },
-      { status: 400 }
-    );
-  }
-
-  // ── STEP 3: جمّع code + phone قبل الإرسال ───────────────────────────────
-  // الـ frontend بيبعت code و phone منفصلين
-  // الـ API الخارجي بيتوقع phone كـ string واحد زي "+201110008407"
-  const { code, phone, ...rest } = result.data;
-  const payload = {
-    ...rest,
+  // ابني الـ payload النهائي اللي هيتبعت للـ API
+  const payload: Record<string, unknown> = {
+    name:    body.name,
+    email:   body.email,
+    subject: body.subject,
+    country: body.country,
+    message: body.message,
+    // phone مدموج: "+201110008407"
     phone: code ? `+${code}${phone}` : phone,
   };
 
-  console.log("📤 Payload being sent to external API:", JSON.stringify(payload, null, 2));
-  console.log("🌐 External endpoint:", CONTACT_ENDPOINT);
-
-  // ── STEP 4: ابعت للـ API الخارجي ────────────────────────────────────────
+  // ── 3. ابعت للـ external API (server-to-server → مفيش CORS) ───────────────
   let externalRes: Response;
   try {
-    externalRes = await fetch(CONTACT_ENDPOINT, {
+    externalRes = await fetch(CONTACT_POST_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -60,37 +95,28 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify(payload),
     });
-  } catch (networkErr) {
-    // مشكلة network — الـ API الخارجي مش متاح أصلاً
-    console.error("🔴 Network error reaching external API:", networkErr);
+  } catch (err) {
+    console.error("[POST /api/contact] network error:", err);
     return NextResponse.json(
       { success: false, message: "Could not reach the server. Please try again." },
       { status: 502 }
     );
   }
 
-  // ── STEP 5: اقرأ الـ response ────────────────────────────────────────────
-  const rawText = await externalRes.text(); // نقرأ كـ text الأول عشان نشوف أي حاجة
-  console.log(`📨 External API status: ${externalRes.status}`);
-  console.log("📨 External API raw response:", rawText);
+  // ── 4. اقرأ الـ response كـ text الأول (لو مش JSON ميقعش في crash) ────────
+  const rawText = await externalRes.text();
 
-  // لو الـ response مش JSON (HTML error page مثلاً)
   let data: Record<string, unknown>;
   try {
     data = JSON.parse(rawText);
   } catch {
-    console.error("🔴 External API returned non-JSON:", rawText.slice(0, 300));
+    console.error("[POST /api/contact] non-JSON response:", rawText.slice(0, 300));
     return NextResponse.json(
-      {
-        success: false,
-        message: `External API error (${externalRes.status}). Please try again.`,
-      },
+      { success: false, message: `Server error (${externalRes.status}). Please try again.` },
       { status: 502 }
     );
   }
 
-  console.log("✅ External API parsed response:", JSON.stringify(data, null, 2));
-
-  // ── STEP 6: رجّع نفس الـ response للـ client ─────────────────────────────
+  // ── 5. رجّع نفس الـ response للـ client ───────────────────────────────────
   return NextResponse.json(data, { status: externalRes.status });
 }

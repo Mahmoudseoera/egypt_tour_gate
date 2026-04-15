@@ -2,10 +2,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send, Phone, MapPin, Mail, ChevronRight, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 
 import {
   contactSchema,
@@ -19,7 +20,16 @@ const breadcrumbItems = [
 ];
 
 /* ─── Info Cards Data ─────────────────────────────────────── */
-const contactCards = [
+type ContactCard = {
+  icon: typeof Phone;
+  label: string;
+  lines: string[];
+  href: string;
+  ariaLabel: string;
+  target: "_blank" | "_self";
+};
+
+const fallbackContactCards: ContactCard[] = [
   {
     icon: Phone,
     label: "Phone",
@@ -48,6 +58,8 @@ const contactCards = [
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
+  const [contactCards, setContactCards] = useState<ContactCard[]>(fallbackContactCards);
+  const locale = useLocale();
   const router = useRouter();
 
   const {
@@ -72,21 +84,84 @@ export default function ContactPage() {
 
   const watchedValues = watch();
 
-  // ─── Submit ───────────────────────────────────────────────────────────────
-  // البراوزر بيبعت لـ /api/contact (same origin → مفيش CORS)
-  // الـ route.ts بيعمل proxy للـ API الخارجي من الـ server
+  // ── GET: جيب بيانات الكروت من الـ API ───────────────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadContactInfo() {
+      try {
+        const res = await fetch(`/api/contact?locale=${locale}`);
+        if (!res.ok) return;
+        const payload = await res.json();
+
+        // حاول تجيب الـ contact data من أي شكل للـ response
+        const data    = payload?.data ?? payload ?? {};
+        const contact = data?.contact ?? data?.form ?? data;
+
+        const phones = [
+          contact?.phone,
+          contact?.phone_1,
+          contact?.phone_2,
+        ].filter((v: unknown): v is string => typeof v === "string" && v.trim().length > 0);
+
+        const email   = typeof contact?.email   === "string" ? contact.email   : "";
+        const address = typeof contact?.address === "string" ? contact.address : "";
+
+        const dynamicCards: ContactCard[] = [
+          {
+            icon: Phone,
+            label: "Phone",
+            lines: phones.length ? phones : fallbackContactCards[0].lines,
+            href: `tel:${(phones[0] ?? fallbackContactCards[0].lines[0]).replace(/\s+/g, "")}`,
+            ariaLabel: "Call us",
+            target: "_self",
+          },
+          {
+            icon: MapPin,
+            label: "Address",
+            lines: address ? [address] : fallbackContactCards[1].lines,
+            href: address
+              ? `https://www.google.com/maps?q=${encodeURIComponent(address)}`
+              : fallbackContactCards[1].href,
+            ariaLabel: "Open location in Google Maps",
+            target: "_blank",
+          },
+          {
+            icon: Mail,
+            label: "Email",
+            lines: email ? [email] : fallbackContactCards[2].lines,
+            href: `mailto:${email || fallbackContactCards[2].lines[0]}`,
+            ariaLabel: "Send us an email",
+            target: "_self",
+          },
+        ];
+
+        if (!cancelled) setContactCards(dynamicCards);
+      } catch {
+        // keep fallback cards silently
+      }
+    }
+
+    loadContactInfo();
+    return () => { cancelled = true; };
+  }, [locale]);
+
+  // ── POST: إرسال الفورم ───────────────────────────────────────────────────
+  // ✅ الـ validation كلها بتحصل هنا في الـ frontend بواسطة zod + react-hook-form
+  // ✅ لو الـ validation فشلت، الـ onSubmit مش بيتنفذ أصلاً
+  // ✅ لو الـ validation نجحت، بنبعت للـ proxy route /api/contact
   async function onSubmit(values: ContactFormData) {
     setLoading(true);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // بنبعت code و phone منفصلين → الـ route.ts هو اللي بيجمّعهم
+        // بنبعت code و phone منفصلين ← الـ route.ts بيجمّعهم في "+20xxxxxxxxx"
         body: JSON.stringify({
-          name: values.name,
-          email: values.email,
-          code: values.code,
-          phone: values.phone,
+          name:    values.name,
+          email:   values.email,
+          code:    values.code,
+          phone:   values.phone,
           subject: values.subject,
           country: values.country,
           message: values.message,
@@ -95,14 +170,17 @@ export default function ContactPage() {
 
       const data = await res.json();
 
+      // الـ API رجع error (4xx / 5xx أو success: false)
       if (!res.ok || !data.success) {
         toast.error(data.message || "Something went wrong. Please try again.");
         return;
       }
 
+      // ✅ نجاح
       toast.success("Message sent! We'll be in touch within 24 hours.");
-      reset(); // امسح الفورم بعد النجاح
+      reset();
       router.push("/thank-you");
+
     } catch {
       toast.error("Network error. Please check your connection and try again.");
     } finally {
@@ -126,7 +204,7 @@ export default function ContactPage() {
     "peer w-full border-[1.5px] border-[#9e9e9e] rounded-2xl bg-transparent px-4 py-4 text-base text-[#333] transition-colors duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[var(--second-color)] outline-none";
 
   function inputClass(fieldName: keyof ContactFormData) {
-    const val = watchedValues[fieldName];
+    const val      = watchedValues[fieldName];
     const hasError = !!errors[fieldName];
     const isFilled = typeof val === "string" ? val.trim().length > 0 : !!val;
     return [
@@ -242,7 +320,7 @@ export default function ContactPage() {
               <Link
                 key={label}
                 href={href}
-                target={target as "_blank" | "_self"}
+                target={target}
                 rel={target === "_blank" ? "noopener noreferrer" : undefined}
                 aria-label={ariaLabel}
                 className="contact-card group flex flex-col items-center text-center bg-white rounded-2xl shadow-lg p-6 sm:p-7 border border-transparent hover:border-[var(--main-color)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"

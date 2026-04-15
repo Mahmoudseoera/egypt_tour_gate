@@ -193,19 +193,31 @@ export default function Navbar() {
 
   if (loading) {
     return (
-      <nav className="w-full bg-white p-4">
-        <Image
-          src="/assets/images/egypt-tour-gate-logo.png"
-          alt="Egypt Tour Gate"
-          width={70}
-          height={30}
-        />
+      <nav className="w-full bg-white border-b border-gray-100 px-4 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Image src="/assets/images/egypt-tour-gate-logo.png" alt="Egypt Tour Gate" width={70} height={30} />
+          <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
+            <span>Home</span>
+            <span>Tours</span>
+            <span>Blogs</span>
+            <span>Contact</span>
+          </div>
+        </div>
       </nav>
     );
   }
 
   if (error || !data) {
-    return <div>Error loading navbar</div>;
+    return (
+      <nav className="w-full bg-white border-b border-gray-100 px-4 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Link href="/" className="inline-flex items-center">
+            <Image src="/assets/images/egypt-tour-gate-logo.png" alt="Egypt Tour Gate" width={70} height={30} />
+          </Link>
+          <div className="text-sm text-gray-600">Menu unavailable, using fallback.</div>
+        </div>
+      </nav>
+    );
   }
 
   const logoSrc =
