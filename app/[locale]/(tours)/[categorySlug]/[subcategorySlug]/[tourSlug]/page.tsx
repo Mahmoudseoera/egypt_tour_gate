@@ -7,8 +7,9 @@ import Breadcrumb from '@/components/layout/breadcrumb';
 import ExpandableDescription from '@/components/shared/expandable-description';
 import SchemaScript from '@/components/seo/schema-script';
 import "@/styles/tour-details.css";
-import { getGeneralCategories, getTourBySlug, getToursBySubcategory } from '@/lib/api/toursApi';
-import { routing } from '@/lib/i18n/routing';
+import { getTourBySlug } from '@/lib/api/toursApi';
+
+export const revalidate = 1800;
 
 type TourDetailPageProps = {
   params: Promise<{
@@ -19,45 +20,14 @@ type TourDetailPageProps = {
   }>;
 };
 
-export async function generateStaticParams() {
-  const result: Array<{
-    locale: string;
-    categorySlug: string;
-    subcategorySlug: string;
-    tourSlug: string;
-  }> = [];
-
-  for (const locale of routing.locales) {
-    try {
-      const categories = await getGeneralCategories(locale);
-      for (const category of categories) {
-        const subs = Array.isArray(category?.subs) ? category.subs : [];
-        for (const subcategory of subs) {
-          if (!category?.slug || !subcategory?.slug) continue;
-          const tours = await getToursBySubcategory(subcategory.slug, locale);
-          tours.forEach((tour) => {
-            if (tour.slug) {
-              result.push({
-                locale,
-                categorySlug: category.slug,
-                subcategorySlug: subcategory.slug,
-                tourSlug: tour.slug,
-              });
-            }
-          });
-        }
-      }
-    } catch {
-      // Keep build resilient if API is unavailable.
-    }
-  }
-
-  return result;
-}
-
 export async function generateMetadata({ params }: TourDetailPageProps): Promise<Metadata> {
   const { locale, tourSlug } = await params;
-  const item = await getTourBySlug(tourSlug, locale);
+  let item = null;
+  try {
+    item = await getTourBySlug(tourSlug, locale);
+  } catch {
+    item = null;
+  }
 
   if (!item) {
     return { title: 'Tour Not Found' };
@@ -74,7 +44,13 @@ export async function generateMetadata({ params }: TourDetailPageProps): Promise
 export default async function TourDetailPage({ params }: TourDetailPageProps) {
   const { locale, categorySlug, subcategorySlug, tourSlug } = await params;
 
-  const item = await getTourBySlug(tourSlug, locale);
+  let item = null;
+  try {
+    item = await getTourBySlug(tourSlug, locale);
+  } catch {
+    item = null;
+  }
+
   if (!item) {
     notFound();
   }
