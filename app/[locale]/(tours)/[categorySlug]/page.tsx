@@ -8,13 +8,13 @@ import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
 import { getCategoryBySlug, getGeneralCategories } from "@/lib/api/toursApi";
 import { routing } from "@/lib/i18n/routing";
-
+import placeholder from "@/assets/images/placeholder.png";
 type CategoryPageProps = {
   params: Promise<{ locale: string; categorySlug: string }>;
 };
 
 // Fallback image used only when a subcategory has no media at all
-const FALLBACK_IMAGE = "/assets/images/tours/Pyramids-in-Egypt-webp.webp";
+const FALLBACK_IMAGE = "/assets/images/placeholder.png";
 
 async function getCategoryData(categorySlug: string, locale: string) {
   const fromEndpoint = await getCategoryBySlug(categorySlug, locale);
@@ -152,10 +152,15 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {(category.subs ?? []).map((child: any, index: number) => {
             // ── Real image from API media, fallback only when absent ──
+            const rawImage =
+              child.media?.image?.trim() ||
+              child.media?.image_url?.trim() ||
+              "";
+
             const childImage: string =
-              child.media?.image ||
-              child.media?.image_url ||
-              FALLBACK_IMAGE;
+             rawImage && !rawImage.includes("/uploads/category/")
+            ? rawImage
+            : FALLBACK_IMAGE;
 
             const childImageAlt: string =
               child.media?.alt ||

@@ -40,6 +40,11 @@ images: {
       hostname: 'www.egypttoursgate.com',
       pathname: '/storage/**',
     },
+        {
+      protocol: 'https',
+      hostname: 'www.egypttoursgate.com',
+      pathname: '/**',
+    },
   ],
 }
 };
