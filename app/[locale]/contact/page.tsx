@@ -84,6 +84,7 @@ export default function ContactPage() {
 
   const watchedValues = watch();
 
+  // ── GET: جيب بيانات الكروت من الـ API ───────────────────────────────────
   useEffect(() => {
     let cancelled = false;
 
@@ -92,7 +93,9 @@ export default function ContactPage() {
         const res = await fetch(`/api/contact?locale=${locale}`);
         if (!res.ok) return;
         const payload = await res.json();
-        const data = payload?.data ?? payload ?? {};
+
+        // حاول تجيب الـ contact data من أي شكل للـ response
+        const data    = payload?.data ?? payload ?? {};
         const contact = data?.contact ?? data?.form ?? data;
 
         const phones = [
@@ -100,7 +103,8 @@ export default function ContactPage() {
           contact?.phone_1,
           contact?.phone_2,
         ].filter((v: unknown): v is string => typeof v === "string" && v.trim().length > 0);
-        const email = typeof contact?.email === "string" ? contact.email : "";
+
+        const email   = typeof contact?.email   === "string" ? contact.email   : "";
         const address = typeof contact?.address === "string" ? contact.address : "";
 
         const dynamicCards: ContactCard[] = [
@@ -139,26 +143,25 @@ export default function ContactPage() {
     }
 
     loadContactInfo();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [locale]);
 
-  // ─── Submit ───────────────────────────────────────────────────────────────
-  // البراوزر بيبعت لـ /api/contact (same origin → مفيش CORS)
-  // الـ route.ts بيعمل proxy للـ API الخارجي من الـ server
+  // ── POST: إرسال الفورم ───────────────────────────────────────────────────
+  // ✅ الـ validation كلها بتحصل هنا في الـ frontend بواسطة zod + react-hook-form
+  // ✅ لو الـ validation فشلت، الـ onSubmit مش بيتنفذ أصلاً
+  // ✅ لو الـ validation نجحت، بنبعت للـ proxy route /api/contact
   async function onSubmit(values: ContactFormData) {
     setLoading(true);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // بنبعت code و phone منفصلين → الـ route.ts هو اللي بيجمّعهم
+        // بنبعت code و phone منفصلين ← الـ route.ts بيجمّعهم في "+20xxxxxxxxx"
         body: JSON.stringify({
-          name: values.name,
-          email: values.email,
-          code: values.code,
-          phone: values.phone,
+          name:    values.name,
+          email:   values.email,
+          code:    values.code,
+          phone:   values.phone,
           subject: values.subject,
           country: values.country,
           message: values.message,
@@ -167,14 +170,17 @@ export default function ContactPage() {
 
       const data = await res.json();
 
+      // الـ API رجع error (4xx / 5xx أو success: false)
       if (!res.ok || !data.success) {
         toast.error(data.message || "Something went wrong. Please try again.");
         return;
       }
 
+      // ✅ نجاح
       toast.success("Message sent! We'll be in touch within 24 hours.");
-      reset(); // امسح الفورم بعد النجاح
+      reset();
       router.push("/thank-you");
+
     } catch {
       toast.error("Network error. Please check your connection and try again.");
     } finally {
@@ -198,7 +204,7 @@ export default function ContactPage() {
     "peer w-full border-[1.5px] border-[#9e9e9e] rounded-2xl bg-transparent px-4 py-4 text-base text-[#333] transition-colors duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[var(--second-color)] outline-none";
 
   function inputClass(fieldName: keyof ContactFormData) {
-    const val = watchedValues[fieldName];
+    const val      = watchedValues[fieldName];
     const hasError = !!errors[fieldName];
     const isFilled = typeof val === "string" ? val.trim().length > 0 : !!val;
     return [
@@ -314,7 +320,7 @@ export default function ContactPage() {
               <Link
                 key={label}
                 href={href}
-                target={target as "_blank" | "_self"}
+                target={target}
                 rel={target === "_blank" ? "noopener noreferrer" : undefined}
                 aria-label={ariaLabel}
                 className="contact-card group flex flex-col items-center text-center bg-white rounded-2xl shadow-lg p-6 sm:p-7 border border-transparent hover:border-[var(--main-color)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
