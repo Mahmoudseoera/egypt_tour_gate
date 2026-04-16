@@ -34,6 +34,10 @@ export default function SecondTourCard({
   categorySlug,
   subcategorySlug, 
 }: TourCardProps) {
+  const safeDescription =
+    description?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() ||
+    `Discover ${title} and customize your ideal Egypt experience.`;
+
   // Fixed: Proper tour link construction
   const tourLink = subcategorySlug
     ? `/${categorySlug}/${subcategorySlug}/${slug}`
@@ -114,11 +118,9 @@ export default function SecondTourCard({
         </Link>
 
         {/* Fixed: Added conditional check for description */}
-        {description && (
-          <p className="text-sm text-black line-clamp-2 mb-4">
-            {description}
-          </p>
-        )}
+        <p className="text-sm text-black line-clamp-2 mb-4">
+          {safeDescription}
+        </p>
 
         {/* Rating */}
         <div className="flex items-center gap-2 mb-4">

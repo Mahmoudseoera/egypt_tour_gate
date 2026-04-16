@@ -7,8 +7,10 @@ import Breadcrumb from '@/components/layout/breadcrumb';
 import ExpandableDescription from '@/components/shared/expandable-description';
 import SchemaScript from '@/components/seo/schema-script';
 import "@/styles/tour-details.css";
-import { getGeneralCategories, getTourBySlug, getToursBySubcategory } from '@/lib/api/toursApi';
-import { routing } from '@/lib/i18n/routing';
+import { getTourBySlug } from '@/lib/api/toursApi';
+
+export const dynamic = "force-dynamic";
+export const revalidate = 1800;
 
 type TourDetailPageProps = {
   params: Promise<{
@@ -19,62 +21,26 @@ type TourDetailPageProps = {
   }>;
 };
 
-export async function generateStaticParams() {
-  const result: Array<{
-    locale: string;
-    categorySlug: string;
-    subcategorySlug: string;
-    tourSlug: string;
-  }> = [];
-
-  for (const locale of routing.locales) {
-    try {
-      const categories = await getGeneralCategories(locale);
-      for (const category of categories) {
-        const subs = Array.isArray(category?.subs) ? category.subs : [];
-        for (const subcategory of subs) {
-          if (!category?.slug || !subcategory?.slug) continue;
-          const tours = await getToursBySubcategory(subcategory.slug, locale);
-          tours.forEach((tour) => {
-            if (tour.slug) {
-              result.push({
-                locale,
-                categorySlug: category.slug,
-                subcategorySlug: subcategory.slug,
-                tourSlug: tour.slug,
-              });
-            }
-          });
-        }
-      }
-    } catch {
-      // Keep build resilient if API is unavailable.
-    }
-  }
-
-  return result;
-}
-
 export async function generateMetadata({ params }: TourDetailPageProps): Promise<Metadata> {
-  const { locale, tourSlug } = await params;
-  const item = await getTourBySlug(tourSlug, locale);
-
-  if (!item) {
-    return { title: 'Tour Not Found' };
-  }
-
-  const description = item.short_description || item.description || `${item.title} with Egypt Tours Gate.`;
+  const { tourSlug } = await params;
+  const readableName = tourSlug.replace(/-/g, " ");
 
   return {
-    title: `${item.title} | Egypt Tours Gate`,
-    description,
+    title: `${readableName} | Egypt Tours Gate`,
+    description: `Explore ${readableName} with Egypt Tours Gate.`,
   };
 }
 
 export default async function TourDetailPage({ params }: TourDetailPageProps) {
   const { locale, categorySlug, subcategorySlug, tourSlug } = await params;
 
-  const item = await getTourBySlug(tourSlug, locale);
+  let item = null;
+  try {
+    item = await getTourBySlug(tourSlug, locale);
+  } catch {
+    item = null;
+  }
+
   if (!item) {
     notFound();
   }
@@ -119,7 +85,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
           </div>
         </div>
 
-        <TourDetailsClient />
+        <TourDetailsClient tour={item} />
       </div>
     </main>
 
