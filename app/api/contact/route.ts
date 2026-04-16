@@ -1,8 +1,15 @@
 // app/api/contact/route.ts
-// ✅ لازم يكون هنا: app/api/contact/route.ts  (برّا [locale])
+// ✅ المكان الصح: app/api/contact/route.ts  (برّا [locale] تماماً)
+//
+// التصميم:
+//   - الـ validation كلها بتحصل على الـ frontend (react-hook-form + zod)
+//   - الـ server مش بيعمل validation تانية — بيثق في الـ frontend
+//   - الـ server بس بيجمّع code + phone ويبعت للـ external API
+//
+// GET  → proxy لـ /forms/get/contact  (بيانات الكروت)
+// POST → proxy لـ /forms/contact      (إرسال الفورم)
 
 import { NextRequest, NextResponse } from "next/server";
-import { contactSchema } from "@/lib/validations/contact.schema";
 
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://www.egypttoursgate.com/api/v1"
@@ -40,17 +47,31 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
-  // ── STEP 1: استقبل الـ body ──────────────────────────────────────────────
-  let body: unknown;
   try {
-    body = await req.json();
-  } catch {
+    const externalRes = await fetch(url, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 300, tags: ["contact-form-info"] },
+    });
+
+    const contentType = externalRes.headers.get("content-type") ?? "";
+    if (!contentType.includes("application/json")) {
+      return NextResponse.json(
+        { success: false, message: `External API error (${externalRes.status})` },
+        { status: 502 }
+      );
+    }
+
+    const data = await externalRes.json();
+    return NextResponse.json(data, { status: externalRes.status });
+
+  } catch (err) {
+    console.error("[GET /api/contact] network error:", err);
     return NextResponse.json(
-      { success: false, message: "Invalid JSON body" },
-      { status: 400 }
+      { success: false, message: "Could not reach the server" },
+      { status: 502 }
     );
   }
+}
 
   // ── STEP 2: Validate بنفس الـ schema ────────────────────────────────────
   const result = contactSchema.safeParse(body);
@@ -58,24 +79,32 @@ export async function POST(req: NextRequest) {
   if (!result.success) {
     const fieldErrors = result.error.flatten().fieldErrors;
     return NextResponse.json(
-      { success: false, message: "Validation failed", errors: fieldErrors },
+      { success: false, message: "Invalid request body" },
       { status: 400 }
     );
   }
 
-  // ── STEP 3: جمّع code + phone قبل الإرسال ───────────────────────────────
-  // الـ frontend بيبعت code و phone منفصلين
-  // الـ API الخارجي بيتوقع phone كـ string واحد زي "+201110008407"
-  const { code, phone, ...rest } = result.data;
-  const payload = {
-    ...rest,
+  // ── 2. جمّع code + phone في field واحد ────────────────────────────────────
+  // الـ frontend بيبعت { code: "20", phone: "1110008407" }
+  // الـ external API بيتوقع { phone: "+201110008407" }
+  const code  = typeof body.code  === "string" ? body.code.trim()  : "";
+  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+
+  // ابني الـ payload النهائي اللي هيتبعت للـ API
+  const payload: Record<string, unknown> = {
+    name:    body.name,
+    email:   body.email,
+    subject: body.subject,
+    country: body.country,
+    message: body.message,
+    // phone مدموج: "+201110008407"
     phone: code ? `+${code}${phone}` : phone,
   };
 
   // ── STEP 4: ابعت للـ API الخارجي ────────────────────────────────────────
   let externalRes: Response;
   try {
-    externalRes = await fetch(CONTACT_ENDPOINT, {
+    externalRes = await fetch(CONTACT_POST_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -94,17 +123,13 @@ export async function POST(req: NextRequest) {
   // ── STEP 5: اقرأ الـ response ────────────────────────────────────────────
   const rawText = await externalRes.text();
 
-  // لو الـ response مش JSON (HTML error page مثلاً)
   let data: Record<string, unknown>;
   try {
     data = JSON.parse(rawText);
   } catch {
     console.error("External API returned non-JSON:", rawText.slice(0, 300));
     return NextResponse.json(
-      {
-        success: false,
-        message: `External API error (${externalRes.status}). Please try again.`,
-      },
+      { success: false, message: `Server error (${externalRes.status}). Please try again.` },
       { status: 502 }
     );
   }

@@ -17,7 +17,7 @@ import type { HomeSections } from "@/lib/api/homeTypes";
 import "@/styles/home.css";
 
 type PageProps = {
-  params: Promise<{
+  params: Promise<{ 
     locale: string;
   }>;
 };
