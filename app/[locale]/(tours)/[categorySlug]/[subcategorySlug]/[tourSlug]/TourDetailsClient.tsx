@@ -201,53 +201,24 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
     };
   }, []);
 
-  /* ── Data ── */
-  const fallbackTourImages = [
-    '/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp',
-    '/assets/images/tours/great-pyramid-webp.webp',
-    '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp',
-    '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp',
-    '/assets/images/tours/49-webp.webp',
-    '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp',
-  ];
-
-  const fallbackHighlights = [
-    'Visit the iconic Pyramids of Giza and the Sphinx',
-    'Explore the treasures of Tutankhamun in the Egyptian Museum',
-    'Walk through ancient history in the temples of Luxor and Karnak',
-    'Cruise along the legendary Nile River',
-    'Professional English-speaking Egyptologist guide',
-  ];
-
-  const fallbackItinerary = [
-    { day: 1, title: 'Cairo Arrival',             description: 'Arrive at Cairo International Airport. Meet and greet by our representative. Transfer to your hotel. Overnight in Cairo.' },
-    { day: 2, title: 'Pyramids & Egyptian Museum', description: 'Visit the Great Pyramids of Giza, the Sphinx, and the Valley Temple. Afternoon visit to the Egyptian Museum to see the treasures of Tutankhamun.' },
-    { day: 3, title: 'Fly to Luxor - Nile Cruise', description: 'Flight to Luxor. Visit Karnak Temple and Luxor Temple. Board your Nile cruise ship. Dinner and overnight on board.' },
-    { day: 4, title: 'Valley of the Kings',        description: 'Visit the West Bank including Valley of the Kings, Hatshepsut Temple, and Colossi of Memnon. Sail to Edfu.' },
-    { day: 5, title: 'Edfu & Kom Ombo',            description: 'Visit Edfu Temple dedicated to Horus. Sail to Kom Ombo. Visit the unique double temple. Continue sailing to Aswan.' },
-  ];
-
-  const fallbackPriceTable: PriceRow[] = [
-    { category: 'Solo Traveler',      price: 1450 },
-    { category: '2-3 Persons',        price: 950  },
-    { category: '4-6 Persons',        price: 850  },
-    { category: '7-10 Persons',       price: 750  },
-    { category: 'Child (6-11 years)', price: 425  },
-  ];
-
-  const fallbackIncluded  = ['Accommodation in 5-star hotels','All transfers in private air-conditioned vehicle','Domestic flight tickets','Professional Egyptologist guide','All entrance fees to mentioned sites','Meals as mentioned in itinerary'];
-  const fallbackExcluded  = ['International flights','Entry visa to Egypt','Personal expenses','Tipping','Optional tours'];
-
-  const tourImages = tour.images?.length ? tour.images : fallbackTourImages;
-  const highlights = tour.highlights?.length ? tour.highlights : fallbackHighlights;
-  const itinerary = tour.itinerary?.length
+  /* ── Dynamic API Data ── */
+  const tourImages = (tour.images?.filter(Boolean)?.length
+    ? tour.images
+    : [tour.image].filter(Boolean)) as string[];
+  const safeTourImages = tourImages.length > 0 ? tourImages : ["/assets/images/tours/49-webp.webp"];
+  const highlights = tour.highlights?.filter(Boolean) ?? [];
+  const itinerary = (tour.itinerary?.length
     ? tour.itinerary.map((item, index) => ({ ...item, day: item.day ?? index + 1 }))
-    : fallbackItinerary;
+    : []) as Array<{ day: number; title: string; description: string }>;
   const priceTable: PriceRow[] = tour.pricing?.length
-    ? tour.pricing.map((item) => ({ category: item.category, price: item.price }))
-    : fallbackPriceTable;
-  const included = tour.included?.length ? tour.included : fallbackIncluded;
-  const excluded = tour.excluded?.length ? tour.excluded : fallbackExcluded;
+    ? tour.pricing.map((item) => ({ category: item.category || "Standard", price: item.price }))
+    : [{ category: "Standard", price: tour.price_from || 0 }];
+  const included = tour.included?.filter(Boolean) ?? [];
+  const excluded = tour.excluded?.filter(Boolean) ?? [];
+  const shortDescription = tour.description?.trim() || tour.short_description?.trim() || "Tour details are available on request.";
+  const locationText = tour.location?.trim() || "Egypt";
+  const durationText = tour.duration?.trim() || "Custom duration";
+  const ratingValue = Number.isFinite(tour.rating) && tour.rating > 0 ? tour.rating : 4.5;
 
   const relatedTours: TourItem[] = [
     { id: '1', title: 'Cairo & Alexandria Discovery', image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', price: 599, duration: '4 Days', rating: 4.8, reviews: 245 },
@@ -361,7 +332,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   const openLightbox    = (i: number) => lightGalleryRef.current?.openGallery(i);
   const navigateLightbox = (dir: 'prev' | 'next') =>
     setSelectedImageIndex((p) =>
-      dir === 'prev' ? (p === 0 ? tourImages.length - 1 : p - 1) : (p === tourImages.length - 1 ? 0 : p + 1)
+      dir === 'prev'
+        ? (p === 0 ? safeTourImages.length - 1 : p - 1)
+        : (p === safeTourImages.length - 1 ? 0 : p + 1)
     );
 
   /* ── Render ── */
@@ -473,19 +446,19 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
           <div
             className="col-span-4 md:col-span-2 row-span-2 relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat"
             onClick={() => openLightbox(0)}
-            style={{ backgroundImage: `url(${tourImages[0]})` }}
+            style={{ backgroundImage: `url(${safeTourImages[0]})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
             <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
-              View Gallery ({tourImages.length})
+              View Gallery ({safeTourImages.length})
             </span>
           </div>
           {[1,2,3,4].map((i) => (
             <div key={i}
               className="relative rounded-xl cursor-pointer group overflow-hidden hidden md:block w-full h-full bg-center bg-cover bg-no-repeat"
-              style={{ backgroundImage: `url(${tourImages[i]})` }}
-              onClick={() => openLightbox(i)}
+              style={{ backgroundImage: `url(${safeTourImages[i % safeTourImages.length]})` }}
+              onClick={() => openLightbox(i % safeTourImages.length)}
             >
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
             </div>
@@ -504,19 +477,17 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
             <div>
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--main-color)]/10 text-[var(--main-color)] rounded-full text-sm font-semibold">
-                  <Star className="w-4 h-4 fill-current" /> 4.5 (128 reviews)
+                  <Star className="w-4 h-4 fill-current" /> {ratingValue.toFixed(1)}
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-gray-500 text-sm">
-                  <MapPin className="w-4 h-4 text-[var(--second-color)]" /> Cairo, Luxor, Aswan
+                  <MapPin className="w-4 h-4 text-[var(--second-color)]" /> {locationText}
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-gray-500 text-sm">
-                  <Clock className="w-4 h-4 text-[var(--second-color)]" /> 5 Days / 4 Nights
+                  <Clock className="w-4 h-4 text-[var(--second-color)]" /> {durationText}
                 </span>
               </div>
               <p className="text-gray-600 text-base leading-relaxed">
-                Experience the wonders of ancient Egypt on this comprehensive 5-day tour. Visit the iconic Pyramids of Giza,
-                explore magnificent temples in Luxor, and cruise along the legendary Nile River. Perfect for first-time visitors
-                who want to see Egypt&apos;s greatest highlights in comfort and style.
+                {shortDescription}
               </p>
             </div>
 
@@ -546,6 +517,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               </div>
 
               <div className="space-y-3">
+                {itinerary.length === 0 && (
+                  <p className="text-sm text-gray-500">Detailed itinerary will be shared after booking confirmation.</p>
+                )}
                 {itinerary.map((day) => {
                   const open = isDayOpen(day.day);
                   return (
@@ -586,6 +560,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   What&apos;s Included
                 </h3>
                 <ul className="space-y-2">
+                  {included.length === 0 && <li className="text-gray-500 text-sm">Inclusions are not listed for this tour.</li>}
                   {included.map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-gray-600 text-sm">
                       <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />{item}
@@ -599,6 +574,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   What&apos;s Excluded
                 </h3>
                 <ul className="space-y-2">
+                  {excluded.length === 0 && <li className="text-gray-500 text-sm">Exclusions are not listed for this tour.</li>}
                   {excluded.map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-gray-600 text-sm">
                       <X className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />{item}
@@ -612,6 +588,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
               <h2 className="text-2xl font-bold text-[var(--second-color)] mb-5">Highlights</h2>
               <ul className="space-y-3">
+                {highlights.length === 0 && <li className="text-gray-500 text-sm">Highlights are not available for this tour.</li>}
                 {highlights.map((h, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="w-5 h-5 rounded-full bg-[var(--main-color)]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -1032,7 +1009,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
           <div className="relative w-full max-w-5xl aspect-video">
             <div className="w-full h-full bg-gradient-to-br from-amber-300 to-stone-400 rounded-lg" />
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm font-semibold bg-black/50 px-3 py-1 rounded-full">
-              {selectedImageIndex + 1} / {tourImages.length}
+              {selectedImageIndex + 1} / {safeTourImages.length}
             </div>
           </div>
         </div>
@@ -1044,7 +1021,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
         speed={500}
         plugins={[lgZoom]}
         dynamic
-        dynamicEl={tourImages.map((img) => ({ src: img, thumb: img }))}
+        dynamicEl={safeTourImages.map((img) => ({ src: img, thumb: img }))}
       />
     </div>
     </>

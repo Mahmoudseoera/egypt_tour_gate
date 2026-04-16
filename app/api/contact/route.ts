@@ -15,16 +15,37 @@ const API_BASE = (
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://www.egypttoursgate.com/api/v1"
 ).replace(/\/+$/, "");
 
-const CONTACT_POST_ENDPOINT = `${API_BASE}/forms/contact`;
-const CONTACT_GET_ENDPOINT  = `${API_BASE}/forms/get/contact`;
+const CONTACT_ENDPOINT = `${API_BASE}/forms/contact`;
+const CONTACT_GET_ENDPOINT = `${API_BASE}/forms/get/contact`;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GET — جيب بيانات الكروت (phone / email / address)
-// ─────────────────────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const locale = searchParams.get("locale") ?? "en";
-  const url    = `${CONTACT_GET_ENDPOINT}?locale=${locale}`;
+  const locale = searchParams.get("locale");
+  const url = locale ? `${CONTACT_GET_ENDPOINT}?locale=${locale}` : CONTACT_GET_ENDPOINT;
+
+  try {
+    const externalRes = await fetch(url, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 300, tags: ["contact-form-info"] },
+    });
+
+    const contentType = externalRes.headers.get("content-type") ?? "";
+    if (!contentType.includes("application/json")) {
+      return NextResponse.json(
+        { success: false, message: `External API error (${externalRes.status})` },
+        { status: 502 }
+      );
+    }
+
+    const data = await externalRes.json();
+    return NextResponse.json(data, { status: externalRes.status });
+  } catch {
+    return NextResponse.json(
+      { success: false, message: "Could not reach the server" },
+      { status: 502 }
+    );
+  }
+}
 
   try {
     const externalRes = await fetch(url, {
@@ -52,15 +73,11 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// POST — إرسال الفورم
-// ─────────────────────────────────────────────────────────────────────────────
-export async function POST(req: NextRequest) {
-  // ── 1. اقرأ الـ body ───────────────────────────────────────────────────────
-  let body: Record<string, unknown>;
-  try {
-    body = await req.json();
-  } catch {
+  // ── STEP 2: Validate بنفس الـ schema ────────────────────────────────────
+  const result = contactSchema.safeParse(body);
+
+  if (!result.success) {
+    const fieldErrors = result.error.flatten().fieldErrors;
     return NextResponse.json(
       { success: false, message: "Invalid request body" },
       { status: 400 }
@@ -84,7 +101,7 @@ export async function POST(req: NextRequest) {
     phone: code ? `+${code}${phone}` : phone,
   };
 
-  // ── 3. ابعت للـ external API (server-to-server → مفيش CORS) ───────────────
+  // ── STEP 4: ابعت للـ API الخارجي ────────────────────────────────────────
   let externalRes: Response;
   try {
     externalRes = await fetch(CONTACT_POST_ENDPOINT, {
@@ -95,28 +112,28 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify(payload),
     });
-  } catch (err) {
-    console.error("[POST /api/contact] network error:", err);
+  } catch (networkErr) {
+    console.error("Network error reaching external API:", networkErr);
     return NextResponse.json(
       { success: false, message: "Could not reach the server. Please try again." },
       { status: 502 }
     );
   }
 
-  // ── 4. اقرأ الـ response كـ text الأول (لو مش JSON ميقعش في crash) ────────
+  // ── STEP 5: اقرأ الـ response ────────────────────────────────────────────
   const rawText = await externalRes.text();
 
   let data: Record<string, unknown>;
   try {
     data = JSON.parse(rawText);
   } catch {
-    console.error("[POST /api/contact] non-JSON response:", rawText.slice(0, 300));
+    console.error("External API returned non-JSON:", rawText.slice(0, 300));
     return NextResponse.json(
       { success: false, message: `Server error (${externalRes.status}). Please try again.` },
       { status: 502 }
     );
   }
 
-  // ── 5. رجّع نفس الـ response للـ client ───────────────────────────────────
+  // ── STEP 6: رجّع نفس الـ response للـ client ─────────────────────────────
   return NextResponse.json(data, { status: externalRes.status });
 }

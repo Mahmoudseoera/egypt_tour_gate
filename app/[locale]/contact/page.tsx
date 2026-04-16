@@ -84,7 +84,6 @@ export default function ContactPage() {
 
   const watchedValues = watch();
 
-  // ── GET: جيب بيانات الكروت من الـ API ───────────────────────────────────
   useEffect(() => {
     let cancelled = false;
 
@@ -93,9 +92,7 @@ export default function ContactPage() {
         const res = await fetch(`/api/contact?locale=${locale}`);
         if (!res.ok) return;
         const payload = await res.json();
-
-        // حاول تجيب الـ contact data من أي شكل للـ response
-        const data    = payload?.data ?? payload ?? {};
+        const data = payload?.data ?? payload ?? {};
         const contact = data?.contact ?? data?.form ?? data;
 
         const phones = [
@@ -103,8 +100,7 @@ export default function ContactPage() {
           contact?.phone_1,
           contact?.phone_2,
         ].filter((v: unknown): v is string => typeof v === "string" && v.trim().length > 0);
-
-        const email   = typeof contact?.email   === "string" ? contact.email   : "";
+        const email = typeof contact?.email === "string" ? contact.email : "";
         const address = typeof contact?.address === "string" ? contact.address : "";
 
         const dynamicCards: ContactCard[] = [
@@ -143,13 +139,14 @@ export default function ContactPage() {
     }
 
     loadContactInfo();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [locale]);
 
-  // ── POST: إرسال الفورم ───────────────────────────────────────────────────
-  // ✅ الـ validation كلها بتحصل هنا في الـ frontend بواسطة zod + react-hook-form
-  // ✅ لو الـ validation فشلت، الـ onSubmit مش بيتنفذ أصلاً
-  // ✅ لو الـ validation نجحت، بنبعت للـ proxy route /api/contact
+  // ─── Submit ───────────────────────────────────────────────────────────────
+  // البراوزر بيبعت لـ /api/contact (same origin → مفيش CORS)
+  // الـ route.ts بيعمل proxy للـ API الخارجي من الـ server
   async function onSubmit(values: ContactFormData) {
     setLoading(true);
     try {

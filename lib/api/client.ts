@@ -11,7 +11,7 @@ export async function apiGet<T = any>(
   init: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
-  const maxAttempts = 3;
+  const maxAttempts = 5;
   let res: Response | null = null;
   let lastError: unknown = null;
 
@@ -30,7 +30,9 @@ export async function apiGet<T = any>(
         break;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, attempt * 600));
+      const retryAfter = Number(res.headers.get("retry-after") ?? "0");
+      const waitMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : attempt * 900;
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
     } catch (error) {
       lastError = error;
       if (attempt === maxAttempts) {

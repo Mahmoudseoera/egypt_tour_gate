@@ -9,6 +9,7 @@ import SchemaScript from '@/components/seo/schema-script';
 import "@/styles/tour-details.css";
 import { getTourBySlug } from '@/lib/api/toursApi';
 
+export const dynamic = "force-dynamic";
 export const revalidate = 1800;
 
 type TourDetailPageProps = {
@@ -21,23 +22,12 @@ type TourDetailPageProps = {
 };
 
 export async function generateMetadata({ params }: TourDetailPageProps): Promise<Metadata> {
-  const { locale, tourSlug } = await params;
-  let item = null;
-  try {
-    item = await getTourBySlug(tourSlug, locale);
-  } catch {
-    item = null;
-  }
-
-  if (!item) {
-    return { title: 'Tour Not Found' };
-  }
-
-  const description = item.short_description || item.description || `${item.title} with Egypt Tours Gate.`;
+  const { tourSlug } = await params;
+  const readableName = tourSlug.replace(/-/g, " ");
 
   return {
-    title: `${item.title} | Egypt Tours Gate`,
-    description,
+    title: `${readableName} | Egypt Tours Gate`,
+    description: `Explore ${readableName} with Egypt Tours Gate.`,
   };
 }
 
