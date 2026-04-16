@@ -3,7 +3,6 @@
 import { ArrowRight, User, Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { getLatestPosts } from "@/lib/api/blogData";
 import type { Article } from "@/lib/api/homeTypes";
 
 interface TravelBlogSectionProps {
@@ -22,31 +21,16 @@ interface DisplayPost {
 }
 
 export default function TravelBlogSection({ apiArticles = [] }: TravelBlogSectionProps) {
-  // Prefer API data, fall back to static blogData
-  let blogPosts: DisplayPost[];
-
-  if (apiArticles.length > 0) {
-    blogPosts = apiArticles.slice(0, 6).map(a => ({
-      slug: a.slug,
-      categorySlug: a.blog_category.slug,
-      image: a.media.image,
-      title: a.name,
-      author: "Egypt Tours Gate",
-      publishedAt: a.date, // e.g. "28 Nov" — use as-is for display
-      readTime: "5 min read",
-    }));
-  } else {
-    const staticPosts = getLatestPosts(6);
-    blogPosts = staticPosts.map(p => ({
-      slug: p.slug,
-      categorySlug: p.categorySlug,
-      image: p.image,
-      title: p.title,
-      author: p.author.name,
-      publishedAt: p.publishedAt,
-      readTime: p.readTime,
-    }));
-  }
+  // Use API data from home API
+  const blogPosts: DisplayPost[] = apiArticles.slice(0, 6).map(a => ({
+    slug: a.slug,
+    categorySlug: a.blog_category.slug,
+    image: a.media.image,
+    title: a.name,
+    author: "Egypt Tours Gate",
+    publishedAt: a.date, // e.g. "28 Nov" — use as-is for display
+    readTime: "5 min read",
+  }));
 
   // Helper to get day/month from either "28 Nov" or "2024-02-01"
   function getDateParts(raw: string): { day: string; month: string } {

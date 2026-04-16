@@ -1,15 +1,19 @@
 // app/blogs/[subCategorySlug]/[blogslug]/page.tsx
-
 import Image from "next/image";
 import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Clock, User, Calendar, ArrowLeft, Share2, Tag, MapPin, Star } from "lucide-react";
-import { getPostBySlug, getRelatedPosts, getCategoryBySlug, blogCategories } from "@/lib/api/blogData";
+import { Clock, User, Calendar, ArrowLeft, Share2, Tag } from "lucide-react";
+import { 
+  getArticleDetailBySlug, 
+  getCategoryBySlug, 
+  getAllBlogCategories,
+  BlogPost,
+  BlogCategory 
+} from "@/lib/api/blog";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import SchemaScript from "@/components/seo/schema-script";
 import ExpandableDescription from "@/components/shared/expandable-description";
-import categoriesData from "@/lib/api/categories";
 
 type BlogDetailsPageProps = {
   params: Promise<{
@@ -18,111 +22,81 @@ type BlogDetailsPageProps = {
   }>;
 };
 
-// Helper function to get related tours based on blog tags and content
-function getRelatedTours(post: any, limit: number = 3) {
-  const { tours, packages: tourPackages, nile_cruises } = categoriesData;
-  
-  // Extract city/location keywords from blog tags and content
-  const keywords = [
-    ...post.tags.map((tag: string) => tag.toLowerCase()),
-    post.title.toLowerCase(),
-    post.excerpt.toLowerCase(),
-  ].join(' ');
-
-  const allTours = [
-    ...tours.map(t => ({ ...t, type: 'tour', routePath: `/egypt-day-tours/${t.city}/${t.slug}` })),
-    ...tourPackages.map(p => ({ ...p, type: 'package', city: 'egypt', routePath: `/egypt-tour-packages/${p.slug}` })),
-    ...nile_cruises.map(c => ({ ...c, type: 'cruise', city: c.location, routePath: `/nile-cruises/${c.subcategorySlug}/${c.slug}` })),
-  ];
-
-  // Score tours based on relevance
-  const scoredTours = allTours.map(tour => {
-    let score = 0;
-    const tourText = `${tour.title} ${(tour as any).city || ''} ${(tour as any).short_description || ''}`.toLowerCase();
-    
-    // Check for city matches
-    if (keywords.includes('cairo') && tourText.includes('cairo')) score += 3;
-    if (keywords.includes('luxor') && tourText.includes('luxor')) score += 3;
-    if (keywords.includes('aswan') && tourText.includes('aswan')) score += 3;
-    if (keywords.includes('hurghada') && tourText.includes('hurghada')) score += 3;
-    if (keywords.includes('giza') && tourText.includes('giza')) score += 3;
-    
-    // Check for activity matches
-    if (keywords.includes('pyramid') && tourText.includes('pyramid')) score += 2;
-    if (keywords.includes('temple') && tourText.includes('temple')) score += 2;
-    if (keywords.includes('cruise') && tour.type === 'cruise') score += 2;
-    if (keywords.includes('nile') && tour.type === 'cruise') score += 2;
-    if (keywords.includes('diving') && tourText.includes('diving')) score += 2;
-    if (keywords.includes('desert') && tourText.includes('desert')) score += 2;
-    
-    return { ...tour, score };
-  });
-
-  // Sort by score and return top results
-  return scoredTours
-    .filter(tour => tour.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
-}
-
-
 export async function generateMetadata({ params }: BlogDetailsPageProps): Promise<Metadata> {
   const { blogslug } = await params;
-  const post = getPostBySlug(blogslug);
-
-  if (!post) {
-    return { title: "Blog Not Found" };
-  }
-
+  const data = await getArticleDetailBySlug(blogslug);
+  
+  if (!data?.post) return { title: "Blog Not Found" };
+  
+  const post = data.post;
+  
+  // Parse SEO metadata from API response
+  const seoTitle = post.seo?.match(/<title>([^<]*)<\/title>/i)?.[1]?.trim() || `${post.title} | Egypt Tours Gate Blog`;
+  const seoDesc = post.seo?.match(/<meta name="description" content="([^"]*)"/i)?.[1]?.trim() || post.excerpt;
+  
   return {
-    title: `${post.title} | Egypt Tours Gate Blog`,
-    description: post.excerpt,
+    title: seoTitle,
+    description: seoDesc,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      images: [{ url: post.image }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      images: [post.image],
+    },
   };
 }
 
 export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) {
-  const { subCategorySlug, blogslug } = await params;
-
-  // Get the blog post
-  const post = getPostBySlug(blogslug);
+  const { blogslug } = await params;
   
-  if (!post) {
-    notFound();
-  }
-
-  // Get category info
-  const category = getCategoryBySlug(post.categorySlug);
+  // Fetch article data from API
+  const data = await getArticleDetailBySlug(blogslug);
   
-  // Get related posts
-  const relatedPosts = getRelatedPosts(post, 3);
+  if (!data?.post) notFound();
   
-  // Get related tours
-  const relatedTours = getRelatedTours(post, 3);
-
+  const post = data.post;
+  const relatedPosts = data.relatedPosts;
+  
+  // Fetch category for breadcrumb
+  const category = await getCategoryBySlug(post.categorySlug);
+  
+  // Fetch all categories for sidebar
+  const allCategories = await getAllBlogCategories();
+  
   const publishDate = new Date(post.publishedAt);
-
+  
+  // Schema.org structured data
   const blogSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
     description: post.excerpt,
     datePublished: post.publishedAt,
-    author: {
-      "@type": "Person",
-      name: post.author.name,
+    dateModified: post.publishedAt,
+    author: { "@type": "Person", name: post.author.name },
+    publisher: {
+      "@type": "Organization",
+      name: "Egypt Tours Gate",
+      logo: { "@type": "ImageObject", url: "https://www.egypttoursgate.com/uploads/settings/logo2.png" },
     },
     image: post.image,
     url: `https://www.egypttoursgate.com/blogs/${post.categorySlug}/${post.slug}`,
   };
 
   return (
-    <div className="min-h-screen bg-[var(--main-grey)]">
+    <>
       <SchemaScript schema={blogSchema} />
+      
       <Breadcrumb
         items={[
           { label: 'Home', href: '/' },
           { label: 'Blogs', href: '/blogs' },
-          { label: category?.title || post.categorySlug, href: `/blogs/${post.categorySlug}` },
+          { label: category?.title || post.categoryTitle, href: `/blogs/${post.categorySlug}` },
           { label: post.title, href: `/blogs/${post.categorySlug}/${post.slug}` },
         ]}
       />
@@ -131,7 +105,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
       <div className="relative h-[500px] w-full">
         <Image
           src={post.image}
-          alt={post.title}
+          alt={post.imageAlt || post.title}
           fill
           className="object-cover"
           priority
@@ -139,24 +113,21 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         
-        {/* Content Overlay */}
         <div className="absolute inset-0 flex items-end">
           <div className="container mx-auto px-4 md:px-8 lg:px-16 pb-12">
             <div className="max-w-4xl">
-              {/* Category Badge */}
               <Link
                 href={`/blogs/${post.categorySlug}`}
                 className="inline-flex items-center gap-2 bg-[var(--main-color)] text-[var(--second-color)] px-4 py-2 rounded-full text-sm font-bold mb-4 hover:bg-white transition-colors"
               >
                 <span>{category?.icon}</span>
-                <span>{category?.title || post.categorySlug}</span>
+                <span>{category?.title || post.categoryTitle}</span>
               </Link>
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
                 {post.title}
               </h1>
 
-              {/* Meta Info */}
               <div className="flex flex-wrap items-center gap-6 text-white/90">
                 <div className="flex items-center gap-2">
                   <User className="w-5 h-5 text-[var(--main-color)]" />
@@ -164,13 +135,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-[var(--main-color)]" />
-                  <span>
-                    {publishDate.toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
+                  <span>{publishDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-[var(--main-color)]" />
@@ -185,9 +150,8 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
       {/* Main Content */}
       <div className="container mx-auto px-4 md:px-8 lg:px-16 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main Article Content */}
+          {/* Article Content */}
           <div className="lg:col-span-8">
-            {/* Back Button */}
             <Link
               href="/blogs"
               className="inline-flex items-center gap-2 text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors mb-8 group"
@@ -196,25 +160,23 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
               <span className="font-semibold">Back to Blog</span>
             </Link>
 
-            {/* Article Content */}
             <article className="bg-white rounded-3xl shadow-lg p-8 md:p-12">
-              {/* Excerpt */}
               <div className="text-xl text-gray-700 leading-relaxed mb-8 pb-8 border-b border-gray-200 italic">
                 <ExpandableDescription text={post.excerpt} maxLength={140} />
               </div>
 
-              {/* Content */}
+              {/* Render full HTML content from API */}
               <div
                 className="prose prose-lg max-w-none prose-headings:text-[var(--second-color)] prose-headings:font-bold prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-[var(--main-color)] prose-a:no-underline hover:prose-a:underline prose-strong:text-[var(--second-color)] prose-ul:text-gray-700 prose-ol:text-gray-700 prose-li:text-gray-700"
-                dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }}
+                dangerouslySetInnerHTML={{ __html: post.content }}
               />
 
-              {/* Tags */}
+              {/* Tags - conditional render */}
               {post.tags && post.tags.length > 0 && (
                 <div className="mt-12 pt-8 border-t border-gray-200">
                   <div className="flex items-center gap-3 flex-wrap">
                     <Tag className="w-5 h-5 text-[var(--main-color)]" />
-                    <span className="font-semibold text-[var(--second-color)]">Tags:</span>
+                    <span className="font-semibold text-[var(--second-color)]">Tags: </span>
                     {post.tags.map((tag) => (
                       <Link
                         key={tag}
@@ -234,9 +196,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
                   {post.author.name.charAt(0)}
                 </div>
                 <div>
-                  <p className="font-bold text-[var(--second-color)] text-lg">
-                    {post.author.name}
-                  </p>
+                  <p className="font-bold text-[var(--second-color)] text-lg">{post.author.name}</p>
                   <p className="text-gray-600">Travel Writer & Egypt Expert</p>
                 </div>
               </div>
@@ -244,9 +204,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
               {/* Share Section */}
               <div className="mt-8 pt-8 border-t border-gray-200">
                 <div className="flex items-center justify-between flex-wrap gap-4">
-                  <span className="font-semibold text-[var(--second-color)]">
-                    Share this article:
-                  </span>
+                  <span className="font-semibold text-[var(--second-color)]">Share this article:</span>
                   <div className="flex gap-3">
                     <button className="w-10 h-10 rounded-full bg-gray-100 hover:bg-[var(--main-color)] hover:text-white flex items-center justify-center transition-colors">
                       <Share2 className="w-5 h-5" />
@@ -259,9 +217,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
             {/* Related Posts */}
             {relatedPosts.length > 0 && (
               <div className="mt-16">
-                <h2 className="text-3xl font-bold text-[var(--second-color)] mb-8">
-                  Related Articles
-                </h2>
+                <h2 className="text-3xl font-bold text-[var(--second-color)] mb-8">Related Articles</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {relatedPosts.map((relatedPost) => (
                     <Link
@@ -272,7 +228,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
                       <div className="relative h-48 overflow-hidden">
                         <Image
                           src={relatedPost.image}
-                          alt={relatedPost.title}
+                          alt={relatedPost.imageAlt || relatedPost.title}
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
                           sizes="(max-width: 768px) 100vw, 33vw"
@@ -298,7 +254,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
             )}
           </div>
 
-          {/* Right Sidebar */}
+          {/* Sidebar */}
           <div className="lg:col-span-4">
             <div className="sticky top-10 space-y-8">
               
@@ -314,7 +270,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
                 </div>
                 <div className="p-6">
                   <ul className="space-y-3">
-                    {blogCategories.map((blogCategory) => (
+                    {allCategories.map((blogCategory) => (
                       <li key={blogCategory.slug}>
                         <Link 
                           href={`/blogs/${blogCategory.slug}`}
@@ -331,61 +287,13 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
                 </div>
               </div>
 
-              {/* Related Tours Widget */}
-              {relatedTours.length > 0 && (
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                  <div className="px-6 py-4 bg-[var(--main-grey)] border-b border-gray-200">
-                    <h3 className="text-lg font-bold text-[var(--second-color)] flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-[var(--main-color)]" />
-                      Related Tours
-                    </h3>
-                  </div>
-                  <div className="p-6">
-                    <ul className="space-y-4">
-                      {relatedTours.map((tour) => (
-                        <li key={tour.id} className="group">
-                          <Link href={tour.routePath} className="flex gap-3">
-                            <div className="flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden">
-                              <Image 
-                                width={80}
-                                height={64}
-                                src={tour.image || "/placeholder.svg"} 
-                                alt={tour.title}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="text-sm font-semibold text-[var(--black-color)] group-hover:text-[var(--main-color)] transition-colors line-clamp-2 mb-1">
-                                {tour.title}
-                              </h4>
-                              <div className="flex items-center justify-between text-xs text-gray-500">
-                                <div className="flex items-center gap-1">
-                                  <Star className="w-3 h-3 fill-[var(--main-color)] text-[var(--main-color)]" />
-                                  <span>{tour.rating}</span>
-                                </div>
-                                <span className="font-semibold text-[var(--main-color)]">
-                                  ${tour.price_from}
-                                </span>
-                              </div>
-                            </div>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link 
-                      href="/egypt-day-tours"
-                      className="block mt-6 text-center px-4 py-2 bg-[var(--main-color)] text-white rounded-lg font-semibold hover:bg-[var(--second-color)] transition-colors"
-                    >
-                      View All Tours
-                    </Link>
-                  </div>
-                </div>
-              )}
+              {/* Related Tours Widget REMOVED - depends on categoriesData which is now deprecated */}
+              {/* To restore this feature, create a separate API endpoint for tours */}
 
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

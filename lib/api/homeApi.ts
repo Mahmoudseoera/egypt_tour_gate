@@ -1,5 +1,5 @@
 import type { HomeApiResponse, HomeSections } from "./homeTypes";
-
+import { cache } from "react";
 type HomeCacheEntry = {
   expiresAt: number;
   data: HomeSections | null;
@@ -17,7 +17,7 @@ const inFlight = new Map<string, Promise<HomeSections | null>>();
  *
  * The base URL is read from NEXT_PUBLIC_API_BASE_URL (e.g. http://127.0.0.1:8000/api/v1/).
  */
-export async function fetchHomeSections(locale: string = "en"): Promise<HomeSections | null> {
+async function fetchHomeSectionsFn(locale: string = "en"): Promise<HomeSections | null> {
   const now = Date.now();
   const cached = homeCache.get(locale);
   if (cached && cached.expiresAt > now) {
@@ -44,8 +44,8 @@ export async function fetchHomeSections(locale: string = "en"): Promise<HomeSect
     let res: Response | null = null;
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       res = await fetch(url, {
-        next: { revalidate: 300, tags: [`home:${locale}`] },
-      });
+        next: { revalidate: 300 },
+      }); 
       if (res.status !== 429 || attempt === 3) break;
       await new Promise((resolve) => setTimeout(resolve, attempt * 600));
     }
@@ -90,3 +90,4 @@ export async function fetchHomeSections(locale: string = "en"): Promise<HomeSect
     inFlight.delete(locale);
   }
 }
+export const fetchHomeSections = cache(fetchHomeSectionsFn);
