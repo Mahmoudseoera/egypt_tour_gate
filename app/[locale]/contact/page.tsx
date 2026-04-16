@@ -2,10 +2,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send, Phone, MapPin, Mail, ChevronRight, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 
 import {
   contactSchema,
@@ -19,7 +20,16 @@ const breadcrumbItems = [
 ];
 
 /* ─── Info Cards Data ─────────────────────────────────────── */
-const contactCards = [
+type ContactCard = {
+  icon: typeof Phone;
+  label: string;
+  lines: string[];
+  href: string;
+  ariaLabel: string;
+  target: "_blank" | "_self";
+};
+
+const fallbackContactCards: ContactCard[] = [
   {
     icon: Phone,
     label: "Phone",
@@ -48,6 +58,8 @@ const contactCards = [
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
+  const [contactCards, setContactCards] = useState<ContactCard[]>(fallbackContactCards);
+  const locale = useLocale();
   const router = useRouter();
 
   const {
@@ -71,6 +83,66 @@ export default function ContactPage() {
   });
 
   const watchedValues = watch();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadContactInfo() {
+      try {
+        const res = await fetch(`/api/contact?locale=${locale}`);
+        if (!res.ok) return;
+        const payload = await res.json();
+        const data = payload?.data ?? payload ?? {};
+        const contact = data?.contact ?? data?.form ?? data;
+
+        const phones = [
+          contact?.phone,
+          contact?.phone_1,
+          contact?.phone_2,
+        ].filter((v: unknown): v is string => typeof v === "string" && v.trim().length > 0);
+        const email = typeof contact?.email === "string" ? contact.email : "";
+        const address = typeof contact?.address === "string" ? contact.address : "";
+
+        const dynamicCards: ContactCard[] = [
+          {
+            icon: Phone,
+            label: "Phone",
+            lines: phones.length ? phones : fallbackContactCards[0].lines,
+            href: `tel:${(phones[0] ?? fallbackContactCards[0].lines[0]).replace(/\s+/g, "")}`,
+            ariaLabel: "Call us",
+            target: "_self",
+          },
+          {
+            icon: MapPin,
+            label: "Address",
+            lines: address ? [address] : fallbackContactCards[1].lines,
+            href: address
+              ? `https://www.google.com/maps?q=${encodeURIComponent(address)}`
+              : fallbackContactCards[1].href,
+            ariaLabel: "Open location in Google Maps",
+            target: "_blank",
+          },
+          {
+            icon: Mail,
+            label: "Email",
+            lines: email ? [email] : fallbackContactCards[2].lines,
+            href: `mailto:${email || fallbackContactCards[2].lines[0]}`,
+            ariaLabel: "Send us an email",
+            target: "_self",
+          },
+        ];
+
+        if (!cancelled) setContactCards(dynamicCards);
+      } catch {
+        // keep fallback cards silently
+      }
+    }
+
+    loadContactInfo();
+    return () => {
+      cancelled = true;
+    };
+  }, [locale]);
 
   // ─── Submit ───────────────────────────────────────────────────────────────
   // البراوزر بيبعت لـ /api/contact (same origin → مفيش CORS)
