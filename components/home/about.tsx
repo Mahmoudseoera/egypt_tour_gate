@@ -48,7 +48,7 @@ export default function RoavioAboutSection({ aboutData }: RoavioAboutSectionProp
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
             <div className="flex flex-col justify-center">
-              <p className="text-sm font-semibold text-[var(--main-color)] uppercase tracking-wider mb-2">{subTitle}</p>
+              <p className="text-sm font-semibold text-[var(--second-color)] uppercase tracking-wider mb-2">{subTitle}</p>
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[var(--second-color)] mb-4 leading-tight">
                 {title.split('<br')[0]}
                 <br className="hidden md:block"/>
@@ -101,7 +101,7 @@ export default function RoavioAboutSection({ aboutData }: RoavioAboutSectionProp
                 ))}
               </div>
               <div>
-                <Link href="/about-us" className="btn-effect !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg">
+                <Link href="/about-us" className="btn-effect !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg" aria-label="Learn more about our company">
                   Learn More
                 </Link>
               </div>

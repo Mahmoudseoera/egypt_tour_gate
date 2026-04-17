@@ -66,7 +66,7 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
               </h2>
               <p className="text-gray-600 text-lg">
                 We are started with 2005s,{" "}
-                <span className="text-[var(--main-color)] font-semibold">
+                <span className="text-[var(--second-800)] font-semibold">
                   20+ years of experience
                 </span>
               </p>

@@ -77,7 +77,7 @@ export default function TravelBlogSection({ apiArticles = [] }: TravelBlogSectio
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <User className="w-4 h-4 text-[var(--main-color)] flex-shrink-0"/>
-                          <h4 className="text-[var(--main-color)] font-bold text-sm truncate">{post.author}</h4>
+                          <h6 className="text-[var(--main-color)] font-bold text-sm truncate">{post.author}</h6>
                         </div>
                         <p className="text-[var(--second-color)] font-semibold text-sm leading-snug line-clamp-2 group-hover:text-[var(--main-color)] transition-colors duration-300">{post.title}</p>
                         <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">

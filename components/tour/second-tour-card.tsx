@@ -159,6 +159,7 @@ export default function SecondTourCard({
 
           <button
             onClick={() => toggleFavorite(id)}
+            aria-label="favourite"
             className={`w-11 h-11 flex items-center justify-center rounded-md transition ${favorites.includes(id) ? "bg-red-500" : "bg-gray-100"}`}
           >
             <Heart

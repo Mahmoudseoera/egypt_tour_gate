@@ -73,7 +73,7 @@ export default function TestimonialSlider({ reviews = [] }: TestimonialSliderPro
                     <Image src={item.image} alt={item.name} width={48} height={48} className="object-cover"/>
                   </div>
                   <div>
-                    <h6 className="font-semibold text-sm text-gray-900">{item.name}</h6>
+                    <h4 className="font-semibold text-sm text-gray-900">{item.name}</h4>
                     <span className="text-xs text-gray-500">{item.role}</span>
                   </div>
                 </div>
