@@ -152,15 +152,15 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {(category.subs ?? []).map((child: any, index: number) => {
             // ── Real image from API media, fallback only when absent ──
-            const rawImage =
+            const rawImage: string =
               child.media?.image?.trim() ||
               child.media?.image_url?.trim() ||
               "";
 
-            const childImage: string =
-             rawImage && rawImage.includes("/uploads/category/")
-            ? rawImage
-            : FALLBACK_IMAGE;
+            // const childImage: string =
+            //  rawImage && rawImage.includes("/uploads/category/")
+            // ? rawImage
+            // : FALLBACK_IMAGE;
 
             const childImageAlt: string =
               child.media?.alt ||
@@ -186,11 +186,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               >
                 <div className="relative h-56 overflow-hidden flex-shrink-0">
                   <Image
-                    src={childImage}
+                    src={rawImage}
                     alt={childImageAlt}
                     fill
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    unoptimized={childImage.startsWith("http")}
+                    unoptimized={rawImage.startsWith("http")}
                   />
 
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
