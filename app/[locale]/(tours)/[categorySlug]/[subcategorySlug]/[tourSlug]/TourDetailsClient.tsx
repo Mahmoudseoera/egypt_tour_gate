@@ -1,5 +1,5 @@
 'use client';
-
+import type { Metadata } from "next";
 import LightGallery from "lightgallery/react";
 import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
@@ -435,29 +435,154 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
     <div className="min-h-screen">
 
       {/* ── Hero Gallery ── */}
+      {/* Layout adapts to image count: 1=full, 2=half+half, 3=big+2stack, 4=big+3grid, 5=big+4grid */}
       <section className="relative w-full h-[300px] sm:h-[420px] md:h-[550px] overflow-hidden">
-        <div className="grid grid-cols-4 grid-rows-2 gap-1 h-full md:gap-2">
-          <div
-            className="col-span-4 md:col-span-2 row-span-2 relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat"
-            onClick={() => openLightbox(0)}
-            style={{ backgroundImage: `url(${safeTourImages[0]})` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
-            <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              View Gallery ({safeTourImages.length})
-            </span>
-          </div>
-          {[1,2,3,4].map((i) => (
-            <div key={i}
-              className="relative rounded-xl cursor-pointer group overflow-hidden hidden md:block w-full h-full bg-center bg-cover bg-no-repeat"
-              style={{ backgroundImage: `url(${safeTourImages[i % safeTourImages.length]})` }}
-              onClick={() => openLightbox(i % safeTourImages.length)}
-            >
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
+        {(() => {
+          const count = safeTourImages.length;
+
+          // ── 1 image: full-width hero ──────────────────────────────────────
+          if (count === 1) {
+            return (
+              <div
+                className="relative w-full h-full cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat"
+                onClick={() => openLightbox(0)}
+                style={{ backgroundImage: `url(${safeTourImages[0]})` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
+                <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  View Gallery ({count})
+                </span>
+              </div>
+            );
+          }
+
+          // ── 2 images: side by side ────────────────────────────────────────
+          if (count === 2) {
+            return (
+              <div className="grid grid-cols-2 gap-1 md:gap-2 h-full">
+                {safeTourImages.map((img, i) => (
+                  <div
+                    key={i}
+                    className="relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat h-full"
+                    onClick={() => openLightbox(i)}
+                    style={{ backgroundImage: `url(${img})` }}
+                  >
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
+                    {i === 0 && (
+                      <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
+                        <BookOpen className="w-4 h-4" />
+                        View Gallery ({count})
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          }
+
+          // ── 3 images: big left + 2 stacked right ─────────────────────────
+          if (count === 3) {
+            return (
+              <div className="grid grid-cols-2 gap-1 md:gap-2 h-full">
+                {/* Main image */}
+                <div
+                  className="relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat h-full"
+                  onClick={() => openLightbox(0)}
+                  style={{ backgroundImage: `url(${safeTourImages[0]})` }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
+                  <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
+                    <BookOpen className="w-4 h-4" />
+                    View Gallery ({count})
+                  </span>
+                </div>
+                {/* Right stack */}
+                <div className="grid grid-rows-2 gap-1 md:gap-2 h-full">
+                  {safeTourImages.slice(1, 3).map((img, i) => (
+                    <div
+                      key={i}
+                      className="relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat"
+                      onClick={() => openLightbox(i + 1)}
+                      style={{ backgroundImage: `url(${img})` }}
+                    >
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+
+          // ── 4 images: big left + 3 stacked right ─────────────────────────
+          if (count === 4) {
+            return (
+              <div className="grid grid-cols-2 gap-1 md:gap-2 h-full">
+                {/* Main image */}
+                <div
+                  className="relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat h-full"
+                  onClick={() => openLightbox(0)}
+                  style={{ backgroundImage: `url(${safeTourImages[0]})` }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
+                  <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
+                    <BookOpen className="w-4 h-4" />
+                    View Gallery ({count})
+                  </span>
+                </div>
+                {/* Right 3-stack */}
+                <div className="grid grid-rows-3 gap-1 md:gap-2 h-full">
+                  {safeTourImages.slice(1, 4).map((img, i) => (
+                    <div
+                      key={i}
+                      className="relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat"
+                      onClick={() => openLightbox(i + 1)}
+                      style={{ backgroundImage: `url(${img})` }}
+                    >
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+
+          // ── 5+ images: original big-left + 2×2 grid right ─────────────────
+          return (
+            <div className="grid grid-cols-4 grid-rows-2 gap-1 h-full md:gap-2">
+              {/* Main large image */}
+              <div
+                className="col-span-4 md:col-span-2 row-span-2 relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat"
+                onClick={() => openLightbox(0)}
+                style={{ backgroundImage: `url(${safeTourImages[0]})` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
+                <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  View Gallery ({count})
+                </span>
+              </div>
+              {/* Right 4 thumbnails — only render actual images (max 4) */}
+              {safeTourImages.slice(1, 5).map((img, i) => (
+                <div
+                  key={i}
+                  className="relative rounded-xl cursor-pointer group overflow-hidden hidden md:block w-full h-full bg-center bg-cover bg-no-repeat"
+                  style={{ backgroundImage: `url(${img})` }}
+                  onClick={() => openLightbox(i + 1)}
+                >
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
+                  {/* "See all" overlay on the last thumbnail when there are more than 5 */}
+                  {i === 3 && count > 5 && (
+                    <div className="absolute inset-0 bg-black/55 z-20 flex flex-col items-center justify-center gap-1">
+                      <span className="text-white font-bold text-lg">+{count - 5}</span>
+                      <span className="text-white/80 text-xs font-medium">more photos</span>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
       </section>
 
       {/* ── Main Layout ── */}
@@ -546,15 +671,16 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               </div>
             </div>
 
-            {/* Included / Excluded */}
+            {/* Included / Excluded — only render if at least one side has data */}
+            {(included.length > 0 || excluded.length > 0) && (
             <div className="grid sm:grid-cols-2 gap-5">
+              {included.length > 0 && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <h3 className="text-lg font-bold text-[var(--second-color)] mb-4 flex items-center gap-2">
                   <span className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center"><Check className="w-4 h-4 text-green-600" /></span>
                   What&apos;s Included
                 </h3>
                 <ul className="space-y-2">
-                  {included.length === 0 && <li className="text-gray-500 text-sm">Inclusions are not listed for this tour.</li>}
                   {included.map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-gray-600 text-sm">
                       <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />{item}
@@ -562,13 +688,14 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   ))}
                 </ul>
               </div>
+              )}
+              {excluded.length > 0 && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <h3 className="text-lg font-bold text-[var(--second-color)] mb-4 flex items-center gap-2">
                   <span className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center"><X className="w-4 h-4 text-red-500" /></span>
                   What&apos;s Excluded
                 </h3>
                 <ul className="space-y-2">
-                  {excluded.length === 0 && <li className="text-gray-500 text-sm">Exclusions are not listed for this tour.</li>}
                   {excluded.map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-gray-600 text-sm">
                       <X className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />{item}
@@ -576,13 +703,15 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   ))}
                 </ul>
               </div>
+              )}
             </div>
+            )}
 
-            {/* Highlights */}
+            {/* Highlights — only render if there are items */}
+            {highlights.length > 0 && (
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
               <h2 className="text-2xl font-bold text-[var(--second-color)] mb-5">Highlights</h2>
               <ul className="space-y-3">
-                {highlights.length === 0 && <li className="text-gray-500 text-sm">Highlights are not available for this tour.</li>}
                 {highlights.map((h, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="w-5 h-5 rounded-full bg-[var(--main-color)]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -593,6 +722,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 ))}
               </ul>
             </div>
+            )}
 
             {/* Pricing */}
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
@@ -626,7 +756,8 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               </div>
             </div>
 
-            {/* ── Children Policy ── */}
+            {/* ── Children Policy — only show when pricing data is present ── */}
+            {priceTable.length > 0 && (
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
               {/* Section header */}
               <div className="flex items-center gap-3 mb-6">
@@ -692,6 +823,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 </p>
               </div>
             </div>
+            )}
 
           </div>
 
@@ -919,15 +1051,13 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               </div>
             </div>
 
-            {/* ── Related Articles ── */}
+            {/* ── Related Articles — only show if articles exist ── */}
+            {relatedArticles.length > 0 && (
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
               <div className="sh-articles px-6 py-4 text-center">
                 <h3 className="text-base font-bold text-white">Related Articles</h3>
               </div>
               <div className="p-4 space-y-3">
-                {relatedArticles.length === 0 && (
-                  <p className="text-sm text-gray-400 text-center py-2">No related articles found.</p>
-                )}
                 {relatedArticles.map((article) => (
                   <a key={article.id} href={`/blogs/${article.blog_category?.slug ?? "travel"}/${article.slug}`}
                     className="group flex gap-3 rounded-xl overflow-hidden border border-gray-100 hover:border-[var(--second-color)]/30 hover:shadow-md transition-all p-2">
@@ -959,6 +1089,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 ))}
               </div>
             </div>
+            )}
 
           </div>{/* end sidebar */}
         </div>{/* end grid */}
@@ -970,7 +1101,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               <h2 className="text-2xl md:text-3xl font-bold text-[var(--second-color)] mb-2">You May Also Like</h2>
               <p className="text-gray-500 text-sm">Discover more amazing Egypt tours</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedTours.map((relTour) => (
                 <a key={relTour.id} href={`/${relTour.slug}`}
                   className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 group border border-gray-100">

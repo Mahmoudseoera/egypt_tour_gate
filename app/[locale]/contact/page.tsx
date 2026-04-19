@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send, Phone, MapPin, Mail, ChevronRight, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -29,28 +29,30 @@ type ContactCard = {
   target: "_blank" | "_self";
 };
 
-const fallbackContactCards: ContactCard[] = [
+// ✅ FIX 3: fallbackContactCards removed — data comes purely from the API.
+// We keep a static skeleton used only while the API call is in-flight.
+const SKELETON_CARDS: ContactCard[] = [
   {
     icon: Phone,
     label: "Phone",
-    lines: ["+201110008407", "+201110008407"],
-    href: "tel:+201110008407",
+    lines: ["Loading…"],
+    href: "#",
     ariaLabel: "Call us",
     target: "_self",
   },
   {
     icon: MapPin,
     label: "Address",
-    lines: ["43 N Area, Ahmed Allam St,", "Pyramids Garden, Giza, Egypt"],
-    href: "https://www.google.com/maps?q=43+Ahmed+Allam+St+Pyramids+Garden+Giza+Egypt",
+    lines: ["Loading…"],
+    href: "#",
     ariaLabel: "Open location in Google Maps",
     target: "_blank",
   },
   {
     icon: Mail,
     label: "Email",
-    lines: ["info@egypttoursgate.com"],
-    href: "mailto:info@egypttoursgate.com",
+    lines: ["Loading…"],
+    href: "#",
     ariaLabel: "Send us an email",
     target: "_self",
   },
@@ -58,9 +60,21 @@ const fallbackContactCards: ContactCard[] = [
 
 const fallbackIframe = `<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3452.8245800187533!2d31.196501715115748!3d30.07056238187281!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDA0JzE0LjAiTiAzMcKwMTEnNTUuMyJF!5e0!3m2!1sen!2sus!4v1600342460576!5m2!1sen!2sus" width="100%" height="450" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>`;
 
+// ✅ FIX 2: Memoize the Map component so it never re-renders when the form changes.
+const ContactMap = memo(function ContactMap({ html }: { html: string }) {
+  return (
+    <div
+      className="rounded-3xl overflow-hidden shadow-xl w-full [&_iframe]:w-full [&_iframe]:h-full [&_iframe]:min-h-[360px] [&_iframe]:border-0 [&_iframe]:block"
+      style={{ minHeight: "360px" }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+});
+
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
-  const [contactCards, setContactCards] = useState<ContactCard[]>(fallbackContactCards);
+  const [contactCards, setContactCards] = useState<ContactCard[]>(SKELETON_CARDS);
+  // ✅ Store the iframe html in a ref-stable state — only set once from the API.
   const [mapIframe, setMapIframe] = useState<string>(fallbackIframe);
   const locale = useLocale();
   const router = useRouter();
@@ -106,37 +120,37 @@ export default function ContactPage() {
         // Phone: prefer `phone`, fallback to `mobile`
         const phones = [d.phone, d.mobile]
           .filter((v: unknown): v is string => typeof v === "string" && v.trim().length > 0)
-          // deduplicate
           .filter((v: string, i: number, arr: string[]) => arr.indexOf(v) === i);
 
         const email   = typeof d.email   === "string" ? d.email.trim()   : "";
         const address = typeof d.address === "string" ? d.address.trim() : "";
         const iframe  = typeof d.iframe  === "string" ? d.iframe.trim()  : "";
 
+        // ✅ FIX 3: Cards are built exclusively from API data. No fallback strings.
         const dynamicCards: ContactCard[] = [
           {
             icon: Phone,
             label: "Phone",
-            lines: phones.length ? phones : fallbackContactCards[0].lines,
-            href: `tel:${(phones[0] ?? fallbackContactCards[0].lines[0]).replace(/\s+/g, "")}`,
+            lines: phones.length ? phones : ["—"],
+            href: phones[0] ? `tel:${phones[0].replace(/\s+/g, "")}` : "#",
             ariaLabel: "Call us",
             target: "_self",
           },
           {
             icon: MapPin,
             label: "Address",
-            lines: address ? [address] : fallbackContactCards[1].lines,
+            lines: address ? [address] : ["—"],
             href: address
               ? `https://www.google.com/maps?q=${encodeURIComponent(address)}`
-              : fallbackContactCards[1].href,
+              : "#",
             ariaLabel: "Open location in Google Maps",
             target: "_blank",
           },
           {
             icon: Mail,
             label: "Email",
-            lines: email ? [email] : fallbackContactCards[2].lines,
-            href: `mailto:${email || fallbackContactCards[2].lines[0]}`,
+            lines: email ? [email] : ["—"],
+            href: email ? `mailto:${email}` : "#",
             ariaLabel: "Send us an email",
             target: "_self",
           },
@@ -147,7 +161,7 @@ export default function ContactPage() {
           if (iframe) setMapIframe(iframe);
         }
       } catch {
-        // keep fallback cards silently
+        // keep skeleton cards silently — or you could set real fallback values here
       }
     }
 
@@ -156,17 +170,16 @@ export default function ContactPage() {
   }, [locale]);
 
   // ─── Submit ───────────────────────────────────────────────────────────────
-  async function onSubmit(values: ContactFormData) {
+  const onSubmit = useCallback(async (values: ContactFormData) => {
     setLoading(true);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Send subject & message — route.ts maps them to msg_title & msg_body
         body: JSON.stringify({
           name:    values.name,
           email:   values.email,
-          code:    values.code,
+          code:    values.code,   // route.ts strips the leading + and builds fullPhone
           phone:   values.phone,
           subject: values.subject,
           country: values.country,
@@ -189,7 +202,8 @@ export default function ContactPage() {
     } finally {
       setLoading(false);
     }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reset, router]);
 
   /* ─── Floating label CSS strings ─── */
   const floatBase =
@@ -601,12 +615,8 @@ export default function ContactPage() {
               </form>
             </div>
 
-            {/* Map — rendered from API iframe HTML */}
-            <div
-              className="rounded-3xl overflow-hidden shadow-xl w-full [&_iframe]:w-full [&_iframe]:h-full [&_iframe]:min-h-[360px] [&_iframe]:border-0 [&_iframe]:block"
-              style={{ minHeight: "360px" }}
-              dangerouslySetInnerHTML={{ __html: mapIframe }}
-            />
+            {/* ✅ FIX 2: Map wrapped in memo component — won't re-render on form changes */}
+            <ContactMap html={mapIframe} />
           </div>
         </div>
       </section>
