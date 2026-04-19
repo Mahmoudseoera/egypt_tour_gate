@@ -10,7 +10,8 @@ const CONTACT_GET_ENDPOINT = `${API_BASE}/forms/get/contact`;
 const CONTACT_POST_ENDPOINT = `${API_BASE}/forms/contact`;
 
 // ─────────────────────────────────────────────
-// ✅ GET → fetch contact info
+// ✅ GET → fetch contact page data
+// Response shape: { success, data: { phone, mobile, email, address, iframe, ... } }
 // ─────────────────────────────────────────────
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -37,7 +38,6 @@ export async function GET(req: NextRequest) {
 
     const data = await externalRes.json();
     return NextResponse.json(data, { status: externalRes.status });
-
   } catch (err) {
     console.error("[GET /api/contact] error:", err);
     return NextResponse.json(
@@ -49,6 +49,11 @@ export async function GET(req: NextRequest) {
 
 // ─────────────────────────────────────────────
 // ✅ POST → send contact form
+//
+// Backend expects these exact fields:
+//   name, email, phone, code, country, msg_title, msg_body
+//
+// The phone is sent separately as `code` + `phone` (the backend handles combining).
 // ─────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   let body: any;
@@ -62,16 +67,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const code = typeof body.code === "string" ? body.code.trim() : "";
+  // Strip leading "+" from code if user included it
+  const rawCode = typeof body.code === "string" ? body.code.replace(/^\+/, "").trim() : "";
   const phone = typeof body.phone === "string" ? body.phone.trim() : "";
 
+  // Build payload matching backend field names exactly (from API screenshot)
   const payload = {
-    name: body.name,
-    email: body.email,
-    subject: body.subject,
-    country: body.country,
-    message: body.message,
-    phone: code ? `+${code}${phone}` : phone,
+    name:      body.name,
+    email:     body.email,
+    phone:     phone,
+    code:      rawCode,
+    country:   body.country,
+    msg_title: body.subject,   // ← backend field name from API screenshot
+    msg_body:  body.message,   // ← backend field name from API screenshot
   };
 
   try {
@@ -90,6 +98,7 @@ export async function POST(req: NextRequest) {
     try {
       data = JSON.parse(text);
     } catch {
+      console.error("[POST /api/contact] Non-JSON response:", text);
       return NextResponse.json(
         { success: false, message: "Invalid response from server" },
         { status: 502 }
@@ -97,7 +106,6 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(data, { status: externalRes.status });
-
   } catch (err) {
     console.error("[POST /api/contact] error:", err);
     return NextResponse.json(

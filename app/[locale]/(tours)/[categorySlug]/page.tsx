@@ -158,7 +158,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               "";
 
             const childImage: string =
-             rawImage && !rawImage.includes("/uploads/category/")
+             rawImage && rawImage.includes("/uploads/category/")
             ? rawImage
             : FALLBACK_IMAGE;
 

@@ -56,9 +56,12 @@ const fallbackContactCards: ContactCard[] = [
   },
 ];
 
+const fallbackIframe = `<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3452.8245800187533!2d31.196501715115748!3d30.07056238187281!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDA0JzE0LjAiTiAzMcKwMTEnNTUuMyJF!5e0!3m2!1sen!2sus!4v1600342460576!5m2!1sen!2sus" width="100%" height="450" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>`;
+
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [contactCards, setContactCards] = useState<ContactCard[]>(fallbackContactCards);
+  const [mapIframe, setMapIframe] = useState<string>(fallbackIframe);
   const locale = useLocale();
   const router = useRouter();
 
@@ -84,6 +87,7 @@ export default function ContactPage() {
 
   const watchedValues = watch();
 
+  // ─── Load contact info from GET endpoint ─────────────────────────────────
   useEffect(() => {
     let cancelled = false;
 
@@ -91,17 +95,23 @@ export default function ContactPage() {
       try {
         const res = await fetch(`/api/contact?locale=${locale}`);
         if (!res.ok) return;
-        const payload = await res.json();
-        const data = payload?.data ?? payload ?? {};
-        const contact = data?.contact ?? data?.form ?? data;
 
-        const phones = [
-          contact?.phone,
-          contact?.phone_1,
-          contact?.phone_2,
-        ].filter((v: unknown): v is string => typeof v === "string" && v.trim().length > 0);
-        const email = typeof contact?.email === "string" ? contact.email : "";
-        const address = typeof contact?.address === "string" ? contact.address : "";
+        const payload = await res.json();
+
+        // Real API shape: { success: true, data: { phone, mobile, email, address, iframe, ... } }
+        if (!payload?.success || !payload?.data) return;
+
+        const d = payload.data;
+
+        // Phone: prefer `phone`, fallback to `mobile`
+        const phones = [d.phone, d.mobile]
+          .filter((v: unknown): v is string => typeof v === "string" && v.trim().length > 0)
+          // deduplicate
+          .filter((v: string, i: number, arr: string[]) => arr.indexOf(v) === i);
+
+        const email   = typeof d.email   === "string" ? d.email.trim()   : "";
+        const address = typeof d.address === "string" ? d.address.trim() : "";
+        const iframe  = typeof d.iframe  === "string" ? d.iframe.trim()  : "";
 
         const dynamicCards: ContactCard[] = [
           {
@@ -132,28 +142,27 @@ export default function ContactPage() {
           },
         ];
 
-        if (!cancelled) setContactCards(dynamicCards);
+        if (!cancelled) {
+          setContactCards(dynamicCards);
+          if (iframe) setMapIframe(iframe);
+        }
       } catch {
         // keep fallback cards silently
       }
     }
 
     loadContactInfo();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [locale]);
 
   // ─── Submit ───────────────────────────────────────────────────────────────
-  // البراوزر بيبعت لـ /api/contact (same origin → مفيش CORS)
-  // الـ route.ts بيعمل proxy للـ API الخارجي من الـ server
   async function onSubmit(values: ContactFormData) {
     setLoading(true);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // بنبعت code و phone منفصلين ← الـ route.ts بيجمّعهم في "+20xxxxxxxxx"
+        // Send subject & message — route.ts maps them to msg_title & msg_body
         body: JSON.stringify({
           name:    values.name,
           email:   values.email,
@@ -167,17 +176,14 @@ export default function ContactPage() {
 
       const data = await res.json();
 
-      // الـ API رجع error (4xx / 5xx أو success: false)
       if (!res.ok || !data.success) {
         toast.error(data.message || "Something went wrong. Please try again.");
         return;
       }
 
-      // ✅ نجاح
       toast.success("Message sent! We'll be in touch within 24 hours.");
       reset();
       router.push("/thank-you");
-
     } catch {
       toast.error("Network error. Please check your connection and try again.");
     } finally {
@@ -595,18 +601,12 @@ export default function ContactPage() {
               </form>
             </div>
 
-            {/* Map */}
-            <div className="rounded-3xl overflow-hidden shadow-xl w-full" style={{ minHeight: "360px" }}>
-              <iframe
-                title="Egypt Tours Gate Location"
-                src="https://www.google.com/maps?q=43+Ahmed+Allam+St+Pyramids+Garden+Giza+Egypt&z=15&output=embed"
-                className="w-full h-full border-0"
-                style={{ minHeight: "360px", display: "block" }}
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
+            {/* Map — rendered from API iframe HTML */}
+            <div
+              className="rounded-3xl overflow-hidden shadow-xl w-full [&_iframe]:w-full [&_iframe]:h-full [&_iframe]:min-h-[360px] [&_iframe]:border-0 [&_iframe]:block"
+              style={{ minHeight: "360px" }}
+              dangerouslySetInnerHTML={{ __html: mapIframe }}
+            />
           </div>
         </div>
       </section>
