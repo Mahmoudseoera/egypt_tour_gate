@@ -23,27 +23,9 @@ import {
   Calendar, BookOpen, ArrowRight, Baby,
   ChevronsDownUp, ChevronsUpDown,
 } from 'lucide-react';
-import type { ApiTourDetails } from '@/lib/api/toursApi';
+import type { ApiTourDetails, ApiTourListItem, RelatedArticle } from '@/lib/api/toursApi';
 
 /* ─── Types ─── */
-interface TourItem {
-  id: string;
-  title: string;
-  image: string;
-  price: number;
-  duration: string;
-  rating: number;
-  reviews: number;
-}
-
-interface Article {
-  id: string;
-  title: string;
-  image: string;
-  date: string;
-  readTime: string;
-}
-
 interface PriceRow {
   category: string;
   price: number;
@@ -210,9 +192,27 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   const itinerary = (tour.itinerary?.length
     ? tour.itinerary.map((item, index) => ({ ...item, day: item.day ?? index + 1 }))
     : []) as Array<{ day: number; title: string; description: string }>;
-  const priceTable: PriceRow[] = tour.pricing?.length
-    ? tour.pricing.map((item) => ({ category: item.category || "Standard", price: item.price }))
-    : [{ category: "Standard", price: tour.price_from || 0 }];
+
+  // ── Pricing: prefer rich pricingTables, fall back to flat pricing, then price_from ──
+  const priceTable: PriceRow[] = (() => {
+    // Use first pricing_table's rows if available
+    if (tour.pricingTables?.length && tour.pricingTables[0].rows.length > 0) {
+      return tour.pricingTables[0].rows.map((r) => ({
+        category: r.category ? `${r.category} ${r.category === "1" ? "Person" : "Persons"}` : "Standard",
+        price: r.price,
+      }));
+    }
+    // Fall back to legacy flat pricing
+    if (tour.pricing?.length) {
+      return tour.pricing.map((item) => ({ category: item.category || "Standard", price: item.price }));
+    }
+    // Last resort — single row from price_from
+    return [{ category: "Standard", price: tour.price_from || 0 }];
+  })();
+
+  // Pricing table title from API (first table)
+  const pricingTableTitle = tour.pricingTables?.[0]?.title ?? "Prices Per Person";
+
   const included = tour.included?.filter(Boolean) ?? [];
   const excluded = tour.excluded?.filter(Boolean) ?? [];
   const shortDescription = tour.description?.trim() || tour.short_description?.trim() || "Tour details are available on request.";
@@ -220,17 +220,11 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   const durationText = tour.duration?.trim() || "Custom duration";
   const ratingValue = Number.isFinite(tour.rating) && tour.rating > 0 ? tour.rating : 4.5;
 
-  const relatedTours: TourItem[] = [
-    { id: '1', title: 'Cairo & Alexandria Discovery', image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', price: 599, duration: '4 Days', rating: 4.8, reviews: 245 },
-    { id: '2', title: 'Luxor & Aswan Highlights',     image: '/assets/images/tours/49-webp.webp',                                                           price: 899, duration: '5 Days', rating: 4.9, reviews: 312 },
-    { id: '3', title: 'Red Sea Adventure',             image: '/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp',                      price: 450, duration: '3 Days', rating: 4.7, reviews: 189 },
-  ];
+  // ── Related Tours — from API, no static fallback ──────────────────────────
+  const relatedTours = tour.relatedTours ?? [];
 
-  const relatedArticles: Article[] = [
-    { id: '1', title: 'Luxury tourism boom in Egypt',               image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'June 14, 2024',  readTime: '5 min read' },
-    { id: '2', title: 'Covid-rules for traveling from USA to Egypt', image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'May 28, 2024',   readTime: '7 min read' },
-    { id: '3', title: 'Luxor Temple: A Complete Visitor Guide',      image: '/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp', date: 'April 10, 2024', readTime: '9 min read' },
-  ];
+  // ── Related Articles — from API, no static fallback ───────────────────────
+  const relatedArticles = tour.relatedArticles ?? [];
 
   /* ── Toggle All Itinerary ── */
   const handleToggleAll = () => {
@@ -602,12 +596,15 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
 
             {/* Pricing */}
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-bold text-[var(--second-color)] mb-5">Pricing</h2>
+              <h2 className="text-2xl font-bold text-[var(--second-color)] mb-1">Pricing</h2>
+              {pricingTableTitle && (
+                <p className="text-sm text-gray-400 mb-5">{pricingTableTitle}</p>
+              )}
               <div className="overflow-x-auto rounded-xl border border-gray-200">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-[var(--second-color)] text-white">
-                      <th className="text-left py-3 px-5 text-sm font-semibold">Category</th>
+                      <th className="text-left py-3 px-5 text-sm font-semibold">No. of Persons</th>
                       <th className="text-right py-3 px-5 text-sm font-semibold">Price / Person</th>
                     </tr>
                   </thead>
@@ -928,23 +925,34 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 <h3 className="text-base font-bold text-white">Related Articles</h3>
               </div>
               <div className="p-4 space-y-3">
+                {relatedArticles.length === 0 && (
+                  <p className="text-sm text-gray-400 text-center py-2">No related articles found.</p>
+                )}
                 {relatedArticles.map((article) => (
-                  <a key={article.id} href={`/articles/${article.id}`}
+                  <a key={article.id} href={`/blogs/${article.blog_category?.slug ?? "travel"}/${article.slug}`}
                     className="group flex gap-3 rounded-xl overflow-hidden border border-gray-100 hover:border-[var(--second-color)]/30 hover:shadow-md transition-all p-2">
-                    <div className="relative w-20 h-16 flex-shrink-0 rounded-lg overflow-hidden">
-                      <Image src={article.image} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="relative w-20 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                      {article.media?.image ? (
+                        <Image src={article.media.image} alt={article.media.alt ?? article.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-amber-100 to-stone-200" />
+                      )}
                     </div>
                     <div className="flex flex-col justify-center min-w-0">
                       <h4 className="text-xs font-semibold text-[var(--second-color)] group-hover:text-[var(--main-color)] transition-colors line-clamp-2 leading-tight mb-1">
-                        {article.title}
+                        {article.name}
                       </h4>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                          <Calendar className="w-2.5 h-2.5" />{article.date}
-                        </span>
-                        <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                          <Clock className="w-2.5 h-2.5" />{article.readTime}
-                        </span>
+                        {article.date && (
+                          <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                            <Calendar className="w-2.5 h-2.5" />{article.date}
+                          </span>
+                        )}
+                        {article.blog_category?.name && (
+                          <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                            <BookOpen className="w-2.5 h-2.5" />{article.blog_category.name}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </a>
@@ -956,42 +964,49 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
         </div>{/* end grid */}
 
         {/* ── Related Tours ── */}
-        <div className="mt-14">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-[var(--second-color)] mb-2">You May Also Like</h2>
-            <p className="text-gray-500 text-sm">Discover more amazing Egypt tours</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {relatedTours.map((tour) => (
-              <a key={tour.id} href={`/tours/${tour.id}`}
-                className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 group border border-gray-100">
-                <div className="relative h-48 overflow-hidden">
-                  <Image src={tour.image} alt={tour.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Star className="w-4 h-4 fill-[var(--main-color)] text-[var(--main-color)]" />
-                    <span className="text-sm font-semibold text-gray-700">{tour.rating}</span>
-                    <span className="text-gray-400 text-xs">({tour.reviews} reviews)</span>
+        {relatedTours.length > 0 && (
+          <div className="mt-14">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-[var(--second-color)] mb-2">You May Also Like</h2>
+              <p className="text-gray-500 text-sm">Discover more amazing Egypt tours</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedTours.map((relTour) => (
+                <a key={relTour.id} href={`/${relTour.slug}`}
+                  className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 group border border-gray-100">
+                  <div className="relative h-48 overflow-hidden bg-gray-100">
+                    {relTour.image ? (
+                      <Image src={relTour.image} alt={relTour.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-amber-100 to-stone-200" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   </div>
-                  <h3 className="text-base font-bold text-[var(--second-color)] mb-3 group-hover:text-[var(--main-color)] transition-colors leading-snug">
-                    {tour.title}
-                  </h3>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 text-gray-500 text-sm">
-                      <Clock className="w-3.5 h-3.5" />{tour.duration}
-                    </span>
-                    <div className="text-right">
-                      <div className="text-xs text-gray-400">From</div>
-                      <div className="text-xl font-bold text-[var(--second-color)]">${tour.price}</div>
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="w-4 h-4 fill-[var(--main-color)] text-[var(--main-color)]" />
+                      <span className="text-sm font-semibold text-gray-700">
+                        {Number.isFinite(relTour.rating) && relTour.rating > 0 ? relTour.rating.toFixed(1) : "5.0"}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-bold text-[var(--second-color)] mb-3 group-hover:text-[var(--main-color)] transition-colors leading-snug">
+                      {relTour.title}
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-gray-500 text-sm">
+                        <Clock className="w-3.5 h-3.5" />{relTour.duration}
+                      </span>
+                      <div className="text-right">
+                        <div className="text-xs text-gray-400">From</div>
+                        <div className="text-xl font-bold text-[var(--second-color)]">${relTour.price_from}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </a>
-            ))}
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── Custom Lightbox ── */}

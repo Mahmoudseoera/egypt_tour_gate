@@ -15,6 +15,32 @@ export interface ApiTourListItem {
   short_description?: string;
 }
 
+/** A single price row derived from pricing_tables[].prices entries */
+export interface PricingTableRow {
+  category: string;   // e.g. "1", "2-4", "5-8" (pax group label)
+  price: number;
+  currency: string;
+}
+
+/** A full pricing table block (type "daily" | "hotel", with optional hotels array) */
+export interface PricingTable {
+  id: number;
+  type: string;
+  title: string;
+  rows: PricingTableRow[];
+}
+
+/** Related article shape returned by related_articles */
+export interface RelatedArticle {
+  id: number;
+  name: string;
+  slug: string;
+  small_desc?: string;
+  date?: string;
+  media?: { image: string; title?: string; alt?: string };
+  blog_category?: { name: string; slug: string };
+}
+
 export interface ApiTourDetails extends ApiTourListItem {
   description?: string;
   highlights?: string[];
@@ -22,7 +48,16 @@ export interface ApiTourDetails extends ApiTourListItem {
   included?: string[];
   excluded?: string[];
   images?: string[];
+  /** Legacy flat pricing (kept for backward compat) */
   pricing?: Array<{ category: string; price: number }>;
+  /** Rich pricing tables from pricing_tables API field */
+  pricingTables?: PricingTable[];
+  /** Related tours from related_tours API field */
+  relatedTours?: ApiTourListItem[];
+  /** Related articles from related_articles API field */
+  relatedArticles?: RelatedArticle[];
+  /** Tour code */
+  code?: string;
 }
 
 function normalizeLocale(locale?: string): AppLocale {
@@ -112,6 +147,38 @@ function stripHtml(html: string): string {
     .replace(/&[a-z#0-9]+;/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/**
+ * Parse HTML inclusion/exclusion blocks into plain-text bullet arrays.
+ * The real API returns these as an HTML string with <li> items.
+ * Strategy:
+ *   1. If the input is already a string[], return cleaned items.
+ *   2. If it's an HTML string, extract <li> text nodes.
+ *   3. If it's a plain string (no HTML), split by newline as fallback.
+ */
+function pickHtmlList(input: unknown): string[] {
+  if (!input) return [];
+
+  // Already an array — use existing pickStringArray logic
+  if (Array.isArray(input)) return pickStringArray(input);
+
+  if (typeof input !== "string" || !input.trim()) return [];
+
+  // Extract <li> inner text
+  const liMatches = input.match(/<li[^>]*>([\s\S]*?)<\/li>/gi);
+  if (liMatches && liMatches.length > 0) {
+    return liMatches
+      .map((li) => stripHtml(li))
+      .filter((s) => s.length > 0);
+  }
+
+  // Fallback: strip all HTML and split by newline
+  const plain = stripHtml(input);
+  return plain
+    .split(/\n/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 }
 
 export async function getGeneralCategories(locale?: string): Promise<AnyObj[]> {
@@ -207,13 +274,17 @@ export async function getTourBySlug(
   const highlights = pickStringArray(
     raw.highlights ?? raw.tour_highlights ?? raw.key_highlights
   );
-  const included = pickStringArray(
-    raw.included ?? raw.includes ?? raw.inclusions
+
+  // ── Inclusion / Exclusion — raw API returns HTML strings ──────────────────
+  // Strip HTML tags so UI renders clean plain-text bullet lists.
+  const included = pickHtmlList(
+    raw.included ?? raw.includes ?? raw.inclusions ?? raw.inclusion
   );
-  const excluded = pickStringArray(
-    raw.excluded ?? raw.excludes ?? raw.exclusions
+  const excluded = pickHtmlList(
+    raw.excluded ?? raw.excludes ?? raw.exclusions ?? raw.exclusion
   );
 
+  // ── Itinerary — real API returns items with `desc` (HTML) field ───────────
   const itineraryRaw = asArray(
     raw.itinerary ?? raw.plan ?? raw.days ?? raw.program
   );
@@ -221,16 +292,21 @@ export async function getTourBySlug(
     .map((day, index) => ({
       day: Number(day?.day ?? day?.day_number ?? index + 1),
       title: day?.title ?? day?.name ?? day?.day ?? "",
-      description: day?.description ?? day?.content ?? day?.text ?? "",
+      // real API uses `desc` (HTML) — strip tags; fallback to plain fields
+      description: stripHtml(
+        day?.desc ?? day?.description ?? day?.content ?? day?.text ?? ""
+      ),
     }))
     .filter((day) => day.title || day.description);
 
+  // ── Gallery images ────────────────────────────────────────────────────────
   const images = asArray(raw.images ?? raw.gallery ?? raw.media?.images)
     .map((img) =>
       typeof img === "string" ? img : img?.image ?? img?.url ?? ""
     )
     .filter(Boolean);
 
+  // ── Legacy flat pricing (backward compat) ─────────────────────────────────
   const pricing = asArray(raw.pricing ?? raw.price_table ?? raw.prices)
     .map((row) => ({
       category: row?.category ?? row?.name ?? "",
@@ -238,8 +314,59 @@ export async function getTourBySlug(
     }))
     .filter((row) => row.category || row.price);
 
+  // ── Rich pricing_tables (real API) ────────────────────────────────────────
+  // Shape: [{ id, type, title, prices: { first: { title, price, currency }, second: … } }]
+  const pricingTables: PricingTable[] = asArray(
+    raw.pricing_tables ?? raw.pricingTables
+  ).map((table) => {
+    const pricesObj: Record<string, { title?: string; price?: unknown; currency?: string }> =
+      table?.prices && typeof table.prices === "object" ? table.prices : {};
+    const rows: PricingTableRow[] = Object.values(pricesObj)
+      .filter((entry) => entry && typeof entry === "object")
+      .map((entry) => ({
+        category: String(entry.title ?? ""),
+        price: parsePrice(entry.price),
+        currency: String(entry.currency ?? "USD"),
+      }))
+      .filter((row) => row.category || row.price > 0);
+
+    return {
+      id: Number(table?.id ?? 0),
+      type: String(table?.type ?? "daily"),
+      title: String(table?.title ?? "Prices Per Person"),
+      rows,
+    };
+  });
+
+  // ── Related tours (real API field: related_tours) ─────────────────────────
+  const relatedTours: ApiTourListItem[] = asArray(
+    raw.related_tours ?? raw.relatedTours
+  ).map((item) => mapTour(item, item?.slug ?? ""));
+
+  // ── Related articles (real API field: related_articles) ───────────────────
+  const relatedArticles: RelatedArticle[] = asArray(
+    raw.related_articles ?? raw.relatedArticles
+  ).map((item) => ({
+    id: Number(item?.id ?? 0),
+    name: item?.name ?? item?.title ?? "",
+    slug: item?.slug ?? "",
+    small_desc: item?.small_desc ?? item?.short_description ?? "",
+    date: item?.date ?? item?.created_at ?? "",
+    media: item?.media
+      ? {
+          image: item.media.image ?? item.media.image_url ?? "",
+          title: item.media.title ?? "",
+          alt: item.media.alt ?? "",
+        }
+      : undefined,
+    blog_category: item?.blog_category
+      ? { name: item.blog_category.name ?? "", slug: item.blog_category.slug ?? "" }
+      : undefined,
+  }));
+
   return {
     ...mapTour(raw, slug),
+    code: raw.code ?? undefined,
     description: raw.desc
       ? stripHtml(raw.desc)
       : raw.description ?? raw.short_description ?? "",
@@ -249,5 +376,8 @@ export async function getTourBySlug(
     excluded,
     images,
     pricing,
+    pricingTables,
+    relatedTours,
+    relatedArticles,
   };
 }
