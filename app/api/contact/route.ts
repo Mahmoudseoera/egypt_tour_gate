@@ -98,12 +98,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const fullPhone = `+${rawCode}${phone}`;
+  // const fullPhone = `+${rawCode}${phone}`;
 
   const payload = {
     name,
     email,
-    phone:     fullPhone,
+    code: rawCode,
+    phone:  phone,
     country,
     msg_title: subject,
     msg_body:  message,
