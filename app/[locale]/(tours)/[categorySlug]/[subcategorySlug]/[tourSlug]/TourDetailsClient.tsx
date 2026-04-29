@@ -1,5 +1,4 @@
 'use client';
-import type { Metadata } from "next";
 import LightGallery from "lightgallery/react";
 import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
@@ -7,6 +6,14 @@ import "flatpickr/dist/flatpickr.min.css";
 import lgZoom from "lightgallery/plugins/zoom";
 import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import {
+  buildBookingPayload,
+  submitBooking,
+  sanitisePhone,
+  type BookingFormState,
+} from '@/lib/api/booking-api';
 import {
   tourDetailsSchema,
   validateField,
@@ -43,6 +50,7 @@ const errCls   = 'mt-1 text-xs text-red-500 font-medium';
 type FormState = Omit<TourDetailsFormData, 'childAges' | 'message'> & {
   childAges: string[];
   message: string;
+  tour_id: string;
 };
 
 const INITIAL: FormState = {
@@ -57,6 +65,7 @@ const INITIAL: FormState = {
   children:     0,
   childAges:   [],
   message:     '',
+  tour_id:     '',
 };
 
 /* ─── Children Policy data ─── */
@@ -121,9 +130,12 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   const [allOpen,            setAllOpen]            = useState(false);
   const [isLightboxOpen,     setIsLightboxOpen]     = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [formData,           setFormData]           = useState<FormState>(INITIAL);
+  const [formData,           setFormData]           = useState<FormState>({
+    ...INITIAL,
+    tour_id: String(tour.id),
+  });
   const [fieldErrors,        setFieldErrors]        = useState<Record<string, string | undefined>>({});
-  const [submitted,          setSubmitted]          = useState(false);
+  const [submitStatus,       setSubmitStatus]       = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   /* Flatpickr refs */
   const checkInRef  = useRef<HTMLInputElement>(null);
@@ -303,10 +315,11 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
     setFieldErrors((p) => ({ ...p, [`childAges_${index}`]: err }));
   }, [formData.children]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = tourDetailsSchema.safeParse(formData);
 
+    // ── Step 1: Zod client-side validation (existing schema) ────────────────
+    const parsed = tourDetailsSchema.safeParse(formData);
     if (!parsed.success) {
       const errs: Record<string, string> = {};
       for (const issue of parsed.error.issues) {
@@ -314,13 +327,72 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
         if (!errs[key]) errs[key] = issue.message;
       }
       setFieldErrors(errs);
-      document.querySelector('[data-err]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        document.querySelector('[data-err]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
       return;
     }
 
     setFieldErrors({});
-    setSubmitted(true);
-    window.location.href = '/thank-you';
+    setSubmitStatus('loading');
+
+    // ── Step 2: Build the typed API payload ─────────────────────────────────
+    // Combine countryCode + phone into a single international phone string
+    const rawPhone = formData.countryCode
+      ? `${formData.countryCode}${formData.phone.replace(/^0+/, '')}`
+      : formData.phone;
+
+    const bookingFormState: BookingFormState = {
+      tour_id:         String(tour.id),
+      name:            formData.name,
+      email:           formData.email,
+      phone:           sanitisePhone(rawPhone),
+      nationality:     formData.nationality,
+      arrival_date:    formData.checkIn,
+      departure_date:  formData.checkOut,
+      adult_number:    formData.adults,
+      children_number: formData.children,
+      child_age:       formData.childAges,
+      message:         formData.message,
+    };
+
+    const payload = buildBookingPayload(bookingFormState);
+
+    // ── Step 3: Submit to API ───────────────────────────────────────────────
+    const result = await submitBooking(payload);
+
+    if (result.ok) {
+      setSubmitStatus('success');
+      toast.success('Booking Request Sent! 🎉', {
+        description: result.message || 'Our team will contact you within 24 hours.',
+        duration: 6000,
+      });
+    } else {
+      setSubmitStatus('error');
+
+      // Hydrate server field-level errors back into the form
+      if (result.fieldErrors) {
+        const remapped: Record<string, string | undefined> = {};
+        for (const [field, msg] of Object.entries(result.fieldErrors)) {
+          const uiField = field
+            .replace(/^arrival_date$/, 'checkIn')
+            .replace(/^departure_date$/, 'checkOut')
+            .replace(/^adult_number$/, 'adults')
+            .replace(/^children_number$/, 'children')
+            .replace(/^child_age\.(\d+)$/, 'childAges_$1');
+          remapped[uiField] = msg;
+        }
+        setFieldErrors(remapped);
+        setTimeout(() => {
+          document.querySelector('[data-err]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 50);
+      }
+
+      toast.error('Booking Failed', {
+        description: result.message || 'Please review your details and try again.',
+        duration: 8000,
+      });
+    }
   };
 
   const openLightbox    = (i: number) => lightGalleryRef.current?.openGallery(i);
@@ -839,6 +911,26 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
 
               <form onSubmit={handleSubmit} className="p-5 space-y-4" noValidate>
 
+                {/* ── Success banner ── */}
+                {submitStatus === 'success' && (
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                    <div className="text-2xl mb-1">🎉</div>
+                    <h3 className="font-bold text-green-800 text-sm">Booking Request Received!</h3>
+                    <p className="text-green-700 text-xs mt-1">
+                      Our team will reach out within 24 hours to confirm your trip.
+                    </p>
+                  </div>
+                )}
+
+                {/* ── API-level error banner ── */}
+                {submitStatus === 'error' && !Object.keys(fieldErrors).length && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+                    <p className="text-red-700 text-xs font-medium">
+                      Something went wrong. Please try again or contact us directly.
+                    </p>
+                  </div>
+                )}
+
                 {/* Name */}
                 <div>
                   <label className={labelCls}>Full Name</label>
@@ -1009,10 +1101,24 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
 
                 <button
                   type="submit"
-                  disabled={submitted}
-                  className="w-full bg-[var(--second-color)] hover:bg-[#1e1a5e] text-white font-bold py-3.5 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-md disabled:opacity-60 flex items-center justify-center gap-2 text-sm tracking-wider"
+                  disabled={submitStatus === 'loading' || submitStatus === 'success'}
+                  className="w-full bg-[var(--second-color)] hover:bg-[#1e1a5e] text-white font-bold py-3.5 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-md disabled:opacity-70 flex items-center justify-center gap-2 text-sm tracking-wider"
                 >
-                  REQUEST THIS TRIP <ArrowRight className="w-4 h-4" />
+                  {submitStatus === 'loading' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      SUBMITTING…
+                    </>
+                  ) : submitStatus === 'success' ? (
+                    <>
+                      <span>✓</span>
+                      BOOKING SENT!
+                    </>
+                  ) : (
+                    <>
+                      REQUEST THIS TRIP <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
                 </button>
               </form>
             </div>
