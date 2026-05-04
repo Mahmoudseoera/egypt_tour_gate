@@ -139,7 +139,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               {categorySecondTitle}
             </p>
           )}
-          <div className="max-w-3xl mx-auto mt-5">
+          <div className="mx-auto mt-5">
             <ExpandableDescription
               text={categoryDescription}
               className="text-white [&>p]:text-white/90"

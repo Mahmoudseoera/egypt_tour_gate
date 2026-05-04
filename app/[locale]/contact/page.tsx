@@ -58,7 +58,7 @@ const SKELETON_CARDS: ContactCard[] = [
   },
 ];
 
-const fallbackIframe = `<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3452.8245800187533!2d31.196501715115748!3d30.07056238187281!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDA0JzE0LjAiTiAzMcKwMTEnNTUuMyJF!5e0!3m2!1sen!2sus!4v1600342460576!5m2!1sen!2sus" width="100%" height="450" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>`;
+const fallbackIframe = "test";
 
 // ✅ FIX 2: Memoize the Map component so it never re-renders when the form changes.
 const ContactMap = memo(function ContactMap({ html }: { html: string }) {
