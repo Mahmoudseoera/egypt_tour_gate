@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { toast } from "sonner";
 import { Check, Calendar, MapPin, User, Phone, Globe, Hotel, MessageSquare, ChevronRight, ChevronLeft, DollarSign, Users, Baby, UserCheck } from "lucide-react";
 import "flatpickr/dist/flatpickr.min.css";
@@ -10,6 +11,139 @@ import {
   type TailorMadeFormData,
 } from "@/lib/validations/tailor-made.schema";
 import { NATIONALITIES, PHONE_CODES } from "@/lib/constants/country-data";
+
+// ─── API Types ──────────────────────────────────────────────────────────────
+interface ApiCity {
+  id: number;
+  name: string;
+  img: string;
+}
+
+interface StaticData {
+  basic_data: {
+    name: string;
+    title: string;
+    description: string;
+    cover_img: string;
+  };
+  top_menu_labels: {
+    city_label_trns: string;
+    time_label_trns: string;
+    info_title_trns: string;
+    budget_title_trns: string;
+    confirm_label_trns: string;
+  };
+  menu_1_city: {
+    title: string;
+    sub_title: string;
+  };
+  menu_2_time: {
+    title: string;
+    sub_title: string;
+    exact_dates_trns?: string;
+    approx_month_trns?: string;
+    not_sure_yet_trns?: string;
+    check_in_date_trns?: string;
+    check_out_date_trns?: string;
+    select_month_trns?: string;
+    vacation_days_trns?: string;
+  };
+  menu_3_info: {
+    title: string;
+    sub_title: string;
+    name_trns?: string;
+    name_palasholder_trns?: string;
+    email_trns?: string;
+    email_placeholder_trns?: string;
+    phone_trns?: string;
+    phone_placeholder_trns?: string;
+    nationality_trns?: string;
+    message_trns?: string;
+    message_placeholder_trns?: string;
+  };
+  menu_4_budget: {
+    title: string;
+    sub_title: string;
+    adults_trns?: string;
+    message_adults_trns?: string;
+    children_trns?: string;
+    message_children_trns?: string;
+    infants_trns?: string;
+    message_infants_trns?: string;
+    label_budget_range_trns?: string;
+    min_price_trns?: string;
+    max_price_trns?: string;
+  };
+  cities: ApiCity[];
+}
+
+// ─── Fallback static data ───────────────────────────────────────────────────
+const FALLBACK_STATIC_DATA: StaticData = {
+  basic_data: {
+    name: "Custom Experience",
+    title: "Egypt Tailor Made Packages",
+    description: "Design your perfect Egypt adventure in just a few steps",
+    cover_img: "",
+  },
+  top_menu_labels: {
+    city_label_trns: "Cities",
+    time_label_trns: "Time",
+    info_title_trns: "Info",
+    budget_title_trns: "Budget",
+    confirm_label_trns: "Confirm",
+  },
+  menu_1_city: {
+    title: "Select your destinations",
+    sub_title: "Choose one or more cities across Egypt",
+  },
+  menu_2_time: {
+    title: "When do you want to travel?",
+    sub_title: "Choose how you'd like to specify your travel dates",
+    exact_dates_trns: "Exact Dates",
+    approx_month_trns: "Approx Month",
+    not_sure_yet_trns: "Not Sure Yet",
+    check_in_date_trns: "Check-in Date",
+    check_out_date_trns: "Check-out Date",
+    select_month_trns: "Select Month",
+    vacation_days_trns: "Number of Vacation Days",
+  },
+  menu_3_info: {
+    title: "Your Personal Information",
+    sub_title: "Tell us about yourself so we can personalize your trip",
+    name_trns: "Full Name",
+    name_palasholder_trns: "Enter your full name",
+    email_trns: "Email",
+    email_placeholder_trns: "Enter your email",
+    phone_trns: "Phone",
+    phone_placeholder_trns: "Enter phone number",
+    nationality_trns: "Nationality",
+    message_trns: "Additional Info",
+    message_placeholder_trns: "Any special requests or notes?",
+  },
+  menu_4_budget: {
+    title: "Customize Your Trip",
+    sub_title: "Set your group size and budget range",
+    adults_trns: "Adults",
+    message_adults_trns: "18+ years",
+    children_trns: "Children",
+    message_children_trns: "2–17 years",
+    infants_trns: "Infants",
+    message_infants_trns: "Under 2 years",
+    label_budget_range_trns: "Budget Range (USD per person)",
+    min_price_trns: "Min Price",
+    max_price_trns: "Max Price",
+  },
+  cities: [
+    { id: 1, name: "Cairo", img: "/assets/images/tours/Pyramids-in-Egypt-webp.webp" },
+    { id: 2, name: "Giza", img: "/assets/images/tours/great-pyramid-webp.webp" },
+    { id: 3, name: "Luxor", img: "/assets/images/about-us/The-front-façade-of-Karnak-Temple-webp.webp" },
+    { id: 4, name: "Aswan", img: "/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp" },
+    { id: 5, name: "Alexandria", img: "/assets/images/tours/Cairo day tours in Egypt-webp.webp" },
+    { id: 6, name: "Dahab", img: "/assets/images/tours/luxurytours-webp.webp" },
+    { id: 7, name: "Sharm El-Sheikh", img: "/assets/images/tours/Egypt Budget Tours-webp.webp" },
+    { id: 8, name: "Taba", img: "/assets/images/tours/egypt family tours-webp.webp" },
+  ],
+};
 
 // ─── Floating Label Input ───────────────────────────────────────────────────
 interface FloatingInputProps {
@@ -228,9 +362,162 @@ function FloatingTextarea({ label, value, onChange, icon, onBlur, error }: Float
   );
 }
 
+// ─── Counter Button ─────────────────────────────────────────────────────────
+function CounterButton({
+  label,
+  subLabel,
+  value,
+  icon,
+  onInc,
+  onDec,
+  min = 0,
+}: {
+  label: string;
+  subLabel: string;
+  value: number;
+  icon: React.ReactNode;
+  onInc: () => void;
+  onDec: () => void;
+  min?: number;
+}) {
+  return (
+    <div className="flex items-center justify-between p-4 rounded-2xl border-[1.5px] border-[#e8eaf0] bg-[#f8f9fc]">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-[#272262]/8 flex items-center justify-center text-[#272262]">
+          {icon}
+        </div>
+        <div>
+          <p className="text-sm font-bold text-[#272262]">{label}</p>
+          <p className="text-xs text-[#aaa]">{subLabel}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onDec}
+          disabled={value <= min}
+          className="w-9 h-9 rounded-full border-2 border-[#e8eaf0] flex items-center justify-center text-[#272262] font-bold hover:border-[#272262] transition-all disabled:opacity-30 disabled:cursor-not-allowed text-lg leading-none"
+        >
+          −
+        </button>
+        <span className="w-6 text-center font-bold text-[#272262] text-base">{value}</span>
+        <button
+          type="button"
+          onClick={onInc}
+          className="w-9 h-9 rounded-full bg-[#272262] flex items-center justify-center text-white font-bold hover:bg-[#1a1848] transition-all text-lg leading-none"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Component ─────────────────────────────────────────────────────────
 export default function TailorMadePage() {
   const router = useRouter();
+  const locale = useLocale();
+
+  // ── API state ─────────────────────────────────────────────────────────────
+  const [apiData, setApiData] = useState<StaticData | null>(null);
+  const [apiLoading, setApiLoading] = useState(true);
+
+  // Fetch tailor-made static data from API via proxy
+  useEffect(() => {
+    async function loadStaticData() {
+      try {
+        const res = await fetch(`/api/tailor-made-data?locale=${locale}`);
+        if (!res.ok) throw new Error("API request failed");
+        const json = await res.json();
+        if (json?.success && json?.data?.static_data) {
+          setApiData(json.data.static_data as StaticData);
+        } else {
+          // API responded but shape is unexpected — use fallback silently
+          setApiData(FALLBACK_STATIC_DATA);
+        }
+      } catch {
+        // Network error or proxy unavailable — use fallback silently
+        setApiData(FALLBACK_STATIC_DATA);
+      } finally {
+        setApiLoading(false);
+      }
+    }
+    loadStaticData();
+  }, [locale]);
+
+  // ── Resolved data: API data merged with fallbacks per field ──────────────
+  // Each field individually falls back so partial API responses still work.
+  const sd = apiData ?? FALLBACK_STATIC_DATA;
+
+  const pageTitle      = sd.basic_data?.title        || FALLBACK_STATIC_DATA.basic_data.title;
+  const pageSubtitle   = sd.basic_data?.name         || FALLBACK_STATIC_DATA.basic_data.name;
+  const pageDesc       = sd.basic_data?.description  || FALLBACK_STATIC_DATA.basic_data.description;
+
+  const label_cities   = sd.top_menu_labels?.city_label_trns    || FALLBACK_STATIC_DATA.top_menu_labels.city_label_trns;
+  const label_time     = sd.top_menu_labels?.time_label_trns    || FALLBACK_STATIC_DATA.top_menu_labels.time_label_trns;
+  const label_info     = sd.top_menu_labels?.info_title_trns    || FALLBACK_STATIC_DATA.top_menu_labels.info_title_trns;
+  const label_budget   = sd.top_menu_labels?.budget_title_trns  || FALLBACK_STATIC_DATA.top_menu_labels.budget_title_trns;
+  const label_confirm  = sd.top_menu_labels?.confirm_label_trns || FALLBACK_STATIC_DATA.top_menu_labels.confirm_label_trns;
+
+  const city_title     = sd.menu_1_city?.title    || FALLBACK_STATIC_DATA.menu_1_city.title;
+  const city_subtitle  = sd.menu_1_city?.sub_title || FALLBACK_STATIC_DATA.menu_1_city.sub_title;
+
+  const time_title         = sd.menu_2_time?.title             || FALLBACK_STATIC_DATA.menu_2_time.title;
+  const time_subtitle      = sd.menu_2_time?.sub_title         || FALLBACK_STATIC_DATA.menu_2_time.sub_title;
+  const time_exact         = sd.menu_2_time?.exact_dates_trns  || FALLBACK_STATIC_DATA.menu_2_time.exact_dates_trns!;
+  const time_approx        = sd.menu_2_time?.approx_month_trns || FALLBACK_STATIC_DATA.menu_2_time.approx_month_trns!;
+  const time_notSure       = sd.menu_2_time?.not_sure_yet_trns || FALLBACK_STATIC_DATA.menu_2_time.not_sure_yet_trns!;
+  const time_checkin       = sd.menu_2_time?.check_in_date_trns  || FALLBACK_STATIC_DATA.menu_2_time.check_in_date_trns!;
+  const time_checkout      = sd.menu_2_time?.check_out_date_trns || FALLBACK_STATIC_DATA.menu_2_time.check_out_date_trns!;
+  const time_selectMonth   = sd.menu_2_time?.select_month_trns   || FALLBACK_STATIC_DATA.menu_2_time.select_month_trns!;
+  const time_vacationDays  = sd.menu_2_time?.vacation_days_trns  || FALLBACK_STATIC_DATA.menu_2_time.vacation_days_trns!;
+
+  const info_title          = sd.menu_3_info?.title                   || FALLBACK_STATIC_DATA.menu_3_info.title;
+  const info_subtitle       = sd.menu_3_info?.sub_title               || FALLBACK_STATIC_DATA.menu_3_info.sub_title;
+  const info_name_label     = sd.menu_3_info?.name_trns               || FALLBACK_STATIC_DATA.menu_3_info.name_trns!;
+  const info_email_label    = sd.menu_3_info?.email_trns              || FALLBACK_STATIC_DATA.menu_3_info.email_trns!;
+  const info_phone_label    = sd.menu_3_info?.phone_trns              || FALLBACK_STATIC_DATA.menu_3_info.phone_trns!;
+  const info_nat_label      = sd.menu_3_info?.nationality_trns        || FALLBACK_STATIC_DATA.menu_3_info.nationality_trns!;
+  const info_msg_label      = sd.menu_3_info?.message_trns            || FALLBACK_STATIC_DATA.menu_3_info.message_trns!;
+
+  const budget_title        = sd.menu_4_budget?.title                 || FALLBACK_STATIC_DATA.menu_4_budget.title;
+  const budget_subtitle     = sd.menu_4_budget?.sub_title             || FALLBACK_STATIC_DATA.menu_4_budget.sub_title;
+  const budget_adults       = sd.menu_4_budget?.adults_trns           || FALLBACK_STATIC_DATA.menu_4_budget.adults_trns!;
+  const budget_adults_sub   = sd.menu_4_budget?.message_adults_trns   || FALLBACK_STATIC_DATA.menu_4_budget.message_adults_trns!;
+  const budget_children     = sd.menu_4_budget?.children_trns         || FALLBACK_STATIC_DATA.menu_4_budget.children_trns!;
+  const budget_children_sub = sd.menu_4_budget?.message_children_trns || FALLBACK_STATIC_DATA.menu_4_budget.message_children_trns!;
+  const budget_infants      = sd.menu_4_budget?.infants_trns          || FALLBACK_STATIC_DATA.menu_4_budget.infants_trns!;
+  const budget_infants_sub  = sd.menu_4_budget?.message_infants_trns  || FALLBACK_STATIC_DATA.menu_4_budget.message_infants_trns!;
+  const budget_range_label  = sd.menu_4_budget?.label_budget_range_trns || FALLBACK_STATIC_DATA.menu_4_budget.label_budget_range_trns!;
+
+  // ── Cities: API cities → normalized shape, fallback if empty ────────────
+  const cities = useMemo(() => {
+    const apiCities = sd.cities;
+    if (Array.isArray(apiCities) && apiCities.length > 0) {
+      return apiCities.map((c) => ({
+        id: String(c.id),          // use string id to match formData.cities[]
+        name: c.name || "City",
+        image: c.img || "/assets/images/tours/Pyramids-in-Egypt-webp.webp",
+      }));
+    }
+    // Fallback: static city list
+    return FALLBACK_STATIC_DATA.cities.map((c) => ({
+      id: String(c.id),
+      name: c.name,
+      image: c.img,
+    }));
+  }, [sd.cities]);
+
+  // ── Steps derived from API labels ────────────────────────────────────────
+  const steps = [
+    { num: 1, label: label_cities },
+    { num: 2, label: label_time },
+    { num: 3, label: label_info },
+    { num: 4, label: label_budget },
+    { num: 5, label: label_confirm },
+  ];
+
+  // ── Form state ───────────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
@@ -276,26 +563,6 @@ export default function TailorMadePage() {
     priceMax: 7500,
   });
 
-  const cities = [
-    { id: "cairo", name: "Cairo", image: "/assets/images/tours/Pyramids-in-Egypt-webp.webp" },
-    { id: "giza", name: "Giza", image: "/assets/images/tours/great-pyramid-webp.webp" },
-    { id: "luxor", name: "Luxor", image: "/assets/images/about-us/The-front-façade-of-Karnak-Temple-webp.webp" },
-    { id: "aswan", name: "Aswan", image: "/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp" },
-    { id: "alexandria", name: "Alexandria", image: "/assets/images/tours/Cairo day tours in Egypt-webp.webp" },
-    { id: "dahab", name: "Dahab", image: "/assets/images/tours/luxurytours-webp.webp" },
-    { id: "sharm", name: "Sharm El-Sheikh", image: "/assets/images/tours/Egypt Budget Tours-webp.webp" },
-    { id: "taba", name: "Taba", image: "/assets/images/tours/egypt family tours-webp.webp" },
-  ];
-
-
-  const steps = [
-    { num: 1, label: "Cities" },
-    { num: 2, label: "Time" },
-    { num: 3, label: "Info" },
-    { num: 4, label: "Budget" },
-    { num: 5, label: "Confirm" },
-  ];
-
   const updateFormData = <K extends keyof typeof formData>(field: K, value: (typeof formData)[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (stepError) setStepError(null);
@@ -311,6 +578,7 @@ export default function TailorMadePage() {
     if (stepError) setStepError(null);
   };
 
+  // ── Zod validation — unchanged ────────────────────────────────────────────
   const isStepValid = () => {
     const parsed = tailorMadeSchema.safeParse(formData);
     if (parsed.success) return true;
@@ -337,13 +605,12 @@ export default function TailorMadePage() {
     return issue?.message ?? null;
   };
 
-
   const validationIssues = useMemo(() => {
     const parsed = tailorMadeSchema.safeParse(formData);
     if (parsed.success) return {} as Record<string, string>;
     const map: Record<string, string> = {};
     for (const issue of parsed.error.issues) {
-      const key = String(issue.path[0] ?? 'form');
+      const key = String(issue.path[0] ?? "form");
       if (!map[key]) map[key] = issue.message;
     }
     return map;
@@ -351,6 +618,7 @@ export default function TailorMadePage() {
 
   const fieldError = (name: string) => (touched[name] ? validationIssues[name] : undefined);
   const markTouched = (name: string) => setTouched((prev) => ({ ...prev, [name]: true }));
+
   const nextStep = () => {
     if (isStepValid() && currentStep < 5) {
       setStepError(null);
@@ -380,7 +648,7 @@ export default function TailorMadePage() {
         body: JSON.stringify(validatedData.data),
       });
       if (res.ok) {
-        toast.success("Trip request submitted successfully! We&apos;ll contact you soon. ✈️");
+        toast.success("Trip request submitted successfully! We'll contact you soon. ✈️");
         router.push("/thank-you");
       } else {
         toast.error("Something went wrong. Please try again.");
@@ -425,6 +693,18 @@ export default function TailorMadePage() {
   const flatpickrDateOpts = { dateFormat: "Y-m-d", minDate: "today" as const };
   const flatpickrMonthOpts = { plugins: [{ onReady: () => {}, onValueUpdate: () => {}, onDayCreate: () => {} }], dateFormat: "Y-m", minDate: "today" as const };
 
+  // ── Loading skeleton ─────────────────────────────────────────────────────
+  if (apiLoading) {
+    return (
+      <div className="relative min-h-screen bg-[#f4f6fb] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-14 h-14 border-4 border-[#272262] border-t-[#e3b75e] rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[#272262] font-semibold text-sm">Loading your experience...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen bg-[#f4f6fb] py-10 sm:py-14">
       {/* Soft gradient blobs */}
@@ -434,14 +714,16 @@ export default function TailorMadePage() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Header */}
+        {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="text-center mb-10">
-          <span className="inline-block text-xs font-bold tracking-[0.2em] uppercase text-[#e3b75e] mb-2">Custom Experience</span>
+          <span className="inline-block text-xs font-bold tracking-[0.2em] uppercase text-[#e3b75e] mb-2">
+            {pageSubtitle}
+          </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#272262] mb-3 leading-tight">
-            Egypt Tailor Made Packages
+            {pageTitle}
           </h1>
           <p className="text-[#666] text-base sm:text-lg max-w-xl mx-auto">
-            Design your perfect Egypt adventure in just a few steps
+            {pageDesc}
           </p>
         </div>
 
@@ -469,7 +751,7 @@ export default function TailorMadePage() {
                       >
                         {done ? <Check size={16} /> : step.num}
                       </div>
-                      <span className={`hidden sm:block text-[11px] font-semibold transition-colors ${active ? "text-[#272262]" : done ? "text-[#e3b75e]" : "text-[#bbb]"}`}>
+                      <span className={`hidden sm:block text-[11px] font-semibold transition-colors capitalize ${active ? "text-[#272262]" : done ? "text-[#e3b75e]" : "text-[#bbb]"}`}>
                         {step.label}
                       </span>
                     </div>
@@ -483,8 +765,8 @@ export default function TailorMadePage() {
               {currentStep === 1 && (
                 <div className="space-y-5">
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">Select your destinations</h3>
-                    <p className="text-[#888] text-sm mt-1">Choose one or more cities across Egypt</p>
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">{city_title}</h3>
+                    <p className="text-[#888] text-sm mt-1">{city_subtitle}</p>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {cities.map((city) => {
@@ -496,12 +778,12 @@ export default function TailorMadePage() {
                           onClick={() => toggleCity(city.id)}
                           className={`group relative overflow-hidden rounded-2xl border-2 transition-all duration-300 hover:shadow-lg focus:outline-none ${selected ? "border-[#e3b75e] shadow-md ring-2 ring-[#e3b75e]/30" : "border-[#e8eaf0] hover:border-[#e3b75e]/60"}`}
                         >
-                          {/* City image — fixed compact height */}
                           <div className="relative h-24 w-full overflow-hidden">
                             <Image
                               src={city.image}
                               alt={city.name}
                               fill
+                              unoptimized={city.image.startsWith("http")}
                               className={`object-cover transition-transform duration-400 ${selected ? "scale-105" : "group-hover:scale-105"}`}
                             />
                             <div className={`absolute inset-0 transition-all duration-300 ${selected ? "bg-[#272262]/40" : "bg-black/10 group-hover:bg-black/20"}`} />
@@ -533,14 +815,14 @@ export default function TailorMadePage() {
               {currentStep === 2 && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">When do you want to travel?</h3>
-                    <p className="text-[#888] text-sm mt-1">Choose how you&apos;d like to specify your travel dates</p>
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">{time_title}</h3>
+                    <p className="text-[#888] text-sm mt-1">{time_subtitle}</p>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      { value: "exact", label: "Exact Dates", icon: "📅" },
-                      { value: "month", label: "Approx Month", icon: "🗓️" },
-                      { value: "days", label: "Not Sure Yet", icon: "⏳" },
+                      { value: "exact", label: time_exact, icon: "📅" },
+                      { value: "month", label: time_approx, icon: "🗓️" },
+                      { value: "days",  label: time_notSure, icon: "⏳" },
                     ].map((opt) => (
                       <button
                         key={opt.value}
@@ -557,20 +839,20 @@ export default function TailorMadePage() {
                   {formData.timeOption === "exact" && (
                     <div className="grid sm:grid-cols-2 gap-4">
                       <FlatpickrInput
-                        label="Check-in Date"
+                        label={time_checkin}
                         value={formData.checkIn}
                         onChange={(v) => updateFormData("checkIn", v)}
                         options={flatpickrDateOpts}
-                        icon={<Calendar size={16} />}
+                        icon={<Calendar size={18} />}
                         onBlur={() => markTouched("checkIn")}
                         error={fieldError("checkIn")}
                       />
                       <FlatpickrInput
-                        label="Check-out Date"
+                        label={time_checkout}
                         value={formData.checkOut}
                         onChange={(v) => updateFormData("checkOut", v)}
                         options={{ ...flatpickrDateOpts, minDate: formData.checkIn || "today" }}
-                        icon={<Calendar size={16} />}
+                        icon={<Calendar size={18} />}
                         onBlur={() => markTouched("checkOut")}
                         error={fieldError("checkOut")}
                       />
@@ -579,11 +861,11 @@ export default function TailorMadePage() {
 
                   {formData.timeOption === "month" && (
                     <FlatpickrInput
-                      label="Select Month"
+                      label={time_selectMonth}
                       value={formData.monthSelect}
                       onChange={(v) => updateFormData("monthSelect", v)}
-                      options={{ dateFormat: "Y-m", minDate: "today" as const, plugins: [], disableMobile: true }}
-                      icon={<Calendar size={16} />}
+                      options={flatpickrMonthOpts}
+                      icon={<Calendar size={18} />}
                       onBlur={() => markTouched("monthSelect")}
                       error={fieldError("monthSelect")}
                     />
@@ -591,11 +873,11 @@ export default function TailorMadePage() {
 
                   {formData.timeOption === "days" && (
                     <FloatingInput
-                      label="Number of Vacation Days"
+                      label={time_vacationDays}
                       type="number"
                       value={formData.vacationDays}
                       onChange={(v) => updateFormData("vacationDays", v)}
-                      icon={<Calendar size={16} />}
+                      icon={<Calendar size={18} />}
                       onBlur={() => markTouched("vacationDays")}
                       error={fieldError("vacationDays")}
                     />
@@ -603,157 +885,157 @@ export default function TailorMadePage() {
                 </div>
               )}
 
-              {/* ── Step 3: Personal Info ── */}
+              {/* ── Step 3: Info ── */}
               {currentStep === 3 && (
                 <div className="space-y-5">
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">Your Personal Information</h3>
-                    <p className="text-[#888] text-sm mt-1">Tell us about yourself so we can personalize your trip</p>
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">{info_title}</h3>
+                    <p className="text-[#888] text-sm mt-1">{info_subtitle}</p>
                   </div>
-                  <div className="grid sm:grid-cols-2 gap-5">
-                    <FloatingInput
-                      label="Full Name"
-                      value={formData.fullName}
-                      onChange={(v) => updateFormData("fullName", v)}
-                      required
-                      autoComplete="name"
-                      icon={<User size={16} />}
-                      onBlur={() => markTouched("fullName")}
-                      error={fieldError("fullName")}
-                    />
-                    <FloatingInput
-                      label="Email Address"
-                      type="email"
-                      value={formData.email}
-                      onChange={(v) => updateFormData("email", v)}
-                      required
-                      autoComplete="email"
-                      icon={<MessageSquare size={16} />}
-                      onBlur={() => markTouched("email")}
-                      error={fieldError("email")}
-                    />
+                  <FloatingInput
+                    label={info_name_label}
+                    value={formData.fullName}
+                    onChange={(v) => updateFormData("fullName", v)}
+                    icon={<User size={18} />}
+                    onBlur={() => markTouched("fullName")}
+                    error={fieldError("fullName")}
+                  />
+                  <FloatingInput
+                    label={info_email_label}
+                    type="email"
+                    value={formData.email}
+                    onChange={(v) => updateFormData("email", v)}
+                    icon={<Globe size={18} />}
+                    autoComplete="email"
+                    onBlur={() => markTouched("email")}
+                    error={fieldError("email")}
+                  />
+                  {/* Phone row: country code + number */}
+                  <div className="grid grid-cols-[140px_1fr] gap-3">
                     <FloatingSelect
-                      label="Phone Code"
+                      label="Code"
                       value={formData.phoneCode}
                       onChange={(v) => updateFormData("phoneCode", v)}
-                      icon={<Phone size={16} />}
+                      icon={<Phone size={18} />}
                       onBlur={() => markTouched("phoneCode")}
                       error={fieldError("phoneCode")}
                     >
-                      <option value="">Select country code</option>
-                      {PHONE_CODES.map((pc) => (
-                        <option key={`${pc.code}-${pc.label}`} value={pc.code.replace("+", "")}>{pc.label}</option>
+                      <option value="" />
+                      {PHONE_CODES.map((c) => (
+                        <option key={c.code} value={c.dialCode}>
+                          {c.flag} +{c.dialCode}
+                        </option>
                       ))}
                     </FloatingSelect>
                     <FloatingInput
-                      label="Phone Number"
+                      label={info_phone_label}
                       type="tel"
                       value={formData.phoneNumber}
                       onChange={(v) => updateFormData("phoneNumber", v)}
-                      required
-                      autoComplete="tel"
-                      icon={<Phone size={16} />}
                       onBlur={() => markTouched("phoneNumber")}
                       error={fieldError("phoneNumber")}
                     />
-                    <FloatingSelect
-                      label="Nationality"
-                      value={formData.nationality}
-                      onChange={(v) => updateFormData("nationality", v)}
-                      icon={<Globe size={16} />}
-                      onBlur={() => markTouched("nationality")}
-                      error={fieldError("nationality")}
-                    >
-                      <option value="">Select nationality</option>
-                      {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
-                    </FloatingSelect>
-                    <FloatingInput
-                      label="Hotel Preference (Optional)"
-                      value={formData.hotel}
-                      onChange={(v) => updateFormData("hotel", v)}
-                      icon={<Hotel size={16} />}
-                      onBlur={() => markTouched("hotel")}
-                      error={fieldError("hotel")}
-                    />
                   </div>
+                  <FloatingSelect
+                    label={info_nat_label}
+                    value={formData.nationality}
+                    onChange={(v) => updateFormData("nationality", v)}
+                    icon={<Globe size={18} />}
+                    onBlur={() => markTouched("nationality")}
+                    error={fieldError("nationality")}
+                  >
+                    <option value="" />
+                    {NATIONALITIES.map((n) => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </FloatingSelect>
+                  <FloatingSelect
+                    label="Hotel Rating"
+                    value={formData.hotel}
+                    onChange={(v) => updateFormData("hotel", v)}
+                    icon={<Hotel size={18} />}
+                    onBlur={() => markTouched("hotel")}
+                    error={fieldError("hotel")}
+                  >
+                    <option value="" />
+                    {["3 Stars", "4 Stars", "5 Stars", "Luxury"].map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </FloatingSelect>
                   <FloatingTextarea
-                    label="Additional Notes or Requests"
+                    label={info_msg_label}
                     value={formData.additionalInfo}
                     onChange={(v) => updateFormData("additionalInfo", v)}
-                    icon={<MessageSquare size={16} />}
+                    icon={<MessageSquare size={18} />}
                     onBlur={() => markTouched("additionalInfo")}
                     error={fieldError("additionalInfo")}
                   />
                 </div>
               )}
 
-              {/* ── Step 4: Budget & Guests ── */}
+              {/* ── Step 4: Budget ── */}
               {currentStep === 4 && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">Customize Your Trip</h3>
-                    <p className="text-[#888] text-sm mt-1">Set your group size and budget range</p>
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">{budget_title}</h3>
+                    <p className="text-[#888] text-sm mt-1">{budget_subtitle}</p>
                   </div>
 
-                  {/* Guest counters */}
+                  {/* Group size counters */}
                   <div className="space-y-3">
-                    {[
-                      { key: "adults", label: "Adults", subtitle: "18+ years", icon: <UserCheck size={18} className="text-[#272262]" />, min: 1 },
-                      { key: "children", label: "Children", subtitle: "2–17 years", icon: <Users size={18} className="text-[#272262]" />, min: 0 },
-                      { key: "infants", label: "Infants", subtitle: "Under 2 years", icon: <Baby size={18} className="text-[#272262]" />, min: 0 },
-                    ].map(({ key, label, subtitle, icon, min }) => (
-                      <div key={key} className="flex items-center justify-between p-4 bg-[#f8f9fc] rounded-2xl border-[1.5px] border-[#e8eaf0]">
-                        <div className="flex items-center gap-3">
-                          {icon}
-                          <div>
-                            <p className="font-bold text-sm text-[#272262]">{label}</p>
-                            <p className="text-xs text-[#aaa]">{subtitle}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => updateFormData(key as "adults" | "children" | "infants", Math.max(min, (formData[key as "adults" | "children" | "infants"] as number) - 1))}
-                            className="w-9 h-9 rounded-full bg-white border-2 border-[#e8eaf0] hover:border-[#e3b75e] hover:text-[#e3b75e] transition-all font-bold text-[#272262] text-lg leading-none flex items-center justify-center"
-                          >
-                            −
-                          </button>
-                          <span className="w-8 text-center font-bold text-base text-[#272262]">
-                            {formData[key as "adults" | "children" | "infants"] as number}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => updateFormData(key as "adults" | "children" | "infants", Math.min(20, (formData[key as "adults" | "children" | "infants"] as number) + 1))}
-                            className="w-9 h-9 rounded-full bg-white border-2 border-[#e8eaf0] hover:border-[#e3b75e] hover:text-[#e3b75e] transition-all font-bold text-[#272262] text-lg leading-none flex items-center justify-center"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                    <CounterButton
+                      label={budget_adults}
+                      subLabel={budget_adults_sub}
+                      value={formData.adults}
+                      icon={<UserCheck size={18} />}
+                      onInc={() => updateFormData("adults", formData.adults + 1)}
+                      onDec={() => updateFormData("adults", Math.max(1, formData.adults - 1))}
+                      min={1}
+                    />
+                    <CounterButton
+                      label={budget_children}
+                      subLabel={budget_children_sub}
+                      value={formData.children}
+                      icon={<Users size={18} />}
+                      onInc={() => updateFormData("children", formData.children + 1)}
+                      onDec={() => updateFormData("children", Math.max(0, formData.children - 1))}
+                    />
+                    <CounterButton
+                      label={budget_infants}
+                      subLabel={budget_infants_sub}
+                      value={formData.infants}
+                      icon={<Baby size={18} />}
+                      onInc={() => updateFormData("infants", formData.infants + 1)}
+                      onDec={() => updateFormData("infants", Math.max(0, formData.infants - 1))}
+                    />
                   </div>
 
-                  {/* Budget range */}
-                  <div className="p-5 bg-[#f8f9fc] rounded-2xl border-[1.5px] border-[#e8eaf0] space-y-4">
-                    <div className="flex items-center gap-2">
-                      <DollarSign size={18} className="text-[#272262]" />
-                      <h4 className="font-bold text-[#272262]">Budget Range (USD per person)</h4>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <FloatingInput
-                        label="Minimum ($)"
-                        type="number"
-                        value={String(formData.priceMin)}
-                        onChange={(v) => updateFormData("priceMin", parseInt(v) || 0)}
-                      />
-                      <FloatingInput
-                        label="Maximum ($)"
-                        type="number"
-                        value={String(formData.priceMax)}
-                        onChange={(v) => updateFormData("priceMax", parseInt(v) || 0)}
+                  {/* Budget range sliders */}
+                  <div className="space-y-4 pt-2">
+                    <p className="text-sm font-bold text-[#272262] flex items-center gap-2">
+                      <DollarSign size={16} className="text-[#e3b75e]" />
+                      {budget_range_label}
+                    </p>
+                    <div>
+                      <div className="flex justify-between text-xs text-[#aaa] mb-2 font-medium">
+                        <span>Min Price</span>
+                        <span className="text-[#272262] font-bold">${formData.priceMin.toLocaleString()}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="15000"
+                        step="100"
+                        value={formData.priceMin}
+                        onChange={(e) => updateFormData("priceMin", parseInt(e.target.value))}
+                        className="w-full accent-[#272262] h-2 cursor-pointer"
                       />
                     </div>
                     <div>
+                      <div className="flex justify-between text-xs text-[#aaa] mb-2 font-medium">
+                        <span>Max Price</span>
+                        <span className="text-[#e3b75e] font-bold">${formData.priceMax.toLocaleString()}</span>
+                      </div>
                       <input
                         type="range"
                         min="0"
