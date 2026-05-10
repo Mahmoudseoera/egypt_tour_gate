@@ -1,7 +1,7 @@
 // app/blogs/[subCategorySlug]/[blogslug]/page.tsx
 import Image from "next/image";
 import Link from "next/link";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Clock, User, Calendar, ArrowLeft, Share2, Tag } from "lucide-react";
 import { 
@@ -14,41 +14,33 @@ import {
 import Breadcrumb from "@/components/layout/breadcrumb";
 import SchemaScript from "@/components/seo/schema-script";
 import ExpandableDescription from "@/components/shared/expandable-description";
+import { breadcrumbSchema, buildSeoMetadata, absoluteUrl } from "@/lib/seo";
 
 type BlogDetailsPageProps = {
   params: Promise<{
+    locale: string;
     subCategorySlug: string;
     blogslug: string;
   }>;
 };
 
 export async function generateMetadata({ params }: BlogDetailsPageProps): Promise<Metadata> {
-  const { blogslug } = await params;
+  const { locale, subCategorySlug, blogslug } = await params;
   const data = await getArticleDetailBySlug(blogslug);
   
   if (!data?.post) return { title: "Blog Not Found" };
   
   const post = data.post;
   
-  // Parse SEO metadata from API response
-  const seoTitle = post.seo?.match(/<title>([^<]*)<\/title>/i)?.[1]?.trim() || `${post.title} | Egypt Tours Gate Blog`;
-  const seoDesc = post.seo?.match(/<meta name="description" content="([^"]*)"/i)?.[1]?.trim() || post.excerpt;
-  
-  return {
-    title: seoTitle,
-    description: seoDesc,
-    openGraph: {
-      title: post.title,
-      description: post.excerpt,
-      images: [{ url: post.image }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description: post.excerpt,
-      images: [post.image],
-    },
-  };
+  return buildSeoMetadata({
+    seoHtml: post.seo,
+    title: `${post.title} | Egypt Tours Gate Blog`,
+    description: post.excerpt,
+    path: `/blogs/${subCategorySlug}/${blogslug}`,
+    locale,
+    image: post.image,
+    type: "article",
+  });
 }
 
 export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) {
@@ -85,21 +77,23 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
       logo: { "@type": "ImageObject", url: "https://www.egypttoursgate.com/uploads/settings/logo2.png" },
     },
     image: post.image,
-    url: `https://www.egypttoursgate.com/blogs/${post.categorySlug}/${post.slug}`,
+    url: absoluteUrl(`/blogs/${post.categorySlug}/${post.slug}`),
   };
+
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Blogs', href: '/blogs' },
+    { label: category?.title || post.categoryTitle, href: `/blogs/${post.categorySlug}` },
+    { label: post.title, href: `/blogs/${post.categorySlug}/${post.slug}` },
+  ];
+
+  const schema = [blogSchema, breadcrumbSchema(breadcrumbItems)];
 
   return (
     <>
-      <SchemaScript schema={blogSchema} />
+      <SchemaScript schema={schema} />
       
-      <Breadcrumb
-        items={[
-          { label: 'Home', href: '/' },
-          { label: 'Blogs', href: '/blogs' },
-          { label: category?.title || post.categoryTitle, href: `/blogs/${post.categorySlug}` },
-          { label: post.title, href: `/blogs/${post.categorySlug}/${post.slug}` },
-        ]}
-      />
+      <Breadcrumb items={breadcrumbItems} />
 
       {/* Hero Section */}
       <div className="relative h-[500px] w-full">

@@ -2,11 +2,29 @@
 // Server Component — fetches from the dedicated about-us endpoint.
 // ✅ No dependency on homeApi / homeTypes.
 
+import type { Metadata } from "next";
 import Link from "next/link";
 import PartnersMarquee from "@/components/home/partners";
 import RoavioAboutSection from "@/components/about/about";
 import TravelServicesSection from "@/components/about/services";
 import { fetchAboutSections } from "@/lib/api/aboutApi";
+import { buildSeoMetadata } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  return buildSeoMetadata({
+    title: "About Egypt Tours Gate",
+    description:
+      "Learn about Egypt Tours Gate, our expert local team, and our Egypt tours, travel packages, Nile cruises, and tailor-made trips.",
+    path: "/about-us",
+    locale,
+  });
+}
 
 export default async function AboutPage({
   params,

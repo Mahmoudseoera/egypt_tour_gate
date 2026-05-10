@@ -2,18 +2,18 @@ import type { Metadata } from 'next';
 import '@/styles/globals.css';
 import { montserrat } from './[locale]/fonts';
 import Analytics, { GoogleTagManagerNoScript } from '@/components/seo/analytics';
-import { buildSeoMetadata, DEFAULT_SEO_IMAGE, SITE_NAME, SITE_URL } from '@/lib/seo';
+import { DEFAULT_SEO_IMAGE, SITE_NAME, SITE_URL } from '@/lib/seo';
 
 export const metadata: Metadata = {
-  ...buildSeoMetadata({
-    title: 'Egypt Tours: Best Vacations, Trips, and Tours to Egypt',
-    description:
-      'Egypt Tours from all countries are made for you. Visit Egypt, explore Egypt trips, enjoy Nile cruises, and discover the Egypt Pyramids.',
-    keywords:
-      'Egypt tours, Egypt trips, Egypt vacations, Egypt travel, tours to Egypt, Egypt holidays, Nile cruises',
-    path: '/',
-    image: DEFAULT_SEO_IMAGE,
-  }),
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'Egypt Tours: Best Vacations, Trips, and Tours to Egypt',
+    template: '%s | Egypt Tours Gate',
+  },
+  description:
+    'Egypt Tours from all countries are made for you. Visit Egypt, explore Egypt trips, enjoy Nile cruises, and discover the Egypt Pyramids.',
+  keywords:
+    'Egypt tours, Egypt trips, Egypt vacations, Egypt travel, tours to Egypt, Egypt holidays, Nile cruises',
   applicationName: SITE_NAME,
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,

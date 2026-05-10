@@ -108,7 +108,10 @@ export function buildSeoMetadata({
 }: BuildSeoMetadataInput): Metadata {
   const parsedSeo = parseApiSeoHtml(seoHtml);
   const canonicalPath = normalizePath(path);
-  const canonical = absoluteUrl(canonicalPath);
+  const metadataLocale = routing.locales.includes(locale as AppLocale)
+    ? (locale as AppLocale)
+    : routing.defaultLocale;
+  const canonical = absoluteUrl(buildLocalizedPath(canonicalPath, metadataLocale));
   const seoTitle = parsedSeo.title || parsedSeo["og:title"] || parsedSeo["twitter:title"] || title || SITE_NAME;
   const seoDescription = truncateSeoText(
     parsedSeo.description ||
@@ -131,7 +134,7 @@ export function buildSeoMetadata({
     alternates: {
       canonical,
       languages: {
-        "x-default": canonical,
+        "x-default": absoluteUrl(buildLocalizedPath(canonicalPath, routing.defaultLocale)),
         ...alternates,
       },
     },
@@ -153,8 +156,8 @@ export function buildSeoMetadata({
       url: canonical,
       siteName: parsedSeo["og:site_name"] || SITE_NAME,
       type: (parsedSeo["og:type"] as "website" | "article" | undefined) || type,
-      locale,
-      alternateLocale: routing.locales.filter((item) => item !== locale),
+      locale: metadataLocale,
+      alternateLocale: routing.locales.filter((item) => item !== metadataLocale),
       images: [
         {
           url: seoImage,

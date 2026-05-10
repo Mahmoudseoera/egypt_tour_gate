@@ -1,6 +1,25 @@
+import type { Metadata } from "next";
+import { buildSeoMetadata } from "@/lib/seo";
 // free page //
 import Link from "next/link";
 import Image from "next/image";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  return buildSeoMetadata({
+    title: "Terms and Conditions",
+    description:
+      "Read Egypt Tours Gate terms and conditions for website use, bookings, tour services, payments, cancellations, and traveler responsibilities.",
+    path: "/free-page",
+    locale,
+    noIndex: false,
+  });
+}
 
 export default function FreePage() {
   return (

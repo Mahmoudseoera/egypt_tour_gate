@@ -1,8 +1,24 @@
+import type { Metadata } from "next";
+import { buildSeoMetadata } from "@/lib/seo";
 
 
 // import CategoryCard from "@/components/tour/category-card";
 // import categoriesData from "@/lib/api/categories";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  return buildSeoMetadata({
+    title: "Egypt Tours",
+    description: "Browse Egypt Tours Gate travel packages, day tours, Nile cruises, and private guided experiences across Egypt.",
+    path: "/tours",
+    locale,
+  });
+}
 
 export default async function ToursPage({
   params,
