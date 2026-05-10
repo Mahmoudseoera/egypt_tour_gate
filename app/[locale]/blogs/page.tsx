@@ -1,13 +1,26 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getBlogPageData } from '@/lib/api/blog';
+import { buildSeoMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Egypt Travel Blog - Tours, Tips & Cultural Guides | Egypt Tours Gate',
-  description:
-    'Explore our comprehensive guides on Egyptian tours, travel tips, cultural experiences, and historical insights. Plan your perfect Egyptian adventure with expert advice.',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  return buildSeoMetadata({
+    title: 'Egypt Travel Blog - Tours, Tips & Cultural Guides | Egypt Tours Gate',
+    description:
+      'Explore our comprehensive guides on Egyptian tours, travel tips, cultural experiences, and historical insights. Plan your perfect Egyptian adventure with expert advice.',
+    path: '/blogs',
+    locale,
+  });
+}
+
+
 
 export default async function BlogsPage() {
   const { subTitle, title, description, categories } = await getBlogPageData();
