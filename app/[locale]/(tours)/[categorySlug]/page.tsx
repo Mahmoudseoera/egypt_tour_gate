@@ -6,6 +6,12 @@ import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
+import {
+  breadcrumbSchema,
+  buildSeoMetadata,
+  collectionPageSchema,
+  stripHtml,
+} from "@/lib/seo";
 import { getCategoryBySlug, getGeneralCategories } from "@/lib/api/toursApi";
 import { routing } from "@/lib/i18n/routing";
 // import placeholder from "@/assets/images/placeholder.png";
@@ -74,10 +80,19 @@ export async function generateMetadata({
       ? category.name
       : category.name?.[locale] ?? category.name?.en ?? categorySlug;
 
-  return {
+  const description =
+    category.plainDesc ||
+    stripHtml(category.small_desc) ||
+    `Explore ${categoryName} tours, itineraries, and travel options in Egypt with Egypt Tours Gate.`;
+
+  return buildSeoMetadata({
+    seoHtml: category.seo,
     title: `${categoryName} Tours | Egypt Tours Gate`,
-    description: `Explore ${categoryName} tours, itineraries, and travel options in Egypt with Egypt Tours Gate.`,
-  };
+    description,
+    path: `/${categorySlug}`,
+    locale,
+    image: category.media?.image,
+  });
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
@@ -101,23 +116,25 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   // second_title shown as subtitle in the hero (e.g. "Egypt Day Tours and Excursions")
   const categorySecondTitle: string = category.second_title ?? "";
 
-  const categorySchema = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: categoryName,
-    description: categoryDescription,
-    url: `https://www.egypttoursgate.com/${categorySlug}`,
-  };
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: categoryName, href: `/${categorySlug}` },
+  ];
+
+  const categorySchema = [
+    collectionPageSchema({
+      name: categoryName,
+      description: categoryDescription,
+      path: `/${categorySlug}`,
+      image: category.media?.image,
+    }),
+    breadcrumbSchema(breadcrumbItems),
+  ];
 
   return (
     <>
       <SchemaScript schema={categorySchema} />
-      <Breadcrumb
-        items={[
-          { label: "Home", href: "/" },
-          { label: categoryName, href: `/${categorySlug}` },
-        ]}
-      />
+      <Breadcrumb items={breadcrumbItems} />
 
       {/* ── Page Hero ── */}
       <div

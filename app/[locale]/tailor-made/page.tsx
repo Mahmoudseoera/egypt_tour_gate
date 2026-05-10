@@ -922,8 +922,8 @@ export default function TailorMadePage() {
                     >
                       <option value="" />
                       {PHONE_CODES.map((c) => (
-                        <option key={c.code} value={c.dialCode}>
-                          {c.flag} +{c.dialCode}
+                        <option key={c.code} value={c.code}>
+                          {c.label}
                         </option>
                       ))}
                     </FloatingSelect>
