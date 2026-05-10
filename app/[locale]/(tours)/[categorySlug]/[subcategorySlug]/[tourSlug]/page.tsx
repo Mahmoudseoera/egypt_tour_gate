@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import Breadcrumb from '@/components/layout/breadcrumb';
 import ExpandableDescription from '@/components/shared/expandable-description';
 import SchemaScript from '@/components/seo/schema-script';
+import { breadcrumbSchema, buildSeoMetadata, tourSchema } from '@/lib/seo';
 import "@/styles/tour-details.css";
 import { getTourBySlug } from '@/lib/api/toursApi';
 
@@ -22,13 +23,21 @@ type TourDetailPageProps = {
 };
 
 export async function generateMetadata({ params }: TourDetailPageProps): Promise<Metadata> {
-  const { tourSlug } = await params;
-  const readableName = tourSlug.replace(/-/g, " ");
+  const { locale, categorySlug, subcategorySlug, tourSlug } = await params;
+  const item = await getTourBySlug(tourSlug, locale);
+  const readableName = item?.title || tourSlug.replace(/-/g, " ");
 
-  return {
+  return buildSeoMetadata({
+    seoHtml: item?.seo,
     title: `${readableName} | Egypt Tours Gate`,
-    description: `Explore ${readableName} with Egypt Tours Gate.`,
-  };
+    description:
+      item?.short_description ||
+      item?.description ||
+      `Explore ${readableName} with Egypt Tours Gate.`,
+    path: `/${categorySlug}/${subcategorySlug}/${tourSlug}`,
+    locale,
+    image: item?.media?.image || item?.image || item?.images?.[0],
+  });
 }
 
 export default async function TourDetailPage({ params }: TourDetailPageProps) {
@@ -47,30 +56,31 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
 
   const shortDescription = item.short_description || item.description || `${item.title} with Egypt Tours Gate.`;
 
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'TouristTrip',
-    name: item.title,
-    description: shortDescription,
-    url: `https://www.egypttoursgate.com/${categorySlug}/${subcategorySlug}/${tourSlug}`,
-    offers: {
-      '@type': 'Offer',
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: categorySlug.replace(/-/g, ' '), href: `/${categorySlug}` },
+    { label: subcategorySlug.replace(/-/g, ' '), href: `/${categorySlug}/${subcategorySlug}` },
+    { label: item.title, href: `/${categorySlug}/${subcategorySlug}/${tourSlug}` },
+  ];
+
+  const schema = [
+    tourSchema({
+      name: item.title,
+      description: shortDescription,
+      path: `/${categorySlug}/${subcategorySlug}/${tourSlug}`,
+      image: item.media?.image || item.image || item.images?.[0],
       price: item.price_from,
-      priceCurrency: 'USD',
-    },
-  };
+      city: item.location,
+      duration: item.duration,
+      code: item.code,
+    }),
+    breadcrumbSchema(breadcrumbItems),
+  ];
 
   return (
     <main className="bg-main-grey">
       <SchemaScript schema={schema} />
-      <Breadcrumb
-        items={[
-          { label: 'Home', href: '/' },
-          { label: categorySlug.replace(/-/g, ' '), href: `/${categorySlug}` },
-          { label: subcategorySlug.replace(/-/g, ' '), href: `/${categorySlug}/${subcategorySlug}` },
-          { label: item.title, href: `/${categorySlug}/${subcategorySlug}/${tourSlug}` },
-        ]}
-      />
+      <Breadcrumb items={breadcrumbItems} />
 
       <div className="container py-10 max-w-7xl mx-auto">
         <div className="tour-title rounded-xl border border-gray-200 bg-white p-4 sm:p-5 mb-4">

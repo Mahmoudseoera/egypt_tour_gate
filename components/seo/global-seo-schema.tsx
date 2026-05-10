@@ -2,11 +2,18 @@
 
 import { useMemo } from 'react';
 import { usePathname } from 'next/navigation';
-
-const SITE_URL = 'https://www.egypttoursgate.com';
+import {
+  absoluteUrl,
+  breadcrumbSchema,
+  organizationSchema,
+  travelAgencySchema,
+  websiteSchema,
+} from '@/lib/seo';
 
 function toLabel(segment: string) {
-  return decodeURIComponent(segment).replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return decodeURIComponent(segment)
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default function GlobalSeoSchema() {
@@ -15,34 +22,25 @@ export default function GlobalSeoSchema() {
   const schema = useMemo(() => {
     const path = pathname || '/';
     const parts = path.split('/').filter(Boolean);
-
-    const itemListElement = [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: SITE_URL,
-      },
+    const breadcrumbItems = [
+      { label: 'Home', href: '/' },
       ...parts.map((segment, index) => ({
-        '@type': 'ListItem',
-        position: index + 2,
-        name: toLabel(segment),
-        item: `${SITE_URL}/${parts.slice(0, index + 1).join('/')}`,
+        label: toLabel(segment),
+        href: `/${parts.slice(0, index + 1).join('/')}`,
       })),
     ];
 
     return [
+      organizationSchema(),
+      websiteSchema(),
+      travelAgencySchema(),
       {
         '@context': 'https://schema.org',
         '@type': 'WebPage',
-        name: 'Egypt Tours Gate',
-        url: `${SITE_URL}${path}`,
+        name: parts.length ? toLabel(parts[parts.length - 1]) : 'Egypt Tours Gate',
+        url: absoluteUrl(path),
       },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement,
-      },
+      breadcrumbSchema(breadcrumbItems),
     ];
   }, [pathname]);
 
