@@ -13,6 +13,8 @@ export interface ApiTourListItem {
   duration: string;
   location: string;
   short_description?: string;
+  seo?: string;
+  media?: { image?: string; title?: string; alt?: string };
 }
 
 /** A single price row derived from pricing_tables[].prices entries */
@@ -123,6 +125,14 @@ function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
       item.summary ??
       item.description ??
       "",
+    seo: item.seo ?? "",
+    media: item.media
+      ? {
+          image: item.media.image ?? item.media.image_url ?? "",
+          title: item.media.title ?? "",
+          alt: item.media.alt ?? "",
+        }
+      : undefined,
   };
 }
 
