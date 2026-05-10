@@ -6,6 +6,12 @@ import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
 import {
+  breadcrumbSchema,
+  buildSeoMetadata,
+  collectionPageSchema,
+  stripHtml,
+} from "@/lib/seo";
+import {
   getSubcategoryBySlug,
   getGeneralCategories,
   getToursBySubcategory,
@@ -94,15 +100,19 @@ export async function generateMetadata({
       ? subcategory.name
       : subcategory.name?.[locale] ?? subcategory.name?.en ?? subcategorySlug;
 
-  // Use meta description from SEO block if available, else generate one
   const metaDescription =
     subcategory.plainDesc ||
+    stripHtml(subcategory.small_desc) ||
     `Discover ${subcategoryName} experiences in ${categoryName} with curated programs and flexible itineraries.`;
 
-  return {
+  return buildSeoMetadata({
+    seoHtml: subcategory.seo,
     title: `${subcategoryName} ${categoryName} | Egypt Tours Gate`,
     description: metaDescription,
-  };
+    path: `/${categorySlug}/${subcategorySlug}`,
+    locale,
+    image: subcategory.media?.image,
+  });
 }
 
 export default async function SubcategoryPage({
@@ -158,27 +168,26 @@ export default async function SubcategoryPage({
     subcategory.small_desc ||
     `Explore the top ${subcategoryName} tours in ${categoryName} and choose the itinerary that matches your travel style.`;
 
-  const subcategorySchema = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: `${subcategoryName} ${categoryName}`,
-    description: shortDescription,
-    url: `https://www.egypttoursgate.com/${categorySlug}/${subcategorySlug}`,
-  };
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: categoryName, href: `/${categorySlug}` },
+    { label: subcategoryName, href: `/${categorySlug}/${subcategorySlug}` },
+  ];
+
+  const subcategorySchema = [
+    collectionPageSchema({
+      name: `${subcategoryName} ${categoryName}`,
+      description: shortDescription,
+      path: `/${categorySlug}/${subcategorySlug}`,
+      image: subcategory.media?.image,
+    }),
+    breadcrumbSchema(breadcrumbItems),
+  ];
 
   return (
     <>
       <SchemaScript schema={subcategorySchema} />
-      <Breadcrumb
-        items={[
-          { label: "Home", href: "/" },
-          { label: categoryName, href: `/${categorySlug}` },
-          {
-            label: subcategoryName,
-            href: `/${categorySlug}/${subcategorySlug}`,
-          },
-        ]}
-      />
+      <Breadcrumb items={breadcrumbItems} />
 
       <section className="container py-10 max-w-7xl mx-auto">
         <div className="container mx-auto">

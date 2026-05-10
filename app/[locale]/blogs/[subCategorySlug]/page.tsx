@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -6,23 +6,28 @@ import { getCategoryPageData } from '@/lib/api/blog';
 import Breadcrumb from '@/components/layout/breadcrumb';
 import ExpandableDescription from '@/components/shared/expandable-description';
 import SchemaScript from '@/components/seo/schema-script';
+import { breadcrumbSchema, buildSeoMetadata, collectionPageSchema } from '@/lib/seo';
 
 interface CategoryPageProps {
   params: Promise<{
+    locale: string;
     subCategorySlug: string;
   }>;
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const { subCategorySlug } = await params;
+  const { locale, subCategorySlug } = await params;
   const data = await getCategoryPageData(subCategorySlug);
 
   if (!data) return { title: 'Category Not Found' };
 
-  return {
+  return buildSeoMetadata({
+    seoHtml: data.category.seo,
     title: `${data.category.title} - Egypt Travel Blog | Egypt Tours Gate`,
     description: data.category.description,
-  };
+    path: `/blogs/${subCategorySlug}`,
+    locale,
+  });
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
@@ -33,26 +38,28 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   const { category, posts } = data;
 
-  const categorySchema = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: category.title,
-    description: category.description,
-    url: `https://www.egypttoursgate.com/blogs/${subCategorySlug}`,
-  };
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Blogs', href: '/blogs' },
+    { label: category.title, href: `/blogs/${subCategorySlug}` },
+  ];
+
+  const categorySchema = [
+    collectionPageSchema({
+      name: category.title,
+      description: category.description,
+      path: `/blogs/${subCategorySlug}`,
+      image: category.image,
+    }),
+    breadcrumbSchema(breadcrumbItems),
+  ];
 
   return (
     <div className="min-h-screen bg-grey-light">
       <SchemaScript schema={categorySchema} />
 
       {/* Breadcrumb */}
-      <Breadcrumb
-        items={[
-          { label: 'Home', href: '/' },
-          { label: 'Blogs', href: '/blogs' },
-          { label: category.title, href: `/blogs/${subCategorySlug}` },
-        ]}
-      />
+      <Breadcrumb items={breadcrumbItems} />
 
       {/* Category Hero */}
       <section className="relative bg-gradient-to-br from-navy via-[#3d3586] to-navy py-20 overflow-hidden">

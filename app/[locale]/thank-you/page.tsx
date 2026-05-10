@@ -1,3 +1,22 @@
+import type { Metadata } from "next";
+import { buildSeoMetadata } from "@/lib/seo";
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  return buildSeoMetadata({
+    title: "Thank You",
+    description:
+      "Thank you for contacting Egypt Tours Gate. Our travel team will review your request and reply as soon as possible.",
+    path: "/thank-you",
+    locale,
+    noIndex: true,
+  });
+}
+
 export default function ThankYouPage() {
   const styles =`
   @keyframes fade-in-up {
