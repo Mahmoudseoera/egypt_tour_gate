@@ -187,19 +187,35 @@ function normalizeResponse(raw: RawApiResponse): GeneralData {
 //    fetch("/api/general?locale=de")
 //    اللي بدوره بيبعت للـ external API من الـ server
 
+const generalDataCache = new Map<AppLocale, GeneralData>();
+const generalDataRequests = new Map<AppLocale, Promise<GeneralData>>();
+
 async function fetchGeneralData(locale: AppLocale): Promise<GeneralData> {
-  // /api/general هو proxy route محلي في Next.js
-  // same origin → مفيش CORS بين البراوزر والـ proxy
-  const res = await fetch(`/api/general?locale=${locale}`, {
-    next: { revalidate: 3600, tags: ["general"] },
-  });
+  const cached = generalDataCache.get(locale);
+  if (cached) return cached;
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch general data [${locale}]: ${res.status} ${res.statusText}`);
-  }
+  const inFlight = generalDataRequests.get(locale);
+  if (inFlight) return inFlight;
 
-  const raw: RawApiResponse = await res.json();
-  return normalizeResponse(raw);
+  const request = fetch(`/api/general?locale=${locale}`, {
+    cache: "force-cache",
+  })
+    .then(async (res) => {
+      if (!res.ok) {
+        throw new Error(`Failed to fetch general data [${locale}]: ${res.status} ${res.statusText}`);
+      }
+
+      const raw: RawApiResponse = await res.json();
+      const normalized = normalizeResponse(raw);
+      generalDataCache.set(locale, normalized);
+      return normalized;
+    })
+    .finally(() => {
+      generalDataRequests.delete(locale);
+    });
+
+  generalDataRequests.set(locale, request);
+  return request;
 }
 
 // ─── React hook ───────────────────────────────────────────────────────────────
@@ -213,8 +229,8 @@ export interface UseGeneralDataResult {
 export function useGeneralData(
   locale: AppLocale = routing.defaultLocale
 ): UseGeneralDataResult {
-  const [data, setData] = useState<GeneralData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<GeneralData | null>(() => generalDataCache.get(locale) ?? null);
+  const [loading, setLoading] = useState(() => !generalDataCache.has(locale));
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -222,6 +238,14 @@ export function useGeneralData(
 
     async function load() {
       try {
+        const cached = generalDataCache.get(locale);
+        if (cached) {
+          setData(cached);
+          setLoading(false);
+          setError(null);
+          return;
+        }
+
         setLoading(true);
         setError(null);
         const result = await fetchGeneralData(locale);

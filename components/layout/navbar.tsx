@@ -191,21 +191,7 @@ export default function Navbar() {
     setActiveDropdown(null);
   };
 
-  if (loading) {
-    return (
-      <nav className="w-full bg-white border-b border-gray-100 px-4 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Image src="/assets/images/egypt-tour-gate-logo.png" alt="Egypt Tour Gate" width={70} height={30} />
-          <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
-            <span>Home</span>
-            <span>Tours</span>
-            <span>Blogs</span>
-            <span>Contact</span>
-          </div>
-        </div>
-      </nav>
-    );
-  }
+  if (loading) return null;
 
   if (error || !data) {
     return (

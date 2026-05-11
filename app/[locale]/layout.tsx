@@ -8,6 +8,7 @@ import ScrollToTop from '@/components/layout/scrollTop';
 import MobileFooter from '@/components/layout/MobileFooter';
 import WhatsappIcon from '@/components/layout/Whatsapp-icon';
 import GlobalSeoSchema from '@/components/seo/global-seo-schema';
+import RouteProgress from '@/components/layout/route-progress';
 import {routing} from '@/lib/i18n/routing';
  
 type Props = {
@@ -30,6 +31,7 @@ export default async function LocaleLayout({children, params}: Props) {
   return (
     <NextIntlClientProvider locale={locale}>
       <GlobalSeoSchema />
+      <RouteProgress />
       <Navbar />
       {children}
       <ScrollToTop />

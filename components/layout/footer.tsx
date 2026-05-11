@@ -29,25 +29,8 @@ export default function Footer() {
   // Real API: footer.categories (same shape as header.categories)
   const footerCategories = data?.footer.categories ?? [];
 
-  // ── Loading skeleton ────────────────────────────────────────────────────────
-  if (loading) {
-    return (
-      <footer className="relative bg-[var(--second-color)] text-white pt-16 pb-10 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-[var(--main-color)]" />
-        <div className="container mx-auto px-4 md:px-6 flex items-center justify-center min-h-[300px]">
-          <div className="text-center">
-            <div className="relative w-16 h-16 mx-auto mb-4">
-              <div className="w-16 h-16 border-2 border-[var(--main-color)] border-r-transparent rounded-full animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-2 h-2 bg-[var(--main-color)] rounded-full" />
-              </div>
-            </div>
-            <p className="text-white/85 text-lg font-medium">Loading…</p>
-          </div>
-        </div>
-      </footer>
-    );
-  }
+  // Render the footer shell immediately; API-backed links hydrate from the shared general-data cache.
+  void loading;
 
   // ── Main footer ─────────────────────────────────────────────────────────────
   return (

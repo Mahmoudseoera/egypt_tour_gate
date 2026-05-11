@@ -2,7 +2,7 @@
  * lib/api/booking-api.ts
  * ─────────────────────────────────────────────────────────────────────────────
  * Type definitions, payload transformer, and submission logic for:
- *   POST https://www.egypttoursgate.com/api/v1/forms/booking-store
+ *   POST /api/booking (server proxy to https://www.egypttoursgate.com/api/v1/forms/booking-store)
  *
  * Mapping of sample data → API payload:
  *   tour_id:          "553"            → 553         (string → number)
@@ -142,7 +142,7 @@ export interface SubmitBookingResult {
   fieldErrors?: Record<string, string>;
 }
 
-const BOOKING_ENDPOINT = 'https://www.egypttoursgate.com/api/v1/forms/booking-store';
+const BOOKING_ENDPOINT = '/api/booking';
 
 /**
  * Submits the booking payload to the API.
@@ -158,7 +158,7 @@ const BOOKING_ENDPOINT = 'https://www.egypttoursgate.com/api/v1/forms/booking-st
  *   □ What HTTP status code does a successful creation return? (200 or 201?)
  *   □ Is there a rate limit per IP? If yes, what is it?
  *   □ Are there CORS headers set to allow browser requests from this domain?
- *     If not, route through the Next.js proxy at app/api/booking/route.ts
+ *     Browser submissions always use the Next.js proxy at app/api/booking/route.ts
  */
 export async function submitBooking(
   payload: BookingApiPayload
