@@ -258,20 +258,39 @@ interface FlatpickrInputProps {
 
 function FlatpickrInput({ label, value, onChange, options = {}, icon, onBlur, error }: FlatpickrInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const fpRef = useRef<{ destroy: () => void } | null>(null);
+  const fpRef = useRef<{ destroy?: () => void; setDate?: (d: string, b: boolean) => void } | null>(null);
 
   useEffect(() => {
     if (!inputRef.current) return;
 
-    let fp: { destroy: () => void; setDate: (d: string, b: boolean) => void } | null = null;
+    let cancelled = false;
+    let fp: { destroy?: () => void; setDate?: (d: string, b: boolean) => void } | null = null;
 
-    import("flatpickr").then((mod) => {
+    Promise.all([
+      import("flatpickr"),
+      options.dateFormat === "Y-m" ? import("flatpickr/dist/plugins/monthSelect") : Promise.resolve(null),
+    ]).then(([mod, monthSelectMod]) => {
+      if (cancelled || !inputRef.current) return;
       const flatpickr = mod.default;
-      fp = flatpickr(inputRef.current!, {
-        ...options,
+      const monthSelectPlugin = monthSelectMod?.default;
+      const safeOptions = { ...options };
+      if (monthSelectPlugin) {
+        safeOptions.plugins = [
+          monthSelectPlugin({
+            shorthand: true,
+            dateFormat: "Y-m",
+            altFormat: "F Y",
+          }),
+        ];
+      } else {
+        delete safeOptions.plugins;
+      }
+
+      fp = flatpickr(inputRef.current, {
+        ...safeOptions,
         onChange: (selectedDates: Date[]) => {
           if (selectedDates[0]) {
-            const fmt = (options.dateFormat as string) || "Y-m-d";
+            const fmt = (safeOptions.dateFormat as string) || "Y-m-d";
             if (fmt === "Y-m") {
               onChange(selectedDates[0].toISOString().slice(0, 7));
             } else {
@@ -279,13 +298,17 @@ function FlatpickrInput({ label, value, onChange, options = {}, icon, onBlur, er
             }
           }
         },
-      }) as unknown as { destroy: () => void; setDate: (d: string, b: boolean) => void };
+      }) as unknown as { destroy?: () => void; setDate?: (d: string, b: boolean) => void };
       fpRef.current = fp;
-      if (value && fp) fp.setDate(value, false);
+      if (value && fp?.setDate) fp.setDate(value, false);
     });
 
     return () => {
-      fpRef.current?.destroy();
+      cancelled = true;
+      if (typeof fpRef.current?.destroy === "function") {
+        fpRef.current.destroy();
+      }
+      fpRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -641,17 +664,17 @@ export default function TailorMadePage() {
     }
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
       const res = await fetch("/api/tailor-made", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(validatedData.data),
       });
-      if (res.ok) {
-        toast.success("Trip request submitted successfully! We'll contact you soon. ✈️");
+      const result = await res.json().catch(() => null);
+      if (res.ok && result?.success !== false) {
+        toast.success(result?.message || "Trip request submitted successfully! We'll contact you soon. ✈️");
         router.push("/thank-you");
       } else {
-        toast.error("Something went wrong. Please try again.");
+        toast.error(result?.message || "Something went wrong. Please try again.");
       }
     } catch {
       toast.error("Network error. Please try again.");
@@ -691,7 +714,7 @@ export default function TailorMadePage() {
     summaryItems.push({ label: "Budget", value: `$${formData.priceMin.toLocaleString()} – $${formData.priceMax.toLocaleString()}` });
 
   const flatpickrDateOpts = { dateFormat: "Y-m-d", minDate: "today" as const };
-  const flatpickrMonthOpts = { plugins: [{ onReady: () => {}, onValueUpdate: () => {}, onDayCreate: () => {} }], dateFormat: "Y-m", minDate: "today" as const };
+  const flatpickrMonthOpts = { dateFormat: "Y-m", minDate: "today" as const };
 
   // ── Loading skeleton ─────────────────────────────────────────────────────
   if (apiLoading) {
