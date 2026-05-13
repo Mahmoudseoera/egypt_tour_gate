@@ -12,7 +12,6 @@ import {
   X,
   Home,
   BookOpen,
-  LogIn,
   CircleDollarSign,
   Globe,
   Bell,
@@ -20,6 +19,7 @@ import {
   HelpCircle,
   Smartphone,
   Map,
+  Heart,
   Compass,
   Sparkles,
   Ship,
@@ -85,20 +85,20 @@ function getCategoryColor(slug: string) {
 }
 
 /* ── Featured highlights (static) ───────────────────────────────────────── */
-const featuredHighlights = [
-  {
-    title: "Pyramids of Giza",
-    tag: "Most Popular",
-    img: "/assets/images/tours/camel front of giza pyramids.jpg",
-    href: "/egypt-day-tours/cairo-day-tours",
-  },
-  {
-    title: "Nile Cruise Package",
-    tag: "Best Value",
-    img: "/assets/images/tours/49-webp.webp",
-    href: "/egypt-nile-cruises/luxor-aswan-nile-cruises",
-  },
-];
+// const featuredHighlights = [
+//   {
+//     title: "Pyramids of Giza",
+//     tag: "Most Popular",
+//     img: "/assets/images/tours/camel front of giza pyramids.jpg",
+//     href: "/egypt-day-tours/cairo-day-tours",
+//   },
+//   {
+//     title: "Nile Cruise Package",
+//     tag: "Best Value",
+//     img: "/assets/images/tours/49-webp.webp",
+//     href: "/egypt-nile-cruises/luxor-aswan-nile-cruises",
+//   },
+// ];
 
 /* ── Locale prefix helpers ───────────────────────────────────────────────── */
 
@@ -214,6 +214,41 @@ export default function Navbar() {
     logoSrc.startsWith("http://localhost");
 
   const categories = data.header.categories;
+const featuredHighlights = categories
+  .map((cat) => {
+    if (!cat.subs?.length) return null;
+
+    const randomIndex =
+      cat.slug
+        .split("")
+        .reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+      cat.subs.length;
+
+    const randomSub = cat.subs[randomIndex];
+
+    return {
+      title: randomSub.name,
+      tag: cat.name,
+      img:
+        randomSub.media?.image ||
+        "/assets/images/tours/default-tour.jpg",
+
+      href: `/${cat.slug}/${randomSub.slug}`,
+      color: getCategoryColor(cat.slug),
+    };
+  })
+  .filter(
+    (
+      item
+    ): item is {
+      title: string;
+      tag: string;
+      img: string;
+      href: string;
+      color: string;
+    } => item !== null
+  )
+  .slice(0, 2);
 
   // Helper bound to current locale — used throughout JSX
   const lp = (path: string) => localizePath(path, locale);
@@ -460,6 +495,9 @@ export default function Navbar() {
                 <span className="hidden md:inline">USD</span>
                 <ChevronDown className="h-4 w-4" />
               </div>
+              <Link href="/favourite" className="flex items-center gap-1 pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition">
+               <Heart size={18} style={{ color: "var(--second-color)" }} />
+              </Link>
             </div>
           </div>
         </div>
@@ -636,7 +674,7 @@ export default function Navbar() {
                                 Featured
                               </p>
                               <div className="flex flex-col gap-3">
-                                {featuredHighlights.map((item) => (
+                                {featuredHighlights.map((item, index) => (
                                   <Link
                                     key={item.href}
                                     href={lp(item.href)}

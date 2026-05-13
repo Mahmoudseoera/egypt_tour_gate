@@ -1,15 +1,12 @@
 /**
  * app/api/booking/route.ts
- * ─────────────────────────────────────────────────────────────────────────────
- * Optional server-side proxy.
+ * Server-side proxy → https://www.egypttoursgate.com/api/v1/forms/booking-store
  *
- * USE THIS if the external API:
- *   a) doesn't have CORS headers allowing your browser origin, OR
- *   b) requires a secret API key you don't want in the browser bundle.
+ * IMPORTANT: the upstream API expects ALL numeric fields as strings:
+ *   tour_id, adult_number, children_number → sent as "553", "2", "4"
+ *   child_age                              → sent as ["7","8"]
  *
- * When active, change the fetch URL in booking-api.ts to:
- *   const BOOKING_ENDPOINT = '/api/booking';
- * ─────────────────────────────────────────────────────────────────────────────
+ * The guard below checks for string presence (not numeric type) to match.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -29,8 +26,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // Basic server-side guard
-  if (!payload.tour_id || !payload.email || !payload.name) {
+  // Guard: all three required fields must be non-empty strings
+  // (tour_id is a string like "553", not a number)
+  if (
+    !payload.tour_id  ||
+    !payload.email    ||
+    !payload.name     ||
+    typeof payload.tour_id !== 'string' ||
+    typeof payload.email   !== 'string' ||
+    typeof payload.name    !== 'string'
+  ) {
     return NextResponse.json(
       { success: false, message: 'Missing required booking fields.' },
       { status: 422 }
@@ -44,8 +49,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         'Content-Type':     'application/json',
         'Accept':           'application/json',
         'X-Requested-With': 'XMLHttpRequest',
-        // Inject secret server-side — never exposed to the browser:
-        // 'Authorization': `Bearer ${process.env.BOOKING_API_SECRET}`,
       },
       body: JSON.stringify(payload),
     });

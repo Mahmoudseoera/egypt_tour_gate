@@ -3,7 +3,7 @@
 import Image, { type ImageProps } from "next/image";
 import { useMemo, useState } from "react";
 
-const TOUR_FALLBACK_IMAGE = "/assets/images/tours/fallback-tour.svg";
+const TOUR_FALLBACK_IMAGE = "/assets/images/placeholder.png";
 
 type FallbackImageProps = ImageProps & {
   fallbackSrc?: string;

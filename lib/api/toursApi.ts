@@ -17,14 +17,12 @@ export interface ApiTourListItem {
   media?: { image?: string; title?: string; alt?: string };
 }
 
-/** A single price row derived from pricing_tables[].prices entries */
 export interface PricingTableRow {
-  category: string;   // e.g. "1", "2-4", "5-8" (pax group label)
+  category: string;
   price: number;
   currency: string;
 }
 
-/** A full pricing table block (type "daily" | "hotel", with optional hotels array) */
 export interface PricingTable {
   id: number;
   type: string;
@@ -32,7 +30,6 @@ export interface PricingTable {
   rows: PricingTableRow[];
 }
 
-/** Related article shape returned by related_articles */
 export interface RelatedArticle {
   id: number;
   name: string;
@@ -50,15 +47,10 @@ export interface ApiTourDetails extends ApiTourListItem {
   included?: string[];
   excluded?: string[];
   images?: string[];
-  /** Legacy flat pricing (kept for backward compat) */
   pricing?: Array<{ category: string; price: number }>;
-  /** Rich pricing tables from pricing_tables API field */
   pricingTables?: PricingTable[];
-  /** Related tours from related_tours API field */
   relatedTours?: ApiTourListItem[];
-  /** Related articles from related_articles API field */
   relatedArticles?: RelatedArticle[];
-  /** Tour code */
   code?: string;
 }
 
@@ -101,7 +93,6 @@ function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
     item.from_price ??
     item.cost;
 
-  // Combine duration + duration_type if both are present (e.g. "9 Day")
   const rawDuration = item.duration ?? "";
   const durationType = item.duration_type ?? "";
   const duration =
@@ -118,7 +109,6 @@ function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
     rating: Number(item.rating ?? 0),
     duration,
     location: item.location ?? item.city ?? item.sub_category_name ?? "",
-    // real API uses small_desc — added as first candidate
     short_description:
       item.small_desc ??
       item.short_description ??
@@ -150,7 +140,6 @@ function pickStringArray(input: unknown): string[] {
     .filter((v) => typeof v === "string" && v.trim().length > 0);
 }
 
-// ─── Strip HTML tags from description strings ─────────────────────────────────
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]*>/g, " ")
@@ -159,23 +148,11 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-/**
- * Parse HTML inclusion/exclusion blocks into plain-text bullet arrays.
- * The real API returns these as an HTML string with <li> items.
- * Strategy:
- *   1. If the input is already a string[], return cleaned items.
- *   2. If it's an HTML string, extract <li> text nodes.
- *   3. If it's a plain string (no HTML), split by newline as fallback.
- */
 function pickHtmlList(input: unknown): string[] {
   if (!input) return [];
-
-  // Already an array — use existing pickStringArray logic
   if (Array.isArray(input)) return pickStringArray(input);
-
   if (typeof input !== "string" || !input.trim()) return [];
 
-  // Extract <li> inner text
   const liMatches = input.match(/<li[^>]*>([\s\S]*?)<\/li>/gi);
   if (liMatches && liMatches.length > 0) {
     return liMatches
@@ -183,7 +160,6 @@ function pickHtmlList(input: unknown): string[] {
       .filter((s) => s.length > 0);
   }
 
-  // Fallback: strip all HTML and split by newline
   const plain = stripHtml(input);
   return plain
     .split(/\n/)
@@ -200,10 +176,6 @@ export async function getGeneralCategories(locale?: string): Promise<AnyObj[]> {
   return asArray(data?.header?.categories ?? data?.header?.headerCategories);
 }
 
-// ─── Category page ────────────────────────────────────────────────────────────
-// Real API: GET /categories/{slug}
-// Response shape: { success, data: { id, name, slug, second_title, desc, media, seo, subCategories[] } }
-// Note: subcategories are under `subCategories` (not `subs`).
 export async function getCategoryBySlug(
   slug: string,
   locale?: string
@@ -214,24 +186,16 @@ export async function getCategoryBySlug(
   });
   const data = pickData(response);
 
-  // Normalize: expose `subs` so the page can use a single field name,
-  // and expose plain `desc` / `second_title` for the description.
   const raw = data?.category ?? data;
   if (!raw || typeof raw !== "object") return null;
 
   return {
     ...raw,
-    // Unify subcategory field — real API returns `subCategories`
     subs: asArray(raw.subs ?? raw.subCategories ?? raw.sub_categories),
-    // Plain-text description stripped of HTML
     plainDesc: raw.desc ? stripHtml(raw.desc) : "",
   };
 }
 
-// ─── Subcategory page ─────────────────────────────────────────────────────────
-// Real API: GET /sub-category/{slug}
-// Response shape: { success, data: { id, name, slug, second_title, desc, media, seo, tours[] } }
-// Tours are at data.tours (after pickData unwraps the outer `data` key).
 export async function getSubcategoryBySlug(
   slug: string,
   locale?: string
@@ -241,7 +205,6 @@ export async function getSubcategoryBySlug(
     next: { revalidate: 3600, tags: [`subcategory:${slug}`] },
   });
   const data = pickData(response);
-  // real API: data IS the subcategory object directly (id, name, slug, desc, tours…)
   const raw = data?.sub_category ?? data?.subcategory ?? data;
   if (!raw || typeof raw !== "object") return null;
 
@@ -260,12 +223,8 @@ export async function getToursBySubcategory(
     next: { revalidate: 3600, tags: [`subcategory:${slug}`, "tours"] },
   });
   const data = pickData(response);
-  // real API: tours live at data.tours (after pickData unwraps outer `data`)
-  const raw =
-    data?.sub_category ?? data?.subcategory ?? data;
-  const rawTours = asArray(
-    raw?.tours ?? data?.tours ?? data?.items
-  );
+  const raw = data?.sub_category ?? data?.subcategory ?? data;
+  const rawTours = asArray(raw?.tours ?? data?.tours ?? data?.items);
   return rawTours.map((item) => mapTour(item, item?.slug ?? ""));
 }
 
@@ -285,8 +244,6 @@ export async function getTourBySlug(
     raw.highlights ?? raw.tour_highlights ?? raw.key_highlights
   );
 
-  // ── Inclusion / Exclusion — raw API returns HTML strings ──────────────────
-  // Strip HTML tags so UI renders clean plain-text bullet lists.
   const included = pickHtmlList(
     raw.included ?? raw.includes ?? raw.inclusions ?? raw.inclusion
   );
@@ -294,7 +251,6 @@ export async function getTourBySlug(
     raw.excluded ?? raw.excludes ?? raw.exclusions ?? raw.exclusion
   );
 
-  // ── Itinerary — real API returns items with `desc` (HTML) field ───────────
   const itineraryRaw = asArray(
     raw.itinerary ?? raw.plan ?? raw.days ?? raw.program
   );
@@ -302,21 +258,36 @@ export async function getTourBySlug(
     .map((day, index) => ({
       day: Number(day?.day ?? day?.day_number ?? index + 1),
       title: day?.title ?? day?.name ?? day?.day ?? "",
-      // real API uses `desc` (HTML) — strip tags; fallback to plain fields
       description: stripHtml(
         day?.desc ?? day?.description ?? day?.content ?? day?.text ?? ""
       ),
     }))
     .filter((day) => day.title || day.description);
 
-  // ── Gallery images ────────────────────────────────────────────────────────
-  const images = asArray(raw.images ?? raw.gallery ?? raw.media?.images)
-    .map((img) =>
-      typeof img === "string" ? img : img?.image ?? img?.url ?? ""
-    )
+  // ── FIX #4: Gallery images ────────────────────────────────────────────────
+  // The real API returns `gallery` as an array of objects:
+  //   { id, type, image, title, alt }
+  // Previously the code looked for raw.images / raw.gallery as plain string[].
+  // Now we correctly map raw.gallery[].image → string URLs.
+  // Fallback chain: gallery → images → media.images → [media.image]
+  const galleryRaw = asArray(raw.gallery ?? raw.images ?? raw.media?.images);
+  const images: string[] = galleryRaw
+    .map((img) => {
+      if (typeof img === "string") return img;
+      // gallery objects from real API: { image, url, src }
+      if (img && typeof img === "object") {
+        return (img as AnyObj).image ?? (img as AnyObj).url ?? (img as AnyObj).src ?? "";
+      }
+      return "";
+    })
     .filter(Boolean);
 
-  // ── Legacy flat pricing (backward compat) ─────────────────────────────────
+  // Final fallback: if gallery is empty, use the tour cover image
+  const finalImages =
+    images.length > 0
+      ? images
+      : [raw.media?.image ?? raw.image].filter(Boolean) as string[];
+
   const pricing = asArray(raw.pricing ?? raw.price_table ?? raw.prices)
     .map((row) => ({
       category: row?.category ?? row?.name ?? "",
@@ -324,8 +295,6 @@ export async function getTourBySlug(
     }))
     .filter((row) => row.category || row.price);
 
-  // ── Rich pricing_tables (real API) ────────────────────────────────────────
-  // Shape: [{ id, type, title, prices: { first: { title, price, currency }, second: … } }]
   const pricingTables: PricingTable[] = asArray(
     raw.pricing_tables ?? raw.pricingTables
   ).map((table) => {
@@ -348,12 +317,10 @@ export async function getTourBySlug(
     };
   });
 
-  // ── Related tours (real API field: related_tours) ─────────────────────────
   const relatedTours: ApiTourListItem[] = asArray(
     raw.related_tours ?? raw.relatedTours
   ).map((item) => mapTour(item, item?.slug ?? ""));
 
-  // ── Related articles (real API field: related_articles) ───────────────────
   const relatedArticles: RelatedArticle[] = asArray(
     raw.related_articles ?? raw.relatedArticles
   ).map((item) => ({
@@ -384,7 +351,7 @@ export async function getTourBySlug(
     itinerary,
     included,
     excluded,
-    images,
+    images: finalImages,  // ← fixed gallery
     pricing,
     pricingTables,
     relatedTours,

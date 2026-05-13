@@ -1,41 +1,34 @@
 /**
  * lib/api/booking-api.ts
  * ─────────────────────────────────────────────────────────────────────────────
- * Type definitions, payload transformer, and submission logic for:
- *   POST /api/booking (server proxy to https://www.egypttoursgate.com/api/v1/forms/booking-store)
+ * Confirmed from API Dog response: the backend accepts AND returns ALL numeric
+ * fields as STRINGS ("adult_number": "2", "tour_id": "553", etc.) and
+ * child_age as string[] (["7","8"]).
  *
- * Mapping of sample data → API payload:
- *   tour_id:          "553"            → 553         (string → number)
- *   name:             "test"           → "test"
- *   email:            "test@gmail.com" → "test@gmail.com"
- *   phone:            "++201125544878" → "+201125544878" (double-+ stripped)
- *   nationality:      "Belarus"        → "Belarus"
- *   arrival_date:     "2026-04-27"     → "2026-04-27"
- *   departure_date:   "2026-05-27"     → "2026-05-27"
- *   adult_number:     "2"              → 2           (string → number)
- *   children_number:  "4"             → 4           (string → number)
- *   child_age:        ["7","8"]        → [7, 8]     (string[] → number[])
- *
- * ⚠️  NOTE on sample data: children_number=4 but only 2 ages supplied.
- *     The form enforces child_age.length === children_number before submit.
+ * Previously buildBookingPayload() was calling parseInt() on these fields,
+ * converting them to numbers — which caused validation errors on the server.
+ * This version sends everything as strings, matching the confirmed API contract.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
 // ─── 1. API Contract ──────────────────────────────────────────────────────────
 
-/** Exact JSON body the endpoint expects */
+/**
+ * Exact JSON body the endpoint expects.
+ * All "numeric" fields are sent as strings — confirmed by API Dog response.
+ */
 export interface BookingApiPayload {
-  tour_id:         number;      // required — numeric tour ID
-  name:            string;      // required — guest full name
-  email:           string;      // required — valid email
-  phone:           string;      // required — international format, single leading "+"
-  nationality:     string;      // required — country name
-  arrival_date:    string;      // required — YYYY-MM-DD
-  departure_date:  string;      // required — YYYY-MM-DD, must be > arrival_date
-  adult_number:    number;      // required — integer ≥ 1
-  children_number: number;      // required — integer ≥ 0
-  child_age?:      number[];    // conditional — required when children_number > 0
-  message?:        string;      // optional — free-text note
+  tour_id:         string;     // "553"
+  name:            string;     // "test"
+  email:           string;     // "test@gmail.com"
+  phone:           string;     // "+201125544878"
+  nationality:     string;     // "Belarus"
+  arrival_date:    string;     // "2026-05-15"
+  departure_date:  string;     // "2026-05-27"
+  adult_number:    string;     // "2"
+  children_number: string;     // "4"
+  child_age?:      string[];   // ["7","8"]
+  message?:        string;     // "message"
 }
 
 /** Success response envelope */
@@ -45,6 +38,7 @@ export interface BookingApiSuccess {
   data?: {
     booking_id?: number | string;
     reference?:  string;
+    id?:         number;
     [key: string]: unknown;
   };
 }
@@ -53,7 +47,6 @@ export interface BookingApiSuccess {
 export interface BookingApiError {
   success: false;
   message: string;
-  /** Field-level validation errors: { "arrival_date": ["The arrival date must be a future date."] } */
   errors?: Record<string, string[]>;
 }
 
@@ -61,21 +54,17 @@ export type BookingApiResponse = BookingApiSuccess | BookingApiError;
 
 // ─── 2. Internal Form State ───────────────────────────────────────────────────
 
-/**
- * React form state — all user inputs are strings; counters are numbers.
- * Maps directly from TourDetailsClient's FormState fields.
- */
 export interface BookingFormState {
-  tour_id:         string;    // from tour.id prop (not user-editable)
+  tour_id:         string;
   name:            string;
   email:           string;
-  phone:           string;    // local number (without country code prefix)
+  phone:           string;    // already combined: countryCode + local number
   nationality:     string;
-  arrival_date:    string;    // YYYY-MM-DD — from flatpickr checkIn
-  departure_date:  string;    // YYYY-MM-DD — from flatpickr checkOut
-  adult_number:    number;
-  children_number: number;
-  child_age:       string[];  // one entry per child, cast to number on submit
+  arrival_date:    string;    // YYYY-MM-DD
+  departure_date:  string;    // YYYY-MM-DD
+  adult_number:    number;    // counter value from UI (will be stringified)
+  children_number: number;    // counter value from UI (will be stringified)
+  child_age:       string[];  // one entry per child, sent as-is
   message:         string;
 }
 
@@ -84,13 +73,8 @@ export interface BookingFormState {
 /**
  * Normalises phone strings:
  *   "++201125544878" → "+201125544878"
- *   "+20 11 2554 4878" → "+20 11 2554 4878" (spaces preserved, valid)
- *
- * Call this BEFORE combining countryCode + localPhone:
- *   sanitisePhone(`${countryCode}${localPhone.replace(/^0+/, '')}`)
  */
 export function sanitisePhone(raw: string): string {
-  // Collapse multiple leading "+" into one
   return raw.replace(/^\++/, '+').replace(/[^\d+\s\-()]/g, '');
 }
 
@@ -98,26 +82,28 @@ export function sanitisePhone(raw: string): string {
 
 /**
  * Transforms the React form state into the exact API payload.
- * Handles all type coercions: string → number, string[] → number[].
+ *
+ * KEY CHANGE: all numeric fields are now sent as strings to match the
+ * confirmed API contract ("adult_number": "2", not 2).
  */
 export function buildBookingPayload(form: BookingFormState): BookingApiPayload {
   const payload: BookingApiPayload = {
-    tour_id:         parseInt(form.tour_id, 10),
+    tour_id:         form.tour_id,                         // already a string
     name:            form.name.trim(),
     email:           form.email.trim().toLowerCase(),
     phone:           sanitisePhone(form.phone.trim()),
     nationality:     form.nationality.trim(),
     arrival_date:    form.arrival_date,
     departure_date:  form.departure_date,
-    adult_number:    form.adult_number,
-    children_number: form.children_number,
+    adult_number:    String(form.adult_number),            // number → string
+    children_number: String(form.children_number),         // number → string
   };
 
-  // Only include child_age when there are children
+  // Include child_age whenever children > 0, send as string[] (no parseInt)
   if (form.children_number > 0 && form.child_age.length > 0) {
     payload.child_age = form.child_age
       .slice(0, form.children_number)
-      .map((a) => parseInt(a, 10));
+      .map((a) => a.trim());                               // keep as strings
   }
 
   if (form.message.trim()) {
@@ -129,37 +115,15 @@ export function buildBookingPayload(form: BookingFormState): BookingApiPayload {
 
 // ─── 5. Submission ────────────────────────────────────────────────────────────
 
-/**
- * POST result returned to the component.
- * fieldErrors keys are normalised to UI field names (checkIn, checkOut, etc.)
- * so the component can display them directly without any extra mapping.
- */
 export interface SubmitBookingResult {
   ok:           boolean;
   message:      string;
   data?:        BookingApiSuccess['data'];
-  /** UI-field-keyed errors hydrated from the API response */
   fieldErrors?: Record<string, string>;
 }
 
 const BOOKING_ENDPOINT = '/api/booking';
 
-/**
- * Submits the booking payload to the API.
- *
- * Headers:
- *   Content-Type:      application/json
- *   Accept:            application/json
- *   X-Requested-With:  XMLHttpRequest    (required by some Laravel installs)
- *
- * Outstanding questions for the API owner:
- *   □ Does this endpoint require Authorization: Bearer <token>?
- *   □ Is there a CSRF token requirement (X-XSRF-TOKEN / _token field)?
- *   □ What HTTP status code does a successful creation return? (200 or 201?)
- *   □ Is there a rate limit per IP? If yes, what is it?
- *   □ Are there CORS headers set to allow browser requests from this domain?
- *     Browser submissions always use the Next.js proxy at app/api/booking/route.ts
- */
 export async function submitBooking(
   payload: BookingApiPayload
 ): Promise<SubmitBookingResult> {
@@ -172,7 +136,6 @@ export async function submitBooking(
         'Content-Type':     'application/json',
         'Accept':           'application/json',
         'X-Requested-With': 'XMLHttpRequest',
-        // 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_BOOKING_API_KEY}`,
       },
       body: JSON.stringify(payload),
     });
@@ -183,7 +146,6 @@ export async function submitBooking(
     };
   }
 
-  // Parse body regardless of status (the API sends errors as JSON too)
   let body: BookingApiResponse;
   try {
     body = await res.json();
@@ -203,7 +165,7 @@ export async function submitBooking(
   }
 
   // Error path — normalise API field names → UI field names
-  const errBody    = body as BookingApiError;
+  const errBody   = body as BookingApiError;
   const uiErrors: Record<string, string> = {};
 
   if (errBody.errors) {
@@ -215,7 +177,6 @@ export async function submitBooking(
     };
 
     for (const [apiField, messages] of Object.entries(errBody.errors)) {
-      // child_age.0, child_age.1, … → childAges_0, childAges_1, …
       const dotIndex = apiField.match(/^child_age\.(\d+)$/);
       if (dotIndex) {
         uiErrors[`childAges_${dotIndex[1]}`] = messages[0];

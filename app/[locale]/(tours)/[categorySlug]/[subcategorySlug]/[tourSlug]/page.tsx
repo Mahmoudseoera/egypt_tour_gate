@@ -1,4 +1,4 @@
-//  tour Details Page //
+//  tour Details Page egypt_tour_gate\app\[locale]\(tours)\[categorySlug]\[subcategorySlug]\[tourSlug]\page.tsx//
 
 import type { Metadata } from 'next';
 import TourDetailsClient from "./TourDetailsClient";
