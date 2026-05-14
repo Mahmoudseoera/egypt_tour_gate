@@ -1,15 +1,4 @@
-// egypt_tour_gate\app\[locale]\(tours)\[categorySlug]\[subcategorySlug]\[tourSlug]\TourDetailsClient.tsx
-//
-// FIXES applied in this version:
-//  #1 – Form validation: tour_id was sent as number but API expects string.
-//       buildBookingPayload now keeps it as-is (already a string in state).
-//  #2 – Children policy CARDS removed; kept description text + rules only.
-//  #3 – Tour code badge added after the gallery section.
-//  #4 – Gallery: toursApi now maps gallery[].image correctly (see toursApi.ts).
-//       safeTourImages builds from images[] which now contains real URLs.
-//  #5 – Flatpickr double-input fixed: removed `value` prop from ref inputs
-//       (flatpickr owns the DOM value); minDate set to tomorrowISO() so
-//       "today" is never selectable, preventing the off-by-one date issue.
+// egypt_tour_gate\app\[locale]\(tours)\[categorySlug]\[subcategorySlug]\[tourSlug]\TourDetailsClient.tsx//
 
 'use client';
 import LightGallery from "lightgallery/react";
@@ -41,9 +30,20 @@ import {
   X, ChevronLeft, ChevronRight, MapPin, Clock,
   Star, Check, Phone, Mail, MessageCircle,
   Calendar, BookOpen, ArrowRight, Baby,
-  ChevronsDownUp, ChevronsUpDown, Hash,
+  ChevronsDownUp, ChevronsUpDown,
 } from 'lucide-react';
 import type { ApiTourDetails, ApiTourListItem, RelatedArticle } from '@/lib/api/toursApi';
+
+/** Convert a Date to YYYY-MM-DD in LOCAL timezone (not UTC).
+ *  date.toISOString() shifts to UTC which causes off-by-one in UTC+ zones. */
+function localISO(date: Date): string {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
 
 /* ─── Types ─── */
 interface PriceRow {
@@ -81,7 +81,50 @@ const INITIAL: FormState = {
   tour_id:     '',
 };
 
-// ── FIX #2: Removed childrenPolicy cards array — kept policyRules only ──
+/* ─── Children Policy data ─── */
+// const childrenPolicy = [
+//   {
+//     icon: '🍼',
+//     label: 'Infants (Under 2)',
+//     price: 'FREE',
+//     color: 'bg-green-50 border-green-200 text-green-700',
+//     badgeColor: 'bg-green-500',
+//     note: 'No seat or meal included. Must sit on parent\'s lap.',
+//   },
+//   {
+//     icon: '🧒',
+//     label: 'Children (2–5)',
+//     price: 'FREE',
+//     color: 'bg-blue-50 border-blue-200 text-blue-700',
+//     badgeColor: 'bg-blue-500',
+//     note: 'Seat included, no meals. Entrance fees apply at child rate.',
+//   },
+//   {
+//     icon: '👦',
+//     label: 'Children (6–11)',
+//     price: '50% off',
+//     color: 'bg-amber-50 border-amber-200 text-amber-700',
+//     badgeColor: 'bg-[var(--main-color)]',
+//     note: 'Half price on all tour services and site entrance fees.',
+//   },
+//   {
+//     icon: '🧑',
+//     label: 'Youth (12–17)',
+//     price: '75% of adult',
+//     color: 'bg-purple-50 border-purple-200 text-purple-700',
+//     badgeColor: 'bg-purple-500',
+//     note: 'Discounted rate applies to tours, cruises, and most services.',
+//   },
+//   {
+//     icon: '🧑‍💼',
+//     label: 'Adults (18+)',
+//     price: 'Full price',
+//     color: 'bg-gray-50 border-gray-200 text-gray-700',
+//     badgeColor: 'bg-[var(--second-color)]',
+//     note: 'Standard pricing as listed in the pricing table above.',
+//   },
+// ];
+
 const policyRules = [
   'Age is calculated at the time of travel, not at the time of booking.',
   'Children must be accompanied by at least one adult (18+) at all times.',
@@ -114,21 +157,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   const fpCheckOut  = useRef<{ destroy(): void; set(k: string, v: unknown): void } | null>(null);
   const lightGalleryRef = useRef<{ openGallery(i: number): void } | null>(null);
 
-  // ── FIX #5: Flatpickr double-input & wrong date ───────────────────────────
-  // Root causes:
-  //   a) `altInput: true` makes flatpickr inject a second <input> into the DOM
-  //      while hiding the original. When React's controlled `value` prop is also
-  //      set on the original input, React re-renders fight with flatpickr's DOM
-  //      ownership → two visible inputs appear.
-  //      Fix: do NOT pass `value` to the ref inputs; let flatpickr own them.
-  //
-  //   b) `date.toISOString()` converts to UTC, which can be a day behind for
-  //      timezones UTC+. Use local-date arithmetic instead.
-  //
-  //   c) minDate was set to tomorrowISO() so today is already blocked in the
-  //      calendar, but if the user somehow typed today's date it passed.
-  //      Fix: schema validation also guards with `>= tomorrowISO()`.
-
+  /* ── Init flatpickr (dynamic import — SSR safe) ── */
   useEffect(() => {
     let cancelled = false;
 
@@ -137,41 +166,39 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
       const fp = mod.default;
 
       fpCheckIn.current = fp(checkInRef.current!, {
-        minDate:       tomorrowISO(),   // blocks today + past
-        dateFormat:    'Y-m-d',
-        altInput:      true,            // shows formatted date in a second input
-        altFormat:     'D, M j Y',
+        minDate:      tomorrowISO(),
+        dateFormat:   'Y-m-d',
+        altInput:     true,
+        altFormat:    'D, M j Y',
         disableMobile: true,
         onChange([date]) {
           if (!date) return;
-          // ── Use local date, NOT toISOString() which shifts to UTC ──
-          const iso = [
-            date.getFullYear(),
-            String(date.getMonth() + 1).padStart(2, '0'),
-            String(date.getDate()).padStart(2, '0'),
-          ].join('-');
+          const iso = localISO(date);                      // local tz, no UTC shift
           setFormData((p) => ({ ...p, checkIn: iso }));
-          setFieldErrors((p) => ({ ...p, checkIn: undefined }));
-          // Push checkout minDate to the day after check-in
+          const err = validateField('checkIn', iso);
+          setFieldErrors((p) => ({ ...p, checkIn: err }));
+          // Push checkout min to day-after check-in
           const nextDay = new Date(date);
           nextDay.setDate(nextDay.getDate() + 1);
           (fpCheckOut.current as any)?.set('minDate', nextDay);
         },
+        onClose([date]) {
+          if (!date) {
+            const err = validateField('checkIn', '');
+            setFieldErrors((p) => ({ ...p, checkIn: err }));
+          }
+        },
       }) as unknown as typeof fpCheckIn.current;
 
       fpCheckOut.current = fp(checkOutRef.current!, {
-        minDate:       tomorrowISO(),
-        dateFormat:    'Y-m-d',
-        altInput:      true,
-        altFormat:     'D, M j Y',
+        minDate:      tomorrowISO(),
+        dateFormat:   'Y-m-d',
+        altInput:     true,
+        altFormat:    'D, M j Y',
         disableMobile: true,
         onChange([date]) {
           if (!date) return;
-          const iso = [
-            date.getFullYear(),
-            String(date.getMonth() + 1).padStart(2, '0'),
-            String(date.getDate()).padStart(2, '0'),
-          ].join('-');
+          const iso = localISO(date);                      // local tz, no UTC shift
           setFormData((p) => {
             const err = iso <= (p.checkIn || todayISO())
               ? 'Check-out date must be after check-in date'
@@ -179,6 +206,12 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
             setFieldErrors((fe) => ({ ...fe, checkOut: err }));
             return { ...p, checkOut: iso };
           });
+        },
+        onClose([date]) {
+          if (!date) {
+            const err = validateField('checkOut', '');
+            setFieldErrors((p) => ({ ...p, checkOut: err }));
+          }
         },
       }) as unknown as typeof fpCheckOut.current;
     });
@@ -191,33 +224,33 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   }, []);
 
   /* ── Dynamic API Data ── */
-  // ── FIX #4: images[] now contains real gallery URLs from toursApi ──────────
-  // toursApi.getTourBySlug now correctly maps gallery[].image (not gallery as
-  // a plain string[]). safeTourImages will have real URLs; no placeholders shown
-  // unless the tour genuinely has no gallery images at all.
   const tourImages = (tour.images?.filter(Boolean)?.length
     ? tour.images
-    : [tour.media?.image, tour.image].filter(Boolean)) as string[];
+    : [tour.image].filter(Boolean)) as string[];
   const safeTourImages = tourImages.length > 0 ? tourImages : ["/assets/images/tours/49-webp.webp"];
-
   const highlights = tour.highlights?.filter(Boolean) ?? [];
   const itinerary = (tour.itinerary?.length
     ? tour.itinerary.map((item, index) => ({ ...item, day: item.day ?? index + 1 }))
     : []) as Array<{ day: number; title: string; description: string }>;
 
+  // ── Pricing: prefer rich pricingTables, fall back to flat pricing, then price_from ──
   const priceTable: PriceRow[] = (() => {
+    // Use first pricing_table's rows if available
     if (tour.pricingTables?.length && tour.pricingTables[0].rows.length > 0) {
       return tour.pricingTables[0].rows.map((r) => ({
         category: r.category ? `${r.category} ${r.category === "1" ? "Person" : "Persons"}` : "Standard",
         price: r.price,
       }));
     }
+    // Fall back to legacy flat pricing
     if (tour.pricing?.length) {
       return tour.pricing.map((item) => ({ category: item.category || "Standard", price: item.price }));
     }
+    // Last resort — single row from price_from
     return [{ category: "Standard", price: tour.price_from || 0 }];
   })();
 
+  // Pricing table title from API (first table)
   const pricingTableTitle = tour.pricingTables?.[0]?.title ?? "Prices Per Person";
 
   const included = tour.included?.filter(Boolean) ?? [];
@@ -226,18 +259,21 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   const locationText = tour.location?.trim() || "Egypt";
   const durationText = tour.duration?.trim() || "Custom duration";
   const ratingValue = Number.isFinite(tour.rating) && tour.rating > 0 ? tour.rating : 4.5;
-  const relatedTours = tour.relatedTours ?? [];
-  const relatedArticles = tour.relatedArticles ?? [];
 
-  // ── FIX #3: tour code ──────────────────────────────────────────────────────
-  const tourCode = tour.code?.trim() || null;
+  // ── Related Tours — from API, no static fallback ──────────────────────────
+  const relatedTours = tour.relatedTours ?? [];
+
+  // ── Related Articles — from API, no static fallback ───────────────────────
+  const relatedArticles = tour.relatedArticles ?? [];
 
   /* ── Toggle All Itinerary ── */
   const handleToggleAll = () => {
     if (allOpen) {
+      // Close all
       setAllOpen(false);
       setActiveDay(null);
     } else {
+      // Open all — use a special sentinel value
       setAllOpen(true);
       setActiveDay(null);
     }
@@ -247,6 +283,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
 
   const handleDayToggle = (day: number) => {
     if (allOpen) {
+      // When all are open, clicking one collapses all-open mode and keeps only that one closed
       setAllOpen(false);
       setActiveDay(null);
     } else {
@@ -309,6 +346,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // ── Step 1: Zod client-side validation (existing schema) ────────────────
     const parsed = tourDetailsSchema.safeParse(formData);
     if (!parsed.success) {
       const errs: Record<string, string> = {};
@@ -326,15 +364,14 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
     setFieldErrors({});
     setSubmitStatus('loading');
 
-    // ── FIX #1: Build API payload ────────────────────────────────────────────
-    // tour_id is already a string in formData ("553").
-    // adult_number / children_number will be stringified by buildBookingPayload.
+    // ── Step 2: Build the typed API payload ─────────────────────────────────
+    // Combine countryCode + phone into a single international phone string
     const rawPhone = formData.countryCode
       ? `${formData.countryCode}${formData.phone.replace(/^0+/, '')}`
       : formData.phone;
 
     const bookingFormState: BookingFormState = {
-      tour_id:         String(tour.id),   // ensure string, e.g. "553"
+      tour_id:         String(tour.id),
       name:            formData.name,
       email:           formData.email,
       phone:           sanitisePhone(rawPhone),
@@ -348,7 +385,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
     };
 
     const payload = buildBookingPayload(bookingFormState);
-    const result  = await submitBooking(payload);
+
+    // ── Step 3: Submit to API ───────────────────────────────────────────────
+    const result = await submitBooking(payload);
 
     if (result.ok) {
       setSubmitStatus('success');
@@ -359,6 +398,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
     } else {
       setSubmitStatus('error');
 
+      // Hydrate server field-level errors back into the form
       if (result.fieldErrors) {
         const remapped: Record<string, string | undefined> = {};
         for (const [field, msg] of Object.entries(result.fieldErrors)) {
@@ -395,6 +435,10 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   return (
     <>
       <style>{`
+        /* Flatpickr — hide the original hidden input; only the alt-input is visible */
+        .flatpickr-input:not(.flatpickr-alt-input){display:none!important}
+
+        /* Flatpickr theme — navy + gold */
         .flatpickr-calendar{border-radius:14px!important;box-shadow:0 20px 60px rgba(39,34,98,.18)!important;font-family:inherit!important;border:none!important;z-index:9999!important;max-width:320px!important}
         .flatpickr-months .flatpickr-month,.flatpickr-current-month{background:var(--second-color)!important;color:#fff!important;border-radius:14px 14px 0 0!important}
         .flatpickr-weekday{color:var(--second-color)!important;font-weight:700!important}
@@ -405,39 +449,101 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
         .flatpickr-prev-month svg,.flatpickr-next-month svg{fill:#fff!important}
         .flatpickr-prev-month:hover svg,.flatpickr-next-month:hover svg{fill:var(--main-color)!important}
 
-        /* ── FIX #5: Hide the original input that flatpickr keeps hidden.
-           flatpickr with altInput=true injects its own formatted input and
-           hides the original via display:none on the original element's
-           wrapper class. We reinforce that here to prevent flicker. ── */
-        .flatpickr-input.form-control.input { display: none !important; }
-
+        /* Sidebar headers */
         .sh-form{background:linear-gradient(135deg,var(--second-color) 0%,#3d3586 100%)}
         .sh-contact{background:linear-gradient(135deg,var(--main-color) 0%,#d19e3d 100%)}
         .sh-articles{background:linear-gradient(135deg,var(--second-color) 0%,#2d2566 100%)}
 
+        /* Counter buttons */
         .ctr-btn{width:32px;height:32px;border-radius:50%;border:2px solid #e5e7eb;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:17px;line-height:1;color:#555;cursor:pointer;background:#fff;flex-shrink:0}
         .ctr-btn:hover{border-color:var(--second-color);color:var(--second-color);background:rgba(39,34,98,.06)}
         .ctr-btn:disabled{opacity:.35;cursor:not-allowed}
 
+        /* Child age slide-in */
         .child-in{animation:cIn .22s ease}
         @keyframes cIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 
-        .toggle-all-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:all .2s ease;border:2px solid var(--second-color);color:var(--second-color);background:transparent}
-        .toggle-all-btn:hover{background:var(--second-color);color:#fff}
-        .toggle-all-btn.all-open{background:var(--second-color);color:#fff}
-        .toggle-all-btn.all-open:hover{background:transparent;color:var(--second-color)}
+        /* Toggle-all button */
+        .toggle-all-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 14px;
+          border-radius: 8px;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: 2px solid var(--second-color);
+          color: var(--second-color);
+          background: transparent;
+        }
+        .toggle-all-btn:hover {
+          background: var(--second-color);
+          color: #fff;
+        }
+        .toggle-all-btn.all-open {
+          background: var(--second-color);
+          color: #fff;
+        }
+        .toggle-all-btn.all-open:hover {
+          background: transparent;
+          color: var(--second-color);
+        }
 
-        .policy-rule-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#555;line-height:1.5}
-        .policy-rule-dot{width:6px;height:6px;border-radius:50%;background:var(--main-color);flex-shrink:0;margin-top:7px}
+        /* Children Policy cards */
+        .policy-card {
+          border-radius: 14px;
+          border: 1.5px solid;
+          padding: 14px 16px;
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .policy-card:hover {
+          box-shadow: 0 4px 20px rgba(39,34,98,0.10);
+          transform: translateY(-2px);
+        }
+        .policy-badge {
+          display: inline-block;
+          color: #fff;
+          font-size: 11px;
+          font-weight: 800;
+          padding: 2px 10px;
+          border-radius: 999px;
+          white-space: nowrap;
+          letter-spacing: 0.03em;
+        }
+        .policy-rule-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          font-size: 13px;
+          color: #555;
+          line-height: 1.5;
+        }
+        .policy-rule-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--main-color);
+          flex-shrink: 0;
+          margin-top: 7px;
+        }
       `}</style>
 
     <div className="min-h-screen">
 
       {/* ── Hero Gallery ── */}
+      {/* Layout adapts to image count: 1=full, 2=half+half, 3=big+2stack, 4=big+3grid, 5=big+4grid */}
       <section className="relative w-full h-[300px] sm:h-[420px] md:h-[550px] overflow-hidden">
         {(() => {
           const count = safeTourImages.length;
 
+          // ── 1 image: full-width hero ──────────────────────────────────────
           if (count === 1) {
             return (
               <div
@@ -447,12 +553,14 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
                 <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4" />View Gallery ({count})
+                  <BookOpen className="w-4 h-4" />
+                  View Gallery ({count})
                 </span>
               </div>
             );
           }
 
+          // ── 2 images: side by side ────────────────────────────────────────
           if (count === 2) {
             return (
               <div className="grid grid-cols-2 gap-1 md:gap-2 h-full">
@@ -466,7 +574,8 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
                     {i === 0 && (
                       <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
-                        <BookOpen className="w-4 h-4" />View Gallery ({count})
+                        <BookOpen className="w-4 h-4" />
+                        View Gallery ({count})
                       </span>
                     )}
                   </div>
@@ -475,9 +584,11 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
             );
           }
 
+          // ── 3 images: big left + 2 stacked right ─────────────────────────
           if (count === 3) {
             return (
               <div className="grid grid-cols-2 gap-1 md:gap-2 h-full">
+                {/* Main image */}
                 <div
                   className="relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat h-full"
                   onClick={() => openLightbox(0)}
@@ -485,9 +596,11 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
                   <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" />View Gallery ({count})
+                    <BookOpen className="w-4 h-4" />
+                    View Gallery ({count})
                   </span>
                 </div>
+                {/* Right stack */}
                 <div className="grid grid-rows-2 gap-1 md:gap-2 h-full">
                   {safeTourImages.slice(1, 3).map((img, i) => (
                     <div
@@ -504,9 +617,11 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
             );
           }
 
+          // ── 4 images: big left + 3 stacked right ─────────────────────────
           if (count === 4) {
             return (
               <div className="grid grid-cols-2 gap-1 md:gap-2 h-full">
+                {/* Main image */}
                 <div
                   className="relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat h-full"
                   onClick={() => openLightbox(0)}
@@ -514,9 +629,11 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
                   <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" />View Gallery ({count})
+                    <BookOpen className="w-4 h-4" />
+                    View Gallery ({count})
                   </span>
                 </div>
+                {/* Right 3-stack */}
                 <div className="grid grid-rows-3 gap-1 md:gap-2 h-full">
                   {safeTourImages.slice(1, 4).map((img, i) => (
                     <div
@@ -533,8 +650,10 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
             );
           }
 
+          // ── 5+ images: original big-left + 2×2 grid right ─────────────────
           return (
             <div className="grid grid-cols-4 grid-rows-2 gap-1 h-full md:gap-2">
+              {/* Main large image */}
               <div
                 className="col-span-4 md:col-span-2 row-span-2 relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat"
                 onClick={() => openLightbox(0)}
@@ -542,9 +661,11 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
                 <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4" />View Gallery ({count})
+                  <BookOpen className="w-4 h-4" />
+                  View Gallery ({count})
                 </span>
               </div>
+              {/* Right 4 thumbnails — only render actual images (max 4) */}
               {safeTourImages.slice(1, 5).map((img, i) => (
                 <div
                   key={i}
@@ -553,6 +674,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   onClick={() => openLightbox(i + 1)}
                 >
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
+                  {/* "See all" overlay on the last thumbnail when there are more than 5 */}
                   {i === 3 && count > 5 && (
                     <div className="absolute inset-0 bg-black/55 z-20 flex flex-col items-center justify-center gap-1">
                       <span className="text-white font-bold text-lg">+{count - 5}</span>
@@ -565,16 +687,6 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
           );
         })()}
       </section>
-
-      {/* ── FIX #3: Tour Code Badge — shown immediately after gallery ── */}
-      {tourCode && (
-        <div className="container mx-auto px-4 mt-4">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--second-color)]/8 border border-[var(--second-color)]/20 text-[var(--second-color)] text-xs font-bold tracking-wide">
-            <Hash className="w-3.5 h-3.5" />
-            Tour Code: {tourCode}
-          </span>
-        </div>
-      )}
 
       {/* ── Main Layout ── */}
       <div className="container mx-auto px-4 py-8 lg:py-12">
@@ -595,23 +707,38 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 <span className="inline-flex items-center gap-1.5 text-gray-500 text-sm">
                   <Clock className="w-4 h-4 text-[var(--second-color)]" /> {durationText}
                 </span>
+                {tour.code && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--second-color)]/8 text-[var(--second-color)] rounded-full text-xs font-bold tracking-wide border border-[var(--second-color)]/15">
+                    <BookOpen className="w-3.5 h-3.5" /> {tour.code}
+                  </span>
+                )}
               </div>
-              <p className="text-gray-600 text-base leading-relaxed">{shortDescription}</p>
+              <p className="text-gray-600 text-base leading-relaxed">
+                {shortDescription}
+              </p>
             </div>
 
-            {/* Itinerary */}
+            {/* ── Itinerary ── */}
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+              {/* Header row with Toggle All button */}
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-2xl font-bold text-[var(--second-color)]">Itinerary</h2>
                 <button
                   type="button"
                   onClick={handleToggleAll}
                   className={`toggle-all-btn ${allOpen ? 'all-open' : ''}`}
+                  aria-label={allOpen ? 'Collapse all days' : 'Expand all days'}
                 >
                   {allOpen ? (
-                    <><ChevronsDownUp className="w-3.5 h-3.5" />Collapse All</>
+                    <>
+                      <ChevronsDownUp className="w-3.5 h-3.5" />
+                      Collapse All
+                    </>
                   ) : (
-                    <><ChevronsUpDown className="w-3.5 h-3.5" />Expand All</>
+                    <>
+                      <ChevronsUpDown className="w-3.5 h-3.5" />
+                      Expand All
+                    </>
                   )}
                 </button>
               </div>
@@ -631,9 +758,17 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       >
                         <div className="w-9 h-9 bg-[var(--main-color)] rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{day.day}</div>
                         <h3 className="flex-1 text-base font-semibold text-[var(--second-color)]">{day.title}</h3>
-                        <span className="text-gray-400 transition-transform duration-200" style={{ display: 'inline-block', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>▾</span>
+                        <span
+                          className="text-gray-400 transition-transform duration-200"
+                          style={{ display: 'inline-block', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                        >
+                          ▾
+                        </span>
                       </button>
-                      <div className="grid transition-all duration-300" style={{ gridTemplateRows: open ? '1fr' : '0fr', opacity: open ? 1 : 0 }}>
+                      <div
+                        className="grid transition-all duration-300"
+                        style={{ gridTemplateRows: open ? '1fr' : '0fr', opacity: open ? 1 : 0 }}
+                      >
                         <div className="overflow-hidden">
                           <div className="p-4 text-gray-600 text-sm leading-relaxed border-t border-gray-100">{day.description}</div>
                         </div>
@@ -644,7 +779,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               </div>
             </div>
 
-            {/* Included / Excluded */}
+            {/* Included / Excluded — only render if at least one side has data */}
             {(included.length > 0 || excluded.length > 0) && (
             <div className="grid sm:grid-cols-2 gap-5">
               {included.length > 0 && (
@@ -680,7 +815,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
             </div>
             )}
 
-            {/* Highlights */}
+            {/* Highlights — only render if there are items */}
             {highlights.length > 0 && (
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
               <h2 className="text-2xl font-bold text-[var(--second-color)] mb-5">Highlights</h2>
@@ -700,7 +835,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
             {/* Pricing */}
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
               <h2 className="text-2xl font-bold text-[var(--second-color)] mb-1">Pricing</h2>
-              {pricingTableTitle && <p className="text-sm text-gray-400 mb-5">{pricingTableTitle}</p>}
+              {pricingTableTitle && (
+                <p className="text-sm text-gray-400 mb-5">{pricingTableTitle}</p>
+              )}
               <div className="overflow-x-auto rounded-xl border border-gray-200">
                 <table className="w-full">
                   <thead>
@@ -727,10 +864,11 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               </div>
             </div>
 
-            {/* ── FIX #2: Children Policy — cards REMOVED, description + rules only ── */}
+            {/* ── Children Policy — only show when pricing data is present ── */}
             {priceTable.length > 0 && (
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
-              <div className="flex items-center gap-3 mb-5">
+              {/* Section header */}
+              <div className="flex items-center gap-3 mb-6">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: 'linear-gradient(135deg, var(--second-color) 0%, #3d3586 100%)' }}
@@ -743,8 +881,16 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 </div>
               </div>
 
-              {/* Rules only — no cards */}
-              <div className="space-y-2.5 mb-5">
+
+              {/* Divider */}
+              {/* <div className="flex items-center gap-3 mb-4">
+                <div className="flex-1 h-px bg-gray-200" />
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">Important Rules</span>
+                <div className="flex-1 h-px bg-gray-200" />
+              </div> */}
+
+              {/* Policy rules */}
+              <div className="space-y-2.5">
                 {policyRules.map((rule, i) => (
                   <div key={i} className="policy-rule-item">
                     <div className="policy-rule-dot" />
@@ -753,8 +899,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 ))}
               </div>
 
+              {/* Footer callout */}
               <div
-                className="rounded-xl p-4 flex items-start gap-3"
+                className="mt-6 rounded-xl p-4 flex items-start gap-3"
                 style={{ background: 'linear-gradient(135deg, rgba(39,34,98,0.06) 0%, rgba(227,183,94,0.10) 100%)', border: '1.5px solid rgba(227,183,94,0.3)' }}
               >
                 <span className="text-xl flex-shrink-0">💡</span>
@@ -776,7 +923,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
           {/* ════ RIGHT SIDEBAR ════ */}
           <div className="lg:col-span-1 space-y-5">
 
-            {/* Booking Form */}
+            {/* ── Booking Form ── */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
               <div className="sh-form px-6 py-4 text-center">
                 <h3 className="text-lg font-bold text-white tracking-wide">Check Availability</h3>
@@ -785,44 +932,58 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
 
               <form onSubmit={handleSubmit} className="p-5 space-y-4" noValidate>
 
+                {/* ── Success banner ── */}
                 {submitStatus === 'success' && (
                   <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
                     <div className="text-2xl mb-1">🎉</div>
                     <h3 className="font-bold text-green-800 text-sm">Booking Request Received!</h3>
-                    <p className="text-green-700 text-xs mt-1">Our team will reach out within 24 hours to confirm your trip.</p>
+                    <p className="text-green-700 text-xs mt-1">
+                      Our team will reach out within 24 hours to confirm your trip.
+                    </p>
                   </div>
                 )}
 
+                {/* ── API-level error banner ── */}
                 {submitStatus === 'error' && !Object.keys(fieldErrors).length && (
                   <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
-                    <p className="text-red-700 text-xs font-medium">Something went wrong. Please try again or contact us directly.</p>
+                    <p className="text-red-700 text-xs font-medium">
+                      Something went wrong. Please try again or contact us directly.
+                    </p>
                   </div>
                 )}
 
                 {/* Name */}
                 <div>
                   <label className={labelCls}>Full Name</label>
-                  <input type="text" name="name" value={formData.name}
+                  <input
+                    type="text" name="name" value={formData.name}
                     onChange={handleChange} onBlur={handleBlur}
-                    className={inputCls(fieldErrors.name)} placeholder="Mahmoud Abozeid" />
+                    className={inputCls(fieldErrors.name)}
+                    placeholder="Mahmoud Abozeid"
+                  />
                   {fieldErrors.name && <p className={errCls} data-err>{fieldErrors.name}</p>}
                 </div>
 
                 {/* Email */}
                 <div>
                   <label className={labelCls}>Email Address</label>
-                  <input type="email" name="email" value={formData.email}
+                  <input
+                    type="email" name="email" value={formData.email}
                     onChange={handleChange} onBlur={handleBlur}
-                    className={inputCls(fieldErrors.email)} placeholder="you@email.com" />
+                    className={inputCls(fieldErrors.email)}
+                    placeholder="you@email.com"
+                  />
                   {fieldErrors.email && <p className={errCls} data-err>{fieldErrors.email}</p>}
                 </div>
 
                 {/* Nationality */}
                 <div>
                   <label className={labelCls}>Nationality</label>
-                  <select name="nationality" value={formData.nationality}
+                  <select
+                    name="nationality" value={formData.nationality}
                     onChange={handleChange} onBlur={handleBlur}
-                    className={`${inputCls(fieldErrors.nationality)} appearance-none cursor-pointer`}>
+                    className={`${inputCls(fieldErrors.nationality)} appearance-none cursor-pointer`}
+                  >
                     <option value="">Select nationality…</option>
                     {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
                   </select>
@@ -833,9 +994,11 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={labelCls}>Code</label>
-                    <select name="countryCode" value={formData.countryCode}
+                    <select
+                      name="countryCode" value={formData.countryCode}
                       onChange={handleChange} onBlur={handleBlur}
-                      className={`${inputCls(fieldErrors.countryCode)} appearance-none cursor-pointer`}>
+                      className={`${inputCls(fieldErrors.countryCode)} appearance-none cursor-pointer`}
+                    >
                       <option value="">Select code…</option>
                       {PHONE_CODES.map((item) => (
                         <option key={item.label} value={item.code}>{item.label}</option>
@@ -845,19 +1008,17 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   </div>
                   <div>
                     <label className={labelCls}>Phone</label>
-                    <input type="tel" name="phone" value={formData.phone}
+                    <input
+                      type="tel" name="phone" value={formData.phone}
                       onChange={handleChange} onBlur={handleBlur}
-                      className={inputCls(fieldErrors.phone)} placeholder="1155131838" />
+                      className={inputCls(fieldErrors.phone)}
+                      placeholder="1155131838"
+                    />
                     {fieldErrors.phone && <p className={errCls} data-err>{fieldErrors.phone}</p>}
                   </div>
                 </div>
 
-                {/* ── FIX #5: Check In / Check Out ────────────────────────────────────────
-                    Removed `value` prop from both ref inputs.
-                    flatpickr with altInput=true creates its own display input and hides
-                    the original. Passing a controlled `value` on the original caused React
-                    to fight with flatpickr's DOM → two inputs visible.
-                    The state is still updated via the onChange callbacks above.         ── */}
+                {/* Check In / Check Out */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={labelCls}>Check In</label>
@@ -896,7 +1057,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-2 py-2 border border-gray-200">
                       <button type="button" className="ctr-btn" onClick={() => handleCounter('adults', false)} disabled={formData.adults <= 1}>−</button>
                       <span className="flex-1 text-center font-bold text-[var(--second-color)] text-sm">{formData.adults}</span>
-                      <button type="button" className="ctr-btn" onClick={() => handleCounter('adults', true)} disabled={formData.adults >= 20}>+</button>
+                      <button type="button" className="ctr-btn" onClick={() => handleCounter('adults', true)}  disabled={formData.adults >= 20}>+</button>
                     </div>
                     {fieldErrors.adults && <p className={errCls}>{fieldErrors.adults}</p>}
                   </div>
@@ -905,17 +1066,18 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-2 py-2 border border-gray-200">
                       <button type="button" className="ctr-btn" onClick={() => handleCounter('children', false)} disabled={formData.children <= 0}>−</button>
                       <span className="flex-1 text-center font-bold text-[var(--second-color)] text-sm">{formData.children}</span>
-                      <button type="button" className="ctr-btn" onClick={() => handleCounter('children', true)} disabled={formData.children >= 20}>+</button>
+                      <button type="button" className="ctr-btn" onClick={() => handleCounter('children', true)}  disabled={formData.children >= 20}>+</button>
                     </div>
                     {fieldErrors.children && <p className={errCls}>{fieldErrors.children}</p>}
                   </div>
                 </div>
 
-                {/* Child age inputs */}
+                {/* Dynamic child-age inputs */}
                 {formData.children > 0 && (
                   <div className="space-y-2.5">
                     <label className={`${labelCls} flex items-center gap-1.5`}>
-                      <Baby className="w-3.5 h-3.5 text-[var(--second-color)]" />Child Ages (0–17)
+                      <Baby className="w-3.5 h-3.5 text-[var(--second-color)]" />
+                      Child Ages (0–17)
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       {Array.from({ length: formData.children }).map((_, i) => (
@@ -960,17 +1122,25 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   className="w-full bg-[var(--second-color)] hover:bg-[#1e1a5e] text-white font-bold py-3.5 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-md disabled:opacity-70 flex items-center justify-center gap-2 text-sm tracking-wider"
                 >
                   {submitStatus === 'loading' ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" />SUBMITTING…</>
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      SUBMITTING…
+                    </>
                   ) : submitStatus === 'success' ? (
-                    <><span>✓</span>BOOKING SENT!</>
+                    <>
+                      <span>✓</span>
+                      BOOKING SENT!
+                    </>
                   ) : (
-                    <>REQUEST THIS TRIP <ArrowRight className="w-4 h-4" /></>
+                    <>
+                      REQUEST THIS TRIP <ArrowRight className="w-4 h-4" />
+                    </>
                   )}
                 </button>
               </form>
             </div>
 
-            {/* Contact Box */}
+            {/* ── Contact Box ── */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
               <div className="sh-contact px-6 py-4 text-center">
                 <p className="text-white/80 text-xs uppercase tracking-widest mb-1">Need Help?</p>
@@ -1004,7 +1174,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               </div>
             </div>
 
-            {/* Related Articles */}
+            {/* ── Related Articles — only show if articles exist ── */}
             {relatedArticles.length > 0 && (
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
               <div className="sh-articles px-6 py-4 text-center">
@@ -1044,10 +1214,10 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
             </div>
             )}
 
-          </div>
-        </div>
+          </div>{/* end sidebar */}
+        </div>{/* end grid */}
 
-        {/* Related Tours */}
+        {/* ── Related Tours ── */}
         {relatedTours.length > 0 && (
           <div className="mt-14">
             <div className="text-center mb-8">
@@ -1093,7 +1263,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
         )}
       </div>
 
-      {/* Custom Lightbox */}
+      {/* ── Custom Lightbox ── */}
       {isLightboxOpen && (
         <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
           <button onClick={() => setIsLightboxOpen(false)} className="absolute top-4 right-4 text-white hover:text-[var(--main-color)] transition-colors z-10">
