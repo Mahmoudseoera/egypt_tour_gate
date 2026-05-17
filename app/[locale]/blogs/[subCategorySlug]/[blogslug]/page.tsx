@@ -16,6 +16,9 @@ import SchemaScript from "@/components/seo/schema-script";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import { breadcrumbSchema, buildSeoMetadata, absoluteUrl } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 1800;
+
 type BlogDetailsPageProps = {
   params: Promise<{
     locale: string;
@@ -26,7 +29,7 @@ type BlogDetailsPageProps = {
 
 export async function generateMetadata({ params }: BlogDetailsPageProps): Promise<Metadata> {
   const { locale, subCategorySlug, blogslug } = await params;
-  const data = await getArticleDetailBySlug(blogslug);
+  const data = await getArticleDetailBySlug(blogslug, locale);
   
   if (!data?.post) return { title: "Blog Not Found" };
   
@@ -44,10 +47,10 @@ export async function generateMetadata({ params }: BlogDetailsPageProps): Promis
 }
 
 export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) {
-  const { blogslug } = await params;
+  const { locale, blogslug } = await params;
   
   // Fetch article data from API
-  const data = await getArticleDetailBySlug(blogslug);
+  const data = await getArticleDetailBySlug(blogslug, locale);
   
   if (!data?.post) notFound();
   
@@ -55,10 +58,10 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
   const relatedPosts = data.relatedPosts;
   
   // Fetch category for breadcrumb
-  const category = await getCategoryBySlug(post.categorySlug);
+  const category = await getCategoryBySlug(post.categorySlug, locale);
   
   // Fetch all categories for sidebar
-  const allCategories = await getAllBlogCategories();
+  const allCategories = await getAllBlogCategories(locale);
   
   const publishDate = new Date(post.publishedAt);
   

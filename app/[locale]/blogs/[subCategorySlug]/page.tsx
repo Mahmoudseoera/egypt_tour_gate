@@ -8,6 +8,9 @@ import ExpandableDescription from '@/components/shared/expandable-description';
 import SchemaScript from '@/components/seo/schema-script';
 import { breadcrumbSchema, buildSeoMetadata, collectionPageSchema } from '@/lib/seo';
 
+export const dynamic = "force-dynamic";
+export const revalidate = 1800;
+
 interface CategoryPageProps {
   params: Promise<{
     locale: string;
@@ -17,7 +20,7 @@ interface CategoryPageProps {
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { locale, subCategorySlug } = await params;
-  const data = await getCategoryPageData(subCategorySlug);
+  const data = await getCategoryPageData(subCategorySlug, locale);
 
   if (!data) return { title: 'Category Not Found' };
 
@@ -31,8 +34,8 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const { subCategorySlug } = await params;
-  const data = await getCategoryPageData(subCategorySlug);
+  const { locale, subCategorySlug } = await params;
+  const data = await getCategoryPageData(subCategorySlug, locale);
 
   if (!data) notFound();
 

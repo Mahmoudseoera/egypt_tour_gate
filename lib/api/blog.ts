@@ -1,3 +1,5 @@
+import { routing, type AppLocale } from '@/lib/i18n/routing';
+
 // ─── Raw API shapes ────────────────────────────────────────────────────────────
 export interface BlogCategoryRaw {
   id: number;
@@ -168,6 +170,18 @@ function normalisePostDetail(raw: BlogArticleDetailRaw): BlogPost {
 // ─── API Configuration ───────────────────────────────────────────────────────
 const API_BASE = 'https://www.egypttoursgate.com/api/v1/articles';
 
+function normalizeLocale(locale?: string): AppLocale {
+  const nextLocale = (locale ?? routing.defaultLocale) as AppLocale;
+  return routing.locales.includes(nextLocale) ? nextLocale : routing.defaultLocale;
+}
+
+function withLocale(url: string, locale?: string): string {
+  const l = normalizeLocale(locale);
+  if (l === routing.defaultLocale) return url;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}locale=${encodeURIComponent(l)}`;
+}
+
 // ─── Fetch all categories + page header ───────────────────────────────────────
 export interface BlogPageData {
   subTitle: string;
@@ -176,8 +190,8 @@ export interface BlogPageData {
   categories: BlogCategory[];
 }
 
-export async function getBlogPageData(): Promise<BlogPageData> {
-  const res = await fetch(`${API_BASE}/get-article-categories`, {
+export async function getBlogPageData(locale?: string): Promise<BlogPageData> {
+  const res = await fetch(withLocale(`${API_BASE}/get-article-categories`, locale), {
     next: { revalidate: 3600 },
   });
   if (!res.ok) throw new Error(`Failed to fetch blog categories: ${res.status}`);
@@ -199,8 +213,8 @@ export interface CategoryPageData {
   posts: BlogPost[];
 }
 
-export async function getCategoryPageData(slug: string): Promise<CategoryPageData | null> {
-  const res = await fetch(`${API_BASE}/get-article-by-category/${slug}`, {
+export async function getCategoryPageData(slug: string, locale?: string): Promise<CategoryPageData | null> {
+  const res = await fetch(withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale), {
     next: { revalidate: 3600 },
   });
   if (res.status === 404) return null;
@@ -222,8 +236,8 @@ export interface ArticleDetailData {
   relatedPosts: BlogPost[];
 }
 
-export async function getArticleDetailBySlug(slug: string): Promise<ArticleDetailData | null> {
-  const res = await fetch(`${API_BASE}/get-ditals-article/${slug}`, {
+export async function getArticleDetailBySlug(slug: string, locale?: string): Promise<ArticleDetailData | null> {
+  const res = await fetch(withLocale(`${API_BASE}/get-ditals-article/${slug}`, locale), {
     next: { revalidate: 3600 },
   });
   if (res.status === 404) return null;
@@ -241,8 +255,8 @@ export async function getArticleDetailBySlug(slug: string): Promise<ArticleDetai
 }
 
 // ─── Helper: Get category by slug (for breadcrumbs) ──────────────────────────
-export async function getCategoryBySlug(slug: string): Promise<BlogCategory | null> {
-  const res = await fetch(`${API_BASE}/get-article-by-category/${slug}`, {
+export async function getCategoryBySlug(slug: string, locale?: string): Promise<BlogCategory | null> {
+  const res = await fetch(withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale), {
     next: { revalidate: 3600 },
   });
   if (!res.ok) return null;
@@ -254,8 +268,8 @@ export async function getCategoryBySlug(slug: string): Promise<BlogCategory | nu
 }
 
 // ─── Helper: Get all categories for sidebar ──────────────────────────────────
-export async function getAllBlogCategories(): Promise<BlogCategory[]> {
-  const res = await fetch(`${API_BASE}/get-article-categories`, {
+export async function getAllBlogCategories(locale?: string): Promise<BlogCategory[]> {
+  const res = await fetch(withLocale(`${API_BASE}/get-article-categories`, locale), {
     next: { revalidate: 3600 },
   });
   if (!res.ok) return [];

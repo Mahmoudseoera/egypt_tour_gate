@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, MapPin } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import type { ApiTour } from "@/lib/api/homeTypes";
+import { useFavourites, type FavouriteTour } from "@/lib/hooks/useFavourites";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -24,16 +24,32 @@ type SliderItem = {
   price: number;
   location: string;
   link: string;
+  slug: string;
+  categorySlug: string;
+  subcategorySlug?: string;
+  duration: string;
 };
 
 
 
 export default function TravelTourSlider({ apiTours = [] }: TravelTourSliderProps) {
-  const [favorites, setFavorites] = useState<Record<number, boolean>>({});
+  const { isFavourite, toggle } = useFavourites();
 
-  const toggleFavorite = (id: number, e: React.MouseEvent) => {
+  const toggleFavorite = (tour: SliderItem, e: React.MouseEvent) => {
     e.preventDefault();
-    setFavorites(prev => ({ ...prev, [id]: !prev[id] }));
+    const favouriteTour: FavouriteTour = {
+      id: tour.id,
+      title: tour.title,
+      slug: tour.slug,
+      categorySlug: tour.categorySlug,
+      subcategorySlug: tour.subcategorySlug,
+      image: tour.image,
+      price: tour.price,
+      duration: tour.duration,
+      location: tour.location,
+      description: tour.description,
+    };
+    toggle(favouriteTour);
   };
 
   const tourItems: SliderItem[] = apiTours.length > 0
@@ -45,6 +61,10 @@ export default function TravelTourSlider({ apiTours = [] }: TravelTourSliderProp
         price: t.price_after_discount,
         location: t.city,
         link: `/${t.subCategory.categorySlug}/${t.subCategory.subCategorySlug}/${t.slug}`,
+        slug: t.slug,
+        categorySlug: t.subCategory.categorySlug,
+        subcategorySlug: t.subCategory.subCategorySlug,
+        duration: `${t.duration} ${t.duration_type}`,
       }))
     : [];
 
@@ -86,11 +106,11 @@ export default function TravelTourSlider({ apiTours = [] }: TravelTourSliderProp
                     <div className="relative w-full h-[280px] overflow-hidden rounded-t-3xl">
                       <Image src={tour.image} alt={tour.title} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width:768px) 100vw,(max-width:1024px) 50vw,33vw"/>
                       <button
-                        className={`absolute top-4 right-4 w-11 h-11 rounded-full flex items-center justify-center z-20 shadow transition-all duration-300 hover:scale-110 ${favorites[tour.id] ? 'bg-[var(--main-color)]' : 'bg-white/95 hover:bg-white'}`}
-                        onClick={(e) => toggleFavorite(tour.id, e)}
-                        aria-label="Add to favorites"
+                        className={`absolute top-4 right-4 w-11 h-11 rounded-full flex items-center justify-center z-20 shadow transition-all duration-300 hover:scale-110 ${isFavourite(tour.id) ? 'bg-[var(--main-color)]' : 'bg-white/95 hover:bg-white'}`}
+                        onClick={(e) => toggleFavorite(tour, e)}
+                        aria-label={isFavourite(tour.id) ? "Remove from favourites" : "Add to favourites"}
                       >
-                        <Heart size={20} fill={favorites[tour.id] ? '#fff' : 'none'} color={favorites[tour.id] ? '#fff' : '#333'} strokeWidth={2.5}/>
+                        <Heart size={20} fill={isFavourite(tour.id) ? '#fff' : 'none'} color={isFavourite(tour.id) ? '#fff' : '#333'} strokeWidth={2.5}/>
                       </button>
                       <div className="absolute bottom-4 flex items-center gap-2 left-4 bg-[rgba(255,255,255,0.5)] backdrop-blur-sm text-[var(--second-color)] px-3 py-2 rounded-full text-xs font-semibold z-20">
                         <MapPin size={16} className="text-indigo-900"/> {tour.location}

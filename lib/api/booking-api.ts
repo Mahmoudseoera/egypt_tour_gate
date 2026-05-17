@@ -27,8 +27,8 @@ export interface BookingApiPayload {
   departure_date:  string;     // "2026-05-27"
   adult_number:    string;     // "2"
   children_number: string;     // "4"
-  child_age?:      string[];   // ["7","8"]
-  message?:        string;     // "message"
+  child_age:       string[];   // ["7","8"] or []
+  message:         string;     // "message" or ""
 }
 
 /** Success response envelope */
@@ -97,18 +97,11 @@ export function buildBookingPayload(form: BookingFormState): BookingApiPayload {
     departure_date:  form.departure_date,
     adult_number:    String(form.adult_number),            // number → string
     children_number: String(form.children_number),         // number → string
-  };
-
-  // Include child_age whenever children > 0, send as string[] (no parseInt)
-  if (form.children_number > 0 && form.child_age.length > 0) {
-    payload.child_age = form.child_age
+    child_age:       form.child_age
       .slice(0, form.children_number)
-      .map((a) => a.trim());                               // keep as strings
-  }
-
-  if (form.message.trim()) {
-    payload.message = form.message.trim();
-  }
+      .map((a) => a.trim()),                               // keep as strings
+    message:         form.message.trim(),
+  };
 
   return payload;
 }
