@@ -42,6 +42,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
+  // Log the payload being sent (visible in Next.js server terminal)
+  console.log('[booking-proxy] sending payload:', JSON.stringify(payload, null, 2));
+
   try {
     const upstream = await fetch(UPSTREAM, {
       method:  'POST',
@@ -54,9 +57,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
 
     const body = await upstream.json();
+
+    // Log upstream response so validation errors are visible in terminal
+    if (!upstream.ok) {
+      console.error('[booking-proxy] upstream rejected payload — status:', upstream.status);
+      console.error('[booking-proxy] upstream error body:', JSON.stringify(body, null, 2));
+    }
+
     return NextResponse.json(body, { status: upstream.status });
   } catch (err) {
-    console.error('[booking-proxy] upstream error:', err);
+    console.error('[booking-proxy] upstream fetch error:', err);
     return NextResponse.json(
       { success: false, message: 'Could not reach booking service. Please try again.' },
       { status: 502 }

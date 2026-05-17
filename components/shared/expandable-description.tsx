@@ -31,7 +31,7 @@ export default function ExpandableDescription({
           onClick={() => setExpanded((prev) => !prev)}
           className="mt-2 text-sm font-semibold text-[var(--main-color)] hover:text-[var(--second-color)] transition-colors"
         >
-          {expanded ? 'Show less' : 'Show more'}
+          {expanded ? 'Show Less ▲' : 'Show More ⏷'}
         </button>
       )}
     </div>

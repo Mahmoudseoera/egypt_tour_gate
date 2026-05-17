@@ -202,7 +202,7 @@ export default async function SubcategoryPage({
               {subcategorySecondTitle}
             </p>
           )}
-          <div className="max-w-2xl mx-auto text-center mb-8">
+          <div className="max-w-7xl mx-auto text-center mb-8">
             <ExpandableDescription text={shortDescription} />
           </div>
 

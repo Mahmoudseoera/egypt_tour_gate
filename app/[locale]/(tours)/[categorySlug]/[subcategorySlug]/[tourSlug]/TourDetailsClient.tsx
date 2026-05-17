@@ -166,18 +166,17 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
       const fp = mod.default;
 
       fpCheckIn.current = fp(checkInRef.current!, {
-        minDate:      tomorrowISO(),
-        dateFormat:   'Y-m-d',
-        altInput:     true,
-        altFormat:    'D, M j Y',
+        minDate:       tomorrowISO(),
+        dateFormat:    'Y-m-d',
+        // altInput removed — it injects a second <input> into the DOM
+        // which causes two visible inputs. We display the ISO value directly.
         disableMobile: true,
         onChange([date]) {
           if (!date) return;
-          const iso = localISO(date);                      // local tz, no UTC shift
+          const iso = localISO(date);
           setFormData((p) => ({ ...p, checkIn: iso }));
           const err = validateField('checkIn', iso);
           setFieldErrors((p) => ({ ...p, checkIn: err }));
-          // Push checkout min to day-after check-in
           const nextDay = new Date(date);
           nextDay.setDate(nextDay.getDate() + 1);
           (fpCheckOut.current as any)?.set('minDate', nextDay);
@@ -191,14 +190,13 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
       }) as unknown as typeof fpCheckIn.current;
 
       fpCheckOut.current = fp(checkOutRef.current!, {
-        minDate:      tomorrowISO(),
-        dateFormat:   'Y-m-d',
-        altInput:     true,
-        altFormat:    'D, M j Y',
+        minDate:       tomorrowISO(),
+        dateFormat:    'Y-m-d',
+        // altInput removed — same reason as checkIn
         disableMobile: true,
         onChange([date]) {
           if (!date) return;
-          const iso = localISO(date);                      // local tz, no UTC shift
+          const iso = localISO(date);
           setFormData((p) => {
             const err = iso <= (p.checkIn || todayISO())
               ? 'Check-out date must be after check-in date'
@@ -385,6 +383,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
     };
 
     const payload = buildBookingPayload(bookingFormState);
+
+    // ── Console log for debugging (remove after confirming API works) ───────
+    console.log('[BookingForm] payload being sent to /api/booking:', JSON.stringify(payload, null, 2));
 
     // ── Step 3: Submit to API ───────────────────────────────────────────────
     const result = await submitBooking(payload);
@@ -1031,6 +1032,12 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                         className={`${inputCls(fieldErrors.checkIn)} pr-9 cursor-pointer`}
                       />
                       <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      {/* Show selected date as overlay since flatpickr owns the input value */}
+                      {formData.checkIn && (
+                        <span className="absolute inset-0 flex items-center px-3 text-sm text-gray-800 pointer-events-none">
+                          {formData.checkIn}
+                        </span>
+                      )}
                     </div>
                     {fieldErrors.checkIn && <p className={errCls} data-err>{fieldErrors.checkIn}</p>}
                   </div>
@@ -1045,6 +1052,12 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                         className={`${inputCls(fieldErrors.checkOut)} pr-9 cursor-pointer`}
                       />
                       <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      {/* Show selected date as overlay since flatpickr owns the input value */}
+                      {formData.checkOut && (
+                        <span className="absolute inset-0 flex items-center px-3 text-sm text-gray-800 pointer-events-none">
+                          {formData.checkOut}
+                        </span>
+                      )}
                     </div>
                     {fieldErrors.checkOut && <p className={errCls} data-err>{fieldErrors.checkOut}</p>}
                   </div>
