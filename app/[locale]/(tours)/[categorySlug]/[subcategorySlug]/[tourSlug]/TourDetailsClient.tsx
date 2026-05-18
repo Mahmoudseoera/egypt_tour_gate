@@ -7,13 +7,13 @@ import "lightgallery/css/lg-zoom.css";
 import "flatpickr/dist/flatpickr.min.css";
 import lgZoom from "lightgallery/plugins/zoom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import {
   buildBookingPayload,
   submitBooking,
-  sanitisePhone,
   type BookingFormState,
 } from '@/lib/api/booking-api';
 import {
@@ -149,7 +149,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   });
   const [fieldErrors,        setFieldErrors]        = useState<Record<string, string | undefined>>({});
   const [submitStatus,       setSubmitStatus]       = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-
+  const router = useRouter();
   /* Flatpickr refs */
   const checkInRef  = useRef<HTMLInputElement>(null);
   const checkOutRef = useRef<HTMLInputElement>(null);
@@ -363,16 +363,13 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
     setSubmitStatus('loading');
 
     // ── Step 2: Build the typed API payload ─────────────────────────────────
-    // Combine countryCode + phone into a single international phone string
-    const rawPhone = formData.countryCode
-      ? `${formData.countryCode}${formData.phone.replace(/^0+/, '')}`
-      : formData.phone;
-
+    // Backend expects `code` (country dial code) and `phone` (local number) separately.
     const bookingFormState: BookingFormState = {
       tour_id:         String(tour.id),
       name:            formData.name,
       email:           formData.email,
-      phone:           sanitisePhone(rawPhone),
+      code:            formData.countryCode,   // e.g. "+20" — sent as `code` field
+      phone:           formData.phone,         // local number — leading 0 stripped in buildBookingPayload
       nationality:     formData.nationality,
       arrival_date:    formData.checkIn,
       departure_date:  formData.checkOut,
@@ -396,6 +393,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
         description: result.message || 'Our team will contact you within 24 hours.',
         duration: 6000,
       });
+      router.push("/thank-you");
     } else {
       setSubmitStatus('error');
 
