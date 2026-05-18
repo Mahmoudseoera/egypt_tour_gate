@@ -4,6 +4,9 @@ import Image from 'next/image';
 import { getBlogPageData } from '@/lib/api/blog';
 import { buildSeoMetadata } from '@/lib/seo';
 
+export const dynamic = "force-dynamic";
+export const revalidate = 1800;
+
 export async function generateMetadata({
   params,
 }: {
@@ -22,8 +25,13 @@ export async function generateMetadata({
 
 
 
-export default async function BlogsPage() {
-  const { subTitle, title, description, categories } = await getBlogPageData();
+export default async function BlogsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const { subTitle, title, description, categories } = await getBlogPageData(locale);
 
   return (
     <div className="min-h-screen bg-grey-light">

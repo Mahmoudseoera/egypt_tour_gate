@@ -21,14 +21,15 @@ export interface BookingApiPayload {
   tour_id:         string;     // "553"
   name:            string;     // "test"
   email:           string;     // "test@gmail.com"
-  phone:           string;     // "+201125544878"
+  code:            string;     // "+20"  — country dial code, sent separately
+  phone:           string;     // "1155131838" — local number without country code
   nationality:     string;     // "Belarus"
   arrival_date:    string;     // "2026-05-15"
   departure_date:  string;     // "2026-05-27"
   adult_number:    string;     // "2"
   children_number: string;     // "4"
-  child_age?:      string[];   // ["7","8"]
-  message?:        string;     // "message"
+  child_age:       string[];   // ["7","8"] or []
+  message:         string;     // "message" or ""
 }
 
 /** Success response envelope */
@@ -58,7 +59,8 @@ export interface BookingFormState {
   tour_id:         string;
   name:            string;
   email:           string;
-  phone:           string;    // already combined: countryCode + local number
+  code:            string;    // country dial code e.g. "+20" — sent as separate field
+  phone:           string;    // local number without country code e.g. "1155131838"
   nationality:     string;
   arrival_date:    string;    // YYYY-MM-DD
   departure_date:  string;    // YYYY-MM-DD
@@ -87,28 +89,26 @@ export function sanitisePhone(raw: string): string {
  * confirmed API contract ("adult_number": "2", not 2).
  */
 export function buildBookingPayload(form: BookingFormState): BookingApiPayload {
+  // Backend expects `code` (dial code) and `phone` (local number) as SEPARATE fields.
+  // Strip leading zeros from local number (e.g. "01155131838" → "1155131838").
+  const localPhone = form.phone.trim().replace(/^0+/, '');
+
   const payload: BookingApiPayload = {
-    tour_id:         form.tour_id,                         // already a string
+    tour_id:         form.tour_id,
     name:            form.name.trim(),
     email:           form.email.trim().toLowerCase(),
-    phone:           sanitisePhone(form.phone.trim()),
+    code:            form.code.trim(),                     // e.g. "+20"
+    phone:           localPhone,                           // local number only
     nationality:     form.nationality.trim(),
     arrival_date:    form.arrival_date,
     departure_date:  form.departure_date,
-    adult_number:    String(form.adult_number),            // number → string
-    children_number: String(form.children_number),         // number → string
-  };
-
-  // Include child_age whenever children > 0, send as string[] (no parseInt)
-  if (form.children_number > 0 && form.child_age.length > 0) {
-    payload.child_age = form.child_age
+    adult_number:    String(form.adult_number),
+    children_number: String(form.children_number),
+    child_age:       form.child_age
       .slice(0, form.children_number)
-      .map((a) => a.trim());                               // keep as strings
-  }
-
-  if (form.message.trim()) {
-    payload.message = form.message.trim();
-  }
+      .map((a) => a.trim()),
+    message:         form.message.trim(),
+  };
 
   return payload;
 }
