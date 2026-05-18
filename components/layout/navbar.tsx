@@ -214,45 +214,61 @@ export default function Navbar() {
     logoSrc.startsWith("http://localhost");
 
   const categories = data.header.categories;
-const featuredHighlights = categories
-  .map((cat) => {
-    if (!cat.subs?.length) return null;
+  // const featuredHighlights = categories
+  //   .map((cat) => {
+  //     if (!cat.subs?.length) return null;
 
-    const randomIndex =
-      cat.slug
-        .split("")
-        .reduce((acc, char) => acc + char.charCodeAt(0), 0) %
-      cat.subs.length;
+  //     const randomIndex =
+  //       cat.slug
+  //         .split("")
+  //         .reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+  //       cat.subs.length;
 
-    const randomSub = cat.subs[randomIndex];
+  //     const randomSub = cat.subs[randomIndex];
 
-    return {
-      title: randomSub.name,
-      tag: cat.name,
-      img:
-        randomSub.media?.image ||
-        "/assets/images/tours/default-tour.jpg",
+  //     return {
+  //       title: randomSub.name,
+  //       tag: cat.name,
+  //       img:
+  //         randomSub.media?.image ||
+  //         "/assets/images/tours/default-tour.jpg",
 
-      href: `/${cat.slug}/${randomSub.slug}`,
-      color: getCategoryColor(cat.slug),
-    };
-  })
-  .filter(
-    (
-      item
-    ): item is {
-      title: string;
-      tag: string;
-      img: string;
-      href: string;
-      color: string;
-    } => item !== null
-  )
-  .slice(0, 2);
+  //       href: `/${cat.slug}/${randomSub.slug}`,
+  //       color: getCategoryColor(cat.slug),
+  //     };
+  //   })
+  //   .filter(
+  //     (
+  //       item
+  //     ): item is {
+  //       title: string;
+  //       tag: string;
+  //       img: string;
+  //       href: string;
+  //       color: string;
+  //     } => item !== null
+  //   )
+  //   .slice(0, 2);
 
   // Helper bound to current locale — used throughout JSX
   const lp = (path: string) => localizePath(path, locale);
 
+  const getFeaturedHighlights = (cat: (typeof categories)[number]) => {
+    if (!cat.subs?.length) return [];
+
+    return cat.subs
+      .slice(0, 2)
+      .map((sub, index) => ({
+        title: sub.name,
+        tag: index === 0 ? "Popular" : "Recommended",
+        img:
+          sub.media?.image ||
+          "/assets/images/tours/default-tour.jpg",
+
+        href: `/${cat.slug}/${sub.slug}`,
+        color: getCategoryColor(cat.slug),
+      }));
+  };
   return (
     <>
       <style jsx global>{`
@@ -553,7 +569,7 @@ const featuredHighlights = categories
                 const isOpen = activeMegaMenu === cat.slug;
                 const hasSubs = cat.subs.length > 0;
                 const catColor = getCategoryColor(cat.slug);
-
+                const featuredHighlights = getFeaturedHighlights(cat);
                 return (
                   <li
                     key={cat.slug}
