@@ -81,49 +81,6 @@ const INITIAL: FormState = {
   tour_id:     '',
 };
 
-/* ─── Children Policy data ─── */
-// const childrenPolicy = [
-//   {
-//     icon: '🍼',
-//     label: 'Infants (Under 2)',
-//     price: 'FREE',
-//     color: 'bg-green-50 border-green-200 text-green-700',
-//     badgeColor: 'bg-green-500',
-//     note: 'No seat or meal included. Must sit on parent\'s lap.',
-//   },
-//   {
-//     icon: '🧒',
-//     label: 'Children (2–5)',
-//     price: 'FREE',
-//     color: 'bg-blue-50 border-blue-200 text-blue-700',
-//     badgeColor: 'bg-blue-500',
-//     note: 'Seat included, no meals. Entrance fees apply at child rate.',
-//   },
-//   {
-//     icon: '👦',
-//     label: 'Children (6–11)',
-//     price: '50% off',
-//     color: 'bg-amber-50 border-amber-200 text-amber-700',
-//     badgeColor: 'bg-[var(--main-color)]',
-//     note: 'Half price on all tour services and site entrance fees.',
-//   },
-//   {
-//     icon: '🧑',
-//     label: 'Youth (12–17)',
-//     price: '75% of adult',
-//     color: 'bg-purple-50 border-purple-200 text-purple-700',
-//     badgeColor: 'bg-purple-500',
-//     note: 'Discounted rate applies to tours, cruises, and most services.',
-//   },
-//   {
-//     icon: '🧑‍💼',
-//     label: 'Adults (18+)',
-//     price: 'Full price',
-//     color: 'bg-gray-50 border-gray-200 text-gray-700',
-//     badgeColor: 'bg-[var(--second-color)]',
-//     note: 'Standard pricing as listed in the pricing table above.',
-//   },
-// ];
 
 const policyRules = [
   'Age is calculated at the time of travel, not at the time of booking.',

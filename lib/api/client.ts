@@ -2,7 +2,7 @@
 // Uses the same NEXT_PUBLIC_API_BASE_URL everywhere, with a safe local fallback.
 
 const RAW_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api/v1/";
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://www.egypttoursgate.com/api/v1";
 
 export const API_BASE_URL = RAW_BASE.replace(/\/$/, "");
 
