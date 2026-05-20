@@ -4,17 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useGeneralData } from "@/lib/api/GeneralApi";
 import { buildLocalizedPath, getPathLocale } from "@/lib/i18n/routing";
 import SimpleSocialIcon, { SocialItem } from "@/components/layout/simpleSocialIcon";
+import { settingsToSocialItems, type SiteSettings } from "@/lib/api/settingsApi";
 
 // Static social data
-const socialData: SocialItem[] = [
-  { icon: "fa-brands fa-facebook-f", url: "https://facebook.com", title: "Facebook" },
-  { icon: "fa-brands fa-instagram", url: "https://instagram.com", title: "Instagram" },
-  { icon: "fa-brands fa-x-twitter", url: "https://twitter.com", title: "Twitter" },
-  { icon: "fa-brands fa-youtube", url: "https://youtube.com", title: "YouTube" },
-];
+const fallbackSocialData: SocialItem[] = [];
 
 export default function Footer() {
   const pathname = usePathname();
@@ -22,6 +19,14 @@ export default function Footer() {
   const { data, loading } = useGeneralData(activeLocale);
   const homePath = buildLocalizedPath("/", activeLocale);
   const currentYear = new Date().getFullYear();
+  const [socialData, setSocialData] = useState<SocialItem[]>(fallbackSocialData);
+
+  useEffect(() => {
+    fetch(`/api/settings?locale=${activeLocale}`).then(r => r.json()).then((json) => {
+      const items = settingsToSocialItems(json?.data as SiteSettings | null);
+      if (items.length) setSocialData(items as SocialItem[]);
+    }).catch(() => undefined);
+  }, [activeLocale]);
 
   // ── Derived values (safe-access with fallbacks) ────────────────────────────
   const footerLogo = data?.footer.logo;

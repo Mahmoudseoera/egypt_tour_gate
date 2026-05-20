@@ -1,6 +1,7 @@
 // app/page.tsx  — Server Component (no 'use client')
 import type { Metadata } from "next";
 import { buildSeoMetadata } from "@/lib/seo";
+import { fetchSeoHtmlFromEndpoint } from "@/lib/api/seoApi";
 import Providers from "../../components/providers";
 import EgyptToursBanner from "../../components/home/hero-banner";
 import TestimonialSlider from "../../components/testimonails/testimonials-card";
@@ -31,7 +32,10 @@ type PageProps = {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
 
+  const seoHtml = await fetchSeoHtmlFromEndpoint("", locale);
+
   return buildSeoMetadata({
+    seoHtml,
     title: "Egypt Tours: Best Vacations, Trips, and Tours to Egypt",
     description:
       "Egypt Tours from all countries are made for you. Visit Egypt, explore Egypt trips, enjoy Nile cruises, and discover the Egypt Pyramids.",

@@ -37,6 +37,7 @@ export default function TravelTourSlider({ apiTours = [] }: TravelTourSliderProp
 
   const toggleFavorite = (tour: SliderItem, e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const favouriteTour: FavouriteTour = {
       id: tour.id,
       title: tour.title,

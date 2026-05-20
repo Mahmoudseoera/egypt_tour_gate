@@ -7,23 +7,24 @@ const API_BASE = (
 
 const UPSTREAM = `${API_BASE}/forms/tailor-made`;
 
-type TailorMadePayload = TailorMadeFormData & {
+type TailorMadePayload = {
   name: string;
+  email: string;
   phone: string;
   code: string;
-  country: string;
-  cities_ids: string[];
-  cities_names: string[];
+  nationality: string;
   arrival_date?: string;
   departure_date?: string;
-  approx_month?: string;
-  vacation_days?: number;
-  adult_number: number;
+  adults_number: number;
   children_number: number;
-  infants_number: number;
-  budget_from: number;
-  budget_to: number;
-  msg_body: string;
+  hotel_category?: number;
+  message?: string;
+  cities?: string[];
+  month?: string;
+  days?: string;
+  infants?: string;
+  max_price?: string;
+  min_price?: string;
 };
 
 function buildPayload(data: TailorMadeFormData): TailorMadePayload {
@@ -35,19 +36,19 @@ function buildPayload(data: TailorMadeFormData): TailorMadePayload {
     name: data.fullName,
     phone: phoneNumber,
     code: phoneCode,
-    country: data.nationality,
-    cities_ids: data.cities,
-    cities_names: data.cities,
+    nationality: data.nationality,
     arrival_date: data.timeOption === "exact" ? data.checkIn : undefined,
     departure_date: data.timeOption === "exact" ? data.checkOut : undefined,
-    approx_month: data.timeOption === "month" ? data.monthSelect : undefined,
-    vacation_days: data.timeOption === "days" ? Number(data.vacationDays) : undefined,
-    adult_number: data.adults,
+    adults_number: data.adults,
     children_number: data.children,
-    infants_number: data.infants,
-    budget_from: data.priceMin,
-    budget_to: data.priceMax,
-    msg_body: data.additionalInfo,
+    hotel_category: Number.parseInt(data.hotel, 10) || undefined,
+    message: data.additionalInfo || undefined,
+    cities: data.cities,
+    month: data.timeOption === "month" ? data.monthSelect : undefined,
+    days: data.timeOption === "days" ? data.vacationDays : undefined,
+    infants: String(data.infants),
+    max_price: String(data.priceMax),
+    min_price: String(data.priceMin),
   };
 }
 
