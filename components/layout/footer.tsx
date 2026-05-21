@@ -177,17 +177,64 @@ export default function Footer() {
           <div className="flex items-center justify-center gap-3 md:justify-end" role="region" aria-label="Social media links">
             <span className="text-white/60 text-sm hidden md:inline">Follow our journey:</span>
             <div className="flex gap-3">
-              {socialData.map((item, index) => (
-                <div
-                  key={index}
-                  className="group relative w-10 h-10 rounded-full overflow-hidden bg-white/10 hover:bg-[var(--main-color)] transition-all duration-300"
-                >
-                  <SimpleSocialIcon
-                    item={item}
-                    className="text-xl text-white group-hover:text-[var(--second-color)] transition-colors duration-300"
-                  />
-                </div>
-              ))}
+              {socialData.map((item, index) => {
+                // WhatsApp link
+                const whatsappNumber =
+                  item.title === "WhatsApp"
+                    ? item.url?.replace(/\D/g, "")
+                    : null;
+
+                // TripAdvisor
+                if (item.title === "TripAdvisor") {
+                  return (
+                    <Link
+                      key={index}
+                      href={item.url || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative w-10 h-10 rounded-full overflow-hidden bg-white/10 hover:bg-[var(--main-color)] transition-all duration-300 flex items-center justify-center"
+                    >
+                      <Image
+                        src="/assets/images/tripadvisor-icon.svg"
+                        alt="TripAdvisor"
+                        width={70}
+                        height={30}
+                        className="w-5 h-5 object-contain brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition duration-300"
+                      />
+                    </Link>
+                  );
+                }
+
+                // WhatsApp
+                if (item.title === "WhatsApp") {
+                  return (
+                    <Link
+                      key={index}
+                      href={`https://wa.me/${whatsappNumber}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative w-10 h-10 rounded-full overflow-hidden bg-white/10 hover:bg-[var(--main-color)] transition-all duration-300 flex items-center justify-center"
+                    >
+                      <i
+                        className={`${item.icon} text-xl text-white group-hover:text-[var(--second-color)] transition-colors duration-300`}
+                      />
+                    </Link>
+                  );
+                }
+
+                  
+                return (
+                  <div
+                    key={index}
+                    className="group relative w-10 h-10 rounded-full overflow-hidden bg-white/10 hover:bg-[var(--main-color)] transition-all duration-300"
+                  >
+                    <SimpleSocialIcon
+                      item={item}
+                      className="text-xl text-white group-hover:text-[var(--second-color)] transition-colors duration-300"
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

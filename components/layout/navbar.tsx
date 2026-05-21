@@ -140,7 +140,6 @@ export default function Navbar() {
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
 
-  const pathname = usePathname();
   const router = useRouter();
 
   const { data, error, loading } = useGeneralData(locale);
@@ -458,13 +457,51 @@ export default function Navbar() {
           <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-2 text-sm">
             <div className="flex items-center">
               <div className="flex items-center gap-2 pr-4 border-r border-gray-200">
-                {socialData.map((item, index) => (
-                  <SimpleSocialIcon
-                    key={index}
-                    item={item}
-                    className="text-[var(--second-color)] hover:text-[var(--main-color)] transition"
-                  />
-                ))}
+                {socialData.map((item, index) => {
+                if (item.title === "TripAdvisor") {
+                  return (
+                    <Link
+                      key={index}
+                      href={item.url || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition hover:opacity-80"
+                    >
+                      <Image
+                        src="/assets/images/tripadvisor-icon.svg"
+                        width={70}
+                        height={30}
+                        alt="TripAdvisor"
+                        className="w-5 h-5 object-contain"
+                      />
+                    </Link>
+                  );
+                }
+
+                  // WhatsApp
+                  if (item.title === "WhatsApp") {
+                    return (
+                      <a
+                        key={index}
+                        href={`https://wa.me/${item.url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[var(--second-color)] hover:text-[var(--main-color)] transition"
+                      >
+                        <i className={item.icon}></i>
+                      </a>
+                    );
+                  }
+
+                  // باقي السوشيال
+                  return (
+                    <SimpleSocialIcon
+                      key={index}
+                      item={item}
+                      className="text-[var(--second-color)] hover:text-[var(--main-color)] transition"
+                    />
+                  );  
+                })}
               </div>
               <Link
                 href={`tel:${data.header.info?.phone ?? "+201110008407"}`}
