@@ -36,14 +36,10 @@ import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import SimpleSocialIcon, {
   SocialItem,
 } from "@/components/layout/simpleSocialIcon";
+import { settingsToSocialItems, type SiteSettings } from "@/lib/api/settingsApi";
 
 /* ── Static social links ─────────────────────────────────────────────────── */
-const socialData: SocialItem[] = [
-  { icon: "fa-brands fa-facebook-f", url: "https://facebook.com", title: "Facebook" },
-  { icon: "fa-brands fa-instagram", url: "https://instagram.com", title: "Instagram" },
-  { icon: "fa-brands fa-x-twitter", url: "https://twitter.com", title: "Twitter" },
-  { icon: "fa-brands fa-youtube", url: "https://youtube.com", title: "YouTube" },
-];
+const fallbackSocialData: SocialItem[] = [];
 
 /* ── Category helpers ────────────────────────────────────────────────────── */
 function getCategoryIcon(slug: string) {
@@ -148,6 +144,13 @@ export default function Navbar() {
   const router = useRouter();
 
   const { data, error, loading } = useGeneralData(locale);
+  const [socialData, setSocialData] = useState<SocialItem[]>(fallbackSocialData);
+  useEffect(() => {
+    fetch(`/api/settings?locale=${locale}`).then(r => r.json()).then((json) => {
+      const items = settingsToSocialItems(json?.data as SiteSettings | null);
+      if (items.length) setSocialData(items as SocialItem[]);
+    }).catch(() => undefined);
+  }, [locale]);
 
   const currentLanguage = data?.header.languages.find(
     (lang) => lang.slug === locale
