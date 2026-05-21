@@ -8,10 +8,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
   }
 
-  const tags = Array.isArray(body?.tags) && body.tags.length
+  const tags: string[] = Array.isArray(body?.tags) && body.tags.length
     ? body.tags
     : ["home", "tours", "blogs", "general", "settings", "contact", "tailor-made"];
 
-  tags.forEach((tag: string) => revalidateTag(tag));
+  for (const tag of tags) {
+    revalidateTag(tag, "default");
+  }
+
   return NextResponse.json({ success: true, revalidated: tags });
 }

@@ -36,6 +36,7 @@ import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import SimpleSocialIcon, {
   SocialItem,
 } from "@/components/layout/simpleSocialIcon";
+import { settingsToSocialItems, type SiteSettings } from "@/lib/api/settingsApi";
 
 /* ── Static social links ─────────────────────────────────────────────────── */
 const fallbackSocialData: SocialItem[] = [];
