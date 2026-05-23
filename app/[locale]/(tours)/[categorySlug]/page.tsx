@@ -156,16 +156,17 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               {categorySecondTitle}
             </p>
           )}
-          <div className="mx-auto mt-5">
-            <ExpandableDescription
-              text={categoryDescription}
-              className="text-white [&>p]:text-white/90"
-            />
-          </div>
         </div>
       </div>
 
       <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+           <div className="max-w-7xl mx-auto text-center mb-8">
+            <ExpandableDescription
+              text={categoryDescription}
+              isHtml
+              className="text-white [&>p]:text-white/90"
+            />
+          </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {(category.subs ?? []).map((child: any, index: number) => {
             // ── Real image from API media, fallback only when absent ──

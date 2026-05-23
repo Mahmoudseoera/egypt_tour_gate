@@ -224,7 +224,7 @@ export async function getCategoryBySlug(
     // Unify subcategory field — real API returns `subCategories`
     subs: asArray(raw.subs ?? raw.subCategories ?? raw.sub_categories),
     // Plain-text description stripped of HTML
-    plainDesc: raw.desc ? stripHtml(raw.desc) : "",
+    plainDesc: raw.desc ,
   };
 }
 
@@ -247,7 +247,7 @@ export async function getSubcategoryBySlug(
 
   return {
     ...raw,
-    plainDesc: raw.desc ? stripHtml(raw.desc) : "",
+    plainDesc: raw.desc,
   };
 }
 

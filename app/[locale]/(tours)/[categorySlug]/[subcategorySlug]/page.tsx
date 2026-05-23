@@ -191,19 +191,19 @@ export default async function SubcategoryPage({
 
       <section className="container py-10 max-w-7xl mx-auto">
         <div className="container mx-auto">
-          <h1 className="text-3xl font-bold mb-2 text-center text-[var(--second-color)]">
+          <p className="text-xl text-gray-600 mb-1 text-center">
             {categoryName}
+          </p>
+          <h1 className="text-3xl font-bold mb-2 text-center text-[var(--second-color)]">
+            {subcategoryName} 
           </h1>
-          <h2 className="text-xl text-gray-600 mb-1 text-center">
-            {subcategoryName}
-          </h2>
           {subcategorySecondTitle && (
             <p className="text-base text-[var(--main-color)] font-medium text-center mb-3">
               {subcategorySecondTitle}
             </p>
           )}
           <div className="max-w-7xl mx-auto text-center mb-8">
-            <ExpandableDescription text={shortDescription} />
+            <ExpandableDescription text={shortDescription} isHtml/>
           </div>
 
           {normalizedItems.length === 0 ? (

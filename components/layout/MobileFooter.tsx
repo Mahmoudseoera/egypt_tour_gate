@@ -2,7 +2,7 @@
 'use client';
 import Image from "next/image";
 import Link from 'next/link';
-
+import {  type SiteSettings } from "@/lib/api/settingsApi";
 const MobileFooter = () => {
   // Corrected & validated contact URLs (removed spaces/formatting issues)
   const CONTACT = {
