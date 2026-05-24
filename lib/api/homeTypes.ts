@@ -77,33 +77,23 @@ export interface SliderItem {
     tag_categories: TagCategory[];
   }
   
-  export interface WhyChooseItem {
-    img: string;
-    why_choose_box_1_title?: string;
-    why_choose_box_1_desc?: string;
-    why_choose_box_2_title?: string;
-    why_choose_box_2_desc?: string;
-    why_choose_box_3_title?: string;
-    why_choose_box_3_desc?: string;
-    why_choose_box_4_title?: string;
-    why_choose_box_4_desc?: string;
-    why_choose_box_5_title?: string;
-    why_choose_box_5_desc?: string;
-    why_choose_box_6_desc?: string;
-  }
-  
-  export interface WhyChooseSection {
-    title: string;
-    description: string;
-    why_choose: {
-      section1: WhyChooseItem;
-      section2: WhyChooseItem;
-      section3: WhyChooseItem;
-      section4: WhyChooseItem;
-      section5: WhyChooseItem;
-      section6: WhyChooseItem;
-    };
-  }
+export interface WhyChooseItem {
+  img: string;
+  title?: string;
+  desc?: string;
+}
+export interface WhyChooseSection {
+  title: string;
+  description: string;
+  why_choose: {
+    section1: WhyChooseItem;
+    section2: WhyChooseItem;
+    section3: WhyChooseItem;
+    section4: WhyChooseItem;
+    section5: WhyChooseItem;
+    section6: WhyChooseItem;
+  };
+}
   
   export interface ReviewMedia {
     image: string;

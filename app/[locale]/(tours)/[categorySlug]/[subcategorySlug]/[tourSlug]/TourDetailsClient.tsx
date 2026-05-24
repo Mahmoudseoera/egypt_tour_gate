@@ -1514,14 +1514,14 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                     </div>
-                    <div className="p-5">
+                    <div className="px-5 py-3">
                       <div className="flex items-center gap-2 mb-2">
                         {/* <Star className="w-4 h-4 fill-[var(--main-color)] text-[var(--main-color)]" />
                       <span className="text-sm font-semibold text-gray-700">
                         {Number.isFinite(relTour.rating) && relTour.rating > 0 ? relTour.rating.toFixed(1) : "5.0"}
                       </span> */}
                       </div>
-                      <h3 className="text-base font-bold text-[var(--second-color)] mb-3 group-hover:text-[var(--main-color)] transition-colors leading-snug">
+                      <h3 className="text-base font-bold text-[var(--second-color)] mb-3 leading-[1.6] h-[calc(1.6_*_2em)] group-hover:text-[var(--main-color)] transition-colors leading-snug">
                         {relTour.title}
                       </h3>
                       <p className="text-[0.84rem] leading-[1.6] text-[var(--color-primary-dark)] transition-colors duration-300 overflow-hidden text-ellipsis h-[calc(1.6_*_3em)]">

@@ -27,23 +27,30 @@ export default function TravelServicesSection({
       whyChooseSection.why_choose.section6,
     ];
 
-    const services: Array<{ id: number; title: string; description: string }> = [];
+    const services: Array<{
+      img: string;
+      id: number;
+      title: string;
+      description: string;
+    }> = [];
     let serviceId = 1;
 
     sections.forEach((section) => {
       for (let i = 1; i <= 6; i++) {
         const titleKey = `why_choose_box_${i}_title` as keyof typeof section;
         const descKey = `why_choose_box_${i}_desc` as keyof typeof section;
-
+        const img = section.img;
         const title = section[titleKey];
         const desc = section[descKey];
 
         if (title || desc) {
           services.push({
             id: serviceId++,
-            title: (title as string) || "Service",
+            title: (title as string) || "Service item",
             description: (desc as string) || "Description not available",
+            img: (img as string) || "/assets/images/safety.svg",
           });
+          console.log("Processing service:", img);
         }
       }
     });
@@ -93,6 +100,11 @@ export default function TravelServicesSection({
       border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       transition: background 0.3s ease;
+    }
+          .service-icon-wrap img {
+      color: transparent;
+      filter: brightness(0) saturate(100%) invert(78%) sepia(27%) saturate(943%)
+            hue-rotate(356deg) brightness(92%) contrast(89%);
     }
     .service-card:hover .service-icon-wrap { background: rgba(227, 183, 94, 0.28); }
     .featured-card {
@@ -160,7 +172,7 @@ export default function TravelServicesSection({
                 after:bg-[#4A4976] after:rounded-full after:z-0"
             />
             {sectionDescription && (
-              <p className="text-base text-white/70 max-w-2xl mx-auto">
+              <p className="text-base text-white/70 max-w-7xl mx-auto">
                 {sectionDescription}
               </p>
             )}
@@ -177,7 +189,7 @@ export default function TravelServicesSection({
                   >
                     <div className="flex items-start gap-3 mb-3">
                       <div className="service-icon-wrap">
-                        <svg
+                        {/* <svg
                           width="24"
                           height="24"
                           viewBox="0 0 24 24"
@@ -186,10 +198,16 @@ export default function TravelServicesSection({
                           strokeWidth="1.5"
                         >
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
+                        </svg> */}
+                        <Image
+                          src={service.img}
+                          alt="Star Icon"
+                          width={24}
+                          height={24}
+                        />
                       </div>
                       <h3 className="text-white text-base font-bold leading-tight">
-                        {service.title}
+                        {service.title.toLowerCase()}
                       </h3>
                     </div>
                     <p className="text-white/60 text-sm leading-relaxed">
