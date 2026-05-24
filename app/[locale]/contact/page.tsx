@@ -402,7 +402,7 @@ export default function ContactPage() {
                       defaultValue=""
                       {...register("code")}
                     >
-                      <option value="" disabled hidden>Code</option>
+                      <option value="" disabled hidden></option>
                       <option value="213">Algeria (+213)</option>
                       <option value="54">Argentina (+54)</option>
                       <option value="374">Armenia (+374)</option>
@@ -494,7 +494,7 @@ export default function ContactPage() {
                     defaultValue=""
                     {...register("country")}
                   >
-                    <option value="" disabled hidden>Country</option>
+                    <option value="" disabled hidden></option>
                     <option value="Afghanistan">Afghanistan</option>
                     <option value="Albania">Albania</option>
                     <option value="Algeria">Algeria</option>

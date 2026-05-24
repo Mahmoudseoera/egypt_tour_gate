@@ -1496,9 +1496,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {relatedTours.map((relTour) => (
-                  <a
+                  <Link
                     key={relTour.id}
-                    href={`/${relTour.slug}`}
+                    href={relTour.href!}
                     className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 group border border-gray-100"
                   >
                     <div className="relative h-48 overflow-hidden bg-gray-100">
@@ -1540,7 +1540,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                         </div>
                       </div>
                     </div>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>

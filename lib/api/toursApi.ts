@@ -14,7 +14,17 @@ export interface ApiTourListItem {
   location: string;
   short_description?: string;
   seo?: string;
-  media?: { image?: string; title?: string; alt?: string };
+
+  media?: {
+    image?: string;
+    title?: string;
+    alt?: string;
+  };
+
+  categorySlug?: string;
+  subCategorySlug?: string;
+
+  href?: string;
 }
 
 /** A single price row derived from pricing_tables[].prices entries */
@@ -91,44 +101,56 @@ function parsePrice(input: unknown): number {
 }
 
 function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
-  const candidatePrice =
-    item.price_from ??
-    item.price_after_discount ??
-    item.price_before_discount ??
-    item.price ??
-    item.start_from ??
-    item.start_price ??
-    item.from_price ??
-    item.cost;
 
-  // Combine duration + duration_type if both are present (e.g. "9 Day")
-  const rawDuration = item.duration ?? "";
-  const durationType = item.duration_type ?? "";
-  const duration =
-    rawDuration && durationType
-      ? `${rawDuration} ${durationType}`
-      : rawDuration || durationType || "";
+  const categorySlug =
+    item.subCategory?.categorySlug ??
+    item.subCategory?.category?.slug ??
+    "";
+
+  const subCategorySlug =
+    item.subCategory?.subCategorySlug ??
+    item.subCategory?.subCategory?.slug ??
+    "";
 
   return {
     id: Number(item.id ?? 0),
     slug: item.slug ?? fallbackSlug,
+
     title: item.title ?? item.name ?? "",
+
     image: item.image ?? item.media?.image ?? "",
-    price_from: parsePrice(candidatePrice),
+
+    price_from: parsePrice(
+      item.price_from ??
+      item.price_after_discount ??
+      item.price
+    ),
+
     rating: Number(item.rating ?? 0),
-    duration,
-    location: item.location ?? item.city ?? item.sub_category_name ?? "",
-    // real API uses small_desc — added as first candidate
+
+    duration:
+      item.duration && item.duration_type
+        ? `${item.duration} ${item.duration_type}`
+        : "",
+
+    location: item.location ?? item.city ?? "",
+
     short_description:
       item.small_desc ??
       item.short_description ??
-      item.summary ??
-      item.description ??
       "",
-    seo: item.seo ?? "",
+
+    categorySlug,
+    subCategorySlug,
+
+    href:
+      categorySlug && subCategorySlug && item.slug
+        ? `/${categorySlug}/${subCategorySlug}/${item.slug}`
+        : `/${item.slug}`,
+
     media: item.media
       ? {
-          image: item.media.image ?? item.media.image_url ?? "",
+          image: item.media.image ?? "",
           title: item.media.title ?? "",
           alt: item.media.alt ?? "",
         }
