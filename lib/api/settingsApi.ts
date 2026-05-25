@@ -71,7 +71,8 @@ export async function fetchSiteSettings(locale = "en"): Promise<SiteSettings | n
     if (!res.ok) return null;
     const json: SiteSettingsApiResponse = await res.json();
     return json?.data?.[0] ?? null;
-  } catch {
+  } catch (error) {
+    console.error("Failed to fetch site settings", error);
     return null;
   }
 }

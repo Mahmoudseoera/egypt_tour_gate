@@ -456,7 +456,7 @@ export default function Navbar() {
         <div className="topbar-wrapper">
           <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-2 text-sm">
             <div className="flex items-center">
-              <div className="flex items-center gap-2 pr-4 border-r border-gray-200">
+              <div className="hidden md:flex items-center gap-2 pr-4 border-r border-gray-200">
                 {socialData.map((item, index) => {
                 if (item.title === "TripAdvisor") {
                   return (
