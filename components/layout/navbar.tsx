@@ -492,8 +492,6 @@ export default function Navbar() {
                       </a>
                     );
                   }
-
-                  // باقي السوشيال
                   return (
                     <SimpleSocialIcon
                       key={index}
@@ -548,7 +546,7 @@ export default function Navbar() {
               </div>
 
               <div className="flex items-center gap-1 pl-4 cursor-pointer text-[var(--second-color)]">
-                <span className="hidden md:inline">USD</span>
+                <span className="inline">USD</span>
                 <ChevronDown className="h-4 w-4" />
               </div>
               <Link href="/favourite" className="flex items-center gap-1 pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition">
