@@ -103,7 +103,9 @@ export interface WhyChooseSection {
   export interface Review {
     id: number;
     name: string;
+    role?: string;
     description: string;
+    quote?: string;
     media: ReviewMedia;
   }
   

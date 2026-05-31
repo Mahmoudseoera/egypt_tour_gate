@@ -7,8 +7,6 @@ import Breadcrumb from '@/components/layout/breadcrumb';
 import ExpandableDescription from '@/components/shared/expandable-description';
 import SchemaScript from '@/components/seo/schema-script';
 import { breadcrumbSchema, buildSeoMetadata, collectionPageSchema } from '@/lib/seo';
-
-export const dynamic = "force-dynamic";
 export const revalidate = 1800;
 
 interface CategoryPageProps {
@@ -71,7 +69,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
               {category.title}
             </h1>

@@ -18,11 +18,14 @@ export default function RoavioAboutSection({ aboutData }: RoavioAboutSectionProp
   ];
 
   const rawDesc  = aboutData?.about_desc ?? "";
-  const cleanDesc = rawDesc.replace(/<[^>]+>/g, "").trim();
+  // const cleanDesc = rawDesc.replace(/<[^>]+>/g, "").trim();
+  const imgAbout = aboutData?.about_img
+  ? `https://www.egypttoursgate.com/uploads/settings/${aboutData.about_img}`
+  : "/assets/images/tours/Pyramids-in-Egypt-webp.webp";
   const title    = aboutData?.about_title    ?? "Awesome Tips That Makes Your Travel Beautiful";
   const subTitle = aboutData?.about_sub_title ?? "Travel Essentials Tips";
-  const desc     = cleanDesc || "We believe travel is more than just a trip—it's an experience that shapes your life.";
-  const title2   = aboutData?.about_title2   ?? "A Time to Travel And Find Breathtaking Landscapes For Relax";
+  const desc     = rawDesc || "We believe travel is more than just a trip—it's an experience that shapes your life.";
+  const title2   = aboutData?.about_title2   ?? "test";
 
   const styles = `
     .roavio-image-zoom { transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); }
@@ -61,7 +64,7 @@ export default function RoavioAboutSection({ aboutData }: RoavioAboutSectionProp
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-1 roavio-card-hover">
                 <div className="rounded-3xl overflow-hidden h-50 lg:h-full">
-                  <Image src="/assets/images/tours/Pyramids-in-Egypt-webp.webp" alt="Pyramids" className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
+                  <Image src={"/assets/images/tours/Pyramids-in-Egypt-webp.webp"} alt="Pyramids" className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
                 </div>
               </div>
               <div className="col-span-1 bg-gray-900 rounded-3xl p-2 md:p-8 flex flex-col justify-center items-center text-white h-50 lg:h-full">
@@ -82,12 +85,18 @@ export default function RoavioAboutSection({ aboutData }: RoavioAboutSectionProp
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="roavio-card-hover">
               <div className="rounded-3xl overflow-hidden h-96">
-                <Image src="/assets/images/tours/Egypt Budget Tours-webp.webp" alt={title2} className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
+                <Image src={imgAbout} alt="test" className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
               </div>
             </div>
             <div className="space-y-8">
               <h3 className="text-xl font-semibold text-[var(--second-color)]">{title2}</h3>
-              <p className="text-gray-600 text-lg leading-relaxed">{desc}</p>
+              <div className="text-gray-600 text-lg leading-relaxed">
+                    <div
+                        dangerouslySetInnerHTML={{
+                          __html: desc,
+                        }}
+                      />
+                </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {features.map((feature) => (
                   <div key={feature.id} className="flex items-center gap-3 roavio-feature-fade">

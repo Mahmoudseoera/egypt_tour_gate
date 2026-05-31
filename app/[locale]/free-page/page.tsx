@@ -87,7 +87,7 @@ export default async function FreePage() {
                   )}
 
                   <h3 className="text-second font-semibold">
-                    {item.title}
+                    {item.title.toLowerCase()}
                   </h3>
 
                   <div

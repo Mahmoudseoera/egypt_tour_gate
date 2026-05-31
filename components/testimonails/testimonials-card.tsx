@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Quote } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
-import type { Review } from "@/lib/api/homeTypes";
+import type { Review, ReviewsSection } from "@/lib/api/homeTypes";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -19,21 +19,39 @@ const staticTestimonials = [
 ];
 
 interface TestimonialSliderProps {
-  /** Reviews from the home API. Falls back to static data when empty. */
+  /** Full reviews section from the home API (includes title + description). */
+  reviewsSection?: ReviewsSection | null;
+  /** Convenience shortcut — ignored when reviewsSection is provided. */
   reviews?: Review[];
 }
 
-export default function TestimonialSlider({ reviews = [] }: TestimonialSliderProps) {
-  // Prefer API data; fall back to static when API returns nothing
-  const items = reviews.length > 0
-    ? reviews.map((r, i) => ({
-        id: r.id,
-        quote: r.description,
-        name: r.name,
-        role: "Verified Traveler",
-        image: r.media?.image ?? staticTestimonials[i % staticTestimonials.length].image,
-      }))
-    : staticTestimonials;
+export default function TestimonialSlider({
+  reviewsSection,
+  reviews = [],
+}: TestimonialSliderProps) {
+  // ── Dynamic section heading with fallbacks ──────────────────────────────
+  const heading =
+    reviewsSection?.title?.trim() || "Our Testimonails";
+  const subheading =
+    reviewsSection?.description?.trim() ||
+    "Discover unforgettable travel experiences tailored just for you";
+  // ── Resolve reviews: prefer reviewsSection.reviews, fall back to reviews prop
+  const rawReviews =
+    reviewsSection?.reviews?.length ? reviewsSection.reviews : reviews;
+
+  // ── Map API reviews → display items; fall back to static when empty ─────
+  const items =
+    rawReviews.length > 0
+      ? rawReviews.map((r, i) => ({
+          id: r.id,
+          quote: r.description,
+          name: r.name,
+          role: "Verified Traveler",
+          image:
+            r.media?.image ||
+            staticTestimonials[i % staticTestimonials.length].image,
+        }))
+      : staticTestimonials;
 
   return (
     <section className="max-w-7xl mx-auto py-16">
@@ -41,12 +59,12 @@ export default function TestimonialSlider({ reviews = [] }: TestimonialSliderPro
         <div className="text-center mb-12">
           <div className="inline-block mb-4">
             <h2 className="text-2xl md:text-3xl font-semibold text-[var(--second-color)] mb-4">
-              What Peoples Say About Us
+              {heading}
             </h2>
             <span className="relative block h-1 w-40 bg-gradient-to-r from-[var(--second-color)] via-[var(--main-color)] to-[var(--second-color)] mx-auto rounded-md before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-4 before:h-4 before:bg-[url('/assets/images/pryamids-2.svg')] before:bg-contain before:bg-no-repeat before:z-20 after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-[26px] after:h-[26px] after:bg-white after:rounded-full after:z-0" />
           </div>
           <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
-            Discover unforgettable travel experiences tailored just for you
+            {subheading}
           </p>
         </div>
 
@@ -65,12 +83,14 @@ export default function TestimonialSlider({ reviews = [] }: TestimonialSliderPro
           {items.map((item) => (
             <SwiperSlide key={item.id}>
               <div className="relative bg-white rounded-2xl p-7 h-full shadow-[0_10px_30px_-10px_rgba(0,0,0,0.15)] border border-gray-100">
-                <Quote size={80} className="absolute bottom-6 right-6 text-blue-100 opacity-40"/>
-                <p className="text-sm text-gray-600 leading-relaxed mb-8 relative z-10 line-clamp-3 overflow-hidden h-[85px] m-0"
-                   dangerouslySetInnerHTML={{ __html: item.quote }} />
+                <Quote size={80} className="absolute bottom-6 right-6 text-blue-100 opacity-40" />
+                <p
+                  className="text-sm text-gray-600 leading-relaxed mb-8 relative z-10 line-clamp-3 overflow-hidden h-[85px] m-0"
+                  dangerouslySetInnerHTML={{ __html: item.quote }}
+                />
                 <div className="flex items-center gap-4 mt-auto">
                   <div className="w-12 h-12 rounded-full overflow-hidden border">
-                    <Image src={item.image} alt={item.name} width={48} height={48} className="object-cover"/>
+                    <Image src={item.image} alt={item.name} width={48} height={48} className="object-cover" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-sm text-gray-900">{item.name}</h4>

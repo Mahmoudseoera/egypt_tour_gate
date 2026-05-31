@@ -42,60 +42,34 @@ import { settingsToSocialItems, type SiteSettings } from "@/lib/api/settingsApi"
 const fallbackSocialData: SocialItem[] = [];
 
 /* ── Category helpers ────────────────────────────────────────────────────── */
-function getCategoryIcon(slug: string) {
-  const map: Record<string, React.ReactNode> = {
-    "egypt-day-tours": <Compass size={20} />,
-    "egypt-tour-packages": <Map size={20} />,
-    "egypt-travel-packages": <Map size={20} />,
-    "nile-cruises": <Ship size={20} />,
-    "egypt-nile-cruises": <Ship size={20} />,
-    "egypt-shore-excursions": <Palmtree size={20} />,
-    "beach-tours": <Palmtree size={20} />,
-    "photography-tours": <Camera size={20} />,
+const CATEGORY_COLORS = [
+  "#e3b75e",
+  "#272262",
+  "#1e6fa5",
+  "#27a06e",
+  "#c96d28",
+  "#8c52ff",
+];
+
+const CATEGORY_ICONS = [
+  Compass,
+  Map,
+  Ship,
+  Palmtree,
+  Camera,
+  Sparkles,
+];
+
+function getCategoryMeta(slug: string) {
+  const hash = slug
+    .split("")
+    .reduce((sum, char) => sum + char.charCodeAt(0), 0);
+
+  return {
+    color: CATEGORY_COLORS[hash % CATEGORY_COLORS.length],
+    Icon: CATEGORY_ICONS[hash % CATEGORY_ICONS.length],
   };
-  return map[slug] ?? <Sparkles size={20} />;
 }
-
-function getCategoryDescription(slug: string) {
-  const map: Record<string, string> = {
-    "egypt-day-tours": "Explore iconic sites in a single day with expert guides",
-    "egypt-tour-packages": "Complete multi-day itineraries across Egypt",
-    "egypt-travel-packages": "Complete multi-day itineraries across Egypt",
-    "nile-cruises": "Sail the legendary Nile River in style & comfort",
-    "egypt-nile-cruises": "Sail the legendary Nile River in style & comfort",
-    "egypt-shore-excursions": "Pristine Red Sea shores and coastal adventures",
-  };
-  return map[slug] ?? "Discover unforgettable experiences across Egypt";
-}
-
-function getCategoryColor(slug: string) {
-  const map: Record<string, string> = {
-    "egypt-day-tours": "#e3b75e",
-    "egypt-tour-packages": "#272262",
-    "egypt-travel-packages": "#272262",
-    "nile-cruises": "#1e6fa5",
-    "egypt-nile-cruises": "#1e6fa5",
-    "egypt-shore-excursions": "#27a06e",
-  };
-  return map[slug] ?? "#e3b75e";
-}
-
-/* ── Featured highlights (static) ───────────────────────────────────────── */
-// const featuredHighlights = [
-//   {
-//     title: "Pyramids of Giza",
-//     tag: "Most Popular",
-//     img: "/assets/images/tours/camel front of giza pyramids.jpg",
-//     href: "/egypt-day-tours/cairo-day-tours",
-//   },
-//   {
-//     title: "Nile Cruise Package",
-//     tag: "Best Value",
-//     img: "/assets/images/tours/49-webp.webp",
-//     href: "/egypt-nile-cruises/luxor-aswan-nile-cruises",
-//   },
-// ];
-
 /* ── Locale prefix helpers ───────────────────────────────────────────────── */
 
 /**
@@ -257,6 +231,7 @@ export default function Navbar() {
 
   const getFeaturedHighlights = (cat: (typeof categories)[number]) => {
     if (!cat.subs?.length) return [];
+  const { color: catColor } = getCategoryMeta(cat.slug);
 
     return cat.subs
       .slice(0, 2)
@@ -268,189 +243,11 @@ export default function Navbar() {
           "/assets/images/tours/default-tour.jpg",
 
         href: `/${cat.slug}/${sub.slug}`,
-        color: getCategoryColor(cat.slug),
+        color: catColor,
       }));
   };
   return (
     <>
-      <style jsx global>{`
-        @keyframes slideInLeft {
-          from { transform: translateX(-100%); opacity: 0; }
-          to   { transform: translateX(0);    opacity: 1; }
-        }
-        @keyframes fadeInOverlay {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-        @keyframes slideDown {
-          from { max-height: 0; opacity: 0; }
-          to   { max-height: 400px; opacity: 1; }
-        }
-        @keyframes megaFadeIn {
-          from { opacity: 0; transform: translateY(-8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes dropdownFadeIn {
-          from { opacity: 0; transform: translateY(-6px) scale(0.98); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .mobile-overlay { animation: fadeInOverlay 0.28s ease forwards; }
-        .mobile-drawer  { animation: slideInLeft 0.32s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
-        .submenu-open   { animation: slideDown 0.28s ease forwards; overflow: hidden; }
-
-        .nav-link-underline { position: relative; }
-        .nav-link-underline::after {
-          content: '';
-          position: absolute;
-          bottom: -2px; left: 0;
-          width: 0; height: 2px;
-          background: var(--main-color);
-          transition: width 0.25s ease;
-        }
-        .nav-link-underline:hover::after,
-        .nav-link-underline.active::after { width: 100%; }
-
-        .simple-dropdown {
-          animation: dropdownFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          transform-origin: top center;
-        }
-        .simple-dropdown-item {
-          position: relative;
-          transition: all 0.18s ease;
-        }
-        .simple-dropdown-item::before {
-          content: '';
-          position: absolute;
-          left: 0; top: 0; bottom: 0;
-          width: 0;
-          background: var(--main-color);
-          opacity: 0.12;
-          transition: width 0.2s ease;
-          border-radius: 0 4px 4px 0;
-        }
-        .simple-dropdown-item:hover::before { width: 100%; }
-        .simple-dropdown-item .item-arrow {
-          opacity: 0;
-          transform: translateX(-4px);
-          transition: all 0.18s ease;
-        }
-        .simple-dropdown-item:hover .item-arrow {
-          opacity: 1;
-          transform: translateX(0);
-        }
-
-        .mega-menu {
-          animation: megaFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          transform-origin: top center;
-        }
-        .mega-cat-card {
-          position: relative;
-          overflow: hidden;
-          transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .mega-cat-card::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: var(--main-color);
-          opacity: 0;
-          transition: opacity 0.2s ease;
-          border-radius: 12px;
-          z-index: 0;
-        }
-        .mega-cat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(39,34,98,0.13); }
-        .mega-cat-card:hover::before { opacity: 0.07; }
-        .mega-cat-card .cat-icon-wrap { transition: all 0.2s ease; }
-        .mega-cat-card:hover .cat-icon-wrap { transform: scale(1.1); }
-        .mega-cat-card .cat-arrow {
-          opacity: 0;
-          transform: translateX(-6px);
-          transition: all 0.2s ease;
-        }
-        .mega-cat-card:hover .cat-arrow { opacity: 1; transform: translateX(0); }
-
-        .mega-sub-link {
-          position: relative;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 7px 12px;
-          border-radius: 8px;
-          font-size: 13.5px;
-          color: #555;
-          transition: all 0.16s ease;
-          font-weight: 500;
-        }
-        .mega-sub-link::before {
-          content: '';
-          position: absolute;
-          left: 8px;
-          width: 4px; height: 4px;
-          border-radius: 50%;
-          background: var(--main-color);
-          opacity: 0;
-          transition: opacity 0.16s ease;
-        }
-        .mega-sub-link:hover {
-          background: rgba(227,183,94,0.1);
-          color: var(--second-color);
-          padding-left: 20px;
-        }
-        .mega-sub-link:hover::before { opacity: 1; }
-
-        .featured-card {
-          position: relative;
-          overflow: hidden;
-          border-radius: 12px;
-          transition: transform 0.22s ease, box-shadow 0.22s ease;
-        }
-        .featured-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.18); }
-        .featured-card img { transition: transform 0.4s ease; }
-        .featured-card:hover img { transform: scale(1.06); }
-
-        .nav-active-dot {
-          position: absolute;
-          bottom: 6px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 4px; height: 4px;
-          border-radius: 50%;
-          background: var(--main-color);
-          opacity: 0;
-          transition: opacity 0.2s;
-        }
-        li:hover .nav-active-dot,
-        li.menu-open .nav-active-dot { opacity: 1; }
-
-        .topbar-wrapper {
-          background: var(--main-grey, #f9f9f9);
-          border-bottom: 1px solid rgba(39,34,98,0.08);
-        }
-        .lang-menu {
-          display: none;
-          position: absolute;
-          top: calc(100% + 8px);
-          right: 0;
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-          border: 1px solid rgba(0,0,0,0.07);
-          min-width: 120px;
-          overflow: hidden;
-          z-index: 999;
-        }
-        .group:hover .lang-menu { display: block; }
-        .lang-item {
-          padding: 8px 14px;
-          font-size: 13px;
-          color: var(--second-color);
-          font-weight: 500;
-          transition: background 0.15s;
-        }
-        .lang-item:hover { background: rgba(227,183,94,0.1); }
-      `}</style>
-
       <header>
         {/* ===== TOP BAR ===== */}
         <div className="topbar-wrapper">
@@ -465,7 +262,7 @@ export default function Navbar() {
                       href={item.url || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="transition hover:opacity-80"
+                      className="p-2 transition hover:opacity-80"
                     >
                       <Image
                         src="/assets/images/tripadvisor-icon.svg"
@@ -606,7 +403,7 @@ export default function Navbar() {
               {categories.map((cat) => {
                 const isOpen = activeMegaMenu === cat.slug;
                 const hasSubs = cat.subs.length > 0;
-                const catColor = getCategoryColor(cat.slug);
+                const { color: catColor, Icon } = getCategoryMeta(cat.slug);
                 const featuredHighlights = getFeaturedHighlights(cat);
                 return (
                   <li
@@ -649,15 +446,15 @@ export default function Navbar() {
                                   className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
                                   style={{ background: catColor }}
                                 >
-                                  {getCategoryIcon(cat.slug)}
+                                  <Icon size={20} />
                                 </div>
                                 <div>
                                   <h3 className="font-bold text-[var(--second-color)] text-[15px] capitalize leading-tight">
                                     {cat.name}
                                   </h3>
-                                  <p className="text-xs text-gray-400 leading-tight mt-0.5">
-                                    {getCategoryDescription(cat.slug)}
-                                  </p>
+                                  {/* <p className="text-xs text-gray-400 leading-tight mt-0.5">
+                                   Discover unforgettable experiences across Egypt
+                                  </p> */}
                                 </div>
                                 <Link
                                   href={lp(`/${cat.slug}`)}
@@ -700,7 +497,7 @@ export default function Navbar() {
                                         style={{ background: `${catColor}18` }}
                                       >
                                         <span style={{ color: catColor }} className="text-sm">
-                                          {getCategoryIcon(cat.slug)}
+                                          <Icon size={20} />
                                         </span>
                                       </div>
                                     )}
@@ -898,8 +695,10 @@ export default function Navbar() {
                 </Link>
 
                 {/* Dynamic Categories */}
-                {categories.map((cat) => (
-                  <div key={cat.slug}>
+                {categories.map((cat) => {
+                    const { Icon } = getCategoryMeta(cat.slug);
+                  return(
+                              <div key={cat.slug}>
                     <button
                       onClick={() => setActiveDropdown(activeDropdown === cat.slug ? null : cat.slug)}
                       className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group text-left"
@@ -913,7 +712,7 @@ export default function Navbar() {
                         }}
                       >
                         <span style={{ color: activeDropdown === cat.slug ? "#fff" : "var(--second-color)" }}>
-                          {getCategoryIcon(cat.slug)}
+                          <Icon size={20} />
                         </span>
                       </div>
                       <div className="flex-1">
@@ -950,7 +749,8 @@ export default function Navbar() {
                       </div>
                     )}
                   </div>
-                ))}
+                );
+                })}
 
                 {/* Blogs */}
                 <Link

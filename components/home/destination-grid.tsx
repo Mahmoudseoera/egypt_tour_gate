@@ -22,7 +22,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const sectionTitle =
-    tagCategoriesSection?.title?.trim() || "Destinations";
+    tagCategoriesSection?.title?.trim() || "Tags Categories";
   const sectionDescription =
     tagCategoriesSection?.description?.trim() ||
     "Discover breathtaking locations around the world and create unforgettable memories";
@@ -93,8 +93,13 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             </div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 0 ? 'opacity-100' : 'opacity-70'}`}></div>
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform transition-transform duration-300">
-              <div className="text-sm font-medium opacity-90 mb-1">{cat(0)?.name ?? ""}</div>
               <h3 className="text-2xl font-bold">{cat(0)?.name ?? ""}</h3>
+              <div
+                className="text-sm line-clamp-3 font-medium opacity-90 mb-1 [&_*]:!text-white [&_*]:!bg-transparent"
+                dangerouslySetInnerHTML={{
+                  __html: cat(0)?.description ?? "",
+                }}
+              />
             </div>
             </Link>
 
@@ -119,8 +124,13 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             </div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 1 ? 'opacity-100' : 'opacity-70'}`}></div>
             <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-              <div className="text-xs font-medium opacity-90 mb-1">{cat(1)?.name ?? ""}</div>
               <h3 className="text-xl font-bold">{cat(1)?.name ?? ""}</h3>
+              <div
+                className="text-sm line-clamp-3 font-medium opacity-90 mb-1 [&_*]:!text-white [&_*]:!bg-transparent"
+                dangerouslySetInnerHTML={{
+                  __html: cat(1)?.description ?? "",
+                }}
+              />
             </div>
             </Link>
           </div>
@@ -144,8 +154,13 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             </div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 2 ? 'opacity-100' : 'opacity-70'}`}></div>
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <div className="text-sm font-medium opacity-90 mb-1">{cat(2)?.name ?? ""}</div>
               <h3 className="text-2xl font-bold">{cat(2)?.name ?? ""}</h3>
+                 <div
+                className="text-sm line-clamp-3 font-medium opacity-90 mb-1 [&_*]:!text-white [&_*]:!bg-transparent"
+                dangerouslySetInnerHTML={{
+                  __html: cat(2)?.description ?? "",
+                }}
+              />
             </div>
             </Link>
           </div>
@@ -169,8 +184,13 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             </div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 3 ? 'opacity-100' : 'opacity-70'}`}></div>
             <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-              <div className="text-xs font-medium opacity-90 mb-1">{cat(3)?.name ?? ""}</div>
               <h3 className="text-xl font-bold">{cat(3)?.name ?? ""}</h3>
+                <div
+                className="text-sm line-clamp-3 font-medium opacity-90 mb-1 [&_*]:!text-white [&_*]:!bg-transparent"
+                dangerouslySetInnerHTML={{
+                  __html: cat(3)?.description ?? "",
+                }}
+              />
             </div>
             </Link>
           </div>
@@ -194,8 +214,13 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             </div>
             <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 4 ? 'opacity-100' : 'opacity-70'}`}></div>
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <div className="text-sm font-medium opacity-90 mb-1">{cat(4)?.name ?? ""}</div>
               <h3 className="text-2xl font-bold">{cat(4)?.name ?? ""}</h3>
+                <div
+                className="text-sm line-clamp-3 font-medium opacity-90 mb-1 [&_*]:!text-white [&_*]:!bg-transparent"
+                dangerouslySetInnerHTML={{
+                  __html: cat(4)?.description ?? "",
+                }}
+              />
             </div>
             </Link>
           </div>
@@ -220,8 +245,13 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
               </div>
               <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 ${hoveredIndex === 5 ? 'opacity-100' : 'opacity-70'}`}></div>
               <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                <div className="text-xs font-medium opacity-90 mb-1">{cat(5)?.name ?? ""}</div>
-                <h3 className="text-base font-bold">{cat(5)?.name ?? ""}</h3>
+                 <h3 className="text-base font-bold">{cat(5)?.name ?? ""}</h3>
+                 <div
+                className="text-sm line-clamp-3 font-medium opacity-90 mb-1 [&_*]:!text-white [&_*]:!bg-transparent"
+                dangerouslySetInnerHTML={{
+                  __html: cat(5)?.description ?? "",
+                }}
+              />
               </div>
               </Link>
             </div>
@@ -231,9 +261,9 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
 
         {/* Call to Action */}
         <div className="mt-12 text-center">
-          <button className="bg-[var(--main-color)] hover:bg-[var(--main-color)]/90 text-[var(--second-color)] font-bold py-4 px-8 rounded-full transition-all duration-300 hover:scale-105 shadow-lg">
+          <Link href="/tailor-made" className="bg-[var(--main-color)] hover:bg-[var(--main-color)]/90 text-[var(--second-color)] font-bold py-4 px-8 rounded-full transition-all duration-300 hover:scale-105 shadow-lg">
             Plan Your Journey
-          </button>
+          </Link>
         </div>
 
       </div>

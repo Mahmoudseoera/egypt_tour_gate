@@ -32,12 +32,10 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
   // Use first slider item from the API when available
   const firstSlide = sliderData[0];
 
-  const title       = firstSlide?.title       ?? fallback.title;
+  const title = firstSlide?.title;
   // Strip HTML tags from the API description
-  const description = firstSlide?.description
-    ? firstSlide.description.replace(/<[^>]+>/g, '').trim()
-    : fallback.description;
-  const backgroundImg = firstSlide?.media?.image_url ?? fallback.backgroundImg;
+  const description = firstSlide?.description.replace(/<[^>]+>/g, '').trim();
+  const imageOne = firstSlide?.media?.image_url ?? fallback.imageOne;
 
   return (
     <>
@@ -46,7 +44,7 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
         {/* Full-width background image */}
         <div className="hero-bg-img">
           <Image
-            src={backgroundImg}
+            src={fallback.backgroundImg}
             alt={firstSlide?.media?.image_alt ?? title}
             fill
             priority
