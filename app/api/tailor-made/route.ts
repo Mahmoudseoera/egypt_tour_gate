@@ -21,15 +21,31 @@ type TailorMadePayload = {
   message?: string;
   cities?: string[];
   month?: string;
+  selected_month?: string;
   days?: string;
+  days_count?: string;
   infants?: string;
   max_price?: string;
   min_price?: string;
 };
 
+function getExactDaysCount(checkIn: string, checkOut: string) {
+  const [startYear, startMonth, startDay] = checkIn.split("-").map(Number);
+  const [endYear, endMonth, endDay] = checkOut.split("-").map(Number);
+  if (!startYear || !startMonth || !startDay || !endYear || !endMonth || !endDay) return undefined;
+
+  const start = new Date(startYear, startMonth - 1, startDay);
+  const end = new Date(endYear, endMonth - 1, endDay);
+  const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  return days > 0 ? String(days) : undefined;
+}
+
 function buildPayload(data: TailorMadeFormData): TailorMadePayload {
   const phoneCode = data.phoneCode.replace(/^\+/, "");
   const phoneNumber = data.phoneNumber.replace(/^\+/, "").trim();
+  const daysCount = data.timeOption === "exact"
+    ? getExactDaysCount(data.checkIn, data.checkOut)
+    : data.vacationDays || undefined;
 
   return {
     ...data,
@@ -44,8 +60,10 @@ function buildPayload(data: TailorMadeFormData): TailorMadePayload {
     hotel_category: Number.parseInt(data.hotel, 10) || undefined,
     message: data.additionalInfo || undefined,
     cities: data.cities,
-    month: data.timeOption === "month" ? data.monthSelect : undefined,
-    days: data.timeOption === "days" ? data.vacationDays : undefined,
+    month: data.monthSelect || undefined,
+    selected_month: data.monthSelect || undefined,
+    days: daysCount,
+    days_count: daysCount,
     infants: String(data.infants),
     max_price: String(data.priceMax),
     min_price: String(data.priceMin),

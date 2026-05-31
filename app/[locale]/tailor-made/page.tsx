@@ -6,6 +6,7 @@ import { useLocale } from "next-intl";
 import { toast } from "sonner";
 import { Check, Calendar, MapPin, User, Phone, Globe, Hotel, MessageSquare, ChevronRight, ChevronLeft, DollarSign, Users, Baby, UserCheck } from "lucide-react";
 import "flatpickr/dist/flatpickr.min.css";
+import "flatpickr/dist/plugins/monthSelect/style.css";
 import {
   tailorMadeSchema,
   type TailorMadeFormData,
@@ -60,6 +61,8 @@ interface StaticData {
     nationality_trns?: string;
     message_trns?: string;
     message_placeholder_trns?: string;
+    hotel_trns?: string;
+    hotel_placeholder_trns?: string;
   };
   menu_4_budget: {
     title: string;
@@ -77,13 +80,11 @@ interface StaticData {
   cities: ApiCity[];
 }
 
-// ─── Fallback static data ───────────────────────────────────────────────────
-const FALLBACK_STATIC_DATA: StaticData = {
+const DEFAULT_COPY = {
   basic_data: {
     name: "Custom Experience",
     title: "Egypt Tailor Made Packages",
     description: "Design your perfect Egypt adventure in just a few steps",
-    cover_img: "",
   },
   top_menu_labels: {
     city_label_trns: "Cities",
@@ -133,19 +134,29 @@ const FALLBACK_STATIC_DATA: StaticData = {
     min_price_trns: "Min Price",
     max_price_trns: "Max Price",
   },
-  cities: [
-    { id: 1, name: "Cairo", img: "/assets/images/tours/Pyramids-in-Egypt-webp.webp" },
-    { id: 2, name: "Giza", img: "/assets/images/tours/great-pyramid-webp.webp" },
-    { id: 3, name: "Luxor", img: "/assets/images/about-us/The-front-façade-of-Karnak-Temple-webp.webp" },
-    { id: 4, name: "Aswan", img: "/assets/images/tours/106896752__MG_7633-final_Pompeys_Pillar-webp.webp" },
-    { id: 5, name: "Alexandria", img: "/assets/images/tours/Cairo day tours in Egypt-webp.webp" },
-    { id: 6, name: "Dahab", img: "/assets/images/tours/luxurytours-webp.webp" },
-    { id: 7, name: "Sharm El-Sheikh", img: "/assets/images/tours/Egypt Budget Tours-webp.webp" },
-    { id: 8, name: "Taba", img: "/assets/images/tours/egypt family tours-webp.webp" },
-  ],
+} as const;
+
+const formatLocalDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const formatLocalMonth = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+};
+
+const parseLocalDate = (value: string) => {
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day);
 };
 
 // ─── Floating Label Input ───────────────────────────────────────────────────
+
 interface FloatingInputProps {
   label: string;
   type?: string;
@@ -164,6 +175,7 @@ function FloatingInput({
   type = "text",
   value,
   onChange,
+  placeholder,
   required,
   icon,
   autoComplete,
@@ -184,10 +196,11 @@ function FloatingInput({
         autoComplete={autoComplete}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
-        className={`peer w-full border-[1.5px] border-solid ${error ? "border-red-400" : "border-[#9e9e9e]"} rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] valid:border-[#272262] outline-none ${icon ? "pl-11 pr-4" : "px-4"}`}
+        placeholder={placeholder || " "}
+        className={`peer w-full border-[1.5px] border-solid ${error ? "border-red-400" : "border-[#9e9e9e]"} rounded-2xl bg-transparent py-3 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] valid:border-[#272262] outline-none ${icon ? "pl-11 pr-4" : "px-4"}`}
       />
       <label
-        className={`absolute text-[#aaa] pointer-events-none translate-y-4 transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]
+        className={`absolute text-[#aaa] pointer-events-none translate-y-3 transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]
           peer-focus:-translate-y-1/2 peer-focus:scale-[0.80] peer-focus:bg-[#272262] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[#e3b75e] peer-focus:rounded-sm
           peer-valid:-translate-y-1/2 peer-valid:scale-[0.80] peer-valid:bg-[#212121] peer-valid:px-[0.2em] peer-valid:py-0 peer-valid:text-[#2196f3] peer-valid:rounded-sm
           ${icon ? "left-11" : "left-4"}`}
@@ -206,6 +219,7 @@ interface FloatingSelectProps {
   onChange: (val: string) => void;
   children: React.ReactNode;
   icon?: React.ReactNode;
+  placeholder?: string;
   onBlur?: () => void;
   error?: string;
 }
@@ -222,7 +236,7 @@ function FloatingSelect({ label, value, onChange, children, icon, onBlur, error 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
-        className={`peer w-full border-[1.5px] border-solid ${error ? "border-red-400" : "border-[#9e9e9e]"} rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] outline-none appearance-none cursor-pointer ${icon ? "pl-11 pr-4" : "px-4"} ${value ? "border-[#272262]" : ""}`}
+        className={`peer w-full border-[1.5px] border-solid ${error ? "border-red-400" : "border-[#9e9e9e]"} rounded-2xl bg-transparent py-3 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] outline-none appearance-none cursor-pointer ${icon ? "pl-11 pr-4" : "px-4"} ${value ? "border-[#272262]" : ""}`}
       >
         {children}
       </select>
@@ -230,7 +244,7 @@ function FloatingSelect({ label, value, onChange, children, icon, onBlur, error 
         className={`absolute text-[#aaa] pointer-events-none transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]
           ${value
             ? "-translate-y-1/2 scale-[0.80] bg-[#212121] px-[0.2em] py-0 text-[#2196f3] rounded-sm top-0"
-            : "translate-y-4 top-0"
+            : "translate-y-3 top-0"
           }
           peer-focus:-translate-y-1/2 peer-focus:scale-[0.80] peer-focus:bg-[#272262] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[#e3b75e] peer-focus:rounded-sm
           ${icon ? "left-11" : "left-4"}`}
@@ -258,13 +272,18 @@ interface FlatpickrInputProps {
 
 function FlatpickrInput({ label, value, onChange, options = {}, icon, onBlur, error }: FlatpickrInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const fpRef = useRef<{ destroy?: () => void; setDate?: (d: string, b: boolean) => void } | null>(null);
+  const onChangeRef = useRef(onChange);
+  const fpRef = useRef<{ destroy?: () => void; setDate?: (d: string, b: boolean) => void; set?: (key: string | Record<string, unknown>, value?: unknown) => void } | null>(null);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   useEffect(() => {
     if (!inputRef.current) return;
 
     let cancelled = false;
-    let fp: { destroy?: () => void; setDate?: (d: string, b: boolean) => void } | null = null;
+    let fp: { destroy?: () => void; setDate?: (d: string, b: boolean) => void; set?: (key: string | Record<string, unknown>, value?: unknown) => void } | null = null;
 
     Promise.all([
       import("flatpickr"),
@@ -288,17 +307,15 @@ function FlatpickrInput({ label, value, onChange, options = {}, icon, onBlur, er
 
       fp = flatpickr(inputRef.current, {
         ...safeOptions,
+        allowInput: false,
+        disableMobile: true,
         onChange: (selectedDates: Date[]) => {
           if (selectedDates[0]) {
             const fmt = (safeOptions.dateFormat as string) || "Y-m-d";
-            if (fmt === "Y-m") {
-              onChange(selectedDates[0].toISOString().slice(0, 7));
-            } else {
-              onChange(selectedDates[0].toISOString().split("T")[0]);
-            }
+            onChangeRef.current(fmt === "Y-m" ? formatLocalMonth(selectedDates[0]) : formatLocalDate(selectedDates[0]));
           }
         },
-      }) as unknown as { destroy?: () => void; setDate?: (d: string, b: boolean) => void };
+      }) as unknown as { destroy?: () => void; setDate?: (d: string, b: boolean) => void; set?: (key: string | Record<string, unknown>, value?: unknown) => void };
       fpRef.current = fp;
       if (value && fp?.setDate) fp.setDate(value, false);
     });
@@ -310,8 +327,7 @@ function FlatpickrInput({ label, value, onChange, options = {}, icon, onBlur, er
       }
       fpRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [options, value]);
 
   const isValid = !!value;
 
@@ -328,13 +344,13 @@ function FlatpickrInput({ label, value, onChange, options = {}, icon, onBlur, er
         value={value}
         onBlur={onBlur}
         placeholder=" "
-        className={`peer w-full border-[1.5px] border-solid rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none outline-none cursor-pointer ${icon ? "pl-11 pr-4" : "px-4"} ${error ? "border-red-400" : isValid ? "border-[#272262]" : "border-[#9e9e9e] focus:border-[#272262]"}`}
+        className={`peer w-full border-[1.5px] border-solid rounded-2xl bg-transparent py-3 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none outline-none cursor-pointer ${icon ? "pl-11 pr-4" : "px-4"} ${error ? "border-red-400" : isValid ? "border-[#272262]" : "border-[#9e9e9e] focus:border-[#272262]"}`}
       />
       <label
         className={`absolute text-[#aaa] pointer-events-none transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]
           ${isValid
             ? "-translate-y-1/2 scale-[0.80] bg-[#212121] px-[0.2em] py-0 text-[#2196f3] rounded-sm top-0"
-            : "translate-y-4 top-0 peer-focus:-translate-y-1/2 peer-focus:scale-[0.80] peer-focus:bg-[#272262] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[#e3b75e] peer-focus:rounded-sm"
+            : "translate-y-3 top-0 peer-focus:-translate-y-1/2 peer-focus:scale-[0.80] peer-focus:bg-[#272262] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[#e3b75e] peer-focus:rounded-sm"
           }
           ${icon ? "left-11" : "left-4"}`}
       >
@@ -351,15 +367,16 @@ interface FloatingTextareaProps {
   value: string;
   onChange: (val: string) => void;
   icon?: React.ReactNode;
+  placeholder?: string;
   onBlur?: () => void;
   error?: string;
 }
 
-function FloatingTextarea({ label, value, onChange, icon, onBlur, error }: FloatingTextareaProps) {
+function FloatingTextarea({ label, value, onChange, icon, placeholder, onBlur, error }: FloatingTextareaProps) {
   return (
     <div className="relative w-full">
       {icon && (
-        <span className="absolute left-4 top-5 text-[#9e9e9e] pointer-events-none z-10">
+        <span className="absolute left-4 top-4 text-[#9e9e9e] pointer-events-none z-10">
           {icon}
         </span>
       )}
@@ -367,14 +384,15 @@ function FloatingTextarea({ label, value, onChange, icon, onBlur, error }: Float
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
-        rows={4}
-        className={`peer w-full border-[1.5px] border-solid ${error ? "border-red-400" : "border-[#9e9e9e]"} rounded-2xl bg-transparent py-4 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] valid:border-[#272262] outline-none resize-none ${icon ? "pl-11 pr-4" : "px-4"} ${value ? "border-[#272262]" : ""}`}
+        placeholder={placeholder || " "}
+        rows={3}
+        className={`peer w-full border-[1.5px] border-solid ${error ? "border-red-400" : "border-[#9e9e9e]"} rounded-2xl bg-transparent py-3 text-base text-[#333] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:border-[#272262] valid:border-[#272262] outline-none resize-none ${icon ? "pl-11 pr-4" : "px-4"} ${value ? "border-[#272262]" : ""}`}
       />
       <label
         className={`absolute text-[#aaa] pointer-events-none transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]
           ${value
             ? "-translate-y-1/2 scale-[0.80] bg-[#212121] px-[0.2em] py-0 text-[#2196f3] rounded-sm top-0"
-            : "top-0 translate-y-5 peer-focus:-translate-y-1/2 peer-focus:scale-[0.80] peer-focus:top-0 peer-focus:bg-[#272262] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[#e3b75e] peer-focus:rounded-sm"
+            : "top-0 translate-y-4 peer-focus:-translate-y-1/2 peer-focus:scale-[0.80] peer-focus:top-0 peer-focus:bg-[#272262] peer-focus:px-[0.2em] peer-focus:py-0 peer-focus:text-[#e3b75e] peer-focus:rounded-sm"
           }
           ${icon ? "left-11" : "left-4"}`}
       >
@@ -455,12 +473,10 @@ export default function TailorMadePage() {
         if (json?.success && json?.data?.static_data) {
           setApiData(json.data.static_data as StaticData);
         } else {
-          // API responded but shape is unexpected — use fallback silently
-          setApiData(FALLBACK_STATIC_DATA);
+          setApiData(null);
         }
       } catch {
-        // Network error or proxy unavailable — use fallback silently
-        setApiData(FALLBACK_STATIC_DATA);
+        setApiData(null);
       } finally {
         setApiLoading(false);
       }
@@ -468,68 +484,69 @@ export default function TailorMadePage() {
     loadStaticData();
   }, [locale]);
 
-  // ── Resolved data: API data merged with fallbacks per field ──────────────
-  // Each field individually falls back so partial API responses still work.
-  const sd = apiData ?? FALLBACK_STATIC_DATA;
+  // ── Resolved API data with minimal UI copy defaults for missing labels ───
+  const sd = apiData;
 
-  const pageTitle      = sd.basic_data?.title        || FALLBACK_STATIC_DATA.basic_data.title;
-  const pageSubtitle   = sd.basic_data?.name         || FALLBACK_STATIC_DATA.basic_data.name;
-  const pageDesc       = sd.basic_data?.description  || FALLBACK_STATIC_DATA.basic_data.description;
+  const pageTitle      = sd?.basic_data?.title        || DEFAULT_COPY.basic_data.title;
+  const pageSubtitle   = sd?.basic_data?.name         || DEFAULT_COPY.basic_data.name;
+  const pageDesc       = sd?.basic_data?.description  || DEFAULT_COPY.basic_data.description;
 
-  const label_cities   = sd.top_menu_labels?.city_label_trns    || FALLBACK_STATIC_DATA.top_menu_labels.city_label_trns;
-  const label_time     = sd.top_menu_labels?.time_label_trns    || FALLBACK_STATIC_DATA.top_menu_labels.time_label_trns;
-  const label_info     = sd.top_menu_labels?.info_title_trns    || FALLBACK_STATIC_DATA.top_menu_labels.info_title_trns;
-  const label_budget   = sd.top_menu_labels?.budget_title_trns  || FALLBACK_STATIC_DATA.top_menu_labels.budget_title_trns;
-  const label_confirm  = sd.top_menu_labels?.confirm_label_trns || FALLBACK_STATIC_DATA.top_menu_labels.confirm_label_trns;
+  const label_cities   = sd?.top_menu_labels?.city_label_trns    || DEFAULT_COPY.top_menu_labels.city_label_trns;
+  const label_time     = sd?.top_menu_labels?.time_label_trns    || DEFAULT_COPY.top_menu_labels.time_label_trns;
+  const label_info     = sd?.top_menu_labels?.info_title_trns    || DEFAULT_COPY.top_menu_labels.info_title_trns;
+  const label_budget   = sd?.top_menu_labels?.budget_title_trns  || DEFAULT_COPY.top_menu_labels.budget_title_trns;
+  const label_confirm  = sd?.top_menu_labels?.confirm_label_trns || DEFAULT_COPY.top_menu_labels.confirm_label_trns;
 
-  const city_title     = sd.menu_1_city?.title    || FALLBACK_STATIC_DATA.menu_1_city.title;
-  const city_subtitle  = sd.menu_1_city?.sub_title || FALLBACK_STATIC_DATA.menu_1_city.sub_title;
+  const city_title     = sd?.menu_1_city?.title    || DEFAULT_COPY.menu_1_city.title;
+  const city_subtitle  = sd?.menu_1_city?.sub_title || DEFAULT_COPY.menu_1_city.sub_title;
 
-  const time_title         = sd.menu_2_time?.title             || FALLBACK_STATIC_DATA.menu_2_time.title;
-  const time_subtitle      = sd.menu_2_time?.sub_title         || FALLBACK_STATIC_DATA.menu_2_time.sub_title;
-  const time_exact         = sd.menu_2_time?.exact_dates_trns  || FALLBACK_STATIC_DATA.menu_2_time.exact_dates_trns!;
-  const time_approx        = sd.menu_2_time?.approx_month_trns || FALLBACK_STATIC_DATA.menu_2_time.approx_month_trns!;
-  const time_notSure       = sd.menu_2_time?.not_sure_yet_trns || FALLBACK_STATIC_DATA.menu_2_time.not_sure_yet_trns!;
-  const time_checkin       = sd.menu_2_time?.check_in_date_trns  || FALLBACK_STATIC_DATA.menu_2_time.check_in_date_trns!;
-  const time_checkout      = sd.menu_2_time?.check_out_date_trns || FALLBACK_STATIC_DATA.menu_2_time.check_out_date_trns!;
-  const time_selectMonth   = sd.menu_2_time?.select_month_trns   || FALLBACK_STATIC_DATA.menu_2_time.select_month_trns!;
-  const time_vacationDays  = sd.menu_2_time?.vacation_days_trns  || FALLBACK_STATIC_DATA.menu_2_time.vacation_days_trns!;
+  const time_title         = sd?.menu_2_time?.title             || DEFAULT_COPY.menu_2_time.title;
+  const time_subtitle      = sd?.menu_2_time?.sub_title         || DEFAULT_COPY.menu_2_time.sub_title;
+  const time_exact         = sd?.menu_2_time?.exact_dates_trns  || DEFAULT_COPY.menu_2_time.exact_dates_trns;
+  const time_approx        = sd?.menu_2_time?.approx_month_trns || DEFAULT_COPY.menu_2_time.approx_month_trns;
+  const time_notSure       = sd?.menu_2_time?.not_sure_yet_trns || DEFAULT_COPY.menu_2_time.not_sure_yet_trns;
+  const time_checkin       = sd?.menu_2_time?.check_in_date_trns  || DEFAULT_COPY.menu_2_time.check_in_date_trns;
+  const time_checkout      = sd?.menu_2_time?.check_out_date_trns || DEFAULT_COPY.menu_2_time.check_out_date_trns;
+  const time_selectMonth   = sd?.menu_2_time?.select_month_trns   || DEFAULT_COPY.menu_2_time.select_month_trns;
+  const time_vacationDays  = sd?.menu_2_time?.vacation_days_trns  || DEFAULT_COPY.menu_2_time.vacation_days_trns;
 
-  const info_title          = sd.menu_3_info?.title                   || FALLBACK_STATIC_DATA.menu_3_info.title;
-  const info_subtitle       = sd.menu_3_info?.sub_title               || FALLBACK_STATIC_DATA.menu_3_info.sub_title;
-  const info_name_label     = sd.menu_3_info?.name_trns               || FALLBACK_STATIC_DATA.menu_3_info.name_trns!;
-  const info_email_label    = sd.menu_3_info?.email_trns              || FALLBACK_STATIC_DATA.menu_3_info.email_trns!;
-  const info_phone_label    = sd.menu_3_info?.phone_trns              || FALLBACK_STATIC_DATA.menu_3_info.phone_trns!;
-  const info_nat_label      = sd.menu_3_info?.nationality_trns        || FALLBACK_STATIC_DATA.menu_3_info.nationality_trns!;
-  const info_msg_label      = sd.menu_3_info?.message_trns            || FALLBACK_STATIC_DATA.menu_3_info.message_trns!;
+  const info_title          = sd?.menu_3_info?.title                   || DEFAULT_COPY.menu_3_info.title;
+  const info_subtitle       = sd?.menu_3_info?.sub_title               || DEFAULT_COPY.menu_3_info.sub_title;
+  const info_name_label     = sd?.menu_3_info?.name_trns               || DEFAULT_COPY.menu_3_info.name_trns;
+  const info_name_placeholder = sd?.menu_3_info?.name_palasholder_trns || DEFAULT_COPY.menu_3_info.name_palasholder_trns;
+  const info_email_label    = sd?.menu_3_info?.email_trns              || DEFAULT_COPY.menu_3_info.email_trns;
+  const info_email_placeholder = sd?.menu_3_info?.email_placeholder_trns || DEFAULT_COPY.menu_3_info.email_placeholder_trns;
+  const info_phone_label    = sd?.menu_3_info?.phone_trns              || DEFAULT_COPY.menu_3_info.phone_trns;
+  const info_phone_placeholder = sd?.menu_3_info?.phone_placeholder_trns || DEFAULT_COPY.menu_3_info.phone_placeholder_trns;
+  const info_nat_label      = sd?.menu_3_info?.nationality_trns        || DEFAULT_COPY.menu_3_info.nationality_trns;
+  const info_hotel_label    = sd?.menu_3_info?.hotel_trns              || "Hotel Rating";
+  const info_msg_label      = sd?.menu_3_info?.message_trns            || DEFAULT_COPY.menu_3_info.message_trns;
+  const info_msg_placeholder = sd?.menu_3_info?.message_placeholder_trns || DEFAULT_COPY.menu_3_info.message_placeholder_trns;
 
-  const budget_title        = sd.menu_4_budget?.title                 || FALLBACK_STATIC_DATA.menu_4_budget.title;
-  const budget_subtitle     = sd.menu_4_budget?.sub_title             || FALLBACK_STATIC_DATA.menu_4_budget.sub_title;
-  const budget_adults       = sd.menu_4_budget?.adults_trns           || FALLBACK_STATIC_DATA.menu_4_budget.adults_trns!;
-  const budget_adults_sub   = sd.menu_4_budget?.message_adults_trns   || FALLBACK_STATIC_DATA.menu_4_budget.message_adults_trns!;
-  const budget_children     = sd.menu_4_budget?.children_trns         || FALLBACK_STATIC_DATA.menu_4_budget.children_trns!;
-  const budget_children_sub = sd.menu_4_budget?.message_children_trns || FALLBACK_STATIC_DATA.menu_4_budget.message_children_trns!;
-  const budget_infants      = sd.menu_4_budget?.infants_trns          || FALLBACK_STATIC_DATA.menu_4_budget.infants_trns!;
-  const budget_infants_sub  = sd.menu_4_budget?.message_infants_trns  || FALLBACK_STATIC_DATA.menu_4_budget.message_infants_trns!;
-  const budget_range_label  = sd.menu_4_budget?.label_budget_range_trns || FALLBACK_STATIC_DATA.menu_4_budget.label_budget_range_trns!;
+  const budget_title        = sd?.menu_4_budget?.title                 || DEFAULT_COPY.menu_4_budget.title;
+  const budget_subtitle     = sd?.menu_4_budget?.sub_title             || DEFAULT_COPY.menu_4_budget.sub_title;
+  const budget_adults       = sd?.menu_4_budget?.adults_trns           || DEFAULT_COPY.menu_4_budget.adults_trns;
+  const budget_adults_sub   = sd?.menu_4_budget?.message_adults_trns   || DEFAULT_COPY.menu_4_budget.message_adults_trns;
+  const budget_children     = sd?.menu_4_budget?.children_trns         || DEFAULT_COPY.menu_4_budget.children_trns;
+  const budget_children_sub = sd?.menu_4_budget?.message_children_trns || DEFAULT_COPY.menu_4_budget.message_children_trns;
+  const budget_infants      = sd?.menu_4_budget?.infants_trns          || DEFAULT_COPY.menu_4_budget.infants_trns;
+  const budget_infants_sub  = sd?.menu_4_budget?.message_infants_trns  || DEFAULT_COPY.menu_4_budget.message_infants_trns;
+  const budget_range_label  = sd?.menu_4_budget?.label_budget_range_trns || DEFAULT_COPY.menu_4_budget.label_budget_range_trns;
+  const budget_min_label    = sd?.menu_4_budget?.min_price_trns || DEFAULT_COPY.menu_4_budget.min_price_trns;
+  const budget_max_label    = sd?.menu_4_budget?.max_price_trns || DEFAULT_COPY.menu_4_budget.max_price_trns;
 
-  // ── Cities: API cities → normalized shape, fallback if empty ────────────
+  // ── Cities: API cities → normalized shape ────────────────────────────────
   const cities = useMemo(() => {
-    const apiCities = sd.cities;
-    if (Array.isArray(apiCities) && apiCities.length > 0) {
-      return apiCities.map((c) => ({
-        id: String(c.id),          // use string id to match formData.cities[]
-        name: c.name || "City",
-        image: c.img || "/assets/images/tours/Pyramids-in-Egypt-webp.webp",
+    const apiCities = sd?.cities;
+    if (!Array.isArray(apiCities)) return [];
+    return apiCities
+      .filter((c) => c?.id && c?.name)
+      .map((c) => ({
+        id: String(c.id),
+        name: c.name,
+        image: c.img,
       }));
-    }
-    // Fallback: static city list
-    return FALLBACK_STATIC_DATA.cities.map((c) => ({
-      id: String(c.id),
-      name: c.name,
-      image: c.img,
-    }));
-  }, [sd.cities]);
+  }, [sd?.cities]);
 
   // ── Steps derived from API labels ────────────────────────────────────────
   const steps = [
@@ -589,6 +606,38 @@ export default function TailorMadePage() {
   const updateFormData = <K extends keyof typeof formData>(field: K, value: (typeof formData)[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (stepError) setStepError(null);
+  };
+
+  const selectTimeOption = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      timeOption: value,
+      checkIn: value === "exact" ? prev.checkIn : "",
+      checkOut: value === "exact" ? prev.checkOut : "",
+      monthSelect: value === "month" ? prev.monthSelect : "",
+      vacationDays: value === "days" ? prev.vacationDays : "",
+    }));
+    if (stepError) setStepError(null);
+  };
+
+  const updateExactDate = (field: "checkIn" | "checkOut", value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      timeOption: "exact",
+      [field]: value,
+      ...(field === "checkIn" && prev.checkOut && value && prev.checkOut <= value ? { checkOut: "" } : {}),
+      monthSelect: "",
+      vacationDays: "",
+    }));
+    if (stepError) setStepError(null);
+  };
+
+  const updateBudgetMin = (value: number) => {
+    setFormData((prev) => ({ ...prev, priceMin: value, priceMax: Math.max(prev.priceMax, value) }));
+  };
+
+  const updateBudgetMax = (value: number) => {
+    setFormData((prev) => ({ ...prev, priceMax: value, priceMin: Math.min(prev.priceMin, value) }));
   };
 
   const toggleCity = (cityId: string) => {
@@ -684,8 +733,9 @@ export default function TailorMadePage() {
 
   const getDaysCount = () => {
     if (formData.checkIn && formData.checkOut) {
-      const start = new Date(formData.checkIn);
-      const end = new Date(formData.checkOut);
+      const start = parseLocalDate(formData.checkIn);
+      const end = parseLocalDate(formData.checkOut);
+      if (!start || !end) return 0;
       const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
       return days > 0 ? days : 0;
     }
@@ -696,13 +746,13 @@ export default function TailorMadePage() {
   const summaryItems: { label: string; value: string }[] = [];
   if (formData.cities.length > 0)
     summaryItems.push({ label: "Cities", value: formData.cities.map((id) => cities.find((c) => c.id === id)?.name ?? id).join(", ") });
-  if (formData.checkIn && formData.checkOut)
-    summaryItems.push({ label: "Dates", value: `${formData.checkIn} → ${formData.checkOut}` });
-  else if (formData.monthSelect)
+  if (formData.checkIn || formData.checkOut)
+    summaryItems.push({ label: "Dates", value: [formData.checkIn || "Check-in pending", formData.checkOut || "Check-out pending"].join(" → ") });
+  if (formData.monthSelect)
     summaryItems.push({ label: "Month", value: formData.monthSelect });
-  else if (formData.vacationDays)
+  if (formData.vacationDays)
     summaryItems.push({ label: "Days", value: `${formData.vacationDays} days` });
-  if (getDaysCount() > 0 && formData.checkIn)
+  if (getDaysCount() > 0)
     summaryItems.push({ label: "Duration", value: `${getDaysCount()} days` });
   if (formData.fullName) summaryItems.push({ label: "Name", value: formData.fullName });
   if (formData.email) summaryItems.push({ label: "Email", value: formData.email });
@@ -713,8 +763,9 @@ export default function TailorMadePage() {
   if (formData.priceMin && formData.priceMax)
     summaryItems.push({ label: "Budget", value: `$${formData.priceMin.toLocaleString()} – $${formData.priceMax.toLocaleString()}` });
 
-  const flatpickrDateOpts = { dateFormat: "Y-m-d", minDate: "today" as const };
-  const flatpickrMonthOpts = { dateFormat: "Y-m", minDate: "today" as const };
+  const today = useMemo(() => new Date(), []);
+  const flatpickrDateOpts = useMemo(() => ({ dateFormat: "Y-m-d", minDate: today, disableMobile: true }), [today]);
+  const flatpickrMonthOpts = useMemo(() => ({ dateFormat: "Y-m", minDate: new Date(today.getFullYear(), today.getMonth(), 1), disableMobile: true }), [today]);
 
   // ── Loading skeleton ─────────────────────────────────────────────────────
   if (apiLoading) {
@@ -791,6 +842,11 @@ export default function TailorMadePage() {
                     <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">{city_title}</h3>
                     <p className="text-[#888] text-sm mt-1">{city_subtitle}</p>
                   </div>
+                  {cities.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-[#d0d4e0] bg-[#f8f9fc] p-6 text-center text-sm font-semibold text-[#888]">
+                      Destinations are loading from the travel API. Please refresh if they do not appear.
+                    </div>
+                  ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {cities.map((city) => {
                       const selected = formData.cities.includes(city.id);
@@ -802,13 +858,17 @@ export default function TailorMadePage() {
                           className={`group relative overflow-hidden rounded-2xl border-2 transition-all duration-300 hover:shadow-lg focus:outline-none ${selected ? "border-[#e3b75e] shadow-md ring-2 ring-[#e3b75e]/30" : "border-[#e8eaf0] hover:border-[#e3b75e]/60"}`}
                         >
                           <div className="relative h-24 w-full overflow-hidden">
-                            <Image
-                              src={city.image}
-                              alt={city.name}
-                              fill
-                              unoptimized={city.image.startsWith("http")}
-                              className={`object-cover transition-transform duration-400 ${selected ? "scale-105" : "group-hover:scale-105"}`}
-                            />
+                            {city.image ? (
+                              <Image
+                                src={city.image}
+                                alt={city.name}
+                                fill
+                                unoptimized={city.image.startsWith("http")}
+                                className={`object-cover transition-transform duration-400 ${selected ? "scale-105" : "group-hover:scale-105"}`}
+                              />
+                            ) : (
+                              <div className="absolute inset-0 bg-gradient-to-br from-[#272262] to-[#e3b75e]" />
+                            )}
                             <div className={`absolute inset-0 transition-all duration-300 ${selected ? "bg-[#272262]/40" : "bg-black/10 group-hover:bg-black/20"}`} />
                             {selected && (
                               <div className="absolute top-2 right-2 w-6 h-6 bg-[#e3b75e] rounded-full flex items-center justify-center shadow">
@@ -825,6 +885,7 @@ export default function TailorMadePage() {
                       );
                     })}
                   </div>
+                  )}
                   {formData.cities.length > 0 && (
                     <p className="text-xs text-[#888] flex items-center gap-1">
                       <MapPin size={12} className="text-[#e3b75e]" />
@@ -841,7 +902,7 @@ export default function TailorMadePage() {
                     <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">{time_title}</h3>
                     <p className="text-[#888] text-sm mt-1">{time_subtitle}</p>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-3">
                     {[
                       { value: "exact", label: time_exact, icon: "📅" },
                       { value: "month", label: time_approx, icon: "🗓️" },
@@ -850,8 +911,8 @@ export default function TailorMadePage() {
                       <button
                         key={opt.value}
                         type="button"
-                        onClick={() => updateFormData("timeOption", opt.value)}
-                        className={`p-4 rounded-2xl border-2 transition-all duration-200 text-center focus:outline-none ${formData.timeOption === opt.value ? "border-[#272262] bg-[#272262]/5 shadow-md" : "border-[#e8eaf0] hover:border-[#272262]/40"}`}
+                        onClick={() => selectTimeOption(opt.value)}
+                        className={`p-3 sm:p-4 rounded-2xl border-2 transition-all duration-200 text-center focus:outline-none ${formData.timeOption === opt.value ? "border-[#272262] bg-[#272262]/5 shadow-md" : "border-[#e8eaf0] hover:border-[#272262]/40"}`}
                       >
                         <div className="text-2xl mb-1">{opt.icon}</div>
                         <span className={`text-xs font-bold block ${formData.timeOption === opt.value ? "text-[#272262]" : "text-[#888]"}`}>{opt.label}</span>
@@ -864,16 +925,17 @@ export default function TailorMadePage() {
                       <FlatpickrInput
                         label={time_checkin}
                         value={formData.checkIn}
-                        onChange={(v) => updateFormData("checkIn", v)}
+                        onChange={(v) => updateExactDate("checkIn", v)}
                         options={flatpickrDateOpts}
                         icon={<Calendar size={18} />}
                         onBlur={() => markTouched("checkIn")}
                         error={fieldError("checkIn")}
                       />
                       <FlatpickrInput
+                        key={`checkout-${formData.checkIn || "today"}`}
                         label={time_checkout}
                         value={formData.checkOut}
-                        onChange={(v) => updateFormData("checkOut", v)}
+                        onChange={(v) => updateExactDate("checkOut", v)}
                         options={{ ...flatpickrDateOpts, minDate: formData.checkIn || "today" }}
                         icon={<Calendar size={18} />}
                         onBlur={() => markTouched("checkOut")}
@@ -915,9 +977,11 @@ export default function TailorMadePage() {
                     <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">{info_title}</h3>
                     <p className="text-[#888] text-sm mt-1">{info_subtitle}</p>
                   </div>
-                  <FloatingInput
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <FloatingInput
                     label={info_name_label}
                     value={formData.fullName}
+                    placeholder={info_name_placeholder}
                     onChange={(v) => updateFormData("fullName", v)}
                     icon={<User size={18} />}
                     onBlur={() => markTouched("fullName")}
@@ -927,14 +991,16 @@ export default function TailorMadePage() {
                     label={info_email_label}
                     type="email"
                     value={formData.email}
+                    placeholder={info_email_placeholder}
                     onChange={(v) => updateFormData("email", v)}
                     icon={<Globe size={18} />}
                     autoComplete="email"
                     onBlur={() => markTouched("email")}
                     error={fieldError("email")}
                   />
+                  </div>
                   {/* Phone row: country code + number */}
-                  <div className="grid grid-cols-[140px_1fr] gap-3">
+                  <div className="grid grid-cols-[120px_1fr] sm:grid-cols-[140px_1fr] gap-3">
                     <FloatingSelect
                       label="Code"
                       value={formData.phoneCode}
@@ -954,12 +1020,14 @@ export default function TailorMadePage() {
                       label={info_phone_label}
                       type="tel"
                       value={formData.phoneNumber}
+                      placeholder={info_phone_placeholder}
                       onChange={(v) => updateFormData("phoneNumber", v)}
                       onBlur={() => markTouched("phoneNumber")}
                       error={fieldError("phoneNumber")}
                     />
                   </div>
-                  <FloatingSelect
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <FloatingSelect
                     label={info_nat_label}
                     value={formData.nationality}
                     onChange={(v) => updateFormData("nationality", v)}
@@ -972,8 +1040,8 @@ export default function TailorMadePage() {
                       <option key={n} value={n}>{n}</option>
                     ))}
                   </FloatingSelect>
-                  <FloatingSelect
-                    label="Hotel Rating"
+                    <FloatingSelect
+                    label={info_hotel_label}
                     value={formData.hotel}
                     onChange={(v) => updateFormData("hotel", v)}
                     icon={<Hotel size={18} />}
@@ -981,13 +1049,15 @@ export default function TailorMadePage() {
                     error={fieldError("hotel")}
                   >
                     <option value="" />
-                    {["3 Stars", "4 Stars", "5 Stars", "Luxury"].map((r) => (
-                      <option key={r} value={r}>{r}</option>
-                    ))}
+                    {[3, 4, 5].map((rating) => (
+                        <option key={rating} value={String(rating)}>{rating} Stars</option>
+                      ))}
                   </FloatingSelect>
+                  </div>
                   <FloatingTextarea
                     label={info_msg_label}
                     value={formData.additionalInfo}
+                    placeholder={info_msg_placeholder}
                     onChange={(v) => updateFormData("additionalInfo", v)}
                     icon={<MessageSquare size={18} />}
                     onBlur={() => markTouched("additionalInfo")}
@@ -1005,7 +1075,7 @@ export default function TailorMadePage() {
                   </div>
 
                   {/* Group size counters */}
-                  <div className="space-y-3">
+                  <div className="grid md:grid-cols-3 gap-3">
                     <CounterButton
                       label={budget_adults}
                       subLabel={budget_adults_sub}
@@ -1034,43 +1104,41 @@ export default function TailorMadePage() {
                   </div>
 
                   {/* Budget range sliders */}
-                  <div className="space-y-4 pt-2">
+                  <div className="space-y-3 pt-2">
                     <p className="text-sm font-bold text-[#272262] flex items-center gap-2">
                       <DollarSign size={16} className="text-[#e3b75e]" />
                       {budget_range_label}
                     </p>
-                    <div>
-                      <div className="flex justify-between text-xs text-[#aaa] mb-2 font-medium">
-                        <span>Min Price</span>
-                        <span className="text-[#272262] font-bold">${formData.priceMin.toLocaleString()}</span>
+                    <div className="rounded-2xl border-[1.5px] border-[#e8eaf0] bg-[#f8f9fc] p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-bold mb-3">
+                        <span className="text-[#272262]">{budget_min_label}: ${formData.priceMin.toLocaleString()}</span>
+                        <span className="text-[#e3b75e]">{budget_max_label}: ${formData.priceMax.toLocaleString()}</span>
                       </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="15000"
-                        step="100"
-                        value={formData.priceMin}
-                        onChange={(e) => updateFormData("priceMin", parseInt(e.target.value))}
-                        className="w-full accent-[#272262] h-2 cursor-pointer"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs text-[#aaa] mb-2 font-medium">
-                        <span>Max Price</span>
-                        <span className="text-[#e3b75e] font-bold">${formData.priceMax.toLocaleString()}</span>
+                      <div className="grid sm:grid-cols-2 gap-4 items-center">
+                        <input
+                          aria-label={budget_min_label}
+                          type="range"
+                          min="0"
+                          max="15000"
+                          step="100"
+                          value={formData.priceMin}
+                          onChange={(e) => updateBudgetMin(parseInt(e.target.value))}
+                          className="w-full accent-[#272262] h-2 cursor-pointer"
+                        />
+                        <input
+                          aria-label={budget_max_label}
+                          type="range"
+                          min="0"
+                          max="15000"
+                          step="100"
+                          value={formData.priceMax}
+                          onChange={(e) => updateBudgetMax(parseInt(e.target.value))}
+                          className="w-full accent-[#e3b75e] h-2 cursor-pointer"
+                        />
                       </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="15000"
-                        step="100"
-                        value={formData.priceMax}
-                        onChange={(e) => updateFormData("priceMax", parseInt(e.target.value))}
-                        className="w-full accent-[#e3b75e] h-2 cursor-pointer"
-                      />
-                      <div className="flex justify-between text-xs text-[#aaa] mt-1 font-medium">
+                      <div className="flex justify-between text-xs text-[#aaa] mt-2 font-medium">
                         <span>$0</span>
-                        <span className="text-[#e3b75e] font-bold">${formData.priceMin.toLocaleString()} – ${formData.priceMax.toLocaleString()}</span>
+                        <span className="text-[#272262] font-bold">${formData.priceMin.toLocaleString()} – ${formData.priceMax.toLocaleString()}</span>
                         <span>$15,000</span>
                       </div>
                     </div>
@@ -1157,7 +1225,7 @@ export default function TailorMadePage() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#272262]/80 to-transparent" />
               <div className="absolute bottom-4 left-5">
                 <h3 className="text-lg font-bold text-white">Trip Summary</h3>
-                <p className="text-xs text-white/70">{summaryItems.length === 0 ? "Fill the form to see your summary" : `${summaryItems.length} detail${summaryItems.length > 1 ? "s" : ""} added`}</p>
+                <p className="text-xs text-white/70">{summaryItems.length === 0 ? "Fill the form to see your summary" : "Live summary updates instantly"}</p>
               </div>
             </div>
 
@@ -1200,7 +1268,8 @@ export default function TailorMadePage() {
         /* Flatpickr calendar theme */
         .flatpickr-calendar {
           z-index: 9999 !important;
-          max-width: 320px !important;
+          width: min(320px, calc(100vw - 24px)) !important;
+          max-width: calc(100vw - 24px) !important;
           border-radius: 16px !important;
           box-shadow: 0 20px 60px rgba(0,0,0,0.12) !important;
           border: 1.5px solid #e8eaf0 !important;
@@ -1231,6 +1300,10 @@ export default function TailorMadePage() {
         .numInputWrapper:hover { background: transparent !important; }
         .flatpickr-prev-month svg, .flatpickr-next-month svg { fill: #fff !important; }
         .flatpickr-prev-month:hover svg, .flatpickr-next-month:hover svg { fill: #e3b75e !important; }
+        .flatpickr-days, .dayContainer { width: 100% !important; min-width: 100% !important; max-width: 100% !important; }
+        .flatpickr-day { max-width: none !important; }
+        .flatpickr-monthSelect-months { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 10px !important; }
+        .flatpickr-monthSelect-month { width: auto !important; margin: 0 !important; border-radius: 10px !important; }
       `}</style>
     </div>
   );
