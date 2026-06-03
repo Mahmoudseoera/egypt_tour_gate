@@ -288,16 +288,20 @@ function FlatpickrInput({ label, value, onChange, options = {}, icon, onBlur, er
 
       fp = flatpickr(inputRef.current, {
         ...safeOptions,
-        onChange: (selectedDates: Date[]) => {
-          if (selectedDates[0]) {
+      onChange: (selectedDates: Date[]) => {        
+        if (selectedDates[0]) {
+          const d = selectedDates[0];
             const fmt = (safeOptions.dateFormat as string) || "Y-m-d";
-            if (fmt === "Y-m") {
-              onChange(selectedDates[0].toISOString().slice(0, 7));
-            } else {
-              onChange(selectedDates[0].toISOString().split("T")[0]);
+            const pad = (n: number) => String(n).padStart(2, "0");
+              if (fmt === "Y-m") {
+                // local year-month, no UTC shift
+                onChange(`${d.getFullYear()}-${pad(d.getMonth() + 1)}`);
+              } else {
+                // local YYYY-MM-DD, no UTC shift
+                onChange(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`);
+              }
             }
-          }
-        },
+          },
       }) as unknown as { destroy?: () => void; setDate?: (d: string, b: boolean) => void };
       fpRef.current = fp;
       if (value && fp?.setDate) fp.setDate(value, false);
@@ -449,7 +453,7 @@ export default function TailorMadePage() {
   useEffect(() => {
     async function loadStaticData() {
       try {
-        const res = await fetch(`/api/tailor-made-data?locale=${locale}`);
+        const res = await fetch(`/api/tailor-made?locale=${locale}`);
         if (!res.ok) throw new Error("API request failed");
         const json = await res.json();
         if (json?.success && json?.data?.static_data) {

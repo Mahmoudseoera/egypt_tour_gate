@@ -78,7 +78,7 @@ export default function SecondTourCard({
 
       <div className="p-6">
         <Link href={tourLink}>
-          <h3 className="text-xl text-left font-bold text-navy mb-2 line-clamp-2 hover:text-gold transition h-[calc(1.5*2em)]">
+          <h3 className="text-lg text-left font-bold text-navy mb-2 line-clamp-2 hover:text-gold transition h-[calc(1.5*2em)]">
             {title}
           </h3>
         </Link>
