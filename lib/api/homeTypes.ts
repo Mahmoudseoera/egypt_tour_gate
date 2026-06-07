@@ -7,6 +7,11 @@ export interface SliderItem {
       image_title: string;
       image_alt: string;
     };
+    media2:{
+      image_url: string;
+      image_title: string;
+      image_alt: string;
+    };
     link: string | null;
     button_text: string | null;
     lang_id: number;

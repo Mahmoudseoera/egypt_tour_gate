@@ -5,16 +5,8 @@ import Link from 'next/link';
 import '@/styles/animations.css';
 import type { SliderItem } from '@/lib/api/homeTypes';
 
-// ─── Static fallback data ──────────────────────────────────────────────────
-const fallback = {
-  title: 'Egypt Tour Gate',
-  description:
-    'Discover the wonders of Egypt with our premium tour experiences. Explore ancient pyramids, vibrant cultures, and unforgettable memories.',
-  imageOne: '/assets/images/tours/9-Days-Marsa-Alam-Holiday-With-A-Tour-To-Pyramids-And-Old-Cairo-Egypt-Tours-Portal-webp.webp',
-  imageTwo: '/assets/images/tours/luxurytours-webp.webp',
-  backgroundImg: 'https://images.unsplash.com/photo-1539768942893-daf53e448371?q=80&w=1600&auto=format&fit=crop',
-};
-
+// ─── Static data ──────────────────────────────────────────────────
+const backgroundImg = 'https://images.unsplash.com/photo-1539768942893-daf53e448371?q=80&w=1600&auto=format&fit=crop'
 const badgeContent = {
   brandLine: 'Egypt Tour Gate',
   titleLine: 'Traveler',
@@ -35,8 +27,8 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
   const title = firstSlide?.title;
   // Strip HTML tags from the API description
   const description = firstSlide?.description.replace(/<[^>]+>/g, '').trim();
-  const imageOne = firstSlide?.media?.image_url ?? fallback.imageOne;
-
+  const imageOne = firstSlide?.media?.image_url;
+  const imageTwo = firstSlide?.media2?.image_url;
   return (
     <>
       <section className="hero-section">
@@ -44,7 +36,7 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
         {/* Full-width background image */}
         <div className="hero-bg-img">
           <Image
-            src={fallback.backgroundImg}
+            src={backgroundImg}
             alt={firstSlide?.media?.image_alt ?? title}
             fill
             priority
@@ -150,14 +142,14 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
               <div className="photo-wrapper-1 animate-floating">
                 <div className="photo-ring" />
                 <div className="photo-frame photo-frame-1">
-                  <Image src={fallback.imageOne} alt="Egypt Tour" fill className="object-cover"/>
+                  <Image src={imageOne} alt="Egypt Tour" fill className="object-cover"/>
                   <div className="photo-shimmer overlay-animated opacity-10" />
                 </div>
               </div>
               <div className="photo-wrapper-2 animate-floating-delayed">
                 <div className="photo-ring photo-ring-2" />
                 <div className="photo-frame photo-frame-2">
-                  <Image src={fallback.imageTwo} alt="Luxury Tour" fill className="object-cover"/>
+                  <Image src={imageTwo} alt="Luxury Tour" fill className="object-cover"/>
                   <div className="photo-shimmer overlay-animated opacity-10" />
                 </div>
               </div>

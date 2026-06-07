@@ -1,3 +1,4 @@
+//lib/api/toursApi.ts
 import { apiGet } from "@/lib/api/client";
 import { routing, type AppLocale } from "@/lib/i18n/routing";
 
@@ -232,7 +233,7 @@ export async function getCategoryBySlug(
 ): Promise<AnyObj | null> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/categories/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`category:${slug}`] },
+    next: { revalidate: 3600, tags: [`category:${slug}`, "categories", "tours"] },
   });
   const data = pickData(response);
 
@@ -260,7 +261,7 @@ export async function getSubcategoryBySlug(
 ): Promise<AnyObj | null> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/sub-category/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`subcategory:${slug}`] },
+    next: { revalidate: 3600, tags: [`subcategory:${slug}`, "subcategories", "tours"] },
   });
   const data = pickData(response);
   // real API: data IS the subcategory object directly (id, name, slug, desc, tours…)
@@ -279,7 +280,7 @@ export async function getToursBySubcategory(
 ): Promise<ApiTourListItem[]> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/sub-category/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`subcategory:${slug}`, "tours"] },
+    next: { revalidate: 3600, tags: [`subcategory:${slug}`, "subcategories", "tours"] },
   });
   const data = pickData(response);
   // real API: tours live at data.tours (after pickData unwraps outer `data`)
@@ -297,7 +298,7 @@ export async function getTourBySlug(
 ): Promise<ApiTourDetails | null> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/tour/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`tour:${slug}`] },
+    next: { revalidate: 3600, tags: [`tour:${slug}`, "tours"] },
   });
   const data = pickData(response);
   const raw = data?.tour ?? data;

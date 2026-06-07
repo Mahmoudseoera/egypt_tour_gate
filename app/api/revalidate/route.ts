@@ -1,3 +1,5 @@
+//app/api/revalidate/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 
@@ -10,10 +12,10 @@ export async function POST(req: NextRequest) {
 
   const tags: string[] = Array.isArray(body?.tags) && body.tags.length
     ? body.tags
-    : ["home", "tours", "blogs", "general", "settings", "contact", "tailor-made"];
+    : ["home", "tours", "blogs", "general", "settings", "contact", "tailor-made", "categories", "subcategories"];
 
   for (const tag of tags) {
-    revalidateTag(tag, "default");
+    revalidateTag(tag);
   }
 
   return NextResponse.json({ success: true, revalidated: tags });
