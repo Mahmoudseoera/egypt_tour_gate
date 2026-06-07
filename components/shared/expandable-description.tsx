@@ -29,11 +29,11 @@ export default function ExpandableDescription({
     <div className={className}>
       {isHtml ? (
         <div
-          className="text-gray-600 leading-relaxed"
+          className="text-gray-600 leading-relaxed expandable-description"
           dangerouslySetInnerHTML={{ __html: content }}
         />
       ) : (
-        <p className="text-gray-600 leading-relaxed">
+        <p className="text-gray-600 leading-relaxed expandable-description">
           {content}
         </p>
       )}

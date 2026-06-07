@@ -330,6 +330,9 @@
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+.expandable-description a{
+ color: var(--main-color);
+}
 /*==================================
     start Header CSS
 ===================================*/

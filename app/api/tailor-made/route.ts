@@ -122,6 +122,7 @@ export async function POST(req: NextRequest) {
     });
 
     const text = await upstream.text();
+    console.log("[tailor-made POST proxy] upstream response:", { status: upstream.status, text });
     let body: unknown;
     try {
       body = text ? JSON.parse(text) : { success: upstream.ok };

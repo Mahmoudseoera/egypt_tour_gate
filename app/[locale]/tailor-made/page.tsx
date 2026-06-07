@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { toast } from "sonner";
 import { Check, Calendar, MapPin, User, Phone, Globe, Hotel, MessageSquare, ChevronRight, ChevronLeft, DollarSign, Users, Baby, UserCheck } from "lucide-react";
+// Import the required base styling and the plugin styling
 import "flatpickr/dist/flatpickr.min.css";
+import "flatpickr/dist/plugins/monthSelect/style.css";
 import {
   tailorMadeSchema,
   type TailorMadeFormData,
@@ -470,6 +472,7 @@ export default function TailorMadePage() {
       }
     }
     loadStaticData();
+    
   }, [locale]);
 
   // ── Resolved data: API data merged with fallbacks per field ──────────────
@@ -696,7 +699,7 @@ export default function TailorMadePage() {
     return formData.vacationDays ? parseInt(formData.vacationDays) : 0;
   };
 
-  // Summary items — only populated when user has filled something
+  // Summary items — reactive to formData, updates immediately on every change
   const summaryItems: { label: string; value: string }[] = [];
   if (formData.cities.length > 0)
     summaryItems.push({ label: "Cities", value: formData.cities.map((id) => cities.find((c) => c.id === id)?.name ?? id).join(", ") });
@@ -710,15 +713,25 @@ export default function TailorMadePage() {
     summaryItems.push({ label: "Duration", value: `${getDaysCount()} days` });
   if (formData.fullName) summaryItems.push({ label: "Name", value: formData.fullName });
   if (formData.email) summaryItems.push({ label: "Email", value: formData.email });
-  if (formData.phoneNumber) summaryItems.push({ label: "Phone", value: `+${formData.phoneCode} ${formData.phoneNumber}` });
+  if (formData.phoneNumber) summaryItems.push({ label: "Phone", value: `${formData.phoneCode} ${formData.phoneNumber}` });
   if (formData.nationality) summaryItems.push({ label: "Nationality", value: formData.nationality });
-  if (formData.adults > 0 || formData.children > 0 || formData.infants > 0)
-    summaryItems.push({ label: "Guests", value: `${formData.adults} Adults · ${formData.children} Children · ${formData.infants} Infants` });
-  if (formData.priceMin && formData.priceMax)
-    summaryItems.push({ label: "Budget", value: `$${formData.priceMin.toLocaleString()} – $${formData.priceMax.toLocaleString()}` });
+  if (formData.hotel) summaryItems.push({ label: "Hotel", value: formData.hotel });
+  // Always show guests (adults defaults to 1)
+  summaryItems.push({ label: "Guests", value: `${formData.adults} Adults · ${formData.children} Children · ${formData.infants} Infants` });
+  // Always show budget (defaults are 2500–7500)
+  summaryItems.push({ label: "Budget", value: `$${formData.priceMin.toLocaleString()} – $${formData.priceMax.toLocaleString()}` });
 
-  const flatpickrDateOpts = { dateFormat: "Y-m-d", minDate: "today" as const };
-  const flatpickrMonthOpts = { dateFormat: "Y-m", minDate: "today" as const };
+  // Fix 1: checkIn minDate = tomorrow (backend requires arrival_date after:today)
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  const flatpickrDateOpts = { dateFormat: "Y-m-d", minDate: tomorrow };
+
+  // Fix 2: monthSelect minDate = first day of current month (so current month is selectable)
+  const firstOfThisMonth = new Date();
+  firstOfThisMonth.setDate(1);
+  firstOfThisMonth.setHours(0, 0, 0, 0);
+  const flatpickrMonthOpts = { dateFormat: "Y-m", minDate: firstOfThisMonth };
 
   // ── Loading skeleton ─────────────────────────────────────────────────────
   if (apiLoading) {
@@ -854,7 +867,7 @@ export default function TailorMadePage() {
                       <button
                         key={opt.value}
                         type="button"
-                        onClick={() => updateFormData("timeOption", opt.value)}
+                        onClick={() => { setFormData((prev) => ({ ...prev, timeOption: opt.value, checkIn: "", checkOut: "", monthSelect: "", vacationDays: "" })); if (stepError) setStepError(null); }}
                         className={`p-4 rounded-2xl border-2 transition-all duration-200 text-center focus:outline-none ${formData.timeOption === opt.value ? "border-[#272262] bg-[#272262]/5 shadow-md" : "border-[#e8eaf0] hover:border-[#272262]/40"}`}
                       >
                         <div className="text-2xl mb-1">{opt.icon}</div>
