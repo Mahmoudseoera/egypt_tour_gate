@@ -188,6 +188,47 @@ export default async function SubcategoryPage({
     <>
       <SchemaScript schema={subcategorySchema} />
       <Breadcrumb items={breadcrumbItems} />
+    {/* ── Page Hero ── */}
+    <div className="relative py-20 overflow-hidden">
+
+      {/* Background Image */}
+      <Image
+        src={subcategoryCover}
+        alt={subcategoryName}
+        fill
+        priority
+        className="object-cover"
+      />
+
+      {/* Main Color Overlay */}
+      <div
+        className="absolute inset-0 z-[1]"
+        style={{
+          background: "var(--second-color)",
+          opacity: 0.55,
+        }}
+      />
+
+      {/* Decorative Shapes */}
+      <div className="absolute -top-10 -left-10 z-[2] w-56 h-56 rounded-full opacity-15 bg-[var(--main-color)]" />
+      <div className="absolute -bottom-14 -right-14 z-[2] w-72 h-72 rounded-full opacity-15 bg-[var(--main-color)]" />
+      {/* Content */}
+      <div className="relative z-[3] text-center px-4">
+        <p className="text-white font-semibold tracking-widest uppercase text-xs mb-3">
+          Explore
+        </p>
+
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white capitalize leading-tight">
+          {subcategoryName.toLowerCase()}
+        </h1>
+
+        {subcategorySecondTitle && (
+          <p className="text-white/80 text-lg mt-2 font-medium">
+            {subcategorySecondTitle}
+          </p>
+        )}
+      </div>
+    </div>
 
       <section className="container py-10 max-w-7xl mx-auto">
         <div className="container mx-auto">
@@ -205,8 +246,6 @@ export default async function SubcategoryPage({
           <div className="max-w-7xl mx-auto text-center mb-8">
             <ExpandableDescription text={shortDescription} isHtml/>
           </div>
-            <Image
-            src={subcategoryCover} alt ="sub-category-cover" width={1000} height={500}/>
           {normalizedItems.length === 0 ? (
             <p className="text-lg text-center">
               No tours found for this subcategory.
