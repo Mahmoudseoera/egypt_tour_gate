@@ -17,7 +17,7 @@ import {
   getToursBySubcategory,
 } from "@/lib/api/toursApi";
 import { routing } from "@/lib/i18n/routing";
-
+import Image from "next/image";
 type SubcategoryPageProps = {
   params: Promise<{
     locale: string;
@@ -161,7 +161,7 @@ export default async function SubcategoryPage({
 
   // second_title is a subtitle (e.g. "Egypt Luxury Tours and Trips")
   const subcategorySecondTitle: string = subcategory.second_title ?? "";
-
+  const subcategoryCover: string = subcategory.media?.cover.image ?? "";
   // plainDesc is the HTML-stripped `desc` field set by getSubcategoryBySlug
   const shortDescription: string =
     subcategory.plainDesc ||
@@ -205,7 +205,8 @@ export default async function SubcategoryPage({
           <div className="max-w-7xl mx-auto text-center mb-8">
             <ExpandableDescription text={shortDescription} isHtml/>
           </div>
-
+            <Image
+            src={subcategoryCover} alt ="sub-category-cover" width={1000} height={500}/>
           {normalizedItems.length === 0 ? (
             <p className="text-lg text-center">
               No tours found for this subcategory.

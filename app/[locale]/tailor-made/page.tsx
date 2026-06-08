@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { toast } from "sonner";
-import { Check, Calendar, MapPin, User, Phone, Globe, Hotel, MessageSquare, ChevronRight, ChevronLeft, DollarSign, Users, Baby, UserCheck } from "lucide-react";
+import { Check, Calendar, CalendarDays, MapPin, User, Phone, Globe, Hotel, MessageSquare, ChevronRight, ChevronLeft, DollarSign, Users, Baby, UserCheck } from "lucide-react";
 // Import the required base styling and the plugin styling
 import "flatpickr/dist/flatpickr.min.css";
 import "flatpickr/dist/plugins/monthSelect/style.css";
@@ -932,24 +932,26 @@ export default function TailorMadePage() {
                     <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">{info_title}</h3>
                     <p className="text-[#888] text-sm mt-1">{info_subtitle}</p>
                   </div>
-                  <FloatingInput
-                    label={info_name_label}
-                    value={formData.fullName}
-                    onChange={(v) => updateFormData("fullName", v)}
-                    icon={<User size={18} />}
-                    onBlur={() => markTouched("fullName")}
-                    error={fieldError("fullName")}
-                  />
-                  <FloatingInput
-                    label={info_email_label}
-                    type="email"
-                    value={formData.email}
-                    onChange={(v) => updateFormData("email", v)}
-                    icon={<Globe size={18} />}
-                    autoComplete="email"
-                    onBlur={() => markTouched("email")}
-                    error={fieldError("email")}
-                  />
+                  <div className="flex gap-3">
+                    <FloatingInput
+                      label={info_name_label}
+                      value={formData.fullName}
+                      onChange={(v) => updateFormData("fullName", v)}
+                      icon={<User size={18} />}
+                      onBlur={() => markTouched("fullName")}
+                      error={fieldError("fullName")}
+                    />
+                    <FloatingInput
+                      label={info_email_label}
+                      type="email"
+                      value={formData.email}
+                      onChange={(v) => updateFormData("email", v)}
+                      icon={<Globe size={18} />}
+                      autoComplete="email"
+                      onBlur={() => markTouched("email")}
+                      error={fieldError("email")}
+                    />    
+                  </div>
                   {/* Phone row: country code + number */}
                   <div className="grid grid-cols-[140px_1fr] gap-3">
                     <FloatingSelect
@@ -976,6 +978,7 @@ export default function TailorMadePage() {
                       error={fieldError("phoneNumber")}
                     />
                   </div>
+                  <div className="flex gap-3">
                   <FloatingSelect
                     label={info_nat_label}
                     value={formData.nationality}
@@ -1002,6 +1005,8 @@ export default function TailorMadePage() {
                       <option key={r} value={r}>{r}</option>
                     ))}
                   </FloatingSelect>
+                  </div>
+
                   <FloatingTextarea
                     label={info_msg_label}
                     value={formData.additionalInfo}

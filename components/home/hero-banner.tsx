@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import FallbackImage from "@/components/shared/fallback-image";
 import '@/styles/animations.css';
 import type { SliderItem } from '@/lib/api/homeTypes';
 
@@ -142,14 +143,14 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
               <div className="photo-wrapper-1 animate-floating">
                 <div className="photo-ring" />
                 <div className="photo-frame photo-frame-1">
-                  <Image src={imageOne} alt="Egypt Tour" fill className="object-cover"/>
+                  <FallbackImage src={imageOne} alt="Egypt Tour" fill className="object-cover" />
                   <div className="photo-shimmer overlay-animated opacity-10" />
                 </div>
               </div>
               <div className="photo-wrapper-2 animate-floating-delayed">
                 <div className="photo-ring photo-ring-2" />
                 <div className="photo-frame photo-frame-2">
-                  <Image src={imageTwo} alt="Luxury Tour" fill className="object-cover"/>
+                  <FallbackImage src={imageTwo} alt="Luxury Tour" fill className="object-cover" />
                   <div className="photo-shimmer overlay-animated opacity-10" />
                 </div>
               </div>
