@@ -333,6 +333,12 @@
 .expandable-description a{
  color: var(--main-color);
 }
+.expandable-description h2 {
+  color: var(--second-color);
+  text-align: center;
+  font-weight: bold;
+  font-size: 24px;
+}
 /*==================================
     start Header CSS
 ===================================*/

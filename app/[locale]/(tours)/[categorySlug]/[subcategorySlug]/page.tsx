@@ -235,9 +235,6 @@ export default async function SubcategoryPage({
           <p className="text-xl text-gray-600 mb-1 text-center">
             {categoryName}
           </p>
-          <h1 className="text-3xl font-bold mb-2 text-center text-[var(--second-color)]">
-            {subcategoryName} 
-          </h1>
           {subcategorySecondTitle && (
             <p className="text-base text-[var(--main-color)] font-medium text-center mb-3">
               {subcategorySecondTitle}
