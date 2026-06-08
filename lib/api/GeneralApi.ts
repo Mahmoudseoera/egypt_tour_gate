@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { routing, type AppLocale } from "@/lib/i18n/routing";
+import { normalizeMediaSet, type ApiMediaAsset } from "@/lib/api/media";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export interface CategoryMedia {
-  image: string;
-  title: string;
-  alt: string;
+export interface CategoryMedia extends ApiMediaAsset {
+  cover?: ApiMediaAsset;
 }
 
 export interface SubCategory {
@@ -61,9 +60,12 @@ export interface GeneralData {
 // ─── Raw API types ────────────────────────────────────────────────────────────
 
 interface RawMedia {
-  image?: string;
-  title?: string;
-  alt?: string;
+  image?: unknown;
+  cover?: unknown;
+  title?: unknown;
+  alt?: unknown;
+  url?: unknown;
+  image_url?: unknown;
 }
 
 interface RawSub {
@@ -121,8 +123,11 @@ interface RawApiResponse {
 // ─── Normalizers ──────────────────────────────────────────────────────────────
 
 function normalizeMedia(raw?: RawMedia): CategoryMedia | undefined {
-  if (!raw) return undefined;
-  return { image: raw.image ?? "", title: raw.title ?? "", alt: raw.alt ?? "" };
+  const media = normalizeMediaSet(raw);
+  if (!media?.image && !media?.cover) return undefined;
+
+  const image = media.image ?? media.cover ?? { image: "", title: "", alt: "" };
+  return { ...image, cover: media.cover };
 }
 
 function normalizeSubs(raw?: RawSub[]): SubCategory[] {

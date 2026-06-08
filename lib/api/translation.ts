@@ -13,7 +13,7 @@ export async function fetchTranslation(locale = "en"): Promise<TranslationEditor
 
   try {
     const res = await fetch(`${base}/get-translation-editor?locale=${locale}`, {
-      next: { revalidate: 3600, tags: ["translation"] },
+      next: { revalidate: 300, tags: ["translation"] },
     });
     if (!res.ok) return null;
     const json: TranslationEditorResponse = await res.json();

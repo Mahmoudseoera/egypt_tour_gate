@@ -9,7 +9,7 @@ import SchemaScript from '@/components/seo/schema-script';
 import { breadcrumbSchema, buildSeoMetadata, tourSchema } from '@/lib/seo';
 import "@/styles/tour-details.css";
 import { getTourBySlug } from '@/lib/api/toursApi';
-export const revalidate = 3600;
+export const revalidate = 300;
 
 type TourDetailPageProps = {
   params: Promise<{

@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const res = await fetch(externalUrl, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 300 },
       headers: { Accept: "application/json" },
     });
 

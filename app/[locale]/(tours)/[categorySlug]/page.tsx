@@ -5,6 +5,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
+import PageCover from "@/components/shared/page-cover";
 import SchemaScript from "@/components/seo/schema-script";
 import {
   breadcrumbSchema,
@@ -91,7 +92,7 @@ export async function generateMetadata({
     description,
     path: `/${categorySlug}`,
     locale,
-    image: category.media?.image,
+    image: category.media?.cover ?? category.media?.image,
   });
 }
 
@@ -126,7 +127,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       name: categoryName,
       description: categoryDescription,
       path: `/${categorySlug}`,
-      image: category.media?.image,
+      image: category.media?.cover ?? category.media?.image,
     }),
     breadcrumbSchema(breadcrumbItems),
   ];
@@ -136,28 +137,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <SchemaScript schema={categorySchema} />
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* ── Page Hero ── */}
-      <div
-        className="relative py-14 overflow-hidden"
-        style={{ backgroundColor: "var(--second-color)" }}
-      >
-        <div className="absolute -top-10 -left-10 w-56 h-56 rounded-full opacity-10 bg-[var(--main-color)]" />
-        <div className="absolute -bottom-14 -right-14 w-72 h-72 rounded-full opacity-10 bg-[var(--main-color)]" />
-
-        <div className="relative z-10 text-center px-4">
-          <p className="text-[var(--main-color)] font-semibold tracking-widest uppercase text-xs mb-3">
-            Explore
-          </p>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white capitalize leading-tight">
-            {categoryName.toLowerCase()}
-          </h1>
-          {categorySecondTitle && (
-            <p className="text-white/70 text-lg mt-2 font-medium">
-              {categorySecondTitle}
-            </p>
-          )}
-        </div>
-      </div>
+      <PageCover
+        cover={category.media?.cover ?? category.media?.image}
+        title={categoryName.toLowerCase()}
+        subtitle={categorySecondTitle}
+        label="Explore"
+      />
 
       <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
            <div className="max-w-7xl mx-auto text-center mb-8">
@@ -172,8 +157,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             // ── Real image from API media, fallback only when absent ──
             const rawImage: string =
               child.media?.image?.trim() ||
-              child.media?.image_url?.trim() ||
-              "";
+              "/assets/images/tours/fallback-tour.svg";
 
             // const childImage: string =
             //  rawImage && rawImage.includes("/uploads/category/")

@@ -50,7 +50,7 @@ export async function safeFetch<T = AnyRecord>(
 ): Promise<T | null> {
   try {
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 300 },
       headers: { Accept: 'application/json' },
     });
     if (!res.ok) return null;

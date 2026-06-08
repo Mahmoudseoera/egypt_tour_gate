@@ -1,6 +1,7 @@
 //lib/api/toursApi.ts
 import { apiGet } from "@/lib/api/client";
 import { routing, type AppLocale } from "@/lib/i18n/routing";
+import { normalizeMediaSet } from "@/lib/api/media";
 
 type AnyObj = Record<string, any>;
 
@@ -16,11 +17,7 @@ export interface ApiTourListItem {
   short_description?: string;
   seo?: string;
 
-  media?: {
-    image?: string;
-    title?: string;
-    alt?: string;
-  };
+  media?: ReturnType<typeof normalizeMediaSet>;
 
   categorySlug?: string;
   subCategorySlug?: string;
@@ -119,7 +116,7 @@ function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
 
     title: item.title ?? item.name ?? "",
 
-    image: item.image ?? item.media?.image ?? "",
+    image: item.image ?? normalizeMediaSet(item.media)?.image?.image ?? "",
 
     price_from: parsePrice(
       item.price_from ??
@@ -149,13 +146,7 @@ function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
         ? `/${categorySlug}/${subCategorySlug}/${item.slug}`
         : `/${item.slug}`,
 
-    media: item.media
-      ? {
-          image: item.media.image ?? "",
-          title: item.media.title ?? "",
-          alt: item.media.alt ?? "",
-        }
-      : undefined,
+    media: normalizeMediaSet(item.media),
   };
 }
 
@@ -217,7 +208,7 @@ function pickHtmlList(input: unknown): string[] {
 export async function getGeneralCategories(locale?: string): Promise<AnyObj[]> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale("/general-data", l), {
-    next: { revalidate: 3600, tags: ["general"] },
+    next: { revalidate: 300, tags: ["general"] },
   });
   const data = pickData(response);
   return asArray(data?.header?.categories ?? data?.header?.headerCategories);
@@ -233,7 +224,7 @@ export async function getCategoryBySlug(
 ): Promise<AnyObj | null> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/categories/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`category:${slug}`, "categories", "tours"] },
+    next: { revalidate: 300, tags: [`category:${slug}`, "categories", "tours"] },
   });
   const data = pickData(response);
 
@@ -244,8 +235,12 @@ export async function getCategoryBySlug(
 
   return {
     ...raw,
+    media: normalizeMediaSet(raw.media),
     // Unify subcategory field — real API returns `subCategories`
-    subs: asArray(raw.subs ?? raw.subCategories ?? raw.sub_categories),
+    subs: asArray(raw.subs ?? raw.subCategories ?? raw.sub_categories).map((sub) => ({
+      ...sub,
+      media: normalizeMediaSet(sub?.media),
+    })),
     // Plain-text description stripped of HTML
     plainDesc: raw.desc ,
   };
@@ -261,7 +256,7 @@ export async function getSubcategoryBySlug(
 ): Promise<AnyObj | null> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/sub-category/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`subcategory:${slug}`, "subcategories", "tours"] },
+    next: { revalidate: 300, tags: [`subcategory:${slug}`, "subcategories", "tours"] },
   });
   const data = pickData(response);
   // real API: data IS the subcategory object directly (id, name, slug, desc, tours…)
@@ -270,6 +265,7 @@ export async function getSubcategoryBySlug(
 
   return {
     ...raw,
+    media: normalizeMediaSet(raw.media),
     plainDesc: raw.desc,
   };
 }
@@ -280,7 +276,7 @@ export async function getToursBySubcategory(
 ): Promise<ApiTourListItem[]> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/sub-category/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`subcategory:${slug}`, "subcategories", "tours"] },
+    next: { revalidate: 300, tags: [`subcategory:${slug}`, "subcategories", "tours"] },
   });
   const data = pickData(response);
   // real API: tours live at data.tours (after pickData unwraps outer `data`)
@@ -298,7 +294,7 @@ export async function getTourBySlug(
 ): Promise<ApiTourDetails | null> {
   const l = normalizeLocale(locale);
   const response = await apiGet<any>(withLocale(`/tour/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`tour:${slug}`, "tours"] },
+    next: { revalidate: 300, tags: [`tour:${slug}`, "tours"] },
   });
   const data = pickData(response);
   const raw = data?.tour ?? data;
@@ -361,8 +357,9 @@ export async function getTourBySlug(
           .filter(Boolean);
 
   // Last resort — use the tour cover image so gallery is never empty
-  if (images.length === 0 && raw.media?.image) {
-    images.push(safeUrl(String(raw.media.image)));
+  const primaryMediaImage = normalizeMediaSet(raw.media)?.image?.image;
+  if (images.length === 0 && primaryMediaImage) {
+    images.push(safeUrl(primaryMediaImage));
   }
 
   // ── Legacy flat pricing (backward compat) ─────────────────────────────────
@@ -413,9 +410,9 @@ export async function getTourBySlug(
     date: item?.date ?? item?.created_at ?? "",
     media: item?.media
       ? {
-          image: item.media.image ?? item.media.image_url ?? "",
-          title: item.media.title ?? "",
-          alt: item.media.alt ?? "",
+          image: normalizeMediaSet(item.media)?.image?.image ?? "",
+          title: normalizeMediaSet(item.media)?.image?.title ?? "",
+          alt: normalizeMediaSet(item.media)?.image?.alt ?? "",
         }
       : undefined,
     blog_category: item?.blog_category

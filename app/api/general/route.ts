@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   try {
     const externalRes = await fetch(url, {
       headers: { Accept: "application/json" },
-      next: { revalidate: 3600, tags: ["general"] },
+      next: { revalidate: 300, tags: ["general"] },
     });
 
     const contentType = externalRes.headers.get("content-type") ?? "";

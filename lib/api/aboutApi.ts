@@ -37,7 +37,7 @@ export async function fetchAboutSections(
   try {
     const res = await fetch(url, {
       // ISR: revalidate every hour; tag so you can purge on-demand
-      next: { revalidate: 3600, tags: ["about"] },
+      next: { revalidate: 300, tags: ["about"] },
     });
 
     if (!res.ok) {

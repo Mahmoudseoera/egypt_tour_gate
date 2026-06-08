@@ -66,7 +66,7 @@ export async function fetchSiteSettings(locale = "en"): Promise<SiteSettings | n
 
   try {
     const res = await fetch(`${base}/get-settings?locale=${locale}`, {
-      next: { revalidate: 3600, tags: ["settings"] },
+      next: { revalidate: 300, tags: ["settings"] },
     });
     if (!res.ok) return null;
     const json: SiteSettingsApiResponse = await res.json();

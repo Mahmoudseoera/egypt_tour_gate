@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCategoryPageData } from '@/lib/api/blog';
 import Breadcrumb from '@/components/layout/breadcrumb';
-import ExpandableDescription from '@/components/shared/expandable-description';
+import PageCover from '@/components/shared/page-cover';
 import SchemaScript from '@/components/seo/schema-script';
 import { breadcrumbSchema, buildSeoMetadata, collectionPageSchema } from '@/lib/seo';
-export const revalidate = 1800;
+export const revalidate = 300;
 
 interface CategoryPageProps {
   params: Promise<{
@@ -50,7 +50,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       name: category.title,
       description: category.description,
       path: `/blogs/${subCategorySlug}`,
-      image: category.image,
+      image: category.cover ?? category.image,
     }),
     breadcrumbSchema(breadcrumbItems),
   ];
@@ -62,47 +62,14 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* Category Hero */}
-      <section className="relative bg-gradient-to-br from-navy via-[#3d3586] to-navy py-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute bottom-10 left-10 w-32 h-32 border-4 border-gold rounded-full" />
-        </div>
+      <PageCover
+        cover={category.cover ?? { image: category.image, alt: category.imageAlt, title: category.title }}
+        title={category.title}
+        subtitle={category.description}
+        label="Travel Blog"
+      />
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              {category.title}
-            </h1>
 
-            {category.description && (
-              <ExpandableDescription
-                text={category.description}
-                maxLength={110}
-                className="text-xl text-white/90 leading-relaxed [&>p]:text-white/90 [&>button]:text-gold"
-              />
-            )}
-
-            <div className="mt-8 inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-white">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <span className="font-semibold">
-                {posts.length} Article{posts.length !== 1 ? 's' : ''}
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Posts Grid */}
       <section className="py-16">

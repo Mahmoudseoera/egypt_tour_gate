@@ -8,6 +8,8 @@ export const TWITTER_HANDLE = "@Egypttoursgate1";
 
 type SeoTagMap = Record<string, string>;
 
+type SeoImageInput = string | { image?: string | null; url?: string | null; image_url?: string | null } | null;
+
 type BuildSeoMetadataInput = {
   seoHtml?: string | null;
   title?: string;
@@ -15,7 +17,7 @@ type BuildSeoMetadataInput = {
   keywords?: string | string[];
   path: string;
   locale?: string;
-  image?: string;
+  image?: SeoImageInput;
   type?: "website" | "article";
   noIndex?: boolean;
 };
@@ -25,10 +27,21 @@ function normalizePath(path: string) {
   return `/${path.replace(/^\/+|\/+$/g, "")}`;
 }
 
-export function absoluteUrl(pathOrUrl?: string | null): string {
-  if (!pathOrUrl) return SITE_URL;
-  if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
-  const path = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
+function normalizeUrlInput(pathOrUrl?: SeoImageInput): string {
+  if (!pathOrUrl) return "";
+
+  if (typeof pathOrUrl === "object") {
+    return pathOrUrl.image || pathOrUrl.url || pathOrUrl.image_url || "";
+  }
+
+  return pathOrUrl;
+}
+
+export function absoluteUrl(pathOrUrl?: SeoImageInput): string {
+  const normalizedInput = normalizeUrlInput(pathOrUrl).trim();
+  if (!normalizedInput) return SITE_URL;
+  if (/^https?:\/\//i.test(normalizedInput)) return normalizedInput;
+  const path = normalizedInput.startsWith("/") ? normalizedInput : `/${normalizedInput}`;
   return `${SITE_URL}${path}`;
 }
 
@@ -262,7 +275,7 @@ export function collectionPageSchema(input: {
   name: string;
   description: string;
   path: string;
-  image?: string;
+  image?: SeoImageInput;
 }) {
   return {
     "@context": "https://schema.org",
@@ -279,7 +292,7 @@ export function tourSchema(input: {
   name: string;
   description: string;
   path: string;
-  image?: string;
+  image?: SeoImageInput;
   price?: number;
   city?: string;
   duration?: string;

@@ -72,33 +72,32 @@ function getCategoryMeta(slug: string) {
 }
 /* ── Locale prefix helpers ───────────────────────────────────────────────── */
 
-/**
- * Build a regex that matches any known locale prefix at the start of a path.
- * e.g. for locales ['en','de','fr','pl'] → /^\/(en|de|fr|pl)(\/|$)/
- * This is derived at runtime from routing.locales so it never goes stale.
- */
-const LOCALE_PREFIX_RE = new RegExp(
-  `^\\/(${routing.locales.join("|")})(\\/?)`
-);
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function buildLocalePrefixRegex(localeSlugs: string[]): RegExp {
+  const safeSlugs = localeSlugs.filter(Boolean).map(escapeRegExp);
+  return new RegExp(`^\/(${safeSlugs.join("|")})(?=\/|$)`);
+}
 
 /**
- * Strip the locale prefix from any pathname, regardless of which locale it is.
+ * Strip the locale prefix from any pathname using General API language slugs.
  * Returns the bare path starting with "/".
  */
-function stripLocalePrefix(pathname: string): string {
-  // routing uses localePrefix: "as-needed", defaultLocale has no prefix
-  return pathname.replace(LOCALE_PREFIX_RE, "/").replace(/\/+$/, "") || "/";
+function stripLocalePrefix(pathname: string, localeSlugs: string[]): string {
+  const regex = buildLocalePrefixRegex(localeSlugs);
+  return pathname.replace(regex, "").replace(/\/+$/, "") || "/";
 }
 
 /**
  * Prepend the locale prefix when needed.
- * localePrefix: "as-needed" → defaultLocale gets no prefix, others get one.
+ * localePrefix: "as-needed" → defaultLocale gets no prefix, other General API language slugs get one.
  */
-function localizePath(path: string, locale: AppLocale): string {
-  if (locale === routing.defaultLocale) return path;
-  // Ensure path starts with /
+function localizePath(path: string, localeSlug: string): string {
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
-  return `/${locale}${cleanPath}`;
+  if (localeSlug === routing.defaultLocale) return cleanPath;
+  return cleanPath === "/" ? `/${localeSlug}` : `/${localeSlug}${cleanPath}`;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════ */
@@ -115,6 +114,7 @@ export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
 
   const router = useRouter();
+  const pathname = usePathname();
 
   const { data, error, loading } = useGeneralData(locale);
   const [socialData, setSocialData] = useState<SocialItem[]>(fallbackSocialData);
@@ -135,8 +135,16 @@ export default function Navbar() {
    * which broke switching to /fr and /pl.
    */
   const onLanguageChange = (newLocale: string) => {
-    const nextLocale = newLocale as AppLocale;
-      router.replace("/", { locale: nextLocale });
+    const localeSlugs = data?.header.languages.map((lang) => lang.slug) ?? [...routing.locales];
+    const barePath = stripLocalePrefix(pathname || "/", localeSlugs);
+    const nextPath = localizePath(barePath, newLocale);
+
+    if (routing.locales.includes(newLocale as AppLocale)) {
+      router.replace(barePath, { locale: newLocale as AppLocale });
+      return;
+    }
+
+    window.location.assign(nextPath);
   };
 
   useEffect(() => {

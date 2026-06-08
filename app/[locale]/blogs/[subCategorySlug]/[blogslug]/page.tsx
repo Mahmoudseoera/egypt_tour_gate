@@ -17,7 +17,7 @@ import ExpandableDescription from "@/components/shared/expandable-description";
 import { breadcrumbSchema, buildSeoMetadata, absoluteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 1800;
+export const revalidate = 300;
 
 type BlogDetailsPageProps = {
   params: Promise<{
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: BlogDetailsPageProps): Promis
     description: post.excerpt,
     path: `/blogs/${subCategorySlug}/${blogslug}`,
     locale,
-    image: post.image,
+    image: post.cover ?? post.image,
     type: "article",
   });
 }
@@ -79,7 +79,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
       name: "Egypt Tours Gate",
       logo: { "@type": "ImageObject", url: "https://www.egypttoursgate.com/uploads/settings/logo2.png" },
     },
-    image: post.image,
+    image: post.cover?.image || post.image,
     url: absoluteUrl(`/blogs/${post.categorySlug}/${post.slug}`),
   };
 
@@ -101,8 +101,8 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
       {/* Hero Section */}
       <div className="relative h-[500px] w-full">
         <Image
-          src={post.image}
-          alt={post.imageAlt || post.title}
+          src={post.cover?.image || post.image}
+          alt={post.cover?.alt || post.imageAlt || post.title}
           fill
           className="object-cover"
           priority

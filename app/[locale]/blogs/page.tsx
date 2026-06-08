@@ -5,7 +5,7 @@ import { getBlogPageData } from '@/lib/api/blog';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = "force-dynamic";
-export const revalidate = 1800;
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,

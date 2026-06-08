@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import SecondTourCard from "@/components/tour/second-tour-card";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
+import PageCover from "@/components/shared/page-cover";
 import SchemaScript from "@/components/seo/schema-script";
 import {
   breadcrumbSchema,
@@ -17,7 +18,6 @@ import {
   getToursBySubcategory,
 } from "@/lib/api/toursApi";
 import { routing } from "@/lib/i18n/routing";
-import Image from "next/image";
 type SubcategoryPageProps = {
   params: Promise<{
     locale: string;
@@ -111,7 +111,7 @@ export async function generateMetadata({
     description: metaDescription,
     path: `/${categorySlug}/${subcategorySlug}`,
     locale,
-    image: subcategory.media?.image,
+    image: subcategory.media?.cover ?? subcategory.media?.image,
   });
 }
 
@@ -161,7 +161,6 @@ export default async function SubcategoryPage({
 
   // second_title is a subtitle (e.g. "Egypt Luxury Tours and Trips")
   const subcategorySecondTitle: string = subcategory.second_title ?? "";
-  const subcategoryCover: string = subcategory.media?.cover.image ?? "";
   // plainDesc is the HTML-stripped `desc` field set by getSubcategoryBySlug
   const shortDescription: string =
     subcategory.plainDesc ||
@@ -179,7 +178,7 @@ export default async function SubcategoryPage({
       name: `${subcategoryName} ${categoryName}`,
       description: shortDescription,
       path: `/${categorySlug}/${subcategorySlug}`,
-      image: subcategory.media?.image,
+      image: subcategory.media?.cover ?? subcategory.media?.image,
     }),
     breadcrumbSchema(breadcrumbItems),
   ];
@@ -188,6 +187,13 @@ export default async function SubcategoryPage({
     <>
       <SchemaScript schema={subcategorySchema} />
       <Breadcrumb items={breadcrumbItems} />
+
+      <PageCover
+        cover={subcategory.media?.cover ?? subcategory.media?.image}
+        title={subcategoryName}
+        subtitle={subcategorySecondTitle}
+        label={categoryName}
+      />
 
       <section className="container py-10 max-w-7xl mx-auto">
         <div className="container mx-auto">
@@ -205,8 +211,6 @@ export default async function SubcategoryPage({
           <div className="max-w-7xl mx-auto text-center mb-8">
             <ExpandableDescription text={shortDescription} isHtml/>
           </div>
-            <Image
-            src={subcategoryCover} alt ="sub-category-cover" width={1000} height={500}/>
           {normalizedItems.length === 0 ? (
             <p className="text-lg text-center">
               No tours found for this subcategory.

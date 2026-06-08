@@ -1,4 +1,5 @@
 import { routing, type AppLocale } from '@/lib/i18n/routing';
+import { normalizeMediaSet, type ApiMediaAsset } from '@/lib/api/media';
 
 // ─── Raw API shapes ────────────────────────────────────────────────────────────
 export interface BlogCategoryRaw {
@@ -8,9 +9,12 @@ export interface BlogCategoryRaw {
   seo: string;
   desc?: string;
   media: {
-    image: string;
-    title: string;
-    alt: string;
+    image?: unknown;
+    cover?: unknown;
+    title?: unknown;
+    alt?: unknown;
+    url?: unknown;
+    image_url?: unknown;
   };
 }
 
@@ -21,9 +25,12 @@ export interface BlogArticleRaw {
   slug: string;
   date: string;
   media: {
-    image: string;
-    title: string;
-    alt: string;
+    image?: unknown;
+    cover?: unknown;
+    title?: unknown;
+    alt?: unknown;
+    url?: unknown;
+    image_url?: unknown;
   };
   blog_category: {
     name: string;
@@ -39,9 +46,12 @@ export interface BlogArticleDetailRaw {
   seo: string;
   desc: string; // Full HTML content
   media: {
-    image: string;
-    title: string;
-    alt: string;
+    image?: unknown;
+    cover?: unknown;
+    title?: unknown;
+    alt?: unknown;
+    url?: unknown;
+    image_url?: unknown;
   };
   blog_category: {
     name: string;
@@ -62,6 +72,7 @@ export interface BlogCategory {
   description: string;
   image: string;
   imageAlt: string;
+  cover?: ApiMediaAsset;
   seo: string;
   icon?: React.ReactNode;
 }
@@ -76,6 +87,7 @@ export interface BlogPost {
   content: string; // Full HTML content
   image: string;
   imageAlt: string;
+  cover?: ApiMediaAsset;
   date: string;
   publishedAt: string;
   author: { name: string };
@@ -85,18 +97,22 @@ export interface BlogPost {
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').trim();
+function stripHtml(html?: string | null): string {
+  return (html ?? '').replace(/<[^>]*>/g, '').trim();
 }
 
 function normaliseCategory(raw: BlogCategoryRaw): BlogCategory {
+  const media = normalizeMediaSet(raw.media);
+  const image = media?.image ?? media?.cover;
+
   return {
     id: raw.id,
     slug: raw.slug,
     title: raw.name,
     description: raw.desc ? stripHtml(raw.desc) : '',
-    image: raw.media.image,
-    imageAlt: raw.media.alt,
+    image: image?.image ?? '',
+    imageAlt: image?.alt ?? raw.name,
+    cover: media?.cover,
     seo: raw.seo,
   };
 }
@@ -110,6 +126,9 @@ function parseDateString(dateStr: string): string {
 }
 
 function normalisePost(raw: BlogArticleRaw): BlogPost {
+  const media = normalizeMediaSet(raw.media);
+  const image = media?.image ?? media?.cover;
+
   return {
     id: raw.id,
     slug: raw.slug,
@@ -118,8 +137,9 @@ function normalisePost(raw: BlogArticleRaw): BlogPost {
     title: raw.name,
     excerpt: raw.small_desc,
     content: raw.small_desc,
-    image: raw.media.image,
-    imageAlt: raw.media.alt,
+    image: image?.image ?? '',
+    imageAlt: image?.alt ?? raw.name,
+    cover: media?.cover,
     date: raw.date,
     publishedAt: parseDateString(raw.date),
     author: { name: 'Egypt Tours Gate' },
@@ -130,6 +150,9 @@ function normalisePost(raw: BlogArticleRaw): BlogPost {
 
 // NEW: Normalise detailed article with SEO parsing
 function normalisePostDetail(raw: BlogArticleDetailRaw): BlogPost {
+  const media = normalizeMediaSet(raw.media);
+  const image = media?.image ?? media?.cover;
+
   // Extract title from SEO <title> tag
   const seoTitleMatch = raw.seo?.match(/<title>([^<]*)<\/title>/i);
   const title = seoTitleMatch ? seoTitleMatch[1].trim() : raw.name;
@@ -156,9 +179,10 @@ function normalisePostDetail(raw: BlogArticleDetailRaw): BlogPost {
     title: title,
     excerpt: excerpt,
     content: raw.desc, // Full HTML content for article body
-    image: raw.media.image,
-    imageAlt: raw.media.alt,
-    date: raw.media.title,
+    image: image?.image ?? '',
+    imageAlt: image?.alt ?? raw.name,
+    cover: media?.cover,
+    date: image?.title ?? '',
     publishedAt: publishedAt,
     author: { name: 'Egypt Tours Gate' }, // Default - API doesn't provide author
     readTime: '5 min read', // Default - API doesn't provide read time
@@ -192,7 +216,7 @@ export interface BlogPageData {
 
 export async function getBlogPageData(locale?: string): Promise<BlogPageData> {
   const res = await fetch(withLocale(`${API_BASE}/get-article-categories`, locale), {
-    next: { revalidate: 3600 },
+    next: { revalidate: 300, tags: ["blogs", "blog-categories"] },
   });
   if (!res.ok) throw new Error(`Failed to fetch blog categories: ${res.status}`);
   const json = await res.json();
@@ -215,7 +239,7 @@ export interface CategoryPageData {
 
 export async function getCategoryPageData(slug: string, locale?: string): Promise<CategoryPageData | null> {
   const res = await fetch(withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale), {
-    next: { revalidate: 3600 },
+    next: { revalidate: 300, tags: [`blog-category:${slug}`, "blogs", "blog-categories"] },
   });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch category "${slug}": ${res.status}`);
@@ -238,7 +262,7 @@ export interface ArticleDetailData {
 
 export async function getArticleDetailBySlug(slug: string, locale?: string): Promise<ArticleDetailData | null> {
   const res = await fetch(withLocale(`${API_BASE}/get-ditals-article/${slug}`, locale), {
-    next: { revalidate: 3600 },
+    next: { revalidate: 300, tags: [`blog:${slug}`, "blogs"] },
   });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch article "${slug}": ${res.status}`);
@@ -257,7 +281,7 @@ export async function getArticleDetailBySlug(slug: string, locale?: string): Pro
 // ─── Helper: Get category by slug (for breadcrumbs) ──────────────────────────
 export async function getCategoryBySlug(slug: string, locale?: string): Promise<BlogCategory | null> {
   const res = await fetch(withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale), {
-    next: { revalidate: 3600 },
+    next: { revalidate: 300, tags: [`blog-category:${slug}`, "blogs", "blog-categories"] },
   });
   if (!res.ok) return null;
   const json = await res.json();
@@ -270,7 +294,7 @@ export async function getCategoryBySlug(slug: string, locale?: string): Promise<
 // ─── Helper: Get all categories for sidebar ──────────────────────────────────
 export async function getAllBlogCategories(locale?: string): Promise<BlogCategory[]> {
   const res = await fetch(withLocale(`${API_BASE}/get-article-categories`, locale), {
-    next: { revalidate: 3600 },
+    next: { revalidate: 300, tags: ["blogs", "blog-categories"] },
   });
   if (!res.ok) return [];
   const json = await res.json();
