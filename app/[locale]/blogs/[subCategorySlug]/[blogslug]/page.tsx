@@ -158,7 +158,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
               <span className="font-semibold">Back to Blog</span>
             </Link>
 
-            <article className="bg-white rounded-3xl shadow-lg p-8 md:p-12">
+            <article className="bg-white rounded-3xl shadow-lg p-8 md:p-12 blog-details-body">
               <div className="text-xl text-gray-700 leading-relaxed mb-8 pb-8 border-b border-gray-200 italic">
                 <ExpandableDescription text={post.excerpt} maxLength={140} />
               </div>

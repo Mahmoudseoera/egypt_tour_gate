@@ -136,10 +136,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   return (
     <>
       <SchemaScript schema={categorySchema} />
-      <Breadcrumb items={breadcrumbItems} />
       {/* ── Page Hero ── */}
-      
-       <div className="relative py-20 overflow-hidden">
+        <div className="relative py-20 overflow-hidden">
         {/* Background Image */}
             <FallbackImage
                src={coverCategory || "/placeholder.svg"}
@@ -172,6 +170,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           )}
         </div>
       </div>
+       <Breadcrumb items={breadcrumbItems} />
       <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
            <div className="max-w-7xl mx-auto text-center mb-8">
             <ExpandableDescription

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Calendar } from "lucide-react";
 import { getCategoryPageData } from '@/lib/api/blog';
 import Breadcrumb from '@/components/layout/breadcrumb';
 import ExpandableDescription from '@/components/shared/expandable-description';
@@ -148,7 +149,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
                       {/* Content */}
                       <div className="p-6">
-                        <div className="flex items-center gap-4 mb-3 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
+                         <Calendar width={20} height={20} className="text-gold" />
                           <time dateTime={post.publishedAt}>{post.date}</time>
                         </div>
 
@@ -158,20 +160,21 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
                         <p className="text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
 
-                        <div className="flex items-center justify-end pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-start gap-1 pt-4 border-t border-gray-100">
+                          Read More 
                           <svg
-                            className="w-6 h-6 text-gold group-hover:translate-x-1 transition-transform"
+                            className="w-6 h-6 text-gold -rotate-45 group-hover:translate-x-1 transition-transform"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
                           >
                             <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 8l4 4m0 0l-4 4m4-4H3"
+                        />
+                      </svg>
                         </div>
                       </div>
                     </Link>
