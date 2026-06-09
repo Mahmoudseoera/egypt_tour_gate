@@ -81,7 +81,7 @@ export default async function Home({ params }: PageProps) {
               </h2>
               <span className="relative block h-1 w-40 bg-gradient-to-r from-[var(--second-color)] via-[var(--main-color)] to-[var(--second-color)] mx-auto rounded-md before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-4 before:h-4 before:bg-[url('/assets/images/pryamids-2.svg')] before:bg-contain before:bg-no-repeat before:z-20 after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-[26px] after:h-[26px] after:bg-white after:rounded-full after:z-0" />
             </div>
-            <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
+            <p className="text-lg text-[var(--black-color)] opacity-70 max-w-7xl mx-auto">
               {sections?.first_tours_section?.description || "Explore Our Amazing Tours"}
             </p>
           </div>

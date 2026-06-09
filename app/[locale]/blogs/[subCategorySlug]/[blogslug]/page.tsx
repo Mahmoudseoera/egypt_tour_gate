@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Clock, User, Calendar, ArrowLeft, Share2, Tag } from "lucide-react";
+import FallbackImage from "@/components/shared/fallback-image";
 import { 
   getArticleDetailBySlug, 
   getCategoryBySlug, 
@@ -15,8 +16,6 @@ import Breadcrumb from "@/components/layout/breadcrumb";
 import SchemaScript from "@/components/seo/schema-script";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import { breadcrumbSchema, buildSeoMetadata, absoluteUrl } from "@/lib/seo";
-
-export const dynamic = "force-dynamic";
 export const revalidate = 1800;
 
 type BlogDetailsPageProps = {
@@ -55,8 +54,11 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
   if (!data?.post) notFound();
   
   const post = data.post;
-  const relatedPosts = data.relatedPosts;
-  
+  const imagehero = data?.post.image;
+  const relatedPosts = data.relatedPosts ?? [];
+  const relatedtours = data?.related_tours ?? [];
+  console.log("relatedtours", relatedtours)
+  console.log("image hero ",imagehero)
   // Fetch category for breadcrumb
   const category = await getCategoryBySlug(post.categorySlug, locale);
   
@@ -82,7 +84,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
     image: post.image,
     url: absoluteUrl(`/blogs/${post.categorySlug}/${post.slug}`),
   };
-
+   
   const breadcrumbItems = [
     { label: 'Home', href: '/' },
     { label: 'Blogs', href: '/blogs' },
@@ -100,12 +102,11 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
 
       {/* Hero Section */}
       <div className="relative h-[500px] w-full">
-        <Image
-          src={post.image}
+        <FallbackImage
+          src={imagehero}
           alt={post.imageAlt || post.title}
           fill
-          className="object-cover"
-          priority
+          className="object-cover"       
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -249,7 +250,9 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
                 </div>
               </div>
             )}
-          </div>
+
+
+             </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-4">
@@ -284,9 +287,65 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
                 </div>
               </div>
 
-              {/* Related Tours Widget REMOVED - depends on categoriesData which is now deprecated */}
-              {/* To restore this feature, create a separate API endpoint for tours */}
+              {relatedtours.length > 0 && (
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                  <div className="px-6 py-4 bg-[var(--main-grey)] border-b border-gray-200 flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-[var(--second-color)]">
+                      Related Tours
+                    </h3>
+                    <span className="text-xs text-gray-400 font-medium">
+                      {relatedtours.length} tours
+                    </span>
+                  </div>
 
+                  <div className="divide-y divide-gray-100">
+                    {relatedtours.map((tour) => (
+                      <Link
+                        key={tour.id}
+                        href={`/${tour.subCategory.categorySlug}/${tour.subCategory.subCategorySlug}/${tour.slug}`}
+                        className="flex gap-3 p-4 hover:bg-gray-50 transition-colors group"
+                      >
+                        {/* Thumbnail */}
+                        <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                          <Image
+                            src={tour.media.image}
+                            alt={tour.media.alt}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            sizes="80px"
+                          />
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex flex-col justify-between flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-[var(--second-color)] leading-snug line-clamp-2 group-hover:text-[var(--main-color)] transition-colors">
+                            {tour.name}
+                          </p>
+
+                          <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                            <span className="flex items-center gap-1">
+                              {/* map-pin inline svg — no external dep */}
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                              {tour.city}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                              {tour.duration} {tour.duration_type}
+                            </span>
+                          </div>
+
+                          <div className="mt-1.5">
+                            <span className="text-sm font-bold text-[var(--second-color)]">
+                              ${tour.price_after_discount}
+                            </span>
+                            <span className="text-xs text-gray-400 ml-1">/ person</span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

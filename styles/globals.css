@@ -339,6 +339,10 @@
   font-weight: bold;
   font-size: 24px;
 }
+.faq-section a {
+  color: var(--main-color) !important;
+  font-weight: 500;
+}
 /*==================================
     start Header CSS
 ===================================*/

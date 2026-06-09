@@ -41,7 +41,7 @@ export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
   const rightItems = rawFaqs.slice(mid);
 
   return (
-    <section className="py-16 px-4 md:px-8 bg-white">
+    <section className="py-16 px-4 md:px-8 bg-white faq-section">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl font-semibold text-[var(--second-color)] mb-4">
@@ -54,9 +54,7 @@ export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
             </p>
           )}
         </div>
-
         <div className="grid md:grid-cols-2 gap-4">
-
           {/* LEFT */}
           <div className="space-y-4">
             {leftItems.map((faq, index) => (

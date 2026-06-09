@@ -43,7 +43,6 @@ export default function TravelServicesSection({
             description: (desc as string) || "Description not available",
             img: (img as string) || "/assets/images/safety.svg",
           });
-           console.log("Processed service:", img);
         }
       }
     });

@@ -39,17 +39,43 @@ export interface BlogArticleDetailRaw {
   seo: string;
   desc: string; // Full HTML content
   media: {
-    image: string;
-    title: string;
-    alt: string;
+    image: blogDetailsMedia;
   };
   blog_category: {
     name: string;
     slug: string;
   };
   related_articles?: BlogArticleRaw[];
+  related_tours?: RelatedTour[];
+}
+export interface blogDetailsMedia {
+  image: string;
+  title: string;
+  alt: string;
+}
+export interface RelatedTour {
+  id: number;
+  name: string;
+  slug: string;
+  small_desc: string;
+  price_after_discount: number;
+  city: string;
+  duration_type: string;
+  duration: string;
+  media: RelatedTourMedia;
+  subCategory: RelatedTourSubCategory;
 }
 
+export interface RelatedTourMedia {
+  image: string;
+  title: string;
+  alt: string;
+}
+
+export interface RelatedTourSubCategory {
+  subCategorySlug: string;
+  categorySlug: string;
+}
 export interface BlogCategoryWithArticles extends BlogCategoryRaw {
   articles: BlogArticleRaw[];
 }
@@ -156,9 +182,9 @@ function normalisePostDetail(raw: BlogArticleDetailRaw): BlogPost {
     title: title,
     excerpt: excerpt,
     content: raw.desc, // Full HTML content for article body
-    image: raw.media.image,
-    imageAlt: raw.media.alt,
-    date: raw.media.title,
+    image: raw.media.image.image,
+    imageAlt: raw.media.image.alt,
+    date: raw.media.image.title,
     publishedAt: publishedAt,
     author: { name: 'Egypt Tours Gate' }, // Default - API doesn't provide author
     readTime: '5 min read', // Default - API doesn't provide read time
@@ -234,6 +260,7 @@ export async function getCategoryPageData(slug: string, locale?: string): Promis
 export interface ArticleDetailData {
   post: BlogPost;
   relatedPosts: BlogPost[];
+  related_tours?: RelatedTour[]
 }
 
 export async function getArticleDetailBySlug(slug: string, locale?: string): Promise<ArticleDetailData | null> {
@@ -251,6 +278,7 @@ export async function getArticleDetailBySlug(slug: string, locale?: string): Pro
   return {
     post: normalisePostDetail(raw),
     relatedPosts: (raw.related_articles ?? []).map(normalisePost),
+    related_tours: raw.related_tours
   };
 }
 
