@@ -1454,7 +1454,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                             <div className="w-full h-full bg-gradient-to-br from-amber-100 to-stone-200" />
                           )}
                         </div>
-                        <div className="flex flex-col justify-center min-w-0">
+                        <div className="flex flex-col justify-center min-w-lg">
                           <h4 className="text-xs font-semibold text-[var(--second-color)] group-hover:text-[var(--main-color)] transition-colors line-clamp-2 leading-tight mb-1">
                             {article.name}
                           </h4>

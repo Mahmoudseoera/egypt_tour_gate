@@ -1,13 +1,17 @@
-import type { Metadata } from 'next';
-import Image from 'next/image';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { Calendar } from "lucide-react";
-import { getCategoryPageData } from '@/lib/api/blog';
-import Breadcrumb from '@/components/layout/breadcrumb';
-import ExpandableDescription from '@/components/shared/expandable-description';
-import SchemaScript from '@/components/seo/schema-script';
-import { breadcrumbSchema, buildSeoMetadata, collectionPageSchema } from '@/lib/seo';
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Calendar, User } from "lucide-react";
+import { getCategoryPageData } from "@/lib/api/blog";
+import Breadcrumb from "@/components/layout/breadcrumb";
+import ExpandableDescription from "@/components/shared/expandable-description";
+import SchemaScript from "@/components/seo/schema-script";
+import {
+  breadcrumbSchema,
+  buildSeoMetadata,
+  collectionPageSchema,
+} from "@/lib/seo";
 export const revalidate = 1800;
 
 interface CategoryPageProps {
@@ -17,11 +21,13 @@ interface CategoryPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: CategoryPageProps): Promise<Metadata> {
   const { locale, subCategorySlug } = await params;
   const data = await getCategoryPageData(subCategorySlug, locale);
 
-  if (!data) return { title: 'Category Not Found' };
+  if (!data) return { title: "Category Not Found" };
 
   return buildSeoMetadata({
     seoHtml: data.category.seo,
@@ -41,8 +47,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category, posts } = data;
 
   const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Blogs', href: '/blogs' },
+    { label: "Home", href: "/" },
+    { label: "Blogs", href: "/blogs" },
     { label: category.title, href: `/blogs/${subCategorySlug}` },
   ];
 
@@ -59,10 +65,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   return (
     <div className="min-h-screen bg-grey-light">
       <SchemaScript schema={categorySchema} />
-
       {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
-
       {/* Category Hero */}
       <section className="relative bg-gradient-to-br from-navy via-[#3d3586] to-navy py-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -98,7 +102,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                 />
               </svg>
               <span className="font-semibold">
-                {posts.length} Article{posts.length !== 1 ? 's' : ''}
+                {posts.length} Article{posts.length !== 1 ? "s" : ""}
               </span>
             </div>
           </div>
@@ -112,9 +116,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             {posts.length === 0 ? (
               <div className="text-center py-20">
                 <div className="text-6xl mb-6">📝</div>
-                <h2 className="text-3xl font-bold text-navy mb-4">No Articles Yet</h2>
+                <h2 className="text-3xl font-bold text-navy mb-4">
+                  No Articles Yet
+                </h2>
                 <p className="text-gray-600 mb-8">
-                  We&apos;re working on creating amazing content for this category. Check back soon!
+                  We&apos;re working on creating amazing content for this
+                  category. Check back soon!
                 </p>
                 <Link
                   href="/blogs"
@@ -149,32 +156,47 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
                       {/* Content */}
                       <div className="p-6">
-                        <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
-                         <Calendar width={20} height={20} className="text-gold" />
-                          <time dateTime={post.publishedAt}>{post.date}</time>
+                        <div className="flex gap-2">
+                          <div className="flex items-center gap-1 mb-3 text-sm text-gray-500">
+                            <Calendar
+                              width={20}
+                              height={20}
+                              className="text-gold"
+                            />
+                            <time dateTime={post.publishedAt}>{post.date}</time>
+                          </div>
+                          <div className="flex items-center gap-1 mb-3 text-sm text-gray-500">
+                            <User
+                              width={20}
+                              height={20}
+                              className="text-gold"
+                            />
+                            <span>{post.author.name}</span>
+                          </div>
                         </div>
-
                         <h3 className="text-xl font-bold text-navy mb-3 group-hover:text-gold transition-colors line-clamp-2">
                           {post.title}
                         </h3>
 
-                        <p className="text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
+                        <p className="text-gray-600 mb-4 line-clamp-3">
+                          {post.excerpt}
+                        </p>
 
-                        <div className="flex items-center justify-start gap-1 pt-4 border-t border-gray-100">
-                          Read More 
+                        <div className="flex items-center justify-start gap-1 pt-4 font-semibold text-[var(--black-color)] border-t border-gray-200">
+                          Read More
                           <svg
-                            className="w-6 h-6 text-gold -rotate-45 group-hover:translate-x-1 transition-transform"
+                            className="w-6 h-6 text-gold  group-hover:translate-x-1 group-hover:-rotate-45 transition-transform"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
                           >
                             <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 8l4 4m0 0l-4 4m4-4H3"
-                        />
-                      </svg>
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17 8l4 4m0 0l-4 4m4-4H3"
+                            />
+                          </svg>
                         </div>
                       </div>
                     </Link>

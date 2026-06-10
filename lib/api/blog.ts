@@ -18,6 +18,7 @@ export interface BlogArticleRaw {
   id: number;
   name: string;
   small_desc: string;
+  author?: string;
   slug: string;
   date: string;
   media: {
@@ -37,14 +38,18 @@ export interface BlogArticleDetailRaw {
   name: string;
   slug: string;
   seo: string;
-  desc: string; // Full HTML content
+  desc: string;
+  author?: string;
+
   media: {
     image: blogDetailsMedia;
   };
+
   blog_category: {
     name: string;
     slug: string;
   };
+
   related_articles?: BlogArticleRaw[];
   related_tours?: RelatedTour[];
 }
@@ -148,7 +153,9 @@ function normalisePost(raw: BlogArticleRaw): BlogPost {
     imageAlt: raw.media.alt,
     date: raw.date,
     publishedAt: parseDateString(raw.date),
-    author: { name: 'Egypt Tours Gate' },
+    author: {
+  name: raw.author || 'Egypt Tours Gate',
+},
     readTime: '5 min read',
     tags: [],
   };
@@ -186,7 +193,9 @@ function normalisePostDetail(raw: BlogArticleDetailRaw): BlogPost {
     imageAlt: raw.media.image.alt,
     date: raw.media.image.title,
     publishedAt: publishedAt,
-    author: { name: 'Egypt Tours Gate' }, // Default - API doesn't provide author
+    author: {
+  name: raw.author || 'Egypt Tours Gate',
+}, // Default - API doesn't provide author
     readTime: '5 min read', // Default - API doesn't provide read time
     tags: [], // Default - API doesn't provide tags
     seo: raw.seo,
