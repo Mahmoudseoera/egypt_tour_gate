@@ -25,10 +25,8 @@ interface TestimonialSliderProps {
   reviews?: Review[];
 }
 
-export default function TestimonialSlider({
-  reviewsSection,
-  reviews = [],
-}: TestimonialSliderProps) {
+export default function TestimonialSlider({ reviewsSection,reviews = [],}: TestimonialSliderProps)
+ {
   // ── Dynamic section heading with fallbacks ──────────────────────────────
   const heading =
     reviewsSection?.title?.trim() || "Our Testimonails";
@@ -38,7 +36,6 @@ export default function TestimonialSlider({
   // ── Resolve reviews: prefer reviewsSection.reviews, fall back to reviews prop
   const rawReviews =
     reviewsSection?.reviews?.length ? reviewsSection.reviews : reviews;
-
   // ── Map API reviews → display items; fall back to static when empty ─────
   const items =
     rawReviews.length > 0

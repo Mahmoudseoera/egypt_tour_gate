@@ -4,7 +4,7 @@ import { Heart, MapPin } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import FallbackImage from "@/components/shared/fallback-image";
-import type { ApiTour } from "@/lib/api/homeTypes";
+import type { ApiTour, SecondToursSection } from "@/lib/api/homeTypes";
 import { useFavourites, type FavouriteTour } from "@/lib/hooks/useFavourites";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -12,6 +12,7 @@ import "swiper/css/pagination";
 
 interface TravelTourSliderProps {
   /** Tours from the API second_tours_section. Falls back to static data when empty. */
+  SecondToursSection?: SecondToursSection | null;
   apiTours?: ApiTour[];
 }
 
@@ -30,8 +31,10 @@ type SliderItem = {
 };
 
 export default function TravelTourSlider({
+  SecondToursSection,
   apiTours = [],
 }: TravelTourSliderProps) {
+
   const { isFavourite, toggle } = useFavourites();
 
   const toggleFavorite = (tour: SliderItem, e: React.MouseEvent) => {
@@ -51,7 +54,10 @@ export default function TravelTourSlider({
     };
     toggle(favouriteTour);
   };
-
+   const heading = SecondToursSection?.title?.trim() || "Explore Amazing Tours";
+   const descripation = SecondToursSection?.description?.trim()  ||
+    "Discover unforgettable travel tours experiences tailored just for you";
+    console.log(SecondToursSection?.title)
   const tourItems: SliderItem[] =
     apiTours.length > 0
       ? apiTours.map((t) => ({
@@ -72,14 +78,13 @@ export default function TravelTourSlider({
   return (
     <section className="home-tours min-h-screen bg-[var(--main-grey)] pt-16">
       <div className="max-w-7xl mx-auto px-5">
-        <div className="text-center mb-12">
+        <div className="text-center mb-5">
           <h2 className="text-2xl md:text-3xl font-semibold text-[var(--second-color)] mb-4">
-            Explore Our Amazing Destinations
+            {heading}
           </h2>
           <span className="relative block h-1 w-40 mb-4 mx-auto rounded-md bg-gradient-to-r from-[var(--second-color)] via-[var(--main-color)] to-[var(--second-color)] before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-4 before:h-4 before:bg-[url('/assets/images/pryamids-2.svg')] before:bg-contain before:bg-no-repeat before:z-20 after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-[26px] after:h-[26px] after:bg-[var(--main-grey)] after:rounded-full after:z-0" />
-          <p className="text-lg text-[var(--black-color)] opacity-70 max-w-2xl mx-auto">
-            Discover breathtaking locations around the world and create
-            unforgettable memories
+          <p className="text-lg text-[var(--black-color)] opacity-70 max-w-7xl mx-auto">
+           {descripation}
           </p>
         </div>
 

@@ -1,26 +1,21 @@
 // components/PartnersMarquee.tsx
 import Image from "next/image";
-import React from "react";
+import type { Partner } from "@/lib/api/homeTypes";
 
-const partners = [
-"partner-logo1.jpeg",
-"partner-logo2.jpeg",
-"partner-logo3.jpeg",
-"partner-logo4.jpeg",
-"partner-logo5.jpeg",
-"partner-logo6.jpeg",
-];
+interface PartnersProps {
+  partners: Partner[];
+}
 
-const PartnersMarquee = () => {
+export default function PartnersMarquee({ partners = [] }: PartnersProps) {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="overflow-hidden relative py-8">
-        <div className="flex animate-marquee gap-6 md:gap-4 lg-gap-8 hover:pause">
+        <div className="flex animate-marquee gap-6 md:gap-4 lg:gap-8 hover:pause">
           {partners.map((img, index) => (
             <div key={`first-${index}`} className="flex-shrink-0">
               <Image
-                src={`/assets/images/partners-section/${img}`}
-                alt={img.split(".")[0]}
+                src={img.image}
+                alt={img.img_alt}
                 width={150}
                 height={70}
                 className="object-cover transition-transform duration-300 hover:-translate-y-1 hover:scale-105 hover:paused"
@@ -30,8 +25,8 @@ const PartnersMarquee = () => {
           {partners.map((img, index) => (
             <div key={`second-${index}`} className="flex-shrink-0 mx-4">
               <Image
-                src={`/assets/images/partners-section/${img}`}
-                alt={img.split(".")[0]}
+                src={img.image}
+                alt={img.img_alt}
                 width={150}
                 height={70}
                 className="object-cover transition-transform duration-300 hover:-translate-y-1 hover:scale-105 hover:paused"
@@ -42,6 +37,4 @@ const PartnersMarquee = () => {
       </div>
     </div>
   );
-};
-
-export default PartnersMarquee;
+}

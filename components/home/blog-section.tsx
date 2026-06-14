@@ -1,6 +1,6 @@
-// egypt_tour_gate\components\home\blog-section.tsx
-"use client";
+// egypt_tour_gate/components/home/blog-section.tsx
 
+"use client";
 import { ArrowRight, User, BookOpen } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,7 +34,7 @@ export default function TravelBlogSection({
   const subheading =
     articlesSection?.description?.trim() ||
     "Discover breathtaking locations around the world and create unforgettable memories";
-
+    console.log("blog subheading", articlesSection?.description)
   // ── Resolve articles: prefer articlesSection.articles, fall back to apiArticles
   const rawArticles =
     articlesSection?.articles?.length
@@ -48,7 +48,7 @@ export default function TravelBlogSection({
     image: a.media.image,
     title: a.name,
     smallDesc: a.small_desc,
-    author: "Egypt Tours Gate",
+    author: a.author || "Egypt Tours Gate",
     publishedAt: a.date,
   }));
 
@@ -99,7 +99,7 @@ export default function TravelBlogSection({
                   >
                     <div className="flex items-stretch gap-0 p-4 h-full">
                       {/* Thumbnail */}
-                      <div className="flex-shrink-0 w-24 h-full min-h-[96px] rounded-2xl overflow-hidden relative self-stretch">
+                      <div className="flex-shrink-0 w-30 h-30 min-h-[96px] rounded-2xl overflow-hidden relative self-stretch">
                         <FallbackImage
                           src={post.image || "/placeholder.svg"}
                           alt={post.title}
@@ -197,7 +197,6 @@ export default function TravelBlogSection({
 
             {/* ── Right Column — small card + large card ────────────────── */}
             <div className="flex flex-col gap-6 h-full">
-
               {blogPosts[4] &&
                 (() => {
                   const post = blogPosts[4];

@@ -23,35 +23,15 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
   // Strip HTML tags that may come from the backend rich-text field
   const rawDesc = aboutData?.about_desc ?? "";
   const cleanDesc = rawDesc.replace(/<[^>]+>/g, "").trim();
-
+  const imgAbout = aboutData?.about_img || "/assets/images/tours/Pyramids-in-Egypt-webp.webp";
   const subTitle = aboutData?.about_sub_title ?? "Travel Essentials Tips";
   const title = aboutData?.about_title ?? "Awesome Tips That Makes Your Travel Beautiful";
   const title2 = aboutData?.about_title2 ?? "A Time to Travel And Find Breathtaking Landscapes For Relax";
   const desc = cleanDesc || "We believe travel is more than just a trip—it's an experience that shapes your life.";
-
-  const styles = `
-    .roavio-image-zoom { transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); }
-    .roavio-card-hover:hover .roavio-image-zoom { transform: scale(1.08); }
-    .roavio-icon-float { animation: roavio-float 3s ease-in-out infinite; }
-    @keyframes roavio-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-    .roavio-check-pulse { animation: roavio-pulse 2s ease-in-out infinite; }
-    @keyframes roavio-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.1);opacity:.9} }
-    .roavio-feature-fade { animation: roavio-fade-in 0.6s ease-out forwards; opacity:0; }
-    .roavio-feature-fade:nth-child(1){animation-delay:.1s}
-    .roavio-feature-fade:nth-child(2){animation-delay:.2s}
-    .roavio-feature-fade:nth-child(3){animation-delay:.3s}
-    .roavio-feature-fade:nth-child(4){animation-delay:.4s}
-    .roavio-feature-fade:nth-child(5){animation-delay:.5s}
-    .roavio-feature-fade:nth-child(6){animation-delay:.6s}
-    @keyframes roavio-fade-in { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-  `;
-
   return (
-    <>
-      <style dangerouslySetInnerHTML={{ __html: styles }} />
-      <div className="bg-white py-16 px-4 md:px-8 lg:px-12">
+    <>  
+    <div className="bg-white py-16 px-4 md:px-8 lg:px-12">
         <div className="max-w-7xl mx-auto">
-
           {/* ── Top grid: heading + image pair ──────────────────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
             <div className="flex flex-col justify-center">
@@ -84,7 +64,7 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
                   />
                 </div>
               </div>
-              <div className="col-span-1 bg-gray-900 rounded-3xl p-2 md:p-8 flex flex-col justify-center items-center text-white h-50 lg:h-full">
+              <div className="col-span-1 bg-[var(--second-800)] rounded-3xl p-2 md:p-8 flex flex-col justify-center items-center text-white h-50 lg:h-full">
                 <div className="roavio-icon-float mb-2 md:mb-6">
                   <svg
                     width="64"
@@ -129,7 +109,7 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
             <div className="roavio-card-hover">
               <div className="rounded-3xl overflow-hidden h-96">
                 <Image
-                  src="/assets/images/tours/Egypt Budget Tours-webp.webp"
+                  src={imgAbout}
                   alt={title2}
                   className="w-full h-full object-cover roavio-image-zoom"
                   width={800}

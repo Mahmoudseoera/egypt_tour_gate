@@ -27,9 +27,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
     tagCategoriesSection?.description?.trim() ||
     "Discover breathtaking locations around the world and create unforgettable memories";
   const categories = tagCategoriesSection?.tag_categories ?? [];
-
   const cat = (index: number): TagCategory | undefined => categories[index];
-
   return (
     <section className=" bg-[var(--main-grey)] py-16 px-4">
       <div className="max-w-7xl mx-auto">

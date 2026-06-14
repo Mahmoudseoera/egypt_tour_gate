@@ -59,7 +59,13 @@ export interface SliderItem {
     description: string;
     tours: ApiTour[];
   }
-  
+
+  export interface SecondToursSection {
+    title: string;
+    description: string;
+    tours: ApiTour[];
+  }
+
   /** Matches API `media` for tag categories (some responses use `image`, others `image_url`). */
   export interface TagCategoryMedia {
     image?: string;
@@ -120,12 +126,6 @@ export interface WhyChooseSection {
     reviews: Review[];
   }
   
-  export interface SecondToursSection {
-    title: string;
-    description: string;
-    tours: ApiTour[];
-  }
-  
   export interface ArticleMedia {
     image: string;
     title: string;
@@ -143,6 +143,7 @@ export interface WhyChooseSection {
     small_desc: string;
     slug: string;
     date: string;
+    author: string;
     media: ArticleMedia;
     blog_category: ArticleBlogCategory;
   }
@@ -163,7 +164,18 @@ export interface WhyChooseSection {
     description: string;
     faqs: Faq[];
   }
-  
+
+  export interface Partner {
+    id: number;
+    image: string;
+    img_title: string;
+    img_alt: string;
+  }
+
+  export interface PartnersSection {
+    partners: Partner[]; // ← matches API field name
+  }
+
   export interface HomeSections {
     sliders_section: SliderItem[];
     about_section: AboutSection;
@@ -174,6 +186,7 @@ export interface WhyChooseSection {
     second_tours_section: SecondToursSection;
     articles_section: ArticlesSection;
     faq_section: FaqSection;
+    partners_section: PartnersSection; // ← snake_case to match API key
   }
   
   export interface HomeApiResponse {
@@ -183,4 +196,3 @@ export interface WhyChooseSection {
     };
     message: string;
   }
-  

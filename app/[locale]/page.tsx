@@ -13,14 +13,11 @@ import TravelServicesSection from "../../components/home/services";
 import PartnersMarquee from "../../components/home/partners";
 import TravelBlogSection from "../../components/home/blog-section"; 
 import TravelTourSlider from "../../components/home/tours-section";
-
 import { fetchHomeSections } from "@/lib/api/homeApi";
 import type { HomeSections } from "@/lib/api/homeTypes";
-
 import "@/styles/home.css";
 
 export const revalidate = 300;
-
 
 type PageProps = {
   params: Promise<{ 
@@ -51,13 +48,16 @@ export default async function Home({ params }: PageProps) {
   const sections: HomeSections | null = await fetchHomeSections(locale);
 
   // ── Derived slices ─────────────────────────────────────────────────────────
-  const sliderData      = sections?.sliders_section                        ?? [];
-  const aboutData       = sections?.about_section                          ?? null;
-  const firstTours      = sections?.first_tours_section?.tours             ?? [];
-  const reviews         = sections?.reviews_section?.reviews               ?? [];
-  const secondTours     = sections?.second_tours_section?.tours            ?? [];
-  const articles        = sections?.articles_section?.articles             ?? [];
-  const faqs            = sections?.faq_section?.faqs                      ?? [];
+  const sliderData         = sections?.sliders_section                      ?? [];
+  const aboutData          = sections?.about_section                        ?? null;
+  const firstTours         = sections?.first_tours_section?.tours           ?? [];
+  const reviewsSection     = sections?.reviews_section;
+  const secondTours        = sections?.second_tours_section?.tours          ?? [];
+  const secondToursSection = sections?.second_tours_section;
+  const articles           = sections?.articles_section?.articles           ?? [];
+  const articleSection     = sections?.articles_section;
+  const partners           = sections?.partners_section?.partners           ?? []; // ← snake_case key, .partners field
+  const faqs               = sections?.faq_section?.faqs                    ?? [];
 
   return (
     <Providers>
@@ -121,27 +121,27 @@ export default async function Home({ params }: PageProps) {
 
         {/* ── Testimonials ────────────────────────────────────────────────── */}
         <div className="animate-on-scroll">
-          <TestimonialSlider reviews={reviews} />
+          <TestimonialSlider reviewsSection={reviewsSection} />
         </div>
 
         {/* ── Second Tours Swiper ─────────────────────────────────────────── */}
         <div className="animate-on-scroll">
-          <TravelTourSlider apiTours={secondTours} />
+          <TravelTourSlider apiTours={secondTours} SecondToursSection={secondToursSection} />
         </div>
 
         {/* ── Blog Section ────────────────────────────────────────────────── */}
         <div className="animate-on-scroll">
-          <TravelBlogSection apiArticles={articles} />
+          <TravelBlogSection apiArticles={articles} articlesSection={articleSection} />
         </div>
 
         {/* ── FAQ ─────────────────────────────────────────────────────────── */}
         <div className="animate-on-scroll">
-          <FAQSection faqs={faqs} />
+          <FAQSection faqs={faqs} faqSection={sections?.faq_section ?? null} />
         </div>
 
         {/* ── Partners ────────────────────────────────────────────────────── */}
         <div className="animate-on-scroll">
-          <PartnersMarquee />
+          <PartnersMarquee partners={partners} />
         </div>
 
       </main>
