@@ -42,8 +42,18 @@ export interface WhyChooseSectionData {
     section6: WhyChooseBox;
   };
 }
+  // export interface Partner {
+  //   id: number;
+  //   image: string;
+  //   img_title: string;
+  //   img_alt: string;
+  // }
 
-/** Shape of `data.sections` returned by the about-us endpoint */
+  // export interface PartnersSection {
+  //   partners: Partner[]; 
+  // }
+
+
 export interface AboutPageSections {
   about_section: AboutSectionData;
   why_choose_section: WhyChooseSectionData;

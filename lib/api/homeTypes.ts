@@ -173,7 +173,7 @@ export interface WhyChooseSection {
   }
 
   export interface PartnersSection {
-    partners: Partner[]; // ← matches API field name
+    partners: Partner[]; 
   }
 
   export interface HomeSections {

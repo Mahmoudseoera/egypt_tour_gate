@@ -1,16 +1,38 @@
 import { routing, type AppLocale } from '@/lib/i18n/routing';
 
 // ─── Raw API shapes ────────────────────────────────────────────────────────────
+export interface BlogCategoryMediaItem {
+  image: string;
+  title: string;
+  alt: string;
+}
+
+/**
+ * Two different media shapes come back depending on which endpoint is called:
+ *
+ * Listing  (/get-article-categories):
+ *   "media": { "image": "https://...", "title": "...", "alt": "..." }
+ *
+ * Detail   (/get-article-by-category/:slug):
+ *   "media": { "image": { image, title, alt }, "cover": { image, title, alt } }
+ *
+ * We use `unknown` here and resolve the actual value safely at runtime
+ * inside normaliseCategory().
+ */
 export interface BlogCategoryRaw {
   id: number;
   name: string;
   slug: string;
   seo: string;
-  desc?: string;
+  small_desc?: string; // listing endpoint
+  desc?: string;       // detail endpoint
   media: {
-    image: string;
-    title: string;
-    alt: string;
+    // string  → listing endpoint (flat)
+    // object  → detail endpoint  (nested)
+    image: string | BlogCategoryMediaItem;
+    title?: string; // present only on listing (flat) shape
+    alt?: string;   // present only on listing (flat) shape
+    cover?: BlogCategoryMediaItem; // present only on detail shape
   };
 }
 
@@ -81,6 +103,7 @@ export interface RelatedTourSubCategory {
   subCategorySlug: string;
   categorySlug: string;
 }
+
 export interface BlogCategoryWithArticles extends BlogCategoryRaw {
   articles: BlogArticleRaw[];
 }
@@ -91,8 +114,10 @@ export interface BlogCategory {
   slug: string;
   title: string;
   description: string;
-  image: string;
+  image: string;       // thumbnail / card image
   imageAlt: string;
+  coverImage: string;  // hero / cover image for the category page
+  coverImageAlt: string;
   seo: string;
   icon?: React.ReactNode;
 }
@@ -121,13 +146,39 @@ function stripHtml(html: string): string {
 }
 
 function normaliseCategory(raw: BlogCategoryRaw): BlogCategory {
+  // desc is used on the detail endpoint; small_desc on the listing endpoint
+  const rawDesc = raw.desc ?? raw.small_desc ?? '';
+
+  /**
+   * Listing endpoint → media.image is a plain string URL:
+   *   { image: "https://...", title: "...", alt: "..." }
+   *
+   * Detail endpoint → media.image is a nested object:
+   *   { image: { image: "https://...", title: "...", alt: "..." }, cover: { ... } }
+   */
+  const isNested = typeof raw.media.image === 'object' && raw.media.image !== null;
+
+  const image       = isNested
+    ? (raw.media.image as BlogCategoryMediaItem).image
+    : (raw.media.image as string);
+
+  const imageAlt    = isNested
+    ? (raw.media.image as BlogCategoryMediaItem).alt
+    : (raw.media.alt ?? '');
+
+  // cover is only present on the detail endpoint's nested shape
+  const coverImage    = raw.media.cover?.image    ?? image;
+  const coverImageAlt = raw.media.cover?.alt      ?? imageAlt;
+
   return {
     id: raw.id,
     slug: raw.slug,
     title: raw.name,
-    description: raw.desc ? stripHtml(raw.desc) : '',
-    image: raw.media.image,
-    imageAlt: raw.media.alt,
+    description: rawDesc ? stripHtml(rawDesc) : '',
+    image,
+    imageAlt,
+    coverImage,
+    coverImageAlt,
     seo: raw.seo,
   };
 }
@@ -154,8 +205,8 @@ function normalisePost(raw: BlogArticleRaw): BlogPost {
     date: raw.date,
     publishedAt: parseDateString(raw.date),
     author: {
-  name: raw.author || 'Egypt Tours Gate',
-},
+      name: raw.author || 'Egypt Tours Gate',
+    },
     readTime: '5 min read',
     tags: [],
   };
@@ -194,10 +245,10 @@ function normalisePostDetail(raw: BlogArticleDetailRaw): BlogPost {
     date: raw.media.image.title,
     publishedAt: publishedAt,
     author: {
-  name: raw.author || 'Egypt Tours Gate',
-}, // Default - API doesn't provide author
-    readTime: '5 min read', // Default - API doesn't provide read time
-    tags: [], // Default - API doesn't provide tags
+      name: raw.author || 'Egypt Tours Gate',
+    },
+    readTime: '5 min read',
+    tags: [],
     seo: raw.seo,
   };
 }
@@ -221,7 +272,9 @@ function withLocale(url: string, locale?: string): string {
 export interface BlogPageData {
   subTitle: string;
   title: string;
+  seo: string;
   description: string;
+  cover: string;
   categories: BlogCategory[];
 }
 
@@ -237,6 +290,8 @@ export async function getBlogPageData(locale?: string): Promise<BlogPageData> {
   return {
     subTitle: d.blog_sub_title ?? '',
     title: d.blog_title ?? '',
+    seo: d.seo ?? '',
+    cover: d.cover ?? '',
     description: d.blog_desc ?? '',
     categories: (d.blog_categories as BlogCategoryRaw[]).map(normaliseCategory),
   };
@@ -246,6 +301,23 @@ export async function getBlogPageData(locale?: string): Promise<BlogPageData> {
 export interface CategoryPageData {
   category: BlogCategory;
   posts: BlogPost[];
+}
+
+export interface categoryData {
+  name: string;
+  slug: string;
+  seo: string;
+  desc: string;
+  media: {
+    image: categoryDataMedia;
+    cover: categoryDataMedia;
+  };
+}
+
+export interface categoryDataMedia {
+  image: string;
+  title: string;
+  alt: string;
 }
 
 export async function getCategoryPageData(slug: string, locale?: string): Promise<CategoryPageData | null> {
@@ -269,7 +341,7 @@ export async function getCategoryPageData(slug: string, locale?: string): Promis
 export interface ArticleDetailData {
   post: BlogPost;
   relatedPosts: BlogPost[];
-  related_tours?: RelatedTour[]
+  related_tours?: RelatedTour[];
 }
 
 export async function getArticleDetailBySlug(slug: string, locale?: string): Promise<ArticleDetailData | null> {
@@ -287,7 +359,7 @@ export async function getArticleDetailBySlug(slug: string, locale?: string): Pro
   return {
     post: normalisePostDetail(raw),
     relatedPosts: (raw.related_articles ?? []).map(normalisePost),
-    related_tours: raw.related_tours
+    related_tours: raw.related_tours,
   };
 }
 

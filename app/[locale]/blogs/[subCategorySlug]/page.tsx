@@ -57,7 +57,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       name: category.title,
       description: category.description,
       path: `/blogs/${subCategorySlug}`,
-      image: category.image,
+      image: category.coverImage || category.image,
     }),
     breadcrumbSchema(breadcrumbItems),
   ];
@@ -67,9 +67,29 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <SchemaScript schema={categorySchema} />
       {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
+
       {/* Category Hero */}
-      <section className="relative bg-gradient-to-br from-navy via-[#3d3586] to-navy py-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+      <section className="relative py-20 overflow-hidden">
+        {/* Cover image background — falls back to gradient if no cover image */}
+        {category.coverImage ? (
+          <div className="absolute inset-0">
+            <Image
+              src={category.coverImage}
+              alt={category.coverImageAlt}
+              fill
+              priority
+              className="object-cover"
+              sizes="100vw"
+            />
+            {/* Dark overlay so text stays readable over the photo */}
+            <div className="absolute inset-0 bg-navy/70" />
+          </div>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-navy via-[#3d3586] to-navy" />
+        )}
+
+        {/* Decorative ring — kept from original */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="absolute bottom-10 left-10 w-32 h-32 border-4 border-gold rounded-full" />
         </div>
 

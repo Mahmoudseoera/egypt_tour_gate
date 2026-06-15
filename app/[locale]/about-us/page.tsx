@@ -4,7 +4,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import PartnersMarquee from "@/components/home/partners";
+// import PartnersMarquee from "@/components/home/partners";
 import RoavioAboutSection from "@/components/about/about";
 import TravelServicesSection from "@/components/about/services";
 import { fetchAboutSections } from "@/lib/api/aboutApi";
@@ -38,7 +38,6 @@ export default async function AboutPage({
 
   const aboutData       = sections?.about_section       ?? null;
   const whyChooseData   = sections?.why_choose_section  ?? null;
-
   return (
     <>
       {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
@@ -64,7 +63,7 @@ export default async function AboutPage({
       <TravelServicesSection whyChooseSection={whyChooseData} />
 
       {/* ── Partners marquee (no API data needed) ──────────────────────────── */}
-      <PartnersMarquee />
+      {/* <PartnersMarquee partners={partners} /> */}
     </>
   );
 }

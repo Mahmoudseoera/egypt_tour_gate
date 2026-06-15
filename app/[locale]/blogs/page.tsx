@@ -3,14 +3,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getBlogPageData } from '@/lib/api/blog';
 import { buildSeoMetadata } from '@/lib/seo';
-
-export const dynamic = "force-dynamic";
+import FallbackImage from "@/components/shared/fallback-image";
 export const revalidate = 1800;
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string }>; 
 }): Promise<Metadata> {
   const { locale } = await params;
 
@@ -31,8 +30,7 @@ export default async function BlogsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const { subTitle, title, description, categories } = await getBlogPageData(locale);
-
+  const { subTitle, title, description, cover, categories } = await getBlogPageData(locale);
   return (
     <div className="min-h-screen bg-grey-light">
       {/* Hero Section */}
@@ -42,7 +40,9 @@ export default async function BlogsPage({
           <div className="absolute bottom-20 right-20 w-24 h-24 border-4 border-gold rotate-45" />
           <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-gold opacity-20 rounded-full" />
         </div>
-
+         <FallbackImage src={cover} fill sizes="(max-width: 768px) 100vw,
+          (max-width: 1200px) 50vw, 33vw" alt="Egypt Travel Blog - Tours, Tips & Cultural Guides | Egypt Tours Gate" 
+          className="object-cover object-center" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {subTitle && (
@@ -74,7 +74,7 @@ export default async function BlogsPage({
                   className="group block bg-grey-light rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
                 >
                   <div className="relative h-56 overflow-hidden">
-                    <Image
+                    <FallbackImage
                       src={category.image}
                       alt={category.imageAlt}
                       fill
@@ -88,7 +88,6 @@ export default async function BlogsPage({
                       </h3>
                     </div>
                   </div>
-
                   <div className="p-6">
                     {category.description && (
                       <p className="text-gray-600 leading-relaxed line-clamp-3">

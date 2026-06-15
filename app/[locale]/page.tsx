@@ -16,7 +16,6 @@ import TravelTourSlider from "../../components/home/tours-section";
 import { fetchHomeSections } from "@/lib/api/homeApi";
 import type { HomeSections } from "@/lib/api/homeTypes";
 import "@/styles/home.css";
-
 export const revalidate = 300;
 
 type PageProps = {
