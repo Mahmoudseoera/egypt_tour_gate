@@ -79,13 +79,12 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
     <main className="bg-main-grey">
       <SchemaScript schema={schema} />
       <Breadcrumb items={breadcrumbItems} />
-
       <div className="container py-10 max-w-7xl mx-auto">
         <div className="tour-title rounded-xl border border-gray-200 bg-white p-4 sm:p-5 mb-4">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between gap-4">
             <h1 className="text-xl sm:text-3xl font-bold text-navy leading-snug">{item.title}</h1>
             <div className="shrink-0 bg-white/95 px-3 py-2 rounded-lg shadow border border-gray-100">
-              <p className="text-navy font-bold text-sm sm:text-xl whitespace-nowrap">{"From $" + item.price_from}</p>
+              <p className="text-[var(--main-color)] font-bold text-sm sm:text-xl whitespace-nowrap">{"From $" + item.price_from}</p>
             </div>
           </div>
           <div className="mt-3">

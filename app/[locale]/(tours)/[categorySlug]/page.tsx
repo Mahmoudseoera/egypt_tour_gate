@@ -147,7 +147,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             />
           {/* Main Color Overlay */}
       <div
-        className="absolute inset-0 z-[1]"
+        className="absolute inset-0 z-[1] "
         style={{
           background: "var(--second-color)",
           opacity: 0.55,

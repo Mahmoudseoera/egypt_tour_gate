@@ -1103,15 +1103,9 @@ export default function TailorMadePage() {
               {/* ── Step 5: Confirm ── */}
               {currentStep === 5 && (
                 <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">
-                      {formData.fullName ? `Almost there, ${formData.fullName.split(" ")[0]}! ✈️` : "Review & Submit"}
-                    </h3>
-                    <p className="text-[#888] text-sm mt-1">Welcome to Egypt Tour Gate. We&apos;ll craft your trip and contact you shortly.</p>
-                  </div>
                   <div className="bg-[#f8f9fc] rounded-2xl border-[1.5px] border-[#e8eaf0] px-5 py-6 text-center">
-                    <p className="text-lg font-bold text-[#272262]">Welcome{formData.fullName ? `, ${formData.fullName}` : ""}! 👋</p>
-                    <p className="text-sm text-[#888] mt-2">Your request is almost ready. Click submit and our travel specialist will contact you.</p>
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">Welcome{formData.fullName ? `, ${formData.fullName}` : ""}! Almost there, 👋</h3>
+                    <p className="text-sm text-[#888] mt-2">Welcome to Egypt Tour Gate. We&apos;ll craft your trip and contact you shortly. Your request is almost ready. Click submit and our travel specialist will contact you.</p>
                   </div>
                   <form onSubmit={handleSubmit}>
                     <button

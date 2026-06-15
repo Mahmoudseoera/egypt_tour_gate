@@ -98,15 +98,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
               {category.title}
             </h1>
-
-            {category.description && (
-              <ExpandableDescription
-                text={category.description}
-                maxLength={110}
-                className="text-xl text-white/90 leading-relaxed [&>p]:text-white/90 [&>button]:text-gold"
-              />
-            )}
-
             <div className="mt-8 inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-white">
               <svg
                 className="w-5 h-5"
@@ -130,8 +121,15 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       </section>
 
       {/* Posts Grid */}
-      <section className="py-16">
+      <section className="py-10">
         <div className="container mx-auto px-4">
+          {category.description && (
+            <ExpandableDescription
+              text={category.description}
+              maxLength={110}
+              className="text-sm mb-5 text-white/90 leading-relaxed text-center [&>button]:text-gold"
+            />
+          )}
           <div className="max-w-7xl mx-auto">
             {posts.length === 0 ? (
               <div className="text-center py-20">

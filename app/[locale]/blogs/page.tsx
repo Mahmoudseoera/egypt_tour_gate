@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import { getBlogPageData } from '@/lib/api/blog';
 import { buildSeoMetadata } from '@/lib/seo';
 import FallbackImage from "@/components/shared/fallback-image";
@@ -34,15 +33,17 @@ export default async function BlogsPage({
   return (
     <div className="min-h-screen bg-grey-light">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-navy via-[#3d3586] to-navy py-24 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+      <section className="relative py-24 overflow-hidden">
+        <div className="bg-gradient-to-br from-navy via-[#3d3586] to-navy absolute inset-0 z-[1] opacity-75">
+        </div>
+        <FallbackImage src={cover} fill sizes="(max-width: 768px) 100vw,
+          (max-width: 1200px) 50vw, 33vw" alt="Egypt Travel Blog - Tours, Tips & Cultural Guides | Egypt Tours Gate" 
+          className="object-cover object-center" />
+        <div className="absolute inset-0 z-20 opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 border-4 border-gold rounded-full" />
           <div className="absolute bottom-20 right-20 w-24 h-24 border-4 border-gold rotate-45" />
           <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-gold opacity-20 rounded-full" />
         </div>
-         <FallbackImage src={cover} fill sizes="(max-width: 768px) 100vw,
-          (max-width: 1200px) 50vw, 33vw" alt="Egypt Travel Blog - Tours, Tips & Cultural Guides | Egypt Tours Gate" 
-          className="object-cover object-center" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {subTitle && (
@@ -54,6 +55,11 @@ export default async function BlogsPage({
             {description && (
               <p className="text-xl text-white/90 leading-relaxed">{description}</p>
             )}
+            <div className="mt-8 inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-white">
+              <span className='font-semibold'>
+                {categories.length} Categor{categories.length !== 1 ? "ies" : "y"}
+              </span>
+            </div>
           </div>
         </div>
       </section>

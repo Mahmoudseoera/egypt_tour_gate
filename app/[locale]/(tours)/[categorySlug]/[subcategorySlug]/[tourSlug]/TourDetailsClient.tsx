@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import FallbackImage from "@/components/shared/fallback-image";
 import {
   buildBookingPayload,
   submitBooking,
@@ -97,13 +98,61 @@ const INITIAL: FormState = {
   tour_id: "",
 };
 
-const policyRules = [
-  "Age is calculated at the time of travel, not at the time of booking.",
-  "Children must be accompanied by at least one adult (18+) at all times.",
-  "Proof of age (passport or birth certificate) may be required at check-in.",
-  "Child prices apply to shared accommodation with parents only.",
-  "Some activities (e.g. horse riding, quad bikes) have minimum age restrictions.",
-  "Infant seats on domestic flights are subject to airline availability.",
+const policySections = [
+  {
+    title: "Prices",
+    rules: [
+      "Tour prices are quoted in USD, but payment can also be made in Euro or British Pound.",
+      "Prices are quoted per person and are all-inclusive.",
+      "Rates are regularly updated to ensure the best available price.",
+      "Prices are valid until 30 December 2025.",
+      "Special rates may apply during Christmas, New Year, and Easter holidays.",
+    ],
+  },
+  {
+    title: "Children Policy",
+    rules: [
+      "Child traveling with two accompanying adults will pay the following:",
+      "0 Years to 1.99 Years of age: Free of charge.",
+      "2 Years to 4.99 Years of age: 50% from the full rate.",
+      "5 Years to 11.99 Years of age: 75% from the full rate.",
+      "12+ pay full tour price as per adult person.",
+      "If your tour includes airfare, an extra child fare charge may apply.",
+    ],
+  },
+  {
+    title: "Cancellation",
+    rules: [
+      "Cancellation requests must be sent via email or fax.",
+      "Written confirmation is required to process any cancellation.",
+    ],
+  },
+  {
+    title: "Deposit & Balance of Payment",
+    rules: [
+      "Reservations should be made as early as possible.",
+      "A deposit of 25% of the total tour price is required to secure your booking.",
+      "A 50% deposit is required during Christmas and New Year holidays and for packages including airfare.",
+      "The deposit forms part of your final payment.",
+      "Payments can be made via bank transfer, Western Union, Visa, or MasterCard.",
+      "Payment must be received within 7 days of booking.",
+    ],
+  },
+  {
+    title: "Tipping",
+    rules: [
+      "Tipping is customary in Egypt but is not mandatory.",
+      "Guests are welcome to tip guides and service providers at their discretion.",
+    ],
+  },
+  {
+    title: "Tour Voucher",
+    rules: [
+      "A final confirmation voucher will be emailed after your booking is confirmed.",
+      "Please print and bring the voucher during your trip.",
+      "The voucher will include contact details for your tour operator, customer support, and additional travel information.",
+    ],
+  },
 ];
 
 type TourDetailsClientProps = {
@@ -982,19 +1031,26 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     </div>
                   </div>
 
-                  {/* Divider */}
-                  {/* <div className="flex items-center gap-3 mb-4">
-                <div className="flex-1 h-px bg-gray-200" />
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">Important Rules</span>
-                <div className="flex-1 h-px bg-gray-200" />
-              </div> */}
-
                   {/* Policy rules */}
-                  <div className="space-y-2.5">
-                    {policyRules.map((rule, i) => (
-                      <div key={i} className="policy-rule-item">
-                        <div className="policy-rule-dot" />
-                        <span>{rule}</span>
+                  <div className="space-y-8">
+                    {policySections.map((section, sectionIndex) => (
+                      <div key={sectionIndex}>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="flex-1 h-px bg-gray-200" />
+                          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                            {section.title}
+                          </span>
+                          <div className="flex-1 h-px bg-gray-200" />
+                        </div>
+
+                        <div className="space-y-2.5">
+                          {section.rules.map((rule, i) => (
+                            <div key={i} className="policy-rule-item">
+                              <div className="policy-rule-dot" />
+                              <span>{rule}</span>
+                            </div>
+                          ))} 
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1444,7 +1500,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       >
                         <div className="relative w-20 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
                           {article.media?.image ? (
-                            <Image
+                            <FallbackImage
                               src={article.media.image}
                               alt={article.media.alt ?? article.name}
                               fill
