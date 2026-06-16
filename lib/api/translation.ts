@@ -33,15 +33,28 @@ export async function fetchTranslationEditor(
   ).replace(/\/+$/, "");
 
   try {
-    const res = await fetch(`${base}/get-translation-editor?locale=${locale}`, {
+    const url = `${base}/get-translation-editor?locale=${locale}`;
+    const res = await fetch(url, {
       // Use no-store so each locale always gets its own fresh response.
       // next-intl calls this from request.ts per-request anyway, so there
       // is no value in caching here — caching caused the locale-switch bug
       // where the cached `en` response was returned for `de`/`fr`/`pl`.
       cache: "no-store",
+      headers: {
+        Accept: "application/json",
+      },
     });
     if (!res.ok) return null;
-    return (await res.json()) as TranslationEditorResponse;
+    const json = (await res.json()) as TranslationEditorResponse;
+
+    if (process.env.NODE_ENV !== "production") {
+      // Keep logs small: we just want to verify backend returns localized values.
+      const inquire = Array.isArray(json.data) && json.data[0] ? json.data[0].inquire : undefined;
+      const home = Array.isArray(json.data) && json.data[0] ? json.data[0].home : undefined;
+      console.log(`[i18n] translation fetched`, { locale, url, success: json.success, home, inquire });
+    }
+
+    return json;
   } catch {
     return null;
   }

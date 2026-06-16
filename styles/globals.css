@@ -647,6 +647,55 @@ nav.fixed {
     transform: translateY(0)
   }
 }
+
 /* ===================================
   end   about shared sections
 ===================================== */
+/* Dual-thumb range slider */
+.dual-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #272262;
+  box-shadow: 0 2px 6px rgba(39, 34, 98, 0.18);
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  pointer-events: all;
+}
+
+.dual-thumb::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #272262;
+  box-shadow: 0 2px 6px rgba(39, 34, 98, 0.18);
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+  pointer-events: all;
+}
+
+.dual-thumb::-webkit-slider-thumb:hover,
+.dual-thumb:focus::-webkit-slider-thumb {
+  border-color: #e3b75e;
+  transform: scale(1.15);
+  box-shadow: 0 3px 10px rgba(227, 183, 94, 0.35);
+}
+
+.dual-thumb::-moz-range-thumb:hover {
+  border-color: #e3b75e;
+  transform: scale(1.15);
+}
+
+.dual-thumb::-webkit-slider-runnable-track,
+.dual-thumb::-moz-range-track {
+  background: transparent;
+  height: 8px;
+}
+
+.dual-thumb {
+  pointer-events: none;
+}

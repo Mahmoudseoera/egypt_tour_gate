@@ -441,7 +441,107 @@ function CounterButton({
     </div>
   );
 }
+// ─── Dual Range Slider ──────────────────────────────────────────────────────
+interface DualRangeSliderProps {
+  min: number;
+  max: number;
+  step: number;
+  valueMin: number;
+  valueMax: number;
+  onChangeMin: (val: number) => void;
+  onChangeMax: (val: number) => void;
+  label: string;
+  formatValue?: (val: number) => string;
+}
 
+function DualRangeSlider({
+  min,
+  max,
+  step,
+  valueMin,
+  valueMax,
+  onChangeMin,
+  onChangeMax,
+  label,
+  formatValue = (v) => `$${v.toLocaleString()}`,
+}: DualRangeSliderProps) {
+  const pct = (v: number) => ((v - min) / (max - min)) * 100;
+
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Math.min(Number(e.target.value), valueMax - step);
+    onChangeMin(val);
+  };
+
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Math.max(Number(e.target.value), valueMin + step);
+    onChangeMax(val);
+  };
+
+  return (
+    <div className="space-y-4 pt-2">
+      <p className="text-sm font-bold text-[#272262] flex items-center gap-2">
+        <DollarSign size={16} className="text-[#e3b75e]" />
+        {label}
+      </p>
+
+      {/* Value badges */}
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col items-start gap-0.5">
+          <span className="text-[10px] font-semibold text-[#bbb] uppercase tracking-wider">Min</span>
+          <span className="text-base font-bold text-[#272262]">{formatValue(valueMin)}</span>
+        </div>
+        <div className="flex-1 mx-3 border-t-2 border-dashed border-[#e8eaf0]" />
+        <div className="flex flex-col items-end gap-0.5">
+          <span className="text-[10px] font-semibold text-[#bbb] uppercase tracking-wider">Max</span>
+          <span className="text-base font-bold text-[#e3b75e]">{formatValue(valueMax)}</span>
+        </div>
+      </div>
+
+      {/* Dual-thumb track */}
+      <div className="relative h-6 flex items-center">
+        {/* Base track */}
+        <div className="absolute inset-x-0 h-2 rounded-full bg-[#e8eaf0]" />
+        {/* Filled range */}
+        <div
+          className="absolute h-2 rounded-full bg-gradient-to-r from-[#272262] to-[#e3b75e]"
+          style={{
+            left: `${pct(valueMin)}%`,
+            right: `${100 - pct(valueMax)}%`,
+          }}
+        />
+        {/* Min thumb */}
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={valueMin}
+          onChange={handleMinChange}
+          className="dual-thumb absolute inset-0 w-full appearance-none bg-transparent cursor-pointer"
+          style={{ zIndex: valueMin > max - 100 ? 5 : 3 }}
+        />
+        {/* Max thumb */}
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={valueMax}
+          onChange={handleMaxChange}
+          className="dual-thumb absolute inset-0 w-full appearance-none bg-transparent cursor-pointer"
+          style={{ zIndex: 4 }}
+        />
+      </div>
+
+      {/* Scale labels */}
+      <div className="flex justify-between text-[10px] font-medium text-[#bbb]">
+        <span>{formatValue(min)}</span>
+        <span>{formatValue(max / 2)}</span>
+        <span>{formatValue(max)}</span>
+      </div>
+    </div>
+  );
+}
 // ─── Main Component ─────────────────────────────────────────────────────────
 export default function TailorMadePage() {
   const router = useRouter();
@@ -1056,47 +1156,17 @@ export default function TailorMadePage() {
                   </div>
 
                   {/* Budget range sliders */}
-                  <div className="space-y-4 pt-2">
-                    <p className="text-sm font-bold text-[#272262] flex items-center gap-2">
-                      <DollarSign size={16} className="text-[#e3b75e]" />
-                      {budget_range_label}
-                    </p>
-                    <div>
-                      <div className="flex justify-between text-xs text-[#aaa] mb-2 font-medium">
-                        <span>Min Price</span>
-                        <span className="text-[#272262] font-bold">${formData.priceMin.toLocaleString()}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="15000"
-                        step="100"
-                        value={formData.priceMin}
-                        onChange={(e) => updateFormData("priceMin", parseInt(e.target.value))}
-                        className="w-full accent-[#272262] h-2 cursor-pointer"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs text-[#aaa] mb-2 font-medium">
-                        <span>Max Price</span>
-                        <span className="text-[#e3b75e] font-bold">${formData.priceMax.toLocaleString()}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="15000"
-                        step="100"
-                        value={formData.priceMax}
-                        onChange={(e) => updateFormData("priceMax", parseInt(e.target.value))}
-                        className="w-full accent-[#e3b75e] h-2 cursor-pointer"
-                      />
-                      <div className="flex justify-between text-xs text-[#aaa] mt-1 font-medium">
-                        <span>$0</span>
-                        <span className="text-[#e3b75e] font-bold">${formData.priceMin.toLocaleString()} – ${formData.priceMax.toLocaleString()}</span>
-                        <span>$15,000</span>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Budget range — single dual-thumb slider */}
+                  <DualRangeSlider
+                    min={0}
+                    max={15000}
+                    step={100}
+                    valueMin={formData.priceMin}
+                    valueMax={formData.priceMax}
+                    onChangeMin={(v) => updateFormData("priceMin", v)}
+                    onChangeMax={(v) => updateFormData("priceMax", v)}
+                    label={budget_range_label}
+                  />
                 </div>
               )}
 
