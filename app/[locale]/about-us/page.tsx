@@ -9,6 +9,7 @@ import RoavioAboutSection from "@/components/about/about";
 import TravelServicesSection from "@/components/about/services";
 import { fetchAboutSections } from "@/lib/api/aboutApi";
 import { buildSeoMetadata } from "@/lib/seo";
+import AboutContent  from "@/components/about/about-content";
 
 export async function generateMetadata({
   params,
@@ -35,7 +36,6 @@ export default async function AboutPage({
 
   // ── Fetch from the dedicated about-us endpoint ───────────────────────────
   const sections = await fetchAboutSections(locale);
-
   const aboutData       = sections?.about_section       ?? null;
   const whyChooseData   = sections?.why_choose_section  ?? null;
   return (
@@ -58,6 +58,9 @@ export default async function AboutPage({
 
       {/* ── About section ──────────────────────────────────────────────────── */}
       <RoavioAboutSection aboutData={aboutData} />
+
+      {/* ── About content ──────────────────────────────────────────────────── */}
+       <AboutContent aboutData={aboutData}/>
 
       {/* ── Services / Why-choose section ──────────────────────────────────── */}
       <TravelServicesSection whyChooseSection={whyChooseData} />

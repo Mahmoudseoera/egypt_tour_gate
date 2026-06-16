@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
   const tags: string[] = Array.isArray(body?.tags) && body.tags.length
     ? body.tags
-    : ["home", "tours", "blogs", "general", "settings", "contact", "tailor-made"];
+    : ["home", "tours", "blogs", "general", "settings", "contact", "tailor-made, translation"];
 
   for (const tag of tags) {
     revalidateTag(tag, "default");

@@ -78,7 +78,8 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             onMouseEnter={() => setHoveredIndex(0)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <Link href={cat(0)?.slug ? `/${cat(0)!.slug}` : "/contact"}>
+            {/* {cat(0)?.slug ? `/${cat(0)!.slug}` : "/contact"} */}
+            <Link href="/tailor-made">
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 0 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-100">
               <Image
@@ -109,7 +110,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             onMouseEnter={() => setHoveredIndex(1)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <Link href={cat(1)?.slug ? `/${cat(1)!.slug}` : "/contact"}>
+           <Link href="/tailor-made">
             <div className={`absolute inset-0 bg-gradient-to-br transition-transform duration-500 ${hoveredIndex === 1 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-100">
                 <Image
@@ -139,7 +140,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             onMouseEnter={() => setHoveredIndex(2)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <Link href={cat(2)?.slug ? `/${cat(2)!.slug}` : "/contact"}>
+            <Link href="/tailor-made">
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 2 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-100">
                 <Image
@@ -169,7 +170,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             onMouseEnter={() => setHoveredIndex(3)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <Link href={cat(3)?.slug ? `/${cat(3)!.slug}` : "/contact"}>
+            <Link href="/tailor-made">
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 3 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-100">
                 <Image
@@ -199,7 +200,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             onMouseEnter={() => setHoveredIndex(4)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <Link href={cat(4)?.slug ? `/${cat(4)!.slug}` : "/contact"}>
+            <Link href="/tailor-made">
             <div className={`absolute inset-0 bg-gradient-to-br transition-transform duration-500 ${hoveredIndex === 4 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-8xl opacity-100">
                 <Image
@@ -230,7 +231,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
               onMouseEnter={() => setHoveredIndex(5)}
               onMouseLeave={() => setHoveredIndex(null)}
             >
-              <Link href={cat(5)?.slug ? `/${cat(5)!.slug}` : "/contact"}>
+              <Link href="/tailor-made">
               <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 5 ? 'scale-110' : 'scale-100'}`}>
                 <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-100">
                   <Image

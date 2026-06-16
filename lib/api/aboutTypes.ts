@@ -12,6 +12,7 @@ export interface AboutSectionData {
   about_link: string;
   about_date: string;
   about_title2: string;
+  content: string;
 }
 
 export interface WhyChooseBox {

@@ -153,7 +153,7 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
             </div>
           </div>
         </div>
-      </div>
+     </div>
     </>
   );
 }

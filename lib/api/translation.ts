@@ -39,7 +39,7 @@ export async function fetchTranslationEditor(
       // next-intl calls this from request.ts per-request anyway, so there
       // is no value in caching here — caching caused the locale-switch bug
       // where the cached `en` response was returned for `de`/`fr`/`pl`.
-      cache: "no-store",
+      next: { revalidate: 3600, tags: ["translation"] },
       headers: {
         Accept: "application/json",
       },
