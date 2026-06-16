@@ -49,9 +49,6 @@ export default async function LocaleLayout({ children, params }: Props) {
   // we always get the correct locale's translations, bypassing getMessages()
   // which depends on next-intl's async storage context (unreliable in layouts).
   const messages = await fetchTranslationMessages(locale);
-
-  console.log("[layout] locale =", locale, "| keys =", Object.keys(messages).length);
-  console.log(messages)
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
