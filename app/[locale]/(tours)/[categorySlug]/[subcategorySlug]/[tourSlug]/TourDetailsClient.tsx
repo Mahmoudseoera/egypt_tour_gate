@@ -716,18 +716,20 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     </span>
                   </div>
                   {/* Right 3-stack */}
-                  <div className="grid grid-rows-3 gap-1 md:gap-2 h-full">
-                    {safeTourImages.slice(1, 4).map((img, i) => (
-                      <div
-                        key={i}
-                        className="relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat"
-                        onClick={() => openLightbox(i + 1)}
-                        style={{ backgroundImage: `url(${img})` }}
-                      >
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
-                      </div>
-                    ))}
-                  </div>
+                <div className="grid grid-cols-2 grid-rows-2 gap-1 md:gap-2 h-full">
+                      {safeTourImages.slice(1, 4).map((img, i) => (
+                        <div
+                          key={i}
+                          className={`relative cursor-pointer rounded-xl group overflow-hidden bg-center bg-cover bg-no-repeat ${
+                            i === 2 ? "col-span-2" : ""
+                          }`}
+                          onClick={() => openLightbox(i + 1)}
+                          style={{ backgroundImage: `url(${img})` }}
+                        >
+                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
+                        </div>
+                      ))}
+                    </div>              
                 </div>
               );
             }

@@ -1,4 +1,4 @@
-// app/blogs/[subCategorySlug]/[blogslug]/page.tsx
+// Blog Details page //  app/blogs/[subCategorySlug]/[blogslug]/page.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -55,9 +55,8 @@ export default async function BlogDetailsPage({
 
   // Fetch article data from API
   const data = await getArticleDetailBySlug(blogslug, locale);
-
   if (!data?.post) notFound();
-
+ 
   const post = data.post;
   const imagehero = data?.post.image;
   const relatedPosts = data.relatedPosts ?? [];
@@ -69,7 +68,7 @@ export default async function BlogDetailsPage({
   const allCategories = await getAllBlogCategories(locale);
 
   const publishDate = new Date(post.publishedAt);
-
+    console.log(post)
   // Schema.org structured data
   const blogSchema = {
     "@context": "https://schema.org",
@@ -118,8 +117,7 @@ export default async function BlogDetailsPage({
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"/>
         <div className="absolute inset-0 flex items-end">
           <div className="container mx-auto px-4 md:px-8 lg:px-16 pb-12">
             <div className="max-w-4xl">
@@ -330,7 +328,7 @@ export default async function BlogDetailsPage({
                         </div>
 
                         {/* Info */}
-                        <div className="flex flex-col justify-between flex-1 min-w-lg">
+                        <div className="flex flex-col justify-between flex-1 w-full">
                           <p className="text-sm font-semibold text-[var(--second-color)] leading-snug line-clamp-2 group-hover:text-[var(--main-color)] transition-colors">
                             {tour.name}
                           </p>
@@ -372,7 +370,7 @@ export default async function BlogDetailsPage({
                           </div>
 
                           <div className="mt-1.5">
-                            <span className="text-sm font-bold text-[var(--second-color)]">
+                            <span className="text-sm font-bold text-[var(--main-color)]">
                               ${tour.price_after_discount}
                             </span>
                             <span className="text-xs text-gray-400 ml-1">

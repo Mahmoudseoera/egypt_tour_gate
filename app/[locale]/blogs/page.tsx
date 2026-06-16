@@ -1,3 +1,4 @@
+// Blog posts  page //  app/blogs/[subCategorySlug]/page.tsx
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getBlogPageData } from '@/lib/api/blog';

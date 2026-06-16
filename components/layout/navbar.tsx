@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { usePathname, useRouter } from "@/lib/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
+import { useT } from "@/lib/hooks/useTranslate";
 import Image from "next/image";
-import Link from "next/link";
 import {
   Phone,
   Mail,
@@ -108,14 +108,13 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
-
+  
   // useLocale() returns AppLocale — now matches useGeneralData() signature
   const locale = useLocale() as AppLocale;
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
-
   const router = useRouter();
-
+   const t = useT();
   const { data, error, loading } = useGeneralData(locale);
   const [socialData, setSocialData] = useState<SocialItem[]>(fallbackSocialData);
   useEffect(() => {
@@ -375,7 +374,7 @@ export default function Navbar() {
             {/* Right: CTA + Hamburger */}
             <div className="flex items-center gap-3 md:order-2">
               <Link href="/tailor-made" className="btn-effect hidden md:block">
-                Get started
+                {t("send_inquiry", "Send Inquiry")}
               </Link>
               <button
                 onClick={() => setMobileOpen(true)}
@@ -396,7 +395,7 @@ export default function Navbar() {
                   href={lp("/")}
                   className="px-3 py-2 rounded-md text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 text-[14.5px] font-semibold nav-link-underline"
                 >
-                  Home
+                 <span>{t("home", "home")}</span>
                 </Link>
               </li>
 

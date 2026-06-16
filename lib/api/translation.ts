@@ -1,25 +1,55 @@
+// lib/api/translation.ts
+export type TranslationMessages = Record<string, string>;
+
 export interface TranslationEditorResponse {
   success: boolean;
-  data: {
-    home_first_section_sub_title: string;
-  };
+  data: Record<string, string | null>[];
   message: string;
   status: number;
 }
-export async function fetchTranslation(locale = "en"): Promise<TranslationEditorResponse | null> {
+
+/**
+ * Merge all objects from data[] and drop any key whose value is null/undefined.
+ * next-intl requires every message value to be a non-null string.
+ */
+function toMessages(json: TranslationEditorResponse | null): TranslationMessages {
+  if (!json?.success) return {};
+  if (!Array.isArray(json.data) || json.data.length === 0) return {};
+
+  const merged = Object.assign({}, ...json.data) as Record<string, string | null>;
+
+  const clean: TranslationMessages = {};
+  for (const [k, v] of Object.entries(merged)) {
+    if (typeof v === "string") clean[k] = v;
+  }
+  return clean;
+}
+
+export async function fetchTranslationEditor(
+  locale = "en"
+): Promise<TranslationEditorResponse | null> {
   const base = (
     process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://www.egypttoursgate.com/api/v1"
   ).replace(/\/+$/, "");
 
   try {
     const res = await fetch(`${base}/get-translation-editor?locale=${locale}`, {
-      next: { revalidate: 3600, tags: ["translation"] },
+      // Use no-store so each locale always gets its own fresh response.
+      // next-intl calls this from request.ts per-request anyway, so there
+      // is no value in caching here — caching caused the locale-switch bug
+      // where the cached `en` response was returned for `de`/`fr`/`pl`.
+      cache: "no-store",
     });
     if (!res.ok) return null;
-    const json: TranslationEditorResponse = await res.json();
-    console.log("Translation API Response:", json);
-    return json;
+    return (await res.json()) as TranslationEditorResponse;
   } catch {
     return null;
-    }
-    }
+  }
+}
+
+export async function fetchTranslationMessages(
+  locale = "en"
+): Promise<TranslationMessages> {
+  const json = await fetchTranslationEditor(locale);
+  return toMessages(json);
+}

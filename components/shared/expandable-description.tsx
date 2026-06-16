@@ -20,10 +20,25 @@ export default function ExpandableDescription({
   const shouldTruncate = text.length > maxLength;
 
   const content = useMemo(() => {
-    if (expanded || !shouldTruncate) return text;
+    const currentContent =
+      expanded || !shouldTruncate
+        ? text
+        : `${text.slice(0, maxLength).trimEnd()}...`;
 
-    return `${text.slice(0, maxLength).trimEnd()}...`;
-  }, [expanded, maxLength, shouldTruncate, text]);
+    if (!isHtml || typeof window === 'undefined') {
+      return currentContent;
+    }
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(currentContent, 'text/html');
+
+    doc.querySelectorAll('a').forEach((link) => {
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+    });
+
+    return doc.body.innerHTML;
+  }, [expanded, maxLength, shouldTruncate, text, isHtml]);
 
   return (
     <div className={className}>
