@@ -3,7 +3,7 @@
 // ⚠️  No dependency on homeApi or homeTypes — completely standalone.
 
 import type { AboutApiResponse, AboutPageSections } from "./aboutTypes";
-
+import { cache } from 'react';
 /**
  * Server-side fetcher for the About page.
  *

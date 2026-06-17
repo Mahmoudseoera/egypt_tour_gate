@@ -21,6 +21,20 @@ interface CategoryPageProps {
   }>;
 }
 
+export async function generateStaticParams({
+  params,
+}: {
+  params: { locale: string; subCategorySlug: string };
+}) {
+  const { locale, subCategorySlug } = params;
+  const data = await getCategoryPageData(subCategorySlug, locale);
+
+  if (!data) return [];
+
+  return data.posts.map((post) => ({
+    postSlug: post.slug,
+  }));
+}
 export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {

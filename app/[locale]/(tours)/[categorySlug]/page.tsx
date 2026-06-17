@@ -20,6 +20,7 @@ type CategoryPageProps = {
   params: Promise<{ locale: string; categorySlug: string }>;
 };
 
+
 // Fallback image used only when a subcategory has no media at all
 // const FALLBACK_IMAGE = "/assets/images/placeholder.png";
 

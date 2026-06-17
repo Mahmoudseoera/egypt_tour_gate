@@ -140,6 +140,33 @@ export interface BlogPost {
   seo?: string; // Raw SEO meta for advanced parsing
 }
 
+// ─── Resilient fetch wrapper ──────────────────────────────────────────────
+// Build-time static generation fires many requests in parallel across the
+// whole site (tours + blog). If combined volume momentarily exceeds the
+// Laravel API's rate limit, retrying with backoff lets the build self-heal
+// instead of failing outright on a transient 429.
+async function fetchWithRetry(
+  url: string,
+  init: RequestInit & { next?: { revalidate?: number; tags?: string[] } },
+  retries = 3
+): Promise<Response> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const res = await fetch(url, init);
+
+    if (res.status !== 429 || attempt === retries) {
+      return res;
+    }
+
+    const retryAfterHeader = res.headers.get('retry-after');
+    const retryAfterMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : null;
+    const backoffMs = retryAfterMs ?? 500 * 2 ** attempt + Math.random() * 250;
+
+    await new Promise((resolve) => setTimeout(resolve, backoffMs));
+  }
+
+  return fetch(url, init); // unreachable, satisfies TS
+}
+
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').trim();
@@ -280,11 +307,9 @@ export interface BlogPageData {
 
 export const getBlogPageData = cache(
   async (locale?: string): Promise<BlogPageData> => {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       withLocale(`${API_BASE}/get-article-categories`, locale),
-      {
-        next: { revalidate: 3600 },
-      }
+      { next: { revalidate: 3600, tags: ['blog-categories'] } }
     );
 
     if (!res.ok) {
@@ -336,15 +361,13 @@ export interface categoryDataMedia {
 }
 
 export const getCategoryPageData = cache(
-  async (
+  async ( 
     slug: string,
     locale?: string
   ): Promise<CategoryPageData | null> => {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale),
-      {
-        next: { revalidate: 3600 },
-      }
+      { next: { revalidate: 3600, tags: ['blog-categories', `blog-category-${slug}`] } }
     );
 
     if (res.status === 404) return null;
@@ -378,12 +401,10 @@ export const getArticleDetailBySlug = cache(
     slug: string,
     locale?: string
   ): Promise<ArticleDetailData | null> => {
-    const res = await fetch(
-      withLocale(`${API_BASE}/get-ditals-article/${slug}`, locale),
-      {
-        next: { revalidate: 3600 },
-      }
-    );
+      const res = await fetchWithRetry(
+        withLocale(`${API_BASE}/get-ditals-article/${slug}`, locale),
+        { next: { revalidate: 3600, tags: ['blog-categories', `blog-article-${slug}`] } }
+      );
 
     if (res.status === 404) return null;
 

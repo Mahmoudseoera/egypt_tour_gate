@@ -22,7 +22,18 @@ export async function generateMetadata({
   });
 }
 
+export async function generateStaticParams({
+  params,
+}: {
+  params: { locale: string };
+}) {
+  const { locale } = params;
+  const { categories } = await getBlogPageData(locale);
 
+  return categories.map((category) => ({
+    subCategorySlug: category.slug,
+  }));
+}
 
 export default async function BlogsPage({
   params,

@@ -258,7 +258,8 @@ li.menu-open .nav-active-dot {
 .lang-menu {
     display: none;
     position: absolute;
-    top: calc(100% + 8px);
+    /* top: calc(100% + 8px); */
+    top: 100%;
     right: 0;
     background: white;
     border-radius: 12px;

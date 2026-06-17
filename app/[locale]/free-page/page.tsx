@@ -4,7 +4,8 @@ import Image from "next/image";
 import FreePageAccordion from "@/components/shared/free-page-accordion";
 // API
 import { getTermsAndConditions } from "@/lib/api/freePage";
-
+export const dynamic = "force-static";
+export const revalidate = 3600;
 export async function generateMetadata({
   params,
 }: {

@@ -1,4 +1,5 @@
 // lib/api/freepage.ts
+import { unstable_cache } from "next/cache";
 export interface TermsAndConditionsResponse {
   success: boolean;
   data: {
@@ -20,7 +21,7 @@ export interface TermsAndConditionItem {
   description: string;
 }
 
-export async function getTermsAndConditions(): Promise<TermsAndConditionsResponse> {
+export const getTermsAndConditions = unstable_cache(async (): Promise<TermsAndConditionsResponse> => {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   if (!baseUrl) {
@@ -32,7 +33,7 @@ export async function getTermsAndConditions(): Promise<TermsAndConditionsRespons
   console.log("Fetching:", url);
 
   const response = await fetch(url, {
-    next: { revalidate: 60 },
+    next: { revalidate: 3600, tags: ["free-page"] },
   });
 
   console.log("Status:", response.status);
@@ -48,4 +49,4 @@ export async function getTermsAndConditions(): Promise<TermsAndConditionsRespons
   }
 
   return response.json();
-}
+})

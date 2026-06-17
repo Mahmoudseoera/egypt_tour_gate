@@ -250,7 +250,7 @@ export default function Navbar() {
       <header>
         {/* ===== TOP BAR ===== */}
         <div className="topbar-wrapper">
-          <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-2 text-sm">
+          <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 pt-2 pb-0 text-sm">
             <div className="flex items-center">
               <div className="hidden md:flex items-center gap-2 pr-4 border-r border-gray-200">
                 {socialData.map((item, index) => {
@@ -321,7 +321,7 @@ export default function Navbar() {
               </Link>
 
               {/* Language switcher */}
-              <div className="relative group flex items-center gap-1 px-4 border-r border-gray-200 cursor-pointer text-[var(--second-color)]">
+              <div className="relative group flex items-center gap-1 pb-3 px-4 border-r border-gray-200 cursor-pointer text-[var(--second-color)]">
                 <Globe className="h-4 w-4" />
                 <span className="hidden md:inline uppercase font-medium">
                   {currentLanguage?.slug ?? locale}
