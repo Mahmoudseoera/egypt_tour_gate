@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { buildSeoMetadata } from "@/lib/seo";
 import Image from "next/image";
-
+import FreePageAccordion from "@/components/shared/free-page-accordion";
 // API
 import { getTermsAndConditions } from "@/lib/api/freePage";
 
@@ -33,7 +33,7 @@ export default async function FreePage() {
       <div className="container mx-auto px-4">
 
         {/* ===== Hero Header ===== */}
-        <div className="relative mb-16 rounded-2xl overflow-hidden shadow-lg">
+        <div className="relative mb-10 rounded-2xl overflow-hidden shadow-lg">
           <Image
             src="/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp"
             alt="Terms and Conditions"
@@ -72,31 +72,13 @@ export default async function FreePage() {
           >
             {section?.terms_and_conditions?.length ? (
               section.terms_and_conditions.map((item) => (
-                <div key={item.id} className="mb-10">
-
-                  {item.image && (
-                    <div className="mb-6 overflow-hidden rounded-2xl">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        width={1200}
-                        height={500}
-                        className="w-full h-auto object-cover"
-                      />
-                    </div>
-                  )}
-
-                  <h3 className="text-second font-semibold">
-                    {item.title.toLowerCase()}
-                  </h3>
-
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: item.description,
-                    }}
-                  />
-                </div>
-              ))
+                <FreePageAccordion
+                  key={item.id}
+                  title={item.title}
+                  content={item.description}
+                  image={item.image}
+                />
+              ))  
             ) : (
               <p>No terms and conditions available.</p>
             )}

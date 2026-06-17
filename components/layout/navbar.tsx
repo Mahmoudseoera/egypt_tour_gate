@@ -77,29 +77,29 @@ function getCategoryMeta(slug: string) {
  * e.g. for locales ['en','de','fr','pl'] → /^\/(en|de|fr|pl)(\/|$)/
  * This is derived at runtime from routing.locales so it never goes stale.
  */
-const LOCALE_PREFIX_RE = new RegExp(
-  `^\\/(${routing.locales.join("|")})(\\/?)`
-);
+// const LOCALE_PREFIX_RE = new RegExp(
+//   `^\\/(${routing.locales.join("|")})(\\/?)`
+// );
 
 /**
  * Strip the locale prefix from any pathname, regardless of which locale it is.
  * Returns the bare path starting with "/".
  */
-function stripLocalePrefix(pathname: string): string {
-  // routing uses localePrefix: "as-needed", defaultLocale has no prefix
-  return pathname.replace(LOCALE_PREFIX_RE, "/").replace(/\/+$/, "") || "/";
-}
+// function stripLocalePrefix(pathname: string): string {
+//   // routing uses localePrefix: "as-needed", defaultLocale has no prefix
+//   return pathname.replace(LOCALE_PREFIX_RE, "/").replace(/\/+$/, "") || "/";
+// }
 
 /**
  * Prepend the locale prefix when needed.
  * localePrefix: "as-needed" → defaultLocale gets no prefix, others get one.
  */
-function localizePath(path: string, locale: AppLocale): string {
-  if (locale === routing.defaultLocale) return path;
-  // Ensure path starts with /
-  const cleanPath = path.startsWith("/") ? path : `/${path}`;
-  return `/${locale}${cleanPath}`;
-}
+// function localizePath(path: string, locale: AppLocale): string {
+//   if (locale === routing.defaultLocale) return path;
+//   // Ensure path starts with /
+//   const cleanPath = path.startsWith("/") ? path : `/${path}`;
+//   return `/${locale}${cleanPath}`;
+// }
 
 /* ══════════════════════════════════════════════════════════════════════════ */
 
@@ -226,7 +226,7 @@ export default function Navbar() {
   //   .slice(0, 2);
 
   // Helper bound to current locale — used throughout JSX
-  const lp = (path: string) => localizePath(path, locale);
+  // const lp = (path: string) => localizePath(path, locale);
 
   const getFeaturedHighlights = (cat: (typeof categories)[number]) => {
     if (!cat.subs?.length) return [];
@@ -361,7 +361,7 @@ export default function Navbar() {
         >
           <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-2">
             {/* Logo */}
-            <Link href={lp("/")}>
+            <Link href="/">
               <Image
                 src={logoSrc}
                 alt={logoAlt}
@@ -392,7 +392,7 @@ export default function Navbar() {
               {/* Home */}
               <li className="py-4">
                 <Link
-                  href={lp("/")}
+                    href="/"
                   className="px-3 py-2 rounded-md text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 text-[14.5px] font-semibold nav-link-underline"
                 >
                  <span>{t("home", "home")}</span>
@@ -412,7 +412,7 @@ export default function Navbar() {
                     onMouseLeave={() => setActiveMegaMenu(null)}
                   >
                     <Link
-                      href={lp(`/${cat.slug}`)}
+                     href={`/${cat.slug}`}
                       className={`flex items-center gap-1 px-3 py-2 rounded-md text-[14.5px] font-semibold transition-all duration-200 nav-link-underline capitalize ${
                         isOpen
                           ? "text-[var(--main-color)]"
@@ -456,7 +456,7 @@ export default function Navbar() {
                                   </p> */}
                                 </div>
                                 <Link
-                                  href={lp(`/${cat.slug}`)}
+                                  href={`/${cat.slug}`}
                                   className="ml-auto flex items-center gap-1 text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full border transition-all duration-200"
                                   style={{ color: catColor, borderColor: catColor }}
                                   onMouseEnter={(e) => {
@@ -477,7 +477,7 @@ export default function Navbar() {
                                 {cat.subs.map((sub) => (
                                   <Link
                                     key={sub.slug}
-                                    href={lp(`/${cat.slug}/${sub.slug}`)}
+                                    href={`/${cat.slug}/${sub.slug}`}
                                     className="mega-cat-card flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/60 group/card"
                                   >
                                     {sub.media?.image ? (
@@ -527,7 +527,7 @@ export default function Navbar() {
                                 {featuredHighlights.map((item, index) => (
                                   <Link
                                     key={item.href}
-                                    href={lp(item.href)}
+                                    href={item.href}
                                     className="featured-card block"
                                   >
                                     <div className="relative h-[100px] w-full overflow-hidden rounded-xl">
@@ -610,7 +610,7 @@ export default function Navbar() {
                         ].map((item) => (
                           <Link
                             key={item.href}
-                            href={lp(item.href)}
+                            href={item.href}
                             className="simple-dropdown-item flex items-center gap-3 px-4 py-2.5 hover:text-[var(--second-color)] text-gray-600 font-medium text-[13.5px]"
                           >
                             <span
@@ -632,7 +632,7 @@ export default function Navbar() {
               {/* Blogs */}
               <li className="py-4">
                 <Link
-                  href={lp("/blogs")}
+                 href="/blogs"
                   className="flex items-center gap-1.5 px-3 py-2 rounded-md text-[14.5px] font-semibold text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 nav-link-underline"
                 >
                   <BookOpen size={15} />
@@ -656,7 +656,7 @@ export default function Navbar() {
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4" style={{ background: "var(--second-color)" }}>
-                <Link href={lp("/")} aria-label="Homepage">
+                <Link href="/" aria-label="Homepage">
                   <Image
                     src="/assets/images/egypt-tour-gate-logo.png"
                     alt="Egypt Tour Gate"
@@ -682,7 +682,7 @@ export default function Navbar() {
 
                 {/* Home */}
                 <Link
-                  href={lp("/")}
+                  href="/"
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -734,7 +734,7 @@ export default function Navbar() {
                         {cat.subs.map((sub) => (
                           <Link
                             key={sub.slug}
-                            href={lp(`/${cat.slug}/${sub.slug}`)}
+                            href={`/${cat.slug}/${sub.slug}`}
                             onClick={closeMenu}
                             className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                           >
@@ -753,7 +753,7 @@ export default function Navbar() {
 
                 {/* Blogs */}
                 <Link
-                  href={lp("/blogs")}
+                  href="/blogs"
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -792,7 +792,7 @@ export default function Navbar() {
                       ].map((item) => (
                         <Link
                           key={item.href}
-                          href={lp(item.href)}
+                          href={item.href}
                           onClick={closeMenu}
                           className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                         >
@@ -834,7 +834,7 @@ export default function Navbar() {
 
                 {/* Support */}
                 <Link
-                  href={lp("/contact")}
+                  href="/contact"
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
@@ -851,7 +851,7 @@ export default function Navbar() {
               {/* Footer CTA */}
               <div className="px-5 py-4 border-t border-gray-100 bg-white">
                 <Link
-                  href={lp("/tailor-made")}
+                  href="/tailor-made"
                   onClick={closeMenu}
                   className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-white font-bold text-[15px] transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
                   style={{ background: "var(--main-color)" }}
