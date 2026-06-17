@@ -17,7 +17,10 @@ export default function AboutContent({ aboutData }: AboutSectionProps) {
         {aboutText && (
           <div
             className="text-gray-800 [&_a]:text-[var(--main-color)] [&_img]:object-cover [&_img]:rounded [&_img]:max-w-7xs [&_img]:mx-auto [&_img]:mt-5 [&_a]:underline"
-            dangerouslySetInnerHTML={{ __html: aboutText }}
+            dangerouslySetInnerHTML={{ __html: aboutText.replace(
+                  /<a\b(?![^>]*\btarget=)/gi,
+                  '<a target="_blank" rel="noopener noreferrer" ',
+                ) }}
           />
         )}
       </div>

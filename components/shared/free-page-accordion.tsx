@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import Image from "next/image"
+import Image from "next/image";
 
 type Props = {
   title: string;
@@ -10,11 +10,7 @@ type Props = {
   image?: string;
 };
 
-export default function FreePageAccordion({
-  title,
-  content,
-  image,
-}: Props) {
+export default function FreePageAccordion({ title, content, image }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -55,7 +51,10 @@ export default function FreePageAccordion({
             <div
               className="free-page-content"
               dangerouslySetInnerHTML={{
-                __html: content,
+                __html: content.replace(
+                  /<a\b(?![^>]*\btarget=)/gi,
+                  '<a target="_blank" rel="noopener noreferrer" ',
+                ),
               }}
             />
           </div>
