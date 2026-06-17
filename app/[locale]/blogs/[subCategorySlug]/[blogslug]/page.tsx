@@ -68,7 +68,6 @@ export default async function BlogDetailsPage({
   const allCategories = await getAllBlogCategories(locale);
 
   const publishDate = new Date(post.publishedAt);
-    console.log(post)
   // Schema.org structured data
   const blogSchema = {
     "@context": "https://schema.org",

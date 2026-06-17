@@ -1,5 +1,5 @@
 import { routing, type AppLocale } from '@/lib/i18n/routing';
-
+import { cache } from 'react';
 // ─── Raw API shapes ────────────────────────────────────────────────────────────
 export interface BlogCategoryMediaItem {
   image: string;
@@ -278,24 +278,39 @@ export interface BlogPageData {
   categories: BlogCategory[];
 }
 
-export async function getBlogPageData(locale?: string): Promise<BlogPageData> {
-  const res = await fetch(withLocale(`${API_BASE}/get-article-categories`, locale), {
-    next: { revalidate: 3600 },
-  });
-  if (!res.ok) throw new Error(`Failed to fetch blog categories: ${res.status}`);
-  const json = await res.json();
-  if (!json.success) throw new Error('get-article-categories returned success: false');
-  
-  const d = json.data;
-  return {
-    subTitle: d.blog_sub_title ?? '',
-    title: d.blog_title ?? '',
-    seo: d.seo ?? '',
-    cover: d.cover ?? '',
-    description: d.blog_desc ?? '',
-    categories: (d.blog_categories as BlogCategoryRaw[]).map(normaliseCategory),
-  };
-}
+export const getBlogPageData = cache(
+  async (locale?: string): Promise<BlogPageData> => {
+    const res = await fetch(
+      withLocale(`${API_BASE}/get-article-categories`, locale),
+      {
+        next: { revalidate: 3600 },
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch blog categories: ${res.status}`);
+    }
+
+    const json = await res.json();
+
+    if (!json.success) {
+      throw new Error('get-article-categories returned success: false');
+    }
+
+    const d = json.data;
+
+    return {
+      subTitle: d.blog_sub_title ?? '',
+      title: d.blog_title ?? '',
+      seo: d.seo ?? '',
+      cover: d.cover ?? '',
+      description: d.blog_desc ?? '',
+      categories: (d.blog_categories as BlogCategoryRaw[]).map(
+        normaliseCategory
+      ),
+    };
+  }
+);
 
 // ─── Fetch single category + its articles ─────────────────────────────────────
 export interface CategoryPageData {
@@ -320,22 +335,36 @@ export interface categoryDataMedia {
   alt: string;
 }
 
-export async function getCategoryPageData(slug: string, locale?: string): Promise<CategoryPageData | null> {
-  const res = await fetch(withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale), {
-    next: { revalidate: 3600 },
-  });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Failed to fetch category "${slug}": ${res.status}`);
-  
-  const json = await res.json();
-  if (!json.success) return null;
-  
-  const raw: BlogCategoryWithArticles = json.data.articles;
-  return {
-    category: normaliseCategory(raw),
-    posts: (raw.articles ?? []).map(normalisePost),
-  };
-}
+export const getCategoryPageData = cache(
+  async (
+    slug: string,
+    locale?: string
+  ): Promise<CategoryPageData | null> => {
+    const res = await fetch(
+      withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale),
+      {
+        next: { revalidate: 3600 },
+      }
+    );
+
+    if (res.status === 404) return null;
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch category "${slug}": ${res.status}`);
+    }
+
+    const json = await res.json();
+
+    if (!json.success) return null;
+
+    const raw: BlogCategoryWithArticles = json.data.articles;
+
+    return {
+      category: normaliseCategory(raw),
+      posts: (raw.articles ?? []).map(normalisePost),
+    };
+  }
+);
 
 // ─── NEW: Fetch single article details by slug ────────────────────────────────
 export interface ArticleDetailData {
@@ -344,25 +373,37 @@ export interface ArticleDetailData {
   related_tours?: RelatedTour[];
 }
 
-export async function getArticleDetailBySlug(slug: string, locale?: string): Promise<ArticleDetailData | null> {
-  const res = await fetch(withLocale(`${API_BASE}/get-ditals-article/${slug}`, locale), {
-    next: { revalidate: 3600 },
-  });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Failed to fetch article "${slug}": ${res.status}`);
-  
-  const json = await res.json();
-  if (!json.success) return null;
-  
-  const raw: BlogArticleDetailRaw = json.data;
-  
-  return {
-    post: normalisePostDetail(raw),
-    relatedPosts: (raw.related_articles ?? []).map(normalisePost),
-    related_tours: raw.related_tours,
-  };
-}
+export const getArticleDetailBySlug = cache(
+  async (
+    slug: string,
+    locale?: string
+  ): Promise<ArticleDetailData | null> => {
+    const res = await fetch(
+      withLocale(`${API_BASE}/get-ditals-article/${slug}`, locale),
+      {
+        next: { revalidate: 3600 },
+      }
+    );
 
+    if (res.status === 404) return null;
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch article "${slug}": ${res.status}`);
+    }
+
+    const json = await res.json();
+
+    if (!json.success) return null;
+
+    const raw: BlogArticleDetailRaw = json.data;
+
+    return {
+      post: normalisePostDetail(raw),
+      relatedPosts: (raw.related_articles ?? []).map(normalisePost),
+      related_tours: raw.related_tours,
+    };
+  }
+);
 // ─── Helper: Get category by slug (for breadcrumbs) ──────────────────────────
 export async function getCategoryBySlug(slug: string, locale?: string): Promise<BlogCategory | null> {
   const res = await fetch(withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale), {

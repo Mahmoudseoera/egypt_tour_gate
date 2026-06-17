@@ -57,7 +57,6 @@ export default function TravelTourSlider({
    const heading = SecondToursSection?.title?.trim() || "Explore Amazing Tours";
    const descripation = SecondToursSection?.description?.trim()  ||
     "Discover unforgettable travel tours experiences tailored just for you";
-    console.log(SecondToursSection?.title)
   const tourItems: SliderItem[] =
     apiTours.length > 0
       ? apiTours.map((t) => ({

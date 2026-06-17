@@ -117,7 +117,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   // second_title shown as subtitle in the hero (e.g. "Egypt Day Tours and Excursions")
   const categorySecondTitle: string = category.second_title ?? "";
   const coverCategory :string = category.media?.cover?.image ?? "";
-  console.log(coverCategory)
   const breadcrumbItems = [
     { label: "Home", href: "/" },
     { label: categoryName, href: `/${categorySlug}` },

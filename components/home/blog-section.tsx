@@ -34,7 +34,6 @@ export default function TravelBlogSection({
   const subheading =
     articlesSection?.description?.trim() ||
     "Discover breathtaking locations around the world and create unforgettable memories";
-    console.log("blog subheading", articlesSection?.description)
   // ── Resolve articles: prefer articlesSection.articles, fall back to apiArticles
   const rawArticles =
     articlesSection?.articles?.length
