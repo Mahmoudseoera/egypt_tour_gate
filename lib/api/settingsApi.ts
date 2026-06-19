@@ -76,7 +76,6 @@ export async function fetchSiteSettings(locale = "en"): Promise<SiteSettings | n
     return null;
   }
 }
-
 // ─── Social helpers ────────────────────────────────────────────────────────────
 
 export interface SocialItem {

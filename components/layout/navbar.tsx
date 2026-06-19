@@ -114,8 +114,8 @@ export default function Navbar() {
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const router = useRouter();
-   const t = useT();
-  const { data, error, loading } = useGeneralData(locale);
+   const t = useT("common");
+   const { data, error, loading } = useGeneralData(locale);
   const [socialData, setSocialData] = useState<SocialItem[]>(fallbackSocialData);
   useEffect(() => {
     fetch(`/api/settings?locale=${locale}`).then(r => r.json()).then((json) => {

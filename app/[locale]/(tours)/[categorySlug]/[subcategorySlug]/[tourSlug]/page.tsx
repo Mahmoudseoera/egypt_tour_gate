@@ -85,6 +85,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
             <h1 className="text-xl sm:text-3xl font-bold text-navy leading-snug">{item.title}</h1>
             <div className="shrink-0 bg-white/95 px-3 py-2 rounded-lg shadow border border-gray-100">
               <p className="text-[var(--main-color)] font-bold text-sm sm:text-xl whitespace-nowrap">{"From $" + item.price_from}</p>
+              <p>{item.price_after_discount}</p>
             </div>
           </div>
           <div className="mt-3">

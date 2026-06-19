@@ -1,28 +1,61 @@
 // lib/api/translation.ts
-export type TranslationMessages = Record<string, string>;
+//
+// Backend shape (nested by page/section):
+// {
+//   common:    { home, about, contact, blog, ... },
+//   home:      { section_one_popular, why_choose_box_1_title, ... },
+//   sub:       { sub_categories_title, ... },
+//   view_tour: { tour_details, itinerary, ... },
+//   blog:      { blog_title, blog_desc, ... },
+//   questions: { questions, faq_desc, ... },
+//   about:     { about_title, about_content, ... },
+//   tailormade:{ tailormade_name, ... },
+//   contact:   { contact_title, ... },
+//   favourites:{ favourites_cover_img, ... }
+// }
+//
+// We keep this exact group structure as next-intl NAMESPACES, instead of
+// flattening everything into one object. That means in components you call:
+//   useTranslations("home")   → t("section_one_popular")
+//   useTranslations("contact") → t("contact_title")
+//   useTranslations("common")  → t("read_more")
+// instead of one giant flat lookup. Each page only deals with its own group.
+
+export type TranslationGroup = Record<string, string>;
+export type TranslationMessages = Record<string, TranslationGroup>;
+
+export type RawTranslationGroups = Record<string, Record<string, string | null>>;
 
 export interface TranslationEditorResponse {
   success: boolean;
-  data: Record<string, string | null>[];
+  data: RawTranslationGroups;
   message: string;
   status: number;
 }
 
 /**
- * Merge all objects from data[] and drop any key whose value is null/undefined.
- * next-intl requires every message value to be a non-null string.
+ * Keeps the backend's group structure intact (common/home/contact/etc.)
+ * but strips null values within each group — next-intl requires every
+ * message value to be a non-null string.
  */
 function toMessages(json: TranslationEditorResponse | null): TranslationMessages {
-  if (!json?.success) return {};
-  if (!Array.isArray(json.data) || json.data.length === 0) return {};
+  if (!json?.success || !json.data || typeof json.data !== "object") return {};
 
-  const merged = Object.assign({}, ...json.data) as Record<string, string | null>;
+  const messages: TranslationMessages = {};
 
-  const clean: TranslationMessages = {};
-  for (const [k, v] of Object.entries(merged)) {
-    if (typeof v === "string") clean[k] = v;
+  for (const [groupName, group] of Object.entries(json.data)) {
+    if (!group || typeof group !== "object") continue;
+
+    const cleanGroup: TranslationGroup = {};
+    for (const [key, value] of Object.entries(group)) {
+      if (typeof value === "string") {
+        cleanGroup[key] = value;
+      }
+    }
+    messages[groupName] = cleanGroup;
   }
-  return clean;
+
+  return messages;
 }
 
 export async function fetchTranslationEditor(
@@ -33,28 +66,11 @@ export async function fetchTranslationEditor(
   ).replace(/\/+$/, "");
 
   try {
-    const url = `${base}/get-translation-editor?locale=${locale}`;
-    const res = await fetch(url, {
-      // Use no-store so each locale always gets its own fresh response.
-      // next-intl calls this from request.ts per-request anyway, so there
-      // is no value in caching here — caching caused the locale-switch bug
-      // where the cached `en` response was returned for `de`/`fr`/`pl`.
-      next: { revalidate: 3600, tags: ["translation"] },
-      headers: {
-        Accept: "application/json",
-      },
+    const res = await fetch(`${base}/get-translation-editor?locale=${locale}`, {
+      cache: "no-store",
     });
     if (!res.ok) return null;
-    const json = (await res.json()) as TranslationEditorResponse;
-
-    if (process.env.NODE_ENV !== "production") {
-      // Keep logs small: we just want to verify backend returns localized values.
-      const inquire = Array.isArray(json.data) && json.data[0] ? json.data[0].inquire : undefined;
-      const home = Array.isArray(json.data) && json.data[0] ? json.data[0].home : undefined;
-      console.log(`[i18n] translation fetched`, { locale, url, success: json.success, home, inquire });
-    }
-
-    return json;
+    return (await res.json()) as TranslationEditorResponse;
   } catch {
     return null;
   }

@@ -74,6 +74,7 @@ const ContactMap = memo(function ContactMap({ html }: { html: string }) {
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [contactCards, setContactCards] = useState<ContactCard[]>(SKELETON_CARDS);
+  const [bgImage, setBgImage] = useState<string>("");
   // ✅ Store the iframe html in a ref-stable state — only set once from the API.
   const [mapIframe, setMapIframe] = useState<string>(fallbackIframe);
   const locale = useLocale();
@@ -107,12 +108,12 @@ export default function ContactPage() {
 
     async function loadContactInfo() {
       try {
-        const res = await fetch(`/api/contact?locale=${locale}`);
+        const res = await fetch(`/api/contact?locale=${locale}`, {
+        next: { revalidate: 3600, tags: ["contact"] } });
         if (!res.ok) return;
 
         const payload = await res.json();
-
-        // Real API shape: { success: true, data: { phone, mobile, email, address, iframe, ... } }
+            // Real API shape: { success: true, data: { phone, mobile, email, address, iframe, ... } }
         if (!payload?.success || !payload?.data) return;
 
         const d = payload.data;
@@ -159,6 +160,7 @@ export default function ContactPage() {
         if (!cancelled) {
           setContactCards(dynamicCards);
           if (iframe) setMapIframe(iframe);
+          if (d.image) setBgImage(d.image);          
         }
       } catch {
         // keep skeleton cards silently — or you could set real fallback values here
@@ -237,14 +239,6 @@ export default function ContactPage() {
     <>
       <style>{`
         .contact-hero {
-          background-image:
-            linear-gradient(
-              135deg,
-              rgba(39,34,98,0.90) 0%,
-              rgba(61,53,134,0.84) 50%,
-              rgba(39,34,98,0.92) 100%
-            ),
-            url('https://images.unsplash.com/photo-1539768942893-daf53e448371?q=80&w=1600&auto=format&fit=crop');
           background-size: cover;
           background-position: center;
           background-repeat: no-repeat;
@@ -283,9 +277,15 @@ export default function ContactPage() {
       `}</style>
 
       <section className="min-h-screen bg-[var(--main-grey)]">
-
         {/* ── PAGE HEADER ── */}
-        <div className="contact-hero relative py-14 sm:py-20 text-center overflow-hidden">
+          <div 
+            className="contact-hero relative py-14 sm:py-20 text-center overflow-hidden"   
+            style={{
+              backgroundImage: bgImage 
+                ? `linear-gradient(135deg, rgba(39,34,98,0.90) 0%, rgba(61,53,134,0.84) 50%, rgba(39,34,98,0.92) 100%), url(${bgImage})` 
+                : `linear-gradient(135deg, rgba(39,34,98,0.90) 0%, rgba(61,53,134,0.84) 50%, rgba(39,34,98,0.92) 100%)`,
+            }}
+          >
           <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
             <div className="absolute -top-10 -left-10 w-48 h-48 border-[3px] border-[var(--main-color)] rounded-full opacity-[0.12]" />
             <div className="absolute top-6 left-6 w-24 h-24 border-[2px] border-[var(--main-color)] rounded-full opacity-[0.10]" />
@@ -362,7 +362,6 @@ export default function ContactPage() {
         {/* ── FORM + MAP ── */}
         <div className="max-w-6xl mx-auto px-4 py-10 sm:py-14">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
-
             {/* Contact Form */}
             <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 flex flex-col">
               <div className="mb-7">

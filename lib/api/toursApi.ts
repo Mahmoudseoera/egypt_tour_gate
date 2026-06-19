@@ -10,6 +10,7 @@ export interface ApiTourListItem {
   title: string;
   image: string;
   price_from: number;
+  price_after_discount?: number;
   rating: number;
   duration: string;
   location: string;

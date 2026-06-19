@@ -699,3 +699,76 @@ nav.fixed {
 .dual-thumb {
   pointer-events: none;
 }
+
+/*=======================================
+end shared section 
+=======================================*/
+/*=======================================
+start general swiper css
+=======================================*/
+.related-tours:hover .swiper-button-next,
+.related-tours:hover .swiper-button-prev {
+  opacity: 1;
+  visibility: visible;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  width: 50px !important;
+  height: 50px !important;
+  background: var(--white-color) !important;
+  border: 2px solid var(--main-color) !important;
+  border-radius: 50% !important;
+  color: var(--main-color) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+  top: 50% !important;
+  margin-top: -25px !important;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 30 !important;
+}
+
+.swiper-button-next {
+  right: 0 !important;
+}
+
+.swiper-button-prev {
+  left: 0 !important;
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+  font-size: 20px !important;
+  font-weight: bold !important;
+}
+.swiper-button-next .swiper-navigation-icon,
+.swiper-button-prev .swiper-navigation-icon {
+height: 16px;
+}
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background: var(--main-color) !important;
+  color: var(--white-color) !important;
+}
+
+.swiper-pagination {
+  bottom: 0 !important;
+}
+
+.swiper-pagination-bullet {
+  width: 12px !important;
+  height: 12px !important;
+  background: #ddd !important;
+  opacity: 1 !important;
+}
+
+.swiper-pagination-bullet-active {
+  background: var(--main-color) !important;
+  width: 32px !important;
+  border-radius: 6px !important;
+}
+
+/*=======================================
+end general swiper css
+=======================================*/

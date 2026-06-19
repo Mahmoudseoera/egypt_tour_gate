@@ -11,7 +11,12 @@ import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
 import FallbackImage from "@/components/shared/fallback-image";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 import {
   buildBookingPayload,
   submitBooking,
@@ -98,6 +103,7 @@ const INITIAL: FormState = {
   tour_id: "",
 };
 
+/* ─── prices policy ─── */
 const policySections = [
   {
     title: "Prices",
@@ -1542,7 +1548,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
           {/* end grid */}
 
           {/* ── Related Tours ── */}
-          {relatedTours.length > 0 && (
+          {relatedTours.length > 0 && relatedTours.length <= 4 && (
             <div className="mt-14">
               <div className="text-center mb-8">
                 <h2 className="text-2xl md:text-3xl font-bold text-[var(--second-color)] mb-2">
@@ -1601,6 +1607,79 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   </Link>
                 ))}
               </div>
+            </div>
+          )}
+          {relatedTours.length > 4  && (
+                        <div className="mt-14 related-tours">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-[var(--second-color)] mb-2">
+                  You May Also Like
+                </h2>
+                <p className="text-gray-500 text-sm">
+                  Discover more amazing Egypt tours
+                </p>
+              </div>
+                      <Swiper
+                        modules={[Navigation]}
+                        navigation
+                        loop
+                        className="py-10"
+                        spaceBetween={24}
+                        breakpoints={{
+                          320: { slidesPerView: 1, spaceBetween: 10 },
+                          576: { slidesPerView: 2, spaceBetween: 15 },
+                          768: { slidesPerView: 3, spaceBetween: 20 },
+                          1024: { slidesPerView: 4, spaceBetween: 24 },
+                        }}
+                      >
+                        {relatedTours.map((relTour) => (
+                          <SwiperSlide className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 group border border-gray-100" key={relTour.id}>
+                          <Link href={relTour.href!}
+                                  
+                                >
+                    <div className="relative h-48 overflow-hidden bg-gray-100">
+                      {relTour.image ? (
+                        <Image
+                          src={relTour.image}
+                          alt={relTour.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-amber-100 to-stone-200" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                    </div>
+                    <div className="px-5 py-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        {/* <Star className="w-4 h-4 fill-[var(--main-color)] text-[var(--main-color)]" />
+                      <span className="text-sm font-semibold text-gray-700">
+                        {Number.isFinite(relTour.rating) && relTour.rating > 0 ? relTour.rating.toFixed(1) : "5.0"}
+                      </span> */}
+                      </div>
+                      <h3 className="text-base font-bold text-[var(--second-color)] mb-3 leading-[1.6] h-[calc(1.6_*_2em)] group-hover:text-[var(--main-color)] transition-colors leading-snug">
+                        {relTour.title}
+                      </h3>
+                      <p className="text-[0.84rem] leading-[1.6] text-[var(--color-primary-dark)] transition-colors duration-300 overflow-hidden text-ellipsis h-[calc(1.6_*_3em)]">
+                        {relTour.short_description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-gray-500 text-sm">
+                          <Clock className="w-3.5 h-3.5" />
+                          {relTour.duration}
+                        </span>
+                        <div className="text-right">
+                          <div className="text-xs text-gray-400">From</div>
+                          <div className="text-xl font-bold text-[var(--second-color)]">
+                            ${relTour.price_from}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                          </SwiperSlide>
+                        ))}
+                      </Swiper>
             </div>
           )}
         </div>
