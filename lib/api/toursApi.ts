@@ -79,6 +79,46 @@ function normalizeLocale(locale?: string): AppLocale {
   return routing.locales.includes(nextLocale) ? nextLocale : routing.defaultLocale;
 }
 
+// ─── Slug normalization ────────────────────────────────────────────────────────
+// Two independent problems collapse into one fix here:
+//
+// 1. Unicode normalization mismatch (NFC vs NFD): the same visible character
+//    (e.g. "è") can be encoded as a single codepoint (NFC) or as a base letter
+//    plus a combining accent (NFD). Next.js route params and API JSON slugs can
+//    arrive in different forms even though they render identically, which makes
+//    strict `===` / `Array.find()` comparisons silently fail for non-ASCII slugs.
+//
+// 2. Accidental multi-round percent-/UTF-8 encoding ("Mojibake") picked up
+//    somewhere in the chain (browser address bar, clipboard, build step). We
+//    defensively decode until the string stops changing, then re-normalize.
+//
+// Applying this once, at the boundary where slugs enter this module (from
+// `params` or from the API response), means every downstream `===` comparison
+// and every fetch URL built from a slug operates on one canonical form.
+export function normalizeSlug(input: unknown): string {
+  if (typeof input !== "string" || input.length === 0) return "";
+
+  let value = input;
+
+  // Repeatedly attempt decodeURIComponent in case the slug was percent-encoded
+  // more than once before reaching us. Stop as soon as decoding throws (already
+  // plain) or stops changing the string (fully decoded).
+  for (let i = 0; i < 3; i += 1) {
+    if (!/%[0-9A-Fa-f]{2}/.test(value)) break;
+    try {
+      const decoded = decodeURIComponent(value);
+      if (decoded === value) break;
+      value = decoded;
+    } catch {
+      break;
+    }
+  }
+
+  // Collapse to a single canonical Unicode form so byte-for-byte comparisons
+  // between route params and API data behave consistently.
+  return value.normalize("NFC");
+}
+
 function withLocale(path: string, locale: AppLocale): string {
   const q = locale === routing.defaultLocale ? "" : `?locale=${locale}`;
   return `${path}${q}`;
@@ -217,11 +257,39 @@ function pickHtmlList(input: unknown): string[] {
 
 export async function getGeneralCategories(locale?: string): Promise<AnyObj[]> {
   const l = normalizeLocale(locale);
-  const response = await apiGet<any>(withLocale("/general-data", l), {
-    next: { revalidate: 3600, tags: ["general"] },
-  });
+
+  let response: any;
+  try {
+    response = await apiGet<any>(withLocale("/general-data", l), {
+      next: { revalidate: 3600, tags: ["general"] },
+    });
+  } catch (error) {
+    // Critical path: this runs inside `generateStaticParams` for every locale.
+    // If it throws, Next.js aborts static generation for that locale entirely
+    // (no pages, not even a 404 fallback). A transient 429/network failure
+    // from the backend's rate limiter should not be able to do that — degrade
+    // to "no categories for this build pass" instead, and let ISR/on-demand
+    // revalidation fill them in once the backend recovers.
+    console.warn(`[getGeneralCategories] fetch failed for locale "${l}":`, String(error));
+    return [];
+  }
+
   const data = pickData(response);
-  return asArray(data?.header?.categories ?? data?.header?.headerCategories);
+  const categories = asArray(data?.header?.categories ?? data?.header?.headerCategories);
+
+  // Normalize category + nested sub-category slugs to a single canonical Unicode
+  // form (NFC). This array is matched against route params via strict `===` in
+  // the category/subcategory pages, so any NFC/NFD mismatch between this API
+  // response and `params.categorySlug` / `params.subcategorySlug` would silently
+  // fail the lookup and trigger notFound() — even though the data itself exists.
+  return categories.map((category: AnyObj) => ({
+    ...category,
+    slug: normalizeSlug(category?.slug),
+    subs: asArray(category?.subs).map((sub: AnyObj) => ({
+      ...sub,
+      slug: normalizeSlug(sub?.slug),
+    })),
+  }));
 }
 
 // ─── Category page ────────────────────────────────────────────────────────────
@@ -233,9 +301,21 @@ export async function getCategoryBySlug(
   locale?: string
 ): Promise<AnyObj | null> {
   const l = normalizeLocale(locale);
-  const response = await apiGet<any>(withLocale(`/categories/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`category:${slug}`, "categories", "tours"] },
-  });
+  const cleanSlug = normalizeSlug(slug);
+
+  let response: any;
+  try {
+    response = await apiGet<any>(withLocale(`/categories/${cleanSlug}`, l), {
+      next: { revalidate: 3600, tags: [`category:${cleanSlug}`, "categories", "tours"] },
+    });
+  } catch (error) {
+    // A throttled/failed fetch here must not crash the build. Callers
+    // (`getCategoryData`, `generateStaticParams`) already treat `null` as
+    // "not found" and fall back accordingly.
+    console.warn(`[getCategoryBySlug] fetch failed for "${cleanSlug}" (${l}):`, String(error));
+    return null;
+  }
+
   const data = pickData(response);
 
   // Normalize: expose `subs` so the page can use a single field name,
@@ -245,8 +325,11 @@ export async function getCategoryBySlug(
 
   return {
     ...raw,
+    slug: normalizeSlug(raw.slug) || cleanSlug,
     // Unify subcategory field — real API returns `subCategories`
-    subs: asArray(raw.subs ?? raw.subCategories ?? raw.sub_categories),
+    subs: asArray(raw.subs ?? raw.subCategories ?? raw.sub_categories).map(
+      (sub: AnyObj) => ({ ...sub, slug: normalizeSlug(sub?.slug) })
+    ),
     // Plain-text description stripped of HTML
     plainDesc: raw.desc ,
   };
@@ -261,9 +344,21 @@ export async function getSubcategoryBySlug(
   locale?: string
 ): Promise<AnyObj | null> {
   const l = normalizeLocale(locale);
-  const response = await apiGet<any>(withLocale(`/sub-category/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`subcategory:${slug}`, "subcategories", "tours"] },
-  });
+  const cleanSlug = normalizeSlug(slug);
+
+  let response: any;
+  try {
+    response = await apiGet<any>(withLocale(`/sub-category/${cleanSlug}`, l), {
+      next: { revalidate: 3600, tags: [`subcategory:${cleanSlug}`, "subcategories", "tours"] },
+    });
+  } catch (error) {
+    // SubcategoryPage's getPageData() already merges this with a header-stub
+    // fallback (`subcategoryFromHeader`) and treats `null` as "not found".
+    // A throttled fetch during build must degrade to that path, not crash.
+    console.warn(`[getSubcategoryBySlug] fetch failed for "${cleanSlug}" (${l}):`, String(error));
+    return null;
+  }
+
   const data = pickData(response);
   // real API: data IS the subcategory object directly (id, name, slug, desc, tours…)
   const raw = data?.sub_category ?? data?.subcategory ?? data;
@@ -271,6 +366,7 @@ export async function getSubcategoryBySlug(
 
   return {
     ...raw,
+    slug: normalizeSlug(raw.slug) || cleanSlug,
     plainDesc: raw.desc,
   };
 }
@@ -280,9 +376,21 @@ export async function getToursBySubcategory(
   locale?: string
 ): Promise<ApiTourListItem[]> {
   const l = normalizeLocale(locale);
-  const response = await apiGet<any>(withLocale(`/sub-category/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`subcategory:${slug}`, "subcategories", "tours"] },
-  });
+  const cleanSlug = normalizeSlug(slug);
+
+  let response: any;
+  try {
+    response = await apiGet<any>(withLocale(`/sub-category/${cleanSlug}`, l), {
+      next: { revalidate: 3600, tags: [`subcategory:${cleanSlug}`, "subcategories", "tours"] },
+    });
+  } catch (error) {
+    // SubcategoryPage already renders a "No tours found" message when this
+    // array is empty — that's the correct degraded state for a throttled
+    // build-time fetch, instead of crashing the whole page.
+    console.warn(`[getToursBySubcategory] fetch failed for "${cleanSlug}" (${l}):`, String(error));
+    return [];
+  }
+
   const data = pickData(response);
   // real API: tours live at data.tours (after pickData unwraps outer `data`)
   const raw =
@@ -298,9 +406,19 @@ export async function getTourBySlug(
   locale?: string
 ): Promise<ApiTourDetails | null> {
   const l = normalizeLocale(locale);
-  const response = await apiGet<any>(withLocale(`/tour/${slug}`, l), {
-    next: { revalidate: 3600, tags: [`tour:${slug}`, "tours"] },
-  });
+  const cleanSlug = normalizeSlug(slug);
+
+  let response: any;
+  try {
+    response = await apiGet<any>(withLocale(`/tour/${cleanSlug}`, l), {
+      next: { revalidate: 3600, tags: [`tour:${cleanSlug}`, "tours"] },
+    });
+  } catch (error) {
+    // TourDetailPage already calls notFound() when this returns null.
+    console.warn(`[getTourBySlug] fetch failed for "${cleanSlug}" (${l}):`, String(error));
+    return null;
+  }
+
   const data = pickData(response);
   const raw = data?.tour ?? data;
   if (!raw || typeof raw !== "object") return null;
@@ -425,7 +543,7 @@ export async function getTourBySlug(
   }));
 
   return {
-    ...mapTour(raw, slug),
+    ...mapTour(raw, cleanSlug),
     code: raw.code ?? undefined,
     description: raw.desc
       ? stripHtml(raw.desc)

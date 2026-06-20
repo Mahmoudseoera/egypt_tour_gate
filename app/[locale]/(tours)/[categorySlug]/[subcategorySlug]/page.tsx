@@ -15,6 +15,7 @@ import {
   getSubcategoryBySlug,
   getGeneralCategories,
   getToursBySubcategory,
+  normalizeSlug, // ← NEW
 } from "@/lib/api/toursApi";
 import { routing } from "@/lib/i18n/routing";
 import Image from "next/image";
@@ -31,16 +32,23 @@ async function getPageData(
   subcategorySlug: string,
   locale: string
 ) {
+  // ── NEW: normalize both incoming slugs (NFC + defensive decode) so the
+  // strict `===` comparisons below are not silently broken by Unicode
+  // normalization mismatches (NFC vs NFD) between the route param and the
+  // slug returned by the API. ──
+  const cleanCategorySlug = normalizeSlug(categorySlug);
+  const cleanSubcategorySlug = normalizeSlug(subcategorySlug);
+
   const headerCategories = await getGeneralCategories(locale);
-  const category = headerCategories.find((c) => c?.slug === categorySlug);
+  const category = headerCategories.find((c) => c?.slug === cleanCategorySlug);
 
   // `subs` is already normalised by getGeneralCategories (comes from general-data header)
   const subcategoryFromHeader = category?.subs?.find(
-    (ch: any) => ch?.slug === subcategorySlug
+    (ch: any) => ch?.slug === cleanSubcategorySlug
   );
 
   // Fetch the full subcategory detail (includes desc, tours, media, seo…)
-  const directSubcategory = await getSubcategoryBySlug(subcategorySlug, locale);
+  const directSubcategory = await getSubcategoryBySlug(cleanSubcategorySlug, locale);
 
   return {
     category,

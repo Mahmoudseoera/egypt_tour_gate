@@ -31,14 +31,26 @@ export async function apiGet<T = any>(
       }
 
       const retryAfter = Number(res.headers.get("retry-after") ?? "0");
-      const waitMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : attempt * 900;
+      // Cap the wait regardless of what `retry-after` says. During `next build`
+      // every page has a hard per-page generation timeout (commonly ~60s), and
+      // `generateStaticParams` can fan out enough parallel requests to exhaust
+      // the backend's rate-limit window almost instantly. Honoring a long
+      // `retry-after` (we've seen 45-60s from Laravel's throttle) literally
+      // would mean sleeping past that build timeout on a single attempt —
+      // which is exactly what was happening. Capping keeps us responsive to
+      // the build's clock while still backing off.
+      const MAX_WAIT_MS = 8000;
+      const waitMs =
+        Number.isFinite(retryAfter) && retryAfter > 0
+          ? Math.min(retryAfter * 1000, MAX_WAIT_MS)
+          : Math.min(attempt * 900, MAX_WAIT_MS);
       await new Promise((resolve) => setTimeout(resolve, waitMs));
     } catch (error) {
       lastError = error;
       if (attempt === maxAttempts) {
         throw error;
       }
-      await new Promise((resolve) => setTimeout(resolve, attempt * 600));
+      await new Promise((resolve) => setTimeout(resolve, Math.min(attempt * 600, 8000)));
     }
   }
 
