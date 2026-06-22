@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useT } from "@/lib/hooks/useTranslate";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -33,7 +34,7 @@ export default function Footer() {
   const info = data?.footer.info ?? data?.header.info;
   // Real API: footer.categories (same shape as header.categories)
   const footerCategories = data?.footer.categories ?? [];
-
+  const t = useT("common");
   // Render the footer shell immediately; API-backed links hydrate from the shared general-data cache.
   void loading;
 
@@ -171,11 +172,11 @@ export default function Footer() {
         {/* ── Bottom bar ────────────────────────────────────────────────────── */}
         <div className="mt-12 pt-8 border-t border-[var(--main-color)]/15 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <p className="text-white/60 text-sm text-center md:text-left">
-            © {currentYear} Egypt Tour Gate. All rights reserved.
+            © {currentYear} {t("rights_reserved")}
           </p>
 
           <div className="flex items-center justify-center gap-3 md:justify-end" role="region" aria-label="Social media links">
-            <span className="text-white/60 text-sm hidden md:inline">Follow our journey:</span>
+            <span className="text-white/60 text-sm hidden md:inline">{t("follow_us").toLowerCase()}:</span>
             <div className="flex gap-3">
               {socialData.map((item, index) => {
                 // WhatsApp link

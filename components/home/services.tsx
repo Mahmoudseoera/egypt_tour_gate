@@ -205,7 +205,6 @@ export default function TravelServicesSection({
           </div>
 
           {/* Render all services in a grid */}
-          {services.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {services.map((service, index) => (
                 <div key={service.id} className="contents">
@@ -251,11 +250,6 @@ export default function TravelServicesSection({
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-white/60">Loading services...</p>
-            </div>
-          )}
         </div>
       </div>
     </>

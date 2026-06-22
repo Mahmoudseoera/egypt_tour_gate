@@ -5,6 +5,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 // import PartnersMarquee from "@/components/home/partners";
+ import { getT } from "@/lib/hooks/getT";
 import RoavioAboutSection from "@/components/about/about";
 import TravelServicesSection from "@/components/about/services";
 import { fetchAboutSections } from "@/lib/api/aboutApi";
@@ -33,7 +34,8 @@ export default async function AboutPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-
+  const t = await getT("about");
+  const commonT = await getT("common");
   // ── Fetch from the dedicated about-us endpoint ───────────────────────────
   const sections = await fetchAboutSections(locale);
   const aboutData       = sections?.about_section       ?? null;
@@ -48,10 +50,10 @@ export default async function AboutPage({
               href={locale === "en" ? "/" : `/${locale}`}
               className="hover:text-[var(--main-color)]"
             >
-              Home
+              {commonT("home")}
             </Link>
             <span className="mx-2">/</span>
-            <span className="text-navy font-medium">About us</span>
+            <span className="text-navy font-medium">{commonT("about")}</span>
           </nav>
         </div>
       </div>

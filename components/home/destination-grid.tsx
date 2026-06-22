@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
+import { useT } from "@/lib/hooks/useTranslate";
 import type { TagCategoriesSection, TagCategory } from "@/lib/api/homeTypes";
 
 const PLACEHOLDER = "/placeholder.svg";
@@ -20,7 +21,7 @@ type DestinationGridProps = {
 
 export default function DestinationGrid({ tagCategoriesSection }: DestinationGridProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
+  const t = useT("common");
   const sectionTitle =
     tagCategoriesSection?.title?.trim() || "Tags Categories";
   const sectionDescription =
@@ -261,7 +262,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
         {/* Call to Action */}
         <div className="mt-12 text-center">
           <Link href="/tailor-made" className="bg-[var(--main-color)] hover:bg-[var(--main-color)]/90 text-[var(--second-color)] font-bold py-4 px-8 rounded-full transition-all duration-300 hover:scale-105 shadow-lg">
-            Plan Your Journey
+            {t("book_now")}
           </Link>
         </div>
 

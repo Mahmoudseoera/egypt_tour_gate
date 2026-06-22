@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback, memo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useT } from "@/lib/hooks/useTranslate";
 import { useLocale } from "next-intl";
 
 import {
@@ -13,11 +14,7 @@ import {
   type ContactFormData,
 } from "@/lib/validations/contact.schema";
 
-/* ─── Breadcrumb items ─────────────────────────────────────── */
-const breadcrumbItems = [
-  { label: "Home", href: "/" },
-  { label: "Contact", href: "/contact" },
-];
+
 
 /* ─── Info Cards Data ─────────────────────────────────────── */
 type ContactCard = {
@@ -79,7 +76,13 @@ export default function ContactPage() {
   const [mapIframe, setMapIframe] = useState<string>(fallbackIframe);
   const locale = useLocale();
   const router = useRouter();
-
+  const t = useT("contact");
+  const commonT = useT("common");
+/* ─── Breadcrumb items ─────────────────────────────────────── */
+const breadcrumbItems = [
+  { label: commonT("home"), href: "/" },
+  { label: commonT("contact"), href: "/contact" },
+];
   const {
     register,
     handleSubmit,
@@ -131,7 +134,7 @@ export default function ContactPage() {
         const dynamicCards: ContactCard[] = [
           {
             icon: Phone,
-            label: "Phone",
+            label: commonT("phone"),
             lines: phones.length ? phones : ["—"],
             href: phones[0] ? `tel:${phones[0].replace(/\s+/g, "")}` : "#",
             ariaLabel: "Call us",
@@ -139,7 +142,7 @@ export default function ContactPage() {
           },
           {
             icon: MapPin,
-            label: "Address",
+            label: commonT("address"),
             lines: address ? [address] : ["—"],
             href: address
               ? `https://www.google.com/maps?q=${encodeURIComponent(address)}`
@@ -149,7 +152,7 @@ export default function ContactPage() {
           },
           {
             icon: Mail,
-            label: "Email",
+            label: commonT("email"),
             lines: email ? [email] : ["—"],
             href: email ? `mailto:${email}` : "#",
             ariaLabel: "Send us an email",
@@ -169,7 +172,7 @@ export default function ContactPage() {
 
     loadContactInfo();
     return () => { cancelled = true; };
-  }, [locale]);
+  }, [locale, commonT]);
 
   // ─── Submit ───────────────────────────────────────────────────────────────
   const onSubmit = useCallback(async (values: ContactFormData) => {
@@ -318,14 +321,13 @@ export default function ContactPage() {
 
           <div className="relative z-10 px-4">
             <p className="text-[var(--main-color)] font-semibold tracking-[0.22em] uppercase text-[11px] sm:text-xs mb-2">
-              Get In Touch
+              {t("contact_sub_title")}  
             </p>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">
-              Contact Us
+              {t("contact_title")}
             </h1>
             <p className="text-white/72 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-              Have questions about your dream Egypt tour? Our team is ready to
-              help you plan the perfect adventure.
+              {t("contact_content")}
             </p>
           </div>
         </div>
@@ -367,10 +369,11 @@ export default function ContactPage() {
               <div className="mb-7">
                 <div className="w-12 h-1 bg-[var(--main-color)] rounded-full mb-4" />
                 <h2 className="text-xl sm:text-2xl font-bold text-[var(--second-color)]">
-                  Send Us a Message
+                  {t("send_us_a_message_title")}
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  Fill in the form and we&apos;ll get back to you within 24 hours.
+                  {t("send_us_a_message_title")}
+                 
                 </p>
               </div>
 
@@ -607,7 +610,7 @@ export default function ContactPage() {
                     disabled={loading}
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[var(--main-color)] hover:bg-[var(--second-color)] text-[var(--second-color)] hover:text-[var(--main-color)] font-bold px-8 py-3.5 rounded-full transition-all duration-300 disabled:opacity-50 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                   >
-                    {loading ? "Sending…" : "Send Message"}
+                    {loading ? "Sending…" : t("send_us_a_message_button")}
                     <Send size={16} />
                   </button>
                 </div>

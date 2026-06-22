@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import FallbackImage from "@/components/shared/fallback-image";
+import { useT } from "@/lib/hooks/useTranslate";
 import '@/styles/animations.css';
 import type { SliderItem } from '@/lib/api/homeTypes';
 
@@ -24,7 +25,7 @@ interface EgyptToursBannerProps {
 export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerProps) {
   // Use first slider item from the API when available
   const firstSlide = sliderData[0];
-
+  const t = useT("common");
   const title = firstSlide?.title;
   // Strip HTML tags from the API description
   const description = firstSlide?.description.replace(/<[^>]+>/g, '').trim();
@@ -125,13 +126,13 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
               <p className="hero-desc">{description}</p>
               <div className="hero-btns">
                 <Link href="/contact" className="btn-primary">
-                  Explore Tours
+                 {t("view_details")}
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                   </svg>
                 </Link>
                 <Link href="#tours-section" className="btn-secondary">
-                  View Tours
+                  {t("tours")}
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
                   </svg>

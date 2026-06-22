@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
+import { useT } from "@/lib/hooks/useTranslate";
 import { toast } from "sonner";
 import { Check, Calendar, CalendarDays, MapPin, User, Phone, Globe, Hotel, MessageSquare, ChevronRight, ChevronLeft, DollarSign, Users, Baby, UserCheck } from "lucide-react";
 // Import the required base styling and the plugin styling
@@ -454,6 +455,15 @@ interface DualRangeSliderProps {
   formatValue?: (val: number) => string;
 }
 
+
+// ─── Main Component ─────────────────────────────────────────────────────────
+export default function TailorMadePage() {
+  const router = useRouter();
+  const locale = useLocale();
+  const t = useT("tailormade");
+  // ── API state ─────────────────────────────────────────────────────────────
+  const [apiData, setApiData] = useState<StaticData | null>(null);
+  const [apiLoading, setApiLoading] = useState(true);
 function DualRangeSlider({
   min,
   max,
@@ -487,12 +497,12 @@ function DualRangeSlider({
       {/* Value badges */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col items-start gap-0.5">
-          <span className="text-[10px] font-semibold text-[#bbb] uppercase tracking-wider">Min</span>
+          <span className="text-[10px] font-semibold text-[#bbb] uppercase tracking-wider">{t("tailormade_menu_4_budget_min_price_trns")}</span>
           <span className="text-base font-bold text-[#272262]">{formatValue(valueMin)}</span>
         </div>
         <div className="flex-1 mx-3 border-t-2 border-dashed border-[#e8eaf0]" />
         <div className="flex flex-col items-end gap-0.5">
-          <span className="text-[10px] font-semibold text-[#bbb] uppercase tracking-wider">Max</span>
+          <span className="text-[10px] font-semibold text-[#bbb] uppercase tracking-wider">{t("tailormade_menu_4_budget_max_price_trns")}</span>
           <span className="text-base font-bold text-[#e3b75e]">{formatValue(valueMax)}</span>
         </div>
       </div>
@@ -542,15 +552,6 @@ function DualRangeSlider({
     </div>
   );
 }
-// ─── Main Component ─────────────────────────────────────────────────────────
-export default function TailorMadePage() {
-  const router = useRouter();
-  const locale = useLocale();
-
-  // ── API state ─────────────────────────────────────────────────────────────
-  const [apiData, setApiData] = useState<StaticData | null>(null);
-  const [apiLoading, setApiLoading] = useState(true);
-
   // Fetch tailor-made static data from API via proxy
   useEffect(() => {
     async function loadStaticData() {
@@ -579,21 +580,21 @@ export default function TailorMadePage() {
   // Each field individually falls back so partial API responses still work.
   const sd = apiData ?? FALLBACK_STATIC_DATA;
 
-  const pageTitle      = sd.basic_data?.title        || FALLBACK_STATIC_DATA.basic_data.title;
-  const pageSubtitle   = sd.basic_data?.name         || FALLBACK_STATIC_DATA.basic_data.name;
-  const pageDesc       = sd.basic_data?.description  || FALLBACK_STATIC_DATA.basic_data.description;
+  const pageTitle      = sd.basic_data?.title        ||  t("tailormade_title");
+  const pageSubtitle   = sd.basic_data?.name         || t("tailormade_name");
+  const pageDesc       = sd.basic_data?.description  || t("tailormade_description");
 
-  const label_cities   = sd.top_menu_labels?.city_label_trns    || FALLBACK_STATIC_DATA.top_menu_labels.city_label_trns;
-  const label_time     = sd.top_menu_labels?.time_label_trns    || FALLBACK_STATIC_DATA.top_menu_labels.time_label_trns;
-  const label_info     = sd.top_menu_labels?.info_title_trns    || FALLBACK_STATIC_DATA.top_menu_labels.info_title_trns;
-  const label_budget   = sd.top_menu_labels?.budget_title_trns  || FALLBACK_STATIC_DATA.top_menu_labels.budget_title_trns;
-  const label_confirm  = sd.top_menu_labels?.confirm_label_trns || FALLBACK_STATIC_DATA.top_menu_labels.confirm_label_trns;
+  const label_cities   = sd.top_menu_labels?.city_label_trns    || t("tailormade_tab_city_label_trns");
+  const label_time     = sd.top_menu_labels?.time_label_trns    || t("tailormade_tab_time_label_trns");
+  const label_info     = sd.top_menu_labels?.info_title_trns    || t("tailormade_tab_info_title_trns");
+  const label_budget   = sd.top_menu_labels?.budget_title_trns  || t("tailormade_tab_budget_title_trns");
+  const label_confirm  = sd.top_menu_labels?.confirm_label_trns || t("tailormade_tab_confirm_label_trns");
 
-  const city_title     = sd.menu_1_city?.title    || FALLBACK_STATIC_DATA.menu_1_city.title;
-  const city_subtitle  = sd.menu_1_city?.sub_title || FALLBACK_STATIC_DATA.menu_1_city.sub_title;
+const city_title    = sd.menu_1_city?.title     || t("tailormade_menu_1_city_title_trns");
+const city_subtitle = sd.menu_1_city?.sub_title || t("tailormade_menu_1_city_sub_title_trns");
 
-  const time_title         = sd.menu_2_time?.title             || FALLBACK_STATIC_DATA.menu_2_time.title;
-  const time_subtitle      = sd.menu_2_time?.sub_title         || FALLBACK_STATIC_DATA.menu_2_time.sub_title;
+const time_title    = sd.menu_2_time?.title     || t("tailormade_menu_2_time_title_trns");
+const time_subtitle = sd.menu_2_time?.sub_title || t("tailormade_menu_2_time_sub_title_trns");
   const time_exact         = sd.menu_2_time?.exact_dates_trns  || FALLBACK_STATIC_DATA.menu_2_time.exact_dates_trns!;
   const time_approx        = sd.menu_2_time?.approx_month_trns || FALLBACK_STATIC_DATA.menu_2_time.approx_month_trns!;
   const time_notSure       = sd.menu_2_time?.not_sure_yet_trns || FALLBACK_STATIC_DATA.menu_2_time.not_sure_yet_trns!;
@@ -602,23 +603,30 @@ export default function TailorMadePage() {
   const time_selectMonth   = sd.menu_2_time?.select_month_trns   || FALLBACK_STATIC_DATA.menu_2_time.select_month_trns!;
   const time_vacationDays  = sd.menu_2_time?.vacation_days_trns  || FALLBACK_STATIC_DATA.menu_2_time.vacation_days_trns!;
 
-  const info_title          = sd.menu_3_info?.title                   || FALLBACK_STATIC_DATA.menu_3_info.title;
-  const info_subtitle       = sd.menu_3_info?.sub_title               || FALLBACK_STATIC_DATA.menu_3_info.sub_title;
-  const info_name_label     = sd.menu_3_info?.name_trns               || FALLBACK_STATIC_DATA.menu_3_info.name_trns!;
-  const info_email_label    = sd.menu_3_info?.email_trns              || FALLBACK_STATIC_DATA.menu_3_info.email_trns!;
-  const info_phone_label    = sd.menu_3_info?.phone_trns              || FALLBACK_STATIC_DATA.menu_3_info.phone_trns!;
-  const info_nat_label      = sd.menu_3_info?.nationality_trns        || FALLBACK_STATIC_DATA.menu_3_info.nationality_trns!;
-  const info_msg_label      = sd.menu_3_info?.message_trns            || FALLBACK_STATIC_DATA.menu_3_info.message_trns!;
+ const info_title    = sd.menu_3_info?.title     || t("tailormade_menu_3_info_title_trns");
+const info_subtitle = sd.menu_3_info?.sub_title || t("tailormade_menu_3_info_sub_title_trns");
 
-  const budget_title        = sd.menu_4_budget?.title                 || FALLBACK_STATIC_DATA.menu_4_budget.title;
-  const budget_subtitle     = sd.menu_4_budget?.sub_title             || FALLBACK_STATIC_DATA.menu_4_budget.sub_title;
-  const budget_adults       = sd.menu_4_budget?.adults_trns           || FALLBACK_STATIC_DATA.menu_4_budget.adults_trns!;
-  const budget_adults_sub   = sd.menu_4_budget?.message_adults_trns   || FALLBACK_STATIC_DATA.menu_4_budget.message_adults_trns!;
-  const budget_children     = sd.menu_4_budget?.children_trns         || FALLBACK_STATIC_DATA.menu_4_budget.children_trns!;
-  const budget_children_sub = sd.menu_4_budget?.message_children_trns || FALLBACK_STATIC_DATA.menu_4_budget.message_children_trns!;
-  const budget_infants      = sd.menu_4_budget?.infants_trns          || FALLBACK_STATIC_DATA.menu_4_budget.infants_trns!;
-  const budget_infants_sub  = sd.menu_4_budget?.message_infants_trns  || FALLBACK_STATIC_DATA.menu_4_budget.message_infants_trns!;
-  const budget_range_label  = sd.menu_4_budget?.label_budget_range_trns || FALLBACK_STATIC_DATA.menu_4_budget.label_budget_range_trns!;
+const info_name_label  = sd.menu_3_info?.name_trns        || t("tailormade_menu_3_info_name_trns");
+const info_email_label = sd.menu_3_info?.email_trns       || t("tailormade_menu_3_info_email_trns");
+const info_phone_label = sd.menu_3_info?.phone_trns       || t("tailormade_menu_3_info_phone_trns");
+const info_nat_label   = sd.menu_3_info?.nationality_trns || t("tailormade_menu_3_info_nationality_trns");
+const info_msg_label   = sd.menu_3_info?.message_trns     || t("tailormade_menu_3_info_message_trns");
+
+const budget_title    = sd.menu_4_budget?.title     || t("tailormade_menu_4_budget_title_trns");
+const budget_subtitle = sd.menu_4_budget?.sub_title || t("tailormade_menu_4_budget_sub_title_trns");
+
+const budget_adults       = sd.menu_4_budget?.adults_trns           || t("tailormade_menu_4_budget_adults_trns");
+const budget_adults_sub   = sd.menu_4_budget?.message_adults_trns   || t("tailormade_menu_4_budget_message_adults_trns");
+
+const budget_children     = sd.menu_4_budget?.children_trns         || t("tailormade_menu_4_budget_children_trns");
+const budget_children_sub = sd.menu_4_budget?.message_children_trns || t("tailormade_menu_4_budget_message_children_trns");
+
+const budget_infants      = sd.menu_4_budget?.infants_trns          || t("tailormade_menu_4_budget_infants_trns");
+const budget_infants_sub  = sd.menu_4_budget?.message_infants_trns  || t("tailormade_menu_4_budget_message_infants_trns");
+
+const budget_range_label =
+  sd.menu_4_budget?.label_budget_range_trns ||
+  t("tailormade_menu_4_budget_label_budget_range_trns");
 
   // ── Cities: API cities → normalized shape, fallback if empty ────────────
   const cities = useMemo(() => {
@@ -689,7 +697,7 @@ export default function TailorMadePage() {
     adults: 1,
     children: 0,
     infants: 0,
-    priceMin: 2500,
+    priceMin: 250,
     priceMax: 7500,
   });
 

@@ -14,6 +14,7 @@ import { Loader2 } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import FallbackImage from "@/components/shared/fallback-image";
+ import { useT } from "@/lib/hooks/useTranslate";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -168,6 +169,7 @@ type TourDetailsClientProps = {
 export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   const [activeDay, setActiveDay] = useState<number | null>(1);
   const [allOpen, setAllOpen] = useState(false);
+    const t = useT("view_tour");
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [formData, setFormData] = useState<FormState>({
@@ -818,7 +820,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 {/* Header row with Toggle All button */}
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="text-2xl font-bold text-[var(--second-color)]">
-                    Itinerary
+                    {t("itineraries")}
                   </h2>
                   <button
                     type="button"
@@ -907,7 +909,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                         <span className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center">
                           <Check className="w-4 h-4 text-green-600" />
                         </span>
-                        What&apos;s Included
+                       {t("included")}
                       </h3>
                       <ul className="space-y-2">
                         {included.map((item, i) => (
@@ -928,7 +930,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                         <span className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center">
                           <X className="w-4 h-4 text-red-500" />
                         </span>
-                        What&apos;s Excluded
+                        {t("Excluded")}
                       </h3>
                       <ul className="space-y-2">
                         {excluded.map((item, i) => (

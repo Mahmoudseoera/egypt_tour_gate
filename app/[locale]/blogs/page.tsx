@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getBlogPageData } from '@/lib/api/blog';
 import { buildSeoMetadata } from '@/lib/seo';
+import { getT } from "@/lib/hooks/getT";
 import FallbackImage from "@/components/shared/fallback-image";
 export const revalidate = 1800;
 
@@ -40,6 +41,8 @@ export default async function BlogsPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  const t = await getT("blogs");
+  const commonT = await getT("common");
   const { locale } = await params;
   const { subTitle, title, description, cover, categories } = await getBlogPageData(locale);
   return (
@@ -69,7 +72,7 @@ export default async function BlogsPage({
             )}
             <div className="mt-8 inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-white">
               <span className='font-semibold'>
-                {categories.length} Categor{categories.length !== 1 ? "ies" : "y"}
+                {categories.length} categor{categories.length !== 1 ? "ies" : "y"}
               </span>
             </div>
           </div>
@@ -81,7 +84,7 @@ export default async function BlogsPage({
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl font-bold text-navy mb-12 text-center">
-              Explore by Category
+              {t("articles")}
             </h2>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -113,7 +116,7 @@ export default async function BlogsPage({
                       </p>
                     )}
                     <div className="mt-4 flex items-center text-gold font-semibold gap-2 group-hover:gap-3 transition-all">
-                      <span>Explore articles</span>
+                      <span>{commonT("view_details")}</span>
                       <svg
                         className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                         fill="none"

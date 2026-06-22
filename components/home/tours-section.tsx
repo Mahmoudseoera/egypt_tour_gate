@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { Heart, MapPin } from "lucide-react";
+import { useT } from "@/lib/hooks/useTranslate";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import FallbackImage from "@/components/shared/fallback-image";
@@ -34,7 +35,7 @@ export default function TravelTourSlider({
   SecondToursSection,
   apiTours = [],
 }: TravelTourSliderProps) {
-
+  const t = useT("common");
   const { isFavourite, toggle } = useFavourites();
 
   const toggleFavorite = (tour: SliderItem, e: React.MouseEvent) => {
@@ -163,14 +164,14 @@ export default function TravelTourSlider({
                         <div className="absolute top-[-25px] w-10 h-10 bg-gray-200 rounded-full right-[-50px] z-10" />
                         <div className="flex flex-col gap-1">
                           <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">
-                            From
+                            {t("starts_from")}
                           </span>
                           <span className="text-3xl font-extrabold text-[var(--main-color)]">
                             ${tour.price}
                           </span>
                         </div>
                         <div className="btn-effect bg-[var(--second-color)] text-white px-7 py-3 rounded-full text-sm font-bold uppercase tracking-wide hover:bg-[#1a1848]">
-                          Book Now
+                          {t("book_now")}
                         </div>
                       </div>
                     </div>

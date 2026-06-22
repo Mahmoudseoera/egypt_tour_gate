@@ -15,7 +15,7 @@ import {
   getSubcategoryBySlug,
   getGeneralCategories,
   getToursBySubcategory,
-  normalizeSlug, // ← NEW
+  normalizeSlug, // 
 } from "@/lib/api/toursApi";
 import { routing } from "@/lib/i18n/routing";
 import Image from "next/image";
@@ -170,6 +170,7 @@ export default async function SubcategoryPage({
   // second_title is a subtitle (e.g. "Egypt Luxury Tours and Trips")
   const subcategorySecondTitle: string = subcategory.second_title ?? "";
   const subcategoryCover: string = subcategory.media?.cover.image ?? "";
+  // console.log("subcategoryCover", subcategoryCover);
   // plainDesc is the HTML-stripped `desc` field set by getSubcategoryBySlug
   const shortDescription: string =
     subcategory.plainDesc ||
@@ -222,7 +223,7 @@ export default async function SubcategoryPage({
         {/* Content */}
         <div className="relative z-[3] text-center px-4">
           <p className="text-white font-semibold tracking-widest uppercase text-xs mb-3">
-            Explore
+            Explore {categoryName}
           </p>
 
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white capitalize leading-tight">
@@ -239,9 +240,9 @@ export default async function SubcategoryPage({
       <Breadcrumb items={breadcrumbItems} />
       <section className="container py-10 max-w-7xl mx-auto">
         <div className="container mx-auto">
-          <p className="text-xl text-gray-600 mb-1 text-center">
+          {/* <p className="text-xl text-gray-600 mb-1 text-center">
             {categoryName}
-          </p>
+          </p> */}  
           {subcategorySecondTitle && (
             <p className="text-base text-[var(--main-color)] font-medium text-center mb-3">
               {subcategorySecondTitle}

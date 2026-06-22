@@ -1,6 +1,6 @@
 // components/tour/second-tour-card.tsx
 "use client";
-
+import { useT } from "@/lib/hooks/useTranslate";
 import { StaticImageData } from "next/image";
 import { MapPin, Calendar, Star, Heart } from "lucide-react";
 import Link from "next/link";
@@ -37,7 +37,7 @@ export default function SecondTourCard({
   subcategorySlug,
 }: TourCardProps) {
   const { isFavourite, toggle } = useFavourites();
-
+  const t = useT("common");
   const safeDescription =
     description?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() ||
     `Discover ${title} and customize your ideal Egypt experience.`;
@@ -119,7 +119,7 @@ export default function SecondTourCard({
             href={tourLink}
             className="flex-1 !bg-navy !text-white text-center py-3 hover:bg-gold hover:text-navy transition btn-effect !rounded-md"
           >
-            Book Now
+            {t("book_now")}
           </Link>
 
           <button

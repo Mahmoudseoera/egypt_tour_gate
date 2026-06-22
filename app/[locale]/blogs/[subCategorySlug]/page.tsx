@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calendar, User } from "lucide-react";
+import { getT } from "@/lib/hooks/getT";
 import { getCategoryPageData } from "@/lib/api/blog";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
@@ -57,12 +58,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const data = await getCategoryPageData(subCategorySlug, locale);
 
   if (!data) notFound();
-
+  const t = await getT("blogs");
+  const commonT = await getT("common");
   const { category, posts } = data;
 
   const breadcrumbItems = [
-    { label: "Home", href: "/" },
-    { label: "Blogs", href: "/blogs" },
+    { label: commonT("home"), href: "/" },
+    { label: commonT("blog"), href: "/blogs" },
     { label: category.title, href: `/blogs/${subCategorySlug}` },
   ];
 
@@ -127,7 +129,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                 />
               </svg>
               <span className="font-semibold">
-                {posts.length} Article{posts.length !== 1 ? "s" : ""}
+                {posts.length} {commonT("blog")}{posts.length !== 1 ? "s" : ""}
               </span>
             </div>
           </div>
@@ -215,7 +217,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                         </p>
 
                         <div className="flex items-center justify-start gap-1 pt-4 font-semibold text-[var(--black-color)] border-t border-gray-200">
-                          Read More
+                         {commonT("read_more")}
                           <svg
                             className="w-6 h-6 text-gold  group-hover:translate-x-1 group-hover:-rotate-45 transition-transform"
                             fill="none"

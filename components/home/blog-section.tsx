@@ -4,6 +4,7 @@
 import { ArrowRight, User, BookOpen } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useT } from "@/lib/hooks/useTranslate";
 import type { Article, ArticlesSection } from "@/lib/api/homeTypes";
 import FallbackImage from "@/components/shared/fallback-image";
 
@@ -50,7 +51,7 @@ export default function TravelBlogSection({
     author: a.author || "Egypt Tours Gate",
     publishedAt: a.date,
   }));
-
+  const t = useT("common");
   // ── Date helper ─────────────────────────────────────────────────────────
   function getDateParts(raw: string): { day: string; month: string } {
     if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
@@ -187,7 +188,7 @@ export default function TravelBlogSection({
                         <p className="text-white/70 text-sm leading-relaxed line-clamp-2">{post.smallDesc}</p>
                       )}
                       <span className="mt-4 inline-flex items-center gap-1.5 text-[var(--main-color)] text-sm font-bold group-hover:gap-3 transition-all duration-300">
-                        Read More <ArrowRight className="w-4 h-4" />
+                        {t("read_more")} <ArrowRight className="w-4 h-4" />
                       </span>
                     </div>
                   </Link>
@@ -282,7 +283,7 @@ export default function TravelBlogSection({
                             <p className="text-white/70 text-sm leading-relaxed line-clamp-2">{post.smallDesc}</p>
                           )}
                           <span className="mt-3 inline-flex items-center gap-1.5 text-[var(--main-color)] text-sm font-bold group-hover:gap-3 transition-all duration-300">
-                            Read More <ArrowRight className="w-4 h-4" />
+                            {t("read_more")} <ArrowRight className="w-4 h-4" />
                           </span>
                         </div>
                       </div>

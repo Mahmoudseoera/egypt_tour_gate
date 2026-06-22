@@ -114,7 +114,8 @@ export default function Navbar() {
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const router = useRouter();
-   const t = useT("common");
+  const t = useT("common");
+  //  const homeT = useT("home");
    const { data, error, loading } = useGeneralData(locale);
   const [socialData, setSocialData] = useState<SocialItem[]>(fallbackSocialData);
   useEffect(() => {
@@ -302,7 +303,7 @@ export default function Navbar() {
                 className="flex items-center gap-2 pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
               >
                 <Phone className="h-4 w-4" />
-                <span className="hidden md:inline font-medium">Call Free :</span>
+                <span className="hidden md:inline font-medium">{t("mobile")}:</span>
                 <span className="hidden lg:inline">
                   {data.header.info?.phone ?? "+201110008407"}
                 </span>
@@ -374,7 +375,7 @@ export default function Navbar() {
             {/* Right: CTA + Hamburger */}
             <div className="flex items-center gap-3 md:order-2">
               <Link href="/tailor-made" className="btn-effect hidden md:block">
-                {t("send_inquiry", "Send Inquiry")}
+                {t("send_inquiry")}
               </Link>
               <button
                 onClick={() => setMobileOpen(true)}
@@ -395,7 +396,7 @@ export default function Navbar() {
                     href="/"
                   className="px-3 py-2 rounded-md text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 text-[14.5px] font-semibold nav-link-underline"
                 >
-                 <span>{t("home", "home")}</span>
+                 <span>{t("home")}</span>
                 </Link>
               </li>
 
@@ -468,7 +469,7 @@ export default function Navbar() {
                                     (e.currentTarget as HTMLElement).style.color = catColor;
                                   }}
                                 >
-                                  View all
+                                  {t("view_details")}
                                   <ArrowRight size={12} />
                                 </Link>
                               </div>
@@ -521,7 +522,7 @@ export default function Navbar() {
 
                             <div className="w-[220px] flex-shrink-0 p-5 bg-gray-50/50">
                               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">
-                                Featured
+                                {t("features")}
                               </p>
                               <div className="flex flex-col gap-3">
                                 {featuredHighlights.map((item, index) => (
@@ -558,14 +559,14 @@ export default function Navbar() {
                               >
                                 <Star size={14} className="mx-auto mb-1" style={{ color: catColor }} />
                                 <p className="text-[11px] font-bold text-[var(--second-color)] leading-tight">
-                                  Tailor-made tours available
+                                 {t("tailormade")} {t("inquire")}
                                 </p>
                                 <Link
                                   href="/tailor-made"
                                   className="inline-block mt-1.5 text-[10px] font-bold underline"
                                   style={{ color: catColor }}
                                 >
-                                  Build my trip →
+                                  {t("book_now")} →
                                 </Link>
                               </div>
                             </div>
@@ -603,26 +604,47 @@ export default function Navbar() {
                     <div className="simple-dropdown bg-white rounded-2xl shadow-[0_16px_48px_rgba(39,34,98,0.12)] border border-gray-100 overflow-hidden min-w-[200px]">
                       <div className="h-1 w-full bg-gradient-to-r from-[var(--second-color)] to-[var(--main-color)]" />
                       <div className="py-2">
-                        {[
-                          { href: "/contact", label: "Contact Us", icon: <Phone size={14} /> },
-                          { href: "/about-us", label: "About Us", icon: <User size={14} /> },
-                          { href: "/free-page", label: "Free Page", icon: <Sparkles size={14} /> },
-                        ].map((item) => (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            className="simple-dropdown-item flex items-center gap-3 px-4 py-2.5 hover:text-[var(--second-color)] text-gray-600 font-medium text-[13.5px]"
+                      {[  
+                        {
+                          href: "/contact",
+                          labelKey: "contact",
+                          icon: <Phone size={14} />,
+                        },
+                        {
+                          href: "/about-us",
+                          labelKey: "about",
+                          icon: <User size={14} />,
+                        },
+                        {
+                          href: "/free-page",
+                          labelKey: "terms_and_conditions",
+                          icon: <Sparkles size={14} />,
+                        },
+                      ].map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="simple-dropdown-item flex items-center gap-3 px-4 py-2.5 hover:text-[var(--second-color)] text-gray-600 font-medium text-[13.5px]"
+                        >
+                          <span
+                            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                            style={{
+                              background: "rgba(39,34,98,0.07)",
+                              color: "var(--second-color)",
+                            }}
                           >
-                            <span
-                              className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                              style={{ background: "rgba(39,34,98,0.07)", color: "var(--second-color)" }}
-                            >
-                              {item.icon}
-                            </span>
-                            {item.label}
-                            <ArrowRight size={13} className="item-arrow ml-auto" style={{ color: "var(--main-color)" }} />
-                          </Link>
-                        ))}
+                            {item.icon}
+                          </span>
+
+                          {t(item.labelKey)}
+
+                          <ArrowRight
+                            size={13}
+                            className="item-arrow ml-auto"
+                            style={{ color: "var(--main-color)" }}
+                          />
+                        </Link>
+                      ))}
                       </div>
                     </div>
                   </div>
@@ -636,7 +658,7 @@ export default function Navbar() {
                   className="flex items-center gap-1.5 px-3 py-2 rounded-md text-[14.5px] font-semibold text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 nav-link-underline"
                 >
                   <BookOpen size={15} />
-                  Blogs
+                  {t("blog")}
                 </Link>
               </li>
             </ul>
@@ -760,7 +782,7 @@ export default function Navbar() {
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(39,34,98,0.08)" }}>
                     <BookOpen size={18} style={{ color: "var(--second-color)" }} />
                   </div>
-                  <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>Blogs</span>
+                  <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>{t("blog")}</span>
                   <ChevronRight size={15} className="ml-auto text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all duration-200" />
                 </Link>
 
@@ -786,9 +808,12 @@ export default function Navbar() {
                   {activeDropdown === "static" && (
                     <div className="submenu-open bg-gray-50 border-l-2 ml-5" style={{ borderColor: "var(--main-color)" }}>
                       {[
-                        { href: "/contact", label: "Contact" },
-                        { href: "/about-us", label: "About Us" },
-                        { href: "/free-page", label: "Free Page" },
+                        { href: "/contact",   labelKey: "contact",
+                        },
+                        { href: "/about-us", labelKey: "about",
+                         },
+                        { href: "/free-page", labelKey: "terms_and_conditions",
+                         },
                       ].map((item) => (
                         <Link
                           key={item.href}
@@ -797,7 +822,7 @@ export default function Navbar() {
                           className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                         >
                           <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--main-color)" }} />
-                          <span className="text-[14px] text-gray-700 group-hover:text-[var(--second-color)] transition-colors font-medium">{item.label}</span>
+                          <span className="text-[14px] text-gray-700 group-hover:text-[var(--second-color)] transition-colors font-medium">{t(item.labelKey)}</span>
                           <ChevronRight size={13} className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
                         </Link>
                       ))}

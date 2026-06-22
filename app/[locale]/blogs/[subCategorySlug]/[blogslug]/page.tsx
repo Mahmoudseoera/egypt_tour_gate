@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import {  Clock, User, Calendar, ArrowLeft, Tag} from "lucide-react";
 import RelatedPostsSlider from "@/components/layout/related-posts-slider";
 import FallbackImage from "@/components/shared/fallback-image";
+import { getT } from "@/lib/hooks/getT";
 import {
   getArticleDetailBySlug,
   getCategoryBySlug,
@@ -52,7 +53,8 @@ export default async function BlogDetailsPage({
   params,
 }: BlogDetailsPageProps) {
   const { locale, blogslug } = await params;
-
+  const t = await getT("blogs");
+  const commonT =  await getT("common");
   // Fetch article data from API
   const data = await getArticleDetailBySlug(blogslug, locale);
   if (!data?.post) notFound();
@@ -91,7 +93,7 @@ export default async function BlogDetailsPage({
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
-    { label: "Blogs", href: "/blogs" },
+    { label: commonT("blog"), href: "/blogs" },
     {
       label: category?.title || post.categoryTitle,
       href: `/blogs/${post.categorySlug}`,
@@ -301,7 +303,7 @@ export default async function BlogDetailsPage({
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                   <div className="px-6 py-4 bg-[var(--main-grey)] border-b border-gray-200 flex items-center justify-between">
                     <h3 className="text-lg font-bold text-[var(--second-color)]">
-                      Related Tours
+                      {commonT("related_tours")}
                     </h3>
                     <span className="text-xs text-gray-400 font-medium">
                       {relatedtours.length} tours
@@ -388,7 +390,7 @@ export default async function BlogDetailsPage({
           {relatedPosts.length > 0 && (
             <div className="col-span-full mt-6">
               <h2 className="text-3xl font-bold text-[var(--second-color)] mb-8">
-                Related Articles
+               {commonT("leatest_posts")}
               </h2>
               <RelatedPostsSlider posts={relatedPosts} />
             </div>

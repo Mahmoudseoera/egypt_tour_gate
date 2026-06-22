@@ -18,6 +18,7 @@ export default function RoavioAboutSection({ aboutData }: RoavioAboutSectionProp
   ];
 
   const rawDesc  = aboutData?.about_desc ?? "";
+
   // const cleanDesc = rawDesc.replace(/<[^>]+>/g, "").trim();
   const imgAbout = aboutData?.about_img || "/assets/images/tours/Pyramids-in-Egypt-webp.webp";
   const title    = aboutData?.about_title    ?? "Awesome Tips That Makes Your Travel Beautiful";

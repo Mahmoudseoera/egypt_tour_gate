@@ -1,37 +1,46 @@
 // lib/hooks/useT.ts
 //
-// Namespaced translation hook matching the backend's page-group structure
-// (common / home / sub / view_tour / blog / questions / about / tailormade
-// / contact / favourites).
+// CLIENT-SIDE translation hook ("use client" components only).
+// For Server Components / pages, use lib/hooks/getT.ts instead (server twin).
 //
-// Usage — pass the group name once per component, then call t(key, fallback):
+// Supports ONE OR MORE namespaces in a single call — pass them in priority
+// order, the first namespace that has a non-missing value for the key wins.
+// This lets you combine e.g. "common" and "home" without declaring two
+// separate t1/t2 variables.
 //
-//   // Navbar / shared UI → "common" group
-//   const t = useT("common");
-//   t("read_more", "Read More")
-//   t("book_now", "Book Now")
-//   t("blog", "Blog")
-//
-//   // Home page → "home" group
+// Usage — single namespace (unchanged from before):
 //   const t = useT("home");
-//   t("section_one_popular", "Recommended Egypt Trips")
-//   t("why_choose_box_1_title", "Years Of Experience")
+//   t("section_one_popular")
 //
-//   // Contact page → "contact" group
-//   const t = useT("contact");
-//   t("contact_title", "Contact Us")
+// Usage — multiple namespaces combined:
+//   const t = useT(["common", "home"]);
+//   t("read_more")              // found in "common" → returned
+//   t("section_one_popular")    // not in "common", found in "home" → returned
+//   t("totally_missing_key")    // missing everywhere → "common.totally_missing_key"
+//                                // (reports under the FIRST namespace, since
+//                                //  that's where lookup started)
 
 "use client";
 import { useTranslations } from "next-intl";
 
-export function useT(namespace: string) {
-  const t = useTranslations(namespace);
-  return function tr(key: string, fallback: string): string {
-    try {
-      const val = t(key as Parameters<typeof t>[0]);
-      return val ?? fallback;
-    } catch {
-      return fallback;
+export function useT(namespace: string | string[]) {
+  const namespaces = Array.isArray(namespace) ? namespace : [namespace];
+
+  // One useTranslations() call per namespace — next-intl only accepts a
+  // single namespace per hook call, so we fan out and pick the first hit.
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const translators = namespaces.map((ns) => useTranslations(ns));
+
+  return function tr(key: string): string {
+    for (let i = 0; i < translators.length; i++) {
+      const t = translators[i];
+      const hasKey = t.has(key as Parameters<typeof t.has>[0]);
+      if (hasKey) {
+        return t(key as Parameters<typeof t>[0]);
+      }
     }
+    // Missing in every namespace tried — report under the first one,
+    // so the visible placeholder points at where to start looking.
+    return `${namespaces[0]}.${key}`;
   };
 }

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+ import { getT } from "@/lib/hooks/getT";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
@@ -100,7 +101,7 @@ export async function generateMetadata({
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { locale, categorySlug } = await params;
   const category = await getCategoryData(categorySlug, locale);
-
+    const t = await getT("common");
   if (!category) {
     notFound();
   }
@@ -253,7 +254,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                           className="inline-flex items-center gap-2 w-full justify-center py-3 px-6 rounded-xl font-semibold text-sm text-white transition-all duration-300 group-hover:gap-3"
                           style={{ backgroundColor: "var(--second-color)" }}
                         >
-                          View Tours
+                          {t("view_details")}
                         </span>
                       </div>
                     </div>
