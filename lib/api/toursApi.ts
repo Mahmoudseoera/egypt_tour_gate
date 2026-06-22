@@ -10,7 +10,7 @@ export interface ApiTourListItem {
   title: string;
   image: string;
   price_from: number;
-  price_after_discount?: number;
+  price_after_discount: number;
   rating: number;
   duration: string;
   location: string;
@@ -159,7 +159,7 @@ function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
     slug: item.slug ?? fallbackSlug,
 
     title: item.title ?? item.name ?? "",
-
+    
     image: item.image ?? item.media?.image ?? "",
 
     price_from: parsePrice(
@@ -167,7 +167,7 @@ function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
       item.price_after_discount ??
       item.price
     ),
-
+    price_after_discount: item.price_after_discount ?? item.price_from ,
     rating: Number(item.rating ?? 0),
 
     duration:

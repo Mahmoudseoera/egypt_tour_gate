@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: TourDetailPageProps): Promise
   const { locale, categorySlug, subcategorySlug, tourSlug } = await params;
   const item = await getTourBySlug(tourSlug, locale);
   const readableName = item?.title || tourSlug.replace(/-/g, " ");
-
+  console.log("item", item);
   return buildSeoMetadata({
     seoHtml: item?.seo,
     title: `${readableName} | Egypt Tours Gate`,
@@ -85,7 +85,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
             <h1 className="text-xl sm:text-3xl font-bold text-navy leading-snug">{item.title}</h1>
             <div className="shrink-0 bg-white/95 px-3 py-2 rounded-lg shadow border border-gray-100">
               <p className="text-[var(--main-color)] font-bold text-sm sm:text-xl whitespace-nowrap">{"From $" + item.price_from}</p>
-              <p>{item.price_after_discount}</p>
+              {item.price_after_discount && item.price_after_discount < item.price_from && <span className="line-through text-gray-500">{"From $" + item.price_after_discount}</span>}
             </div>
           </div>
           <div className="mt-3">
