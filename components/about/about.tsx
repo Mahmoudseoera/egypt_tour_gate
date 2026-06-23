@@ -33,7 +33,7 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
     <div className="bg-white py-16 px-4 md:px-8 lg:px-12">
         <div className="max-w-7xl mx-auto">
           {/* ── Top grid: heading + image pair ──────────────────────────────── */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <div className="flex flex-col justify-center">
               <p className="text-sm font-semibold text-[var(--main-color)] uppercase tracking-wider mb-2">
                 {subTitle}
@@ -107,7 +107,7 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
           {/* ── Bottom grid: image + content ────────────────────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="roavio-card-hover">
-              <div className="rounded-3xl overflow-hidden h-96">
+              <div className="rounded-3xl overflow-hidden h-full">
                 <Image
                   src={imgAbout}
                   alt={title2}
