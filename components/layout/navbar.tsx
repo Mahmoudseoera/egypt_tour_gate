@@ -36,7 +36,10 @@ import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import SimpleSocialIcon, {
   SocialItem,
 } from "@/components/layout/simpleSocialIcon";
-import { settingsToSocialItems, type SiteSettings } from "@/lib/api/settingsApi";
+import {
+  settingsToSocialItems,
+  type SiteSettings,
+} from "@/lib/api/settingsApi";
 
 /* ── Static social links ─────────────────────────────────────────────────── */
 const fallbackSocialData: SocialItem[] = [];
@@ -51,14 +54,7 @@ const CATEGORY_COLORS = [
   "#8c52ff",
 ];
 
-const CATEGORY_ICONS = [
-  Compass,
-  Map,
-  Ship,
-  Palmtree,
-  Camera,
-  Sparkles,
-];
+const CATEGORY_ICONS = [Compass, Map, Ship, Palmtree, Camera, Sparkles];
 
 function getCategoryMeta(slug: string) {
   const hash = slug
@@ -108,7 +104,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
-  
+
   // useLocale() returns AppLocale — now matches useGeneralData() signature
   const locale = useLocale() as AppLocale;
   const megaMenuRef = useRef<HTMLDivElement>(null);
@@ -116,17 +112,21 @@ export default function Navbar() {
   const router = useRouter();
   const t = useT("common");
   //  const homeT = useT("home");
-   const { data, error, loading } = useGeneralData(locale);
-  const [socialData, setSocialData] = useState<SocialItem[]>(fallbackSocialData);
+  const { data, error, loading } = useGeneralData(locale);
+  const [socialData, setSocialData] =
+    useState<SocialItem[]>(fallbackSocialData);
   useEffect(() => {
-    fetch(`/api/settings?locale=${locale}`).then(r => r.json()).then((json) => {
-      const items = settingsToSocialItems(json?.data as SiteSettings | null);
-      if (items.length) setSocialData(items as SocialItem[]);
-    }).catch(() => undefined);
+    fetch(`/api/settings?locale=${locale}`)
+      .then((r) => r.json())
+      .then((json) => {
+        const items = settingsToSocialItems(json?.data as SiteSettings | null);
+        if (items.length) setSocialData(items as SocialItem[]);
+      })
+      .catch(() => undefined);
   }, [locale]);
 
   const currentLanguage = data?.header.languages.find(
-    (lang) => lang.slug === locale
+    (lang) => lang.slug === locale,
   );
 
   /**
@@ -136,7 +136,7 @@ export default function Navbar() {
    */
   const onLanguageChange = (newLocale: string) => {
     const nextLocale = newLocale as AppLocale;
-      router.replace("/", { locale: nextLocale });
+    router.replace("/", { locale: nextLocale });
   };
 
   useEffect(() => {
@@ -174,9 +174,16 @@ export default function Navbar() {
       <nav className="w-full bg-white border-b border-gray-100 px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/" className="inline-flex items-center">
-            <Image src="/assets/images/egypt-tour-gate-logo.png" alt="Egypt Tour Gate" width={70} height={30} />
+            <Image
+              src="/assets/images/egypt-tour-gate-logo.png"
+              alt="Egypt Tour Gate"
+              width={70}
+              height={30}
+            />
           </Link>
-          <div className="text-sm text-gray-600">Menu unavailable, using fallback.</div>
+          <div className="text-sm text-gray-600">
+            Menu unavailable, using fallback.
+          </div>
         </div>
       </nav>
     );
@@ -231,54 +238,50 @@ export default function Navbar() {
 
   const getFeaturedHighlights = (cat: (typeof categories)[number]) => {
     if (!cat.subs?.length) return [];
-  const { color: catColor } = getCategoryMeta(cat.slug);
+    const { color: catColor } = getCategoryMeta(cat.slug);
 
-    return cat.subs
-      .slice(0, 2)
-      .map((sub, index) => ({
-        title: sub.name,
-        tag: index === 0 ? "Popular" : "Recommended",
-        img:
-          sub.media?.image ||
-          "/assets/images/tours/default-tour.jpg",
+    return cat.subs.slice(0, 2).map((sub, index) => ({
+      title: sub.name,
+      tag: index === 0 ? "Popular" : "Recommended",
+      img: sub.media?.image || "/assets/images/tours/default-tour.jpg",
 
-        href: `/${cat.slug}/${sub.slug}`,
-        color: catColor,
-      }));
+      href: `/${cat.slug}/${sub.slug}`,
+      color: catColor,
+    }));
   };
   return (
     <>
       <header>
         {/* ===== TOP BAR ===== */}
         <div className="topbar-wrapper">
-          <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 pt-2 pb-0 text-sm">
+          <div className="mx-auto flex max-w-[1500px] items-center justify-between pr-2 pt-2 md:pr-4 pt-2 pb-0 text-sm">
             <div className="flex items-center">
-              <div className="hidden md:flex items-center gap-2 pr-4 border-r border-gray-200">
+              <div className=" hidden md:flex items-center gap-1 pr-2 md:pr-4 border-r border-gray-200">
                 {socialData.map((item, index) => {
-                if (item.title === "TripAdvisor") {
-                  return (
-                    <Link
-                      key={index}
-                      href={item.url || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 transition hover:opacity-80"
-                    >
-                      <Image
-                        src="/assets/images/tripadvisor-icon.svg"
-                        width={70}
-                        height={30}
-                        alt="TripAdvisor"
-                        className="w-5 h-5 object-contain"
-                      />
-                    </Link>
-                  );
-                }
+                  if (item.title === "TripAdvisor") {
+                    return (
+                      <Link
+                        key={index}
+                        href={item.url || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-1 md:p-2 transition hover:opacity-80"
+                      >
+                        <Image
+                          src="/assets/images/tripadvisor-icon.svg"
+                          width={70}
+                          height={30}
+                          alt="TripAdvisor"
+                          className="w-5 h-5 object-contain"
+                        />
+                      </Link>
+                    );
+                  }
 
                   // WhatsApp
                   if (item.title === "WhatsApp") {
                     return (
-                      <a
+                      <Link
                         key={index}
                         href={`https://wa.me/${item.url}`}
                         target="_blank"
@@ -286,7 +289,7 @@ export default function Navbar() {
                         className="text-[var(--second-color)] hover:text-[var(--main-color)] transition"
                       >
                         <i className={item.icon}></i>
-                      </a>
+                      </Link>
                     );
                   }
                   return (
@@ -295,15 +298,15 @@ export default function Navbar() {
                       item={item}
                       className="text-[var(--second-color)] hover:text-[var(--main-color)] transition"
                     />
-                  );  
+                  );
                 })}
               </div>
               <Link
                 href={`tel:${data.header.info?.phone ?? "+201110008407"}`}
-                className="flex items-center gap-2 pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
+                className="flex items-center gap-1 pl-2 md:pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
               >
                 <Phone className="h-4 w-4" />
-                <span className="hidden md:inline font-medium">{t("mobile")}:</span>
+                <span className="hidden md:inline font-medium">{t("")}:</span>
                 <span className="hidden lg:inline">
                   {data.header.info?.phone ?? "+201110008407"}
                 </span>
@@ -346,8 +349,11 @@ export default function Navbar() {
                 <span className="inline">USD</span>
                 <ChevronDown className="h-4 w-4" />
               </div>
-              <Link href="/favourite" className="flex items-center gap-1 pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition">
-               <Heart size={18} style={{ color: "var(--second-color)" }} />
+              <Link
+                href="/favourite"
+                className="flex items-center gap-1 pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
+              >
+                <Heart size={18} style={{ color: "var(--second-color)" }} />
               </Link>
             </div>
           </div>
@@ -393,10 +399,10 @@ export default function Navbar() {
               {/* Home */}
               <li className="py-4">
                 <Link
-                    href="/"
+                  href="/"
                   className="px-3 py-2 rounded-md text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 text-[14.5px] font-semibold nav-link-underline"
                 >
-                 <span>{t("home")}</span>
+                  <span>{t("home")}</span>
                 </Link>
               </li>
 
@@ -413,7 +419,7 @@ export default function Navbar() {
                     onMouseLeave={() => setActiveMegaMenu(null)}
                   >
                     <Link
-                     href={`/${cat.slug}`}
+                      href={`/${cat.slug}`}
                       className={`flex items-center gap-1 px-3 py-2 rounded-md text-[14.5px] font-semibold transition-all duration-200 nav-link-underline capitalize ${
                         isOpen
                           ? "text-[var(--main-color)]"
@@ -437,7 +443,9 @@ export default function Navbar() {
                         <div className="bg-white rounded-2xl shadow-[0_20px_60px_rgba(39,34,98,0.14)] border border-gray-100 overflow-hidden">
                           <div
                             className="h-1 w-full"
-                            style={{ background: `linear-gradient(90deg, ${catColor}, var(--main-color))` }}
+                            style={{
+                              background: `linear-gradient(90deg, ${catColor}, var(--main-color))`,
+                            }}
                           />
                           <div className="flex">
                             <div className="flex-1 p-6">
@@ -459,14 +467,25 @@ export default function Navbar() {
                                 <Link
                                   href={`/${cat.slug}`}
                                   className="ml-auto flex items-center gap-1 text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full border transition-all duration-200"
-                                  style={{ color: catColor, borderColor: catColor }}
+                                  style={{
+                                    color: catColor,
+                                    borderColor: catColor,
+                                  }}
                                   onMouseEnter={(e) => {
-                                    (e.currentTarget as HTMLElement).style.background = catColor;
-                                    (e.currentTarget as HTMLElement).style.color = "#fff";
+                                    (
+                                      e.currentTarget as HTMLElement
+                                    ).style.background = catColor;
+                                    (
+                                      e.currentTarget as HTMLElement
+                                    ).style.color = "#fff";
                                   }}
                                   onMouseLeave={(e) => {
-                                    (e.currentTarget as HTMLElement).style.background = "transparent";
-                                    (e.currentTarget as HTMLElement).style.color = catColor;
+                                    (
+                                      e.currentTarget as HTMLElement
+                                    ).style.background = "transparent";
+                                    (
+                                      e.currentTarget as HTMLElement
+                                    ).style.color = catColor;
                                   }}
                                 >
                                   {t("view_details")}
@@ -496,7 +515,10 @@ export default function Navbar() {
                                         className="cat-icon-wrap w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
                                         style={{ background: `${catColor}18` }}
                                       >
-                                        <span style={{ color: catColor }} className="text-sm">
+                                        <span
+                                          style={{ color: catColor }}
+                                          className="text-sm"
+                                        >
                                           <Icon size={20} />
                                         </span>
                                       </div>
@@ -555,11 +577,18 @@ export default function Navbar() {
 
                               <div
                                 className="mt-4 p-3 rounded-xl text-center"
-                                style={{ background: `${catColor}15`, border: `1px dashed ${catColor}60` }}
+                                style={{
+                                  background: `${catColor}15`,
+                                  border: `1px dashed ${catColor}60`,
+                                }}
                               >
-                                <Star size={14} className="mx-auto mb-1" style={{ color: catColor }} />
+                                <Star
+                                  size={14}
+                                  className="mx-auto mb-1"
+                                  style={{ color: catColor }}
+                                />
                                 <p className="text-[11px] font-bold text-[var(--second-color)] leading-tight">
-                                 {t("tailormade")} {t("inquire")}
+                                  {t("tailormade")} {t("inquire")}
                                 </p>
                                 <Link
                                   href="/tailor-made"
@@ -604,47 +633,47 @@ export default function Navbar() {
                     <div className="simple-dropdown bg-white rounded-2xl shadow-[0_16px_48px_rgba(39,34,98,0.12)] border border-gray-100 overflow-hidden min-w-[200px]">
                       <div className="h-1 w-full bg-gradient-to-r from-[var(--second-color)] to-[var(--main-color)]" />
                       <div className="py-2">
-                      {[  
-                        {
-                          href: "/contact",
-                          labelKey: "contact",
-                          icon: <Phone size={14} />,
-                        },
-                        {
-                          href: "/about-us",
-                          labelKey: "about",
-                          icon: <User size={14} />,
-                        },
-                        {
-                          href: "/free-page",
-                          labelKey: "terms_and_conditions",
-                          icon: <Sparkles size={14} />,
-                        },
-                      ].map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="simple-dropdown-item flex items-center gap-3 px-4 py-2.5 hover:text-[var(--second-color)] text-gray-600 font-medium text-[13.5px]"
-                        >
-                          <span
-                            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                            style={{
-                              background: "rgba(39,34,98,0.07)",
-                              color: "var(--second-color)",
-                            }}
+                        {[
+                          {
+                            href: "/contact",
+                            labelKey: "contact",
+                            icon: <Phone size={14} />,
+                          },
+                          {
+                            href: "/about-us",
+                            labelKey: "about",
+                            icon: <User size={14} />,
+                          },
+                          {
+                            href: "/free-page",
+                            labelKey: "terms_and_conditions",
+                            icon: <Sparkles size={14} />,
+                          },
+                        ].map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className="simple-dropdown-item flex items-center gap-3 px-4 py-2.5 hover:text-[var(--second-color)] text-gray-600 font-medium text-[13.5px]"
                           >
-                            {item.icon}
-                          </span>
+                            <span
+                              className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                              style={{
+                                background: "rgba(39,34,98,0.07)",
+                                color: "var(--second-color)",
+                              }}
+                            >
+                              {item.icon}
+                            </span>
 
-                          {t(item.labelKey)}
+                            {t(item.labelKey)}
 
-                          <ArrowRight
-                            size={13}
-                            className="item-arrow ml-auto"
-                            style={{ color: "var(--main-color)" }}
-                          />
-                        </Link>
-                      ))}
+                            <ArrowRight
+                              size={13}
+                              className="item-arrow ml-auto"
+                              style={{ color: "var(--main-color)" }}
+                            />
+                          </Link>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -654,7 +683,7 @@ export default function Navbar() {
               {/* Blogs */}
               <li className="py-4">
                 <Link
-                 href="/blogs"
+                  href="/blogs"
                   className="flex items-center gap-1.5 px-3 py-2 rounded-md text-[14.5px] font-semibold text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors duration-200 nav-link-underline"
                 >
                   <BookOpen size={15} />
@@ -677,7 +706,10 @@ export default function Navbar() {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-5 py-4" style={{ background: "var(--second-color)" }}>
+              <div
+                className="flex items-center justify-between px-5 py-4"
+                style={{ background: "var(--second-color)" }}
+              >
                 <Link href="/" aria-label="Homepage">
                   <Image
                     src="/assets/images/egypt-tour-gate-logo.png"
@@ -699,7 +731,9 @@ export default function Navbar() {
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto">
                 <div className="px-5 pt-5 pb-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Explore</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
+                    Explore
+                  </p>
                 </div>
 
                 {/* Home */}
@@ -708,69 +742,112 @@ export default function Navbar() {
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(39,34,98,0.08)" }}>
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(39,34,98,0.08)" }}
+                  >
                     <Home size={18} style={{ color: "var(--second-color)" }} />
                   </div>
-                  <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>Home</span>
-                  <ChevronRight size={15} className="ml-auto text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all duration-200" />
+                  <span
+                    className="font-semibold text-[15px]"
+                    style={{ color: "var(--second-color)" }}
+                  >
+                    Home
+                  </span>
+                  <ChevronRight
+                    size={15}
+                    className="ml-auto text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all duration-200"
+                  />
                 </Link>
 
                 {/* Dynamic Categories */}
                 {categories.map((cat) => {
-                    const { Icon } = getCategoryMeta(cat.slug);
-                  return(
-                              <div key={cat.slug}>
-                    <button
-                      onClick={() => setActiveDropdown(activeDropdown === cat.slug ? null : cat.slug)}
-                      className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group text-left"
-                    >
-                      <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200"
-                        style={{
-                          background: activeDropdown === cat.slug
-                            ? "var(--main-color)"
-                            : "rgba(39,34,98,0.08)",
-                        }}
-                      >
-                        <span style={{ color: activeDropdown === cat.slug ? "#fff" : "var(--second-color)" }}>
-                          <Icon size={20} />
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <span className="font-semibold text-[15px] capitalize" style={{ color: "var(--second-color)" }}>
-                          {cat.name}
-                        </span>
-                        {cat.subs.length > 0 && (
-                          <span className="block text-xs text-gray-400">{cat.subs.length} subcategories</span>
-                        )}
-                      </div>
-                      <ChevronDown
-                        size={16}
-                        className="text-gray-400 flex-shrink-0 transition-transform duration-300"
-                        style={{ transform: activeDropdown === cat.slug ? "rotate(180deg)" : "rotate(0deg)" }}
-                      />
-                    </button>
-
-                    {activeDropdown === cat.slug && cat.subs.length > 0 && (
-                      <div className="submenu-open bg-gray-50 border-l-2 ml-5" style={{ borderColor: "var(--main-color)" }}>
-                        {cat.subs.map((sub) => (
-                          <Link
-                            key={sub.slug}
-                            href={`/${cat.slug}/${sub.slug}`}
-                            onClick={closeMenu}
-                            className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
+                  const { Icon } = getCategoryMeta(cat.slug);
+                  return (
+                    <div key={cat.slug}>
+                      <div className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group text-left">
+                        <div
+                          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200"
+                          style={{
+                            background:
+                              activeDropdown === cat.slug
+                                ? "var(--main-color)"
+                                : "rgba(39,34,98,0.08)",
+                          }}
+                        >
+                          <span
+                            style={{
+                              color:
+                                activeDropdown === cat.slug
+                                  ? "#fff"
+                                  : "var(--second-color)",
+                            }}
                           >
-                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--main-color)" }} />
-                            <span className="text-[14px] text-gray-700 capitalize group-hover:text-[var(--second-color)] transition-colors font-medium">
-                              {sub.name}
+                            <Icon size={20} />
+                          </span>
+                        </div>
+                        <Link href={`/${cat.slug}`} className="block flex-1">
+                          <span
+                            className="font-semibold text-[15px] capitalize"
+                            style={{ color: "var(--second-color)" }}
+                          >
+                            {cat.name}
+                          </span>
+                          {cat.subs.length > 0 && (
+                            <span className="block text-xs text-gray-400">
+                              {cat.subs.length} subcategories
                             </span>
-                            <ChevronRight size={13} className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
-                          </Link>
-                        ))}
+                          )}
+                        </Link>
+                        <span
+                          onClick={() =>
+                            setActiveDropdown(
+                              activeDropdown === cat.slug ? null : cat.slug,
+                            )
+                          }
+                        >
+                          <ChevronDown
+                            size={16}
+                            className="text-gray-400 flex-shrink-0 transition-transform duration-300"
+                            style={{
+                              transform:
+                                activeDropdown === cat.slug
+                                  ? "rotate(180deg)"
+                                  : "rotate(0deg)",
+                            }}
+                          />
+                        </span>
                       </div>
-                    )}
-                  </div>
-                );
+
+                      {activeDropdown === cat.slug && cat.subs.length > 0 && (
+                        <div
+                          className="submenu-open bg-gray-50 border-l-2 ml-5"
+                          style={{ borderColor: "var(--main-color)" }}
+                        >
+                          {cat.subs.map((sub) => (
+                            <Link
+                              key={sub.slug}
+                              href={`/${cat.slug}/${sub.slug}`}
+                              onClick={closeMenu}
+                              className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
+                            >
+                              <span
+                                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                                style={{ background: "var(--main-color)" }}
+                              />
+                              <span className="text-[14px] text-gray-700 capitalize group-hover:text-[var(--second-color)] transition-colors font-medium">
+                                {sub.name}
+                              </span>
+                              <ChevronRight
+                                size={13}
+                                className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200"
+                              />
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
                 })}
 
                 {/* Blogs */}
@@ -779,41 +856,85 @@ export default function Navbar() {
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(39,34,98,0.08)" }}>
-                    <BookOpen size={18} style={{ color: "var(--second-color)" }} />
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(39,34,98,0.08)" }}
+                  >
+                    <BookOpen
+                      size={18}
+                      style={{ color: "var(--second-color)" }}
+                    />
                   </div>
-                  <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>{t("blog")}</span>
-                  <ChevronRight size={15} className="ml-auto text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all duration-200" />
+                  <span
+                    className="font-semibold text-[15px]"
+                    style={{ color: "var(--second-color)" }}
+                  >
+                    {t("blog")}
+                  </span>
+                  <ChevronRight
+                    size={15}
+                    className="ml-auto text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all duration-200"
+                  />
                 </Link>
 
                 {/* Static Pages */}
                 <div>
                   <button
-                    onClick={() => setActiveDropdown(activeDropdown === "static" ? null : "static")}
+                    onClick={() =>
+                      setActiveDropdown(
+                        activeDropdown === "static" ? null : "static",
+                      )
+                    }
                     className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group text-left"
                   >
                     <div
                       className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200"
-                      style={{ background: activeDropdown === "static" ? "var(--main-color)" : "rgba(39,34,98,0.08)" }}
+                      style={{
+                        background:
+                          activeDropdown === "static"
+                            ? "var(--main-color)"
+                            : "rgba(39,34,98,0.08)",
+                      }}
                     >
-                      <Sparkles size={18} style={{ color: activeDropdown === "static" ? "#fff" : "var(--second-color)" }} />
+                      <Sparkles
+                        size={18}
+                        style={{
+                          color:
+                            activeDropdown === "static"
+                              ? "#fff"
+                              : "var(--second-color)",
+                        }}
+                      />
                     </div>
-                    <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>More Pages</span>
+                    <span
+                      className="font-semibold text-[15px]"
+                      style={{ color: "var(--second-color)" }}
+                    >
+                      More Pages
+                    </span>
                     <ChevronDown
                       size={16}
                       className="ml-auto text-gray-400 flex-shrink-0 transition-transform duration-300"
-                      style={{ transform: activeDropdown === "static" ? "rotate(180deg)" : "rotate(0deg)" }}
+                      style={{
+                        transform:
+                          activeDropdown === "static"
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
+                      }}
                     />
                   </button>
                   {activeDropdown === "static" && (
-                    <div className="submenu-open bg-gray-50 border-l-2 ml-5" style={{ borderColor: "var(--main-color)" }}>
+                    <div
+                      className="submenu-open bg-gray-50 border-l-2 ml-5"
+                      style={{ borderColor: "var(--main-color)" }}
+                    >
                       {[
-                        { href: "/contact",   labelKey: "contact",
+                        { href: "/contact", labelKey: "contact" },
+                        { href: "/about-us", labelKey: "about" },
+                        {
+                          href: "/free-page",
+                          labelKey: "terms_and_conditions",
                         },
-                        { href: "/about-us", labelKey: "about",
-                         },
-                        { href: "/free-page", labelKey: "terms_and_conditions",
-                         },
                       ].map((item) => (
                         <Link
                           key={item.href}
@@ -821,9 +942,17 @@ export default function Navbar() {
                           onClick={closeMenu}
                           className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors group"
                         >
-                          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--main-color)" }} />
-                          <span className="text-[14px] text-gray-700 group-hover:text-[var(--second-color)] transition-colors font-medium">{t(item.labelKey)}</span>
-                          <ChevronRight size={13} className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
+                          <span
+                            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                            style={{ background: "var(--main-color)" }}
+                          />
+                          <span className="text-[14px] text-gray-700 group-hover:text-[var(--second-color)] transition-colors font-medium">
+                            {t(item.labelKey)}
+                          </span>
+                          <ChevronRight
+                            size={13}
+                            className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200"
+                          />
                         </Link>
                       ))}
                     </div>
@@ -832,29 +961,70 @@ export default function Navbar() {
 
                 <div className="mx-5 my-4 border-t border-gray-100" />
                 <div className="px-5 pb-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Preferences</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    Preferences
+                  </p>
                 </div>
 
                 {/* Currency */}
                 <div className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(39,34,98,0.08)" }}>
-                    <CircleDollarSign size={18} style={{ color: "var(--second-color)" }} />
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(39,34,98,0.08)" }}
+                  >
+                    <CircleDollarSign
+                      size={18}
+                      style={{ color: "var(--second-color)" }}
+                    />
                   </div>
-                  <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>Currency</span>
-                  <span className="ml-auto text-sm text-gray-400 font-medium">EGP</span>
-                  <ChevronRight size={15} className="text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
+                  <span
+                    className="font-semibold text-[15px]"
+                    style={{ color: "var(--second-color)" }}
+                  >
+                    Currency
+                  </span>
+                  <span className="ml-auto text-sm text-gray-400 font-medium">
+                    EGP
+                  </span>
+                  <ChevronRight
+                    size={15}
+                    className="text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200"
+                  />
                 </div>
 
-                {/* Language */}
-                <div className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(39,34,98,0.08)" }}>
+                {/* Mobile Language */}
+                <div className="relative flex items-center flex-wrap gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(39,34,98,0.08)" }}
+                  >
                     <Globe size={18} style={{ color: "var(--second-color)" }} />
                   </div>
-                  <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>Language</span>
-                  <span className="ml-auto text-sm text-gray-400 font-medium capitalize">
-                    {currentLanguage?.name ?? "English"}
+                  <span
+                    className="font-semibold text-[15px]"
+                    style={{ color: "var(--second-color)" }}
+                  >
+                    Language
                   </span>
-                  <ChevronRight size={15} className="text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
+                  <span className="ml-auto text-sm text-gray-400 font-medium capitalize">
+                    {currentLanguage?.slug ?? locale}
+                  </span>
+                  <ChevronRight
+                    size={15}
+                    className="text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200"
+                  />
+                  <div className="lang-menu !flex-1 !relative w-auto ps-5">
+                    {data.header.languages.map((lang) => (
+                      <button
+                        key={lang.slug}
+                        type="button"
+                        onClick={() => onLanguageChange(lang.slug)}
+                        className="lang-item w-full text-left"
+                      >
+                        {lang.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Support */}
@@ -863,11 +1033,25 @@ export default function Navbar() {
                   onClick={closeMenu}
                   className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
                 >
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(39,34,98,0.08)" }}>
-                    <HelpCircle size={18} style={{ color: "var(--second-color)" }} />
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(39,34,98,0.08)" }}
+                  >
+                    <HelpCircle
+                      size={18}
+                      style={{ color: "var(--second-color)" }}
+                    />
                   </div>
-                  <span className="font-semibold text-[15px]" style={{ color: "var(--second-color)" }}>Support</span>
-                  <ChevronRight size={15} className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200" />
+                  <span
+                    className="font-semibold text-[15px]"
+                    style={{ color: "var(--second-color)" }}
+                  >
+                    Support
+                  </span>
+                  <ChevronRight
+                    size={15}
+                    className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200"
+                  />
                 </Link>
 
                 <div className="pb-8" />

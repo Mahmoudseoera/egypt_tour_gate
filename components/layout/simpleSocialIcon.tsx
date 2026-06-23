@@ -18,7 +18,7 @@ export default function SimpleSocialIcon({ item, className = '' }: SimpleSocialI
       href={item.url}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-block p-2 hover:opacity-80 ${className}`}
+      className={`inline-block pe-1 md:p-2 hover:opacity-80 ${className}`}
       title={item.title}
     >
       <i className={item.icon}></i>

@@ -1,6 +1,6 @@
 // components/layout/MobileFooter.tsx
 'use client';
-
+import { useT } from "@/lib/hooks/useTranslate";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -119,7 +119,7 @@ function NavItem({ href, label, active, icon, external }: NavItemProps) {
 export default function MobileFooter() {
   const pathname = usePathname();
   const [settings, setSettings] = useState<SiteSettings | null>(null);
-
+  const t = useT("common");
   useEffect(() => {
     loadSettings('en').then(setSettings).catch(() => {});
   }, []);
@@ -290,7 +290,7 @@ export default function MobileFooter() {
           {/* Call */}
           <NavItem
             href={phoneHref}
-            label="Call"
+            label= {t("mobile")}
             active={false}
             icon={<PhoneIcon />}
             external
@@ -299,7 +299,7 @@ export default function MobileFooter() {
           {/* Home */}
           <NavItem
             href="/"
-            label="Home"
+            label={t("home")}
             active={isActive('/')}
             icon={<HomeIcon />}
           />
@@ -307,7 +307,7 @@ export default function MobileFooter() {
           {/* Contact */}
           <NavItem
             href="/contact"
-            label="Contact"
+            label={t("contact")}
             active={isActive('/contact')}
             icon={<ContactIcon />}
           />
@@ -315,7 +315,7 @@ export default function MobileFooter() {
           {/* Book Now */}
           <NavItem
             href="/tailor-made"
-            label="Book Now"
+            label={t("tailormade")}
             active={isActive('/tailor-made')}
             icon={<BookIcon />}
           />
