@@ -306,7 +306,7 @@ export default function Navbar() {
                 className="flex items-center gap-1 pl-2 md:pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
               >
                 <Phone className="h-4 w-4" />
-                <span className="hidden md:inline font-medium">{t("")}:</span>
+                <span className="hidden md:inline font-medium">{t("mobile")}:</span>
                 <span className="hidden lg:inline">
                   {data.header.info?.phone ?? "+201110008407"}
                 </span>
@@ -620,7 +620,7 @@ export default function Navbar() {
                       : "text-[var(--second-color)] hover:text-[var(--main-color)]"
                   }`}
                 >
-                  More Pages
+                  {t("more_pages")}
                   <ChevronDown
                     className={`h-4 w-4 transition-transform duration-300 ${activeMegaMenu === "static" ? "rotate-180" : ""}`}
                   />
@@ -910,7 +910,7 @@ export default function Navbar() {
                       className="font-semibold text-[15px]"
                       style={{ color: "var(--second-color)" }}
                     >
-                      More Pages
+                      {t("more_pages")}
                     </span>
                     <ChevronDown
                       size={16}

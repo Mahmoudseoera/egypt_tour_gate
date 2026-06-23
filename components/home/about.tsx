@@ -2,12 +2,12 @@ import { Check } from 'lucide-react';
 import Image from "next/image";
 import Link from "next/link";
 import type { AboutSection } from "@/lib/api/homeTypes";
-
+import { getT } from "@/lib/hooks/getT";
 interface RoavioAboutSectionProps {
   aboutData?: AboutSection | null;
 }
 
-export default function RoavioAboutSection({ aboutData }: RoavioAboutSectionProps) {
+export default async function RoavioAboutSection({ aboutData }: RoavioAboutSectionProps) {
   const features = [
     { id: 1, text: "Destination Search & Filters" },
     { id: 2, text: "Online Booking System" },
@@ -16,7 +16,7 @@ export default function RoavioAboutSection({ aboutData }: RoavioAboutSectionProp
     { id: 5, text: "Pricing & Discounts" },
     { id: 6, text: "Reviews & Ratings" },
   ];
-
+   const t =  await getT("home");
   const rawDesc  = aboutData?.about_desc ?? "";
 
   // const cleanDesc = rawDesc.replace(/<[^>]+>/g, "").trim();
@@ -91,7 +91,7 @@ export default function RoavioAboutSection({ aboutData }: RoavioAboutSectionProp
               </div>
               <div>
                 <Link href="/about-us" className="btn-effect !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg" aria-label="Learn more about our company">
-                  Learn More
+                  {t("learn_more")}
                 </Link>
               </div>
             </div>

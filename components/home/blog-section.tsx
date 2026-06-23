@@ -301,7 +301,7 @@ export default function TravelBlogSection({
             className="inline-flex items-center gap-3 px-8 py-4 rounded-full font-bold text-lg text-white shadow-lg bg-[var(--main-color)] hover:bg-[var(--second-color)] transition-all duration-300 hover:scale-105 group"
           >
             <BookOpen className="w-5 h-5" />
-            <span>Explore All Articles</span>
+            <span>{t("view_all_articles")}</span>
             <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-2" />
           </Link>
         </div>
