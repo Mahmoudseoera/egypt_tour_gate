@@ -325,7 +325,7 @@ export default function Navbar() {
               </Link>
 
               {/* Language switcher */}
-              <div className="relative group flex items-center gap-1 pb-3 px-4 border-r border-gray-200 cursor-pointer text-[var(--second-color)]">
+              <div className="relative group flex items-center gap-1  px-4 border-r border-gray-200 cursor-pointer text-[var(--second-color)]">
                 <Globe className="h-4 w-4" />
                 <span className="hidden md:inline uppercase font-medium">
                   {currentLanguage?.slug ?? locale}

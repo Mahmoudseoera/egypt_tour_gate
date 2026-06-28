@@ -3,7 +3,7 @@
 // Pure client component — reads directly from localStorage via useFavourites.
 
 "use client";
-
+import { useT } from "@/lib/hooks/useTranslate";
 import { Heart, Trash2, ArrowLeft, PackageOpen } from "lucide-react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
@@ -13,7 +13,7 @@ import SecondTourCard from "@/components/tour/second-tour-card";
 export default function FavouritePage() {
   const { favourites, clear } = useFavourites();
   const locale = useLocale();
-
+  const t = useT("common");
   // Build a locale-aware path (respects `localePrefix: 'as-needed'`)
   const localePath = (path: string) =>
     locale === "en" ? path : `/${locale}${path}`;
@@ -26,7 +26,7 @@ export default function FavouritePage() {
           <PackageOpen size={40} className="text-red-300" />
         </div>
         <h1 className="text-2xl font-bold text-[var(--second-color)] mb-2">
-          No favourites yet
+          {t("favourites_is_empty")}
         </h1>
         <p className="text-gray-500 max-w-md mb-8">
           Tap the{" "}
@@ -60,7 +60,7 @@ export default function FavouritePage() {
               <Heart size={20} className="text-red-500 fill-red-500" />
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-[var(--second-color)]">
-              My Favourites
+              {t("favourites")}
             </h1>
           </div>
           <p className="text-gray-500 text-sm pl-[52px]">
