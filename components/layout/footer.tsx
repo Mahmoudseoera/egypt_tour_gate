@@ -170,7 +170,7 @@ export default function Footer() {
         </div>
 
         {/* ── Bottom bar ────────────────────────────────────────────────────── */}
-        <div className="mt-12 pt-8 border-t border-[var(--main-color)]/15 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="mt-12 pt-8 pb-8 md:pb-0 border-t border-[var(--main-color)]/15 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <p className="text-white/60 text-sm text-center md:text-left">
             © {currentYear} {t("rights_reserved")}
           </p>

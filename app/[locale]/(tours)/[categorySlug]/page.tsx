@@ -101,7 +101,7 @@ export async function generateMetadata({
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { locale, categorySlug } = await params;
   const category = await getCategoryData(categorySlug, locale);
-    const t = await getT("common");
+    const t = await getT("view_tour");
   if (!category) {
     notFound();
   }
@@ -138,7 +138,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     <>
       <SchemaScript schema={categorySchema} />
       {/* ── Page Hero ── */}
-        <div className="relative py-20 overflow-hidden">
+        <div className="relative py-16 h-80 overflow-hidden">
         {/* Background Image */}
             <FallbackImage
                src={coverCategory || "/placeholder.svg"}
@@ -157,7 +157,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <div className="absolute -top-10 -left-10 w-56 h-56 rounded-full opacity-10 bg-[var(--main-color)]" />
         <div className="absolute -bottom-14 -right-14 w-72 h-72 rounded-full opacity-10 bg-[var(--main-color)]" />
 
-        <div className="relative z-10 text-center px-4">
+        <div className="relative z-[3] flex flex-col justify-center item-center h-full text-center px-4">
           <p className="text-[var(--main-color)] font-semibold tracking-widest uppercase text-xs mb-3">
             Explore
           </p>
@@ -177,7 +177,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             <ExpandableDescription
               text={categoryDescription}
               isHtml
-              className="text-white [&>p]:text-white/90"
+              className="text-white [&>p]:text-white/90 [&_a:hover]:underline"
             />
           </div>
           {category.subs.length === 0 ? (
@@ -251,10 +251,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
                       <div className="pt-2 border-t border-gray-100">
                         <span
-                          className="inline-flex items-center gap-2 w-full justify-center py-3 px-6 rounded-xl font-semibold text-sm text-white transition-all duration-300 group-hover:gap-3"
+                          className="inline-flex items-center capitalize gap-2 w-full justify-center py-3 px-6 rounded-xl font-semibold text-sm text-white transition-all duration-300 group-hover:gap-3"
                           style={{ backgroundColor: "var(--second-color)" }}
                         >
-                          {t("view_details")}
+                          {t("view_tours")}
                         </span>
                       </div>
                     </div>

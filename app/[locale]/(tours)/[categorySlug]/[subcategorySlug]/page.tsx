@@ -197,7 +197,7 @@ export default async function SubcategoryPage({
     <>
       <SchemaScript schema={subcategorySchema} />
       {/* ── Page Hero ── */}
-      <div className="relative py-20 overflow-hidden">
+      <div className="relative py-16 h-80 overflow-hidden">
 
         {/* Background Image */}
         <Image
@@ -221,7 +221,7 @@ export default async function SubcategoryPage({
         <div className="absolute -top-10 -left-10 z-[2] w-56 h-56 rounded-full opacity-15 bg-[var(--main-color)]" />
         <div className="absolute -bottom-14 -right-14 z-[2] w-72 h-72 rounded-full opacity-15 bg-[var(--main-color)]" />
         {/* Content */}
-        <div className="relative z-[3] text-center px-4">
+        <div className="relative z-[3] flex flex-col justify-center item-center h-full text-center px-4">
           <p className="text-white font-semibold tracking-widest uppercase text-xs mb-3">
             Explore {categoryName}
           </p>

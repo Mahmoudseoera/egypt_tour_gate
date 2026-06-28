@@ -72,7 +72,7 @@ export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
                 </button>
                 {openIndex === index && (
                   <div className="px-6 pb-6">
-                    <div className="text-gray-600 leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: faq.answer }} />
+                    <div className="text-gray-600 leading-relaxed prose prose-sm max-w-none [&_a:hover]:underline" dangerouslySetInnerHTML={{ __html: faq.answer }} />
                   </div>
                 )}
               </div>
@@ -98,7 +98,7 @@ export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
                   </button>
                   {openIndex === realIndex && (
                     <div className="px-6 pb-6">
-                      <div className="text-gray-600 leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: faq.answer }} />
+                      <div className="text-gray-600 leading-relaxed prose prose-sm max-w-none [&_a:hover]:underline" dangerouslySetInnerHTML={{ __html: faq.answer }} />
                     </div>
                   )}
                 </div>
