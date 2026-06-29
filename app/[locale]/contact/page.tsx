@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { useT } from "@/lib/hooks/useTranslate";
 import { useLocale } from "next-intl";
-
+import "@/styles/contact.css";
 import {
   contactSchema,
   type ContactFormData,
@@ -207,7 +207,6 @@ const breadcrumbItems = [
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, router]);
 
   /* ─── Floating label CSS strings ─── */
@@ -240,45 +239,6 @@ const breadcrumbItems = [
 
   return (
     <>
-      <style>{`
-        .contact-hero {
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
-        }
-        .bc-link {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          color: rgba(255,255,255,0.70);
-          font-size: 0.82rem;
-          font-weight: 500;
-          text-decoration: none;
-          transition: color 0.22s ease;
-          white-space: nowrap;
-        }
-        .bc-link:hover { color: var(--main-color); }
-        .bc-link.bc-active {
-          color: var(--main-color);
-          font-weight: 600;
-          pointer-events: none;
-        }
-        .bc-sep {
-          display: inline-flex;
-          align-items: center;
-          color: var(--main-color);
-          opacity: 0.55;
-          flex-shrink: 0;
-        }
-        .contact-card .card-icon {
-          transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
-          will-change: transform;
-        }
-        .contact-card:hover .card-icon {
-          transform: scale(1.18) rotate(14deg);
-        }
-      `}</style>
-
       <section className="min-h-screen bg-[var(--main-grey)]">
         {/* ── PAGE HEADER ── */}
           <div 

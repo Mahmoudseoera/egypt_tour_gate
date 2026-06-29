@@ -52,118 +52,8 @@ export default function TravelServicesSection({
 
   const services = buildServicesFromAPI();
 
-  const styles = `
-    .services-bg-section {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .services-bg-image {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-    }
-
-    .services-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        135deg,
-        rgba(39, 34, 98, 0.88) 0%,
-        rgba(39, 34, 98, 0.75) 40%,
-        rgba(20, 17, 60, 0.85) 100%
-      );
-      z-index: 1;
-    }
-
-    .services-content {
-      position: relative;
-      z-index: 2;
-    }
-
-    .service-card {
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(227, 183, 94, 0.2);
-      backdrop-filter: blur(8px);
-      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .service-card:hover {
-      background: rgba(227, 183, 94, 0.12);
-      border-color: rgba(227, 183, 94, 0.5);
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-    }
-
-    .service-icon-wrap {
-      width: 44px;
-      height: 44px;
-      min-width: 44px;
-      background: rgba(227, 183, 94, 0.15);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.3s ease;
-    }
-    .service-icon-wrap img {
-      color: transparent;
-      filter: brightness(0) saturate(100%) invert(78%) sepia(27%) saturate(943%)
-            hue-rotate(356deg) brightness(92%) contrast(89%);
-    }
-    .service-card:hover .service-icon-wrap {
-      background: rgba(227, 183, 94, 0.28);
-    }
-
-    .featured-card {
-      position: relative;
-      overflow: hidden;
-      border-radius: 20px;
-    }
-
-    .featured-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(39,34,98,0.85) 100%);
-      z-index: 1;
-    }
-
-    .featured-card img {
-      transition: transform 0.6s ease;
-    }
-
-    .featured-card:hover img {
-      transform: scale(1.06);
-    }
-
-    .featured-card > * {
-      position: relative;
-      z-index: 2;
-    }
-
-    .service-fade-in {
-      animation: svcFadeUp 0.5s ease-out forwards;
-      opacity: 0;
-    }
-    .service-fade-in:nth-child(1) { animation-delay: 0.05s; }
-    .service-fade-in:nth-child(2) { animation-delay: 0.1s; }
-    .service-fade-in:nth-child(3) { animation-delay: 0.15s; }
-    .service-fade-in:nth-child(4) { animation-delay: 0.2s; }
-    .service-fade-in:nth-child(5) { animation-delay: 0.25s; }
-    .service-fade-in:nth-child(6) { animation-delay: 0.3s; }
-    .service-fade-in:nth-child(7) { animation-delay: 0.35s; }
-
-    @keyframes svcFadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-  `;
-
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: styles }} />
-
       <div className="services-bg-section py-12 md:py-16 px-4 md:px-8">
         {/* Background Image */}
         <div className="services-bg-image">
@@ -232,8 +122,7 @@ export default function TravelServicesSection({
                       {service.description}
                     </p>
                   </div>
-
-                  {/* 👇 حط الـ Featured بعد العنصر التاني */}
+             
                   {index === 0 && (
                     <div
                       className="featured-card service-fade-in md:col-span-2"

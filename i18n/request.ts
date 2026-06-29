@@ -8,15 +8,15 @@ import { fetchTranslationMessages } from '@/lib/api/translation';
 // Server Components and pages. It MUST populate `messages` (not {}) — that
 // data is what next-intl/server reads from internally.
 //
-// layout.tsx ALSO calls fetchTranslationMessages(locale) directly to build
-// the `messages` prop passed into NextIntlClientProvider for client
-// components (useTranslations() / useT()). That is intentional duplication,
-// not a bug: client components read from React context (NextIntlClientProvider),
-// while Server Components read from this request-scoped config — they are
-// two separate delivery paths and both need the same data.
+// layout.tsx uses getMessages() (which delegates here via next-intl internals)
+// to build the `messages` prop passed into NextIntlClientProvider for client
+// components (useTranslations() / useT()). That is intentional: client
+// components read from React context (NextIntlClientProvider), while Server
+// Components read from this request-scoped config — they are two separate
+// delivery paths but share the same data fetched here.
 //
-// Both calls hit fetchTranslationEditor() with cache: "no-store", so the
-// locale is always correct and fresh in either path — no stale-cache risk.
+// fetchTranslationMessages() uses cache: "no-store" by default, so translations
+// are always fresh on every request — no stale-cache risk.
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
   const locale = hasLocale(routing.locales, requested)

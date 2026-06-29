@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Toaster } from 'sonner';
 import { setRequestLocale } from 'next-intl/server';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
+import { getMessages } from "next-intl/server";
 import { notFound } from 'next/navigation';
 import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
@@ -11,7 +12,7 @@ import WhatsappIcon from '@/components/layout/Whatsapp-icon';
 import GlobalSeoSchema from '@/components/seo/global-seo-schema';
 import RouteProgress from '@/components/layout/route-progress';
 import { routing } from '@/lib/i18n/routing';
-import { fetchTranslationMessages } from '@/lib/api/translation';
+// import { fetchTranslationMessages } from '@/lib/api/translation';
 
 type Props = {
   children: React.ReactNode;
@@ -48,7 +49,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   // Fetch messages directly using the locale from params — this guarantees
   // we always get the correct locale's translations, bypassing getMessages()
   // which depends on next-intl's async storage context (unreliable in layouts).
-  const messages = await fetchTranslationMessages(locale);
+  const messages = await getMessages();
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>

@@ -256,7 +256,7 @@ export default function Navbar() {
         <div className="topbar-wrapper">
           <div className="mx-auto flex max-w-[1500px] items-center justify-between pr-2 pt-2 md:pr-4 pt-2 pb-0 text-sm">
             <div className="flex items-center">
-              <div className=" hidden md:flex items-center gap-1 pr-2 md:pr-4 border-r border-gray-200">
+              <div className="  md:flex items-center gap-1 pr-2 md:pr-4 border-r border-gray-200">
                 {socialData.map((item, index) => {
                   if (item.title === "TripAdvisor") {
                     return (
@@ -272,7 +272,7 @@ export default function Navbar() {
                           width={70}
                           height={30}
                           alt="TripAdvisor"
-                          className="w-5 h-5 object-contain"
+                          className="w-5 h-5 object-contain inline-block"
                         />
                       </Link>
                     );

@@ -59,7 +59,8 @@ function toMessages(json: TranslationEditorResponse | null): TranslationMessages
 }
 
 export async function fetchTranslationEditor(
-  locale = "en"
+  locale = "en",
+  options?: RequestInit
 ): Promise<TranslationEditorResponse | null> {
   const base = (
     process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://www.egypttoursgate.com/api/v1"
@@ -67,7 +68,10 @@ export async function fetchTranslationEditor(
 
   try {
     const res = await fetch(`${base}/get-translation-editor?locale=${locale}`, {
-      next: { revalidate: 3600, tags: ["translation"] },
+      // Default: always fetch fresh so i18n/request.ts never serves stale translations.
+      // Callers that want tag-based caching can override via `options`.
+      cache: "no-store",
+      ...options,
     });
     if (!res.ok) return null;
     return (await res.json()) as TranslationEditorResponse;
