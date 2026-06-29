@@ -25,11 +25,12 @@ export type Entry = { path: string; priority: string };
  */
 export function buildUrl(canonicalPath: string, locale: string): string {
   const clean =
-    canonicalPath === '/'
-      ? ''
-      : `/${canonicalPath.replace(/^\/+|\/+$/g, '')}`;
-  const prefix = locale === DEFAULT_LOCALE ? '' : `/${locale}`;
-  return `${SITE_URL}${prefix}${clean || '/'}`;
+    canonicalPath === "/"
+      ? ""
+      : `/${canonicalPath.replace(/^\/+|\/+$/g, "")}`;
+
+  const prefix = locale === DEFAULT_LOCALE ? "" : `/${locale}`;
+  return `${SITE_URL}${prefix}${clean}`;
 }
 
 // ─── XML helpers ──────────────────────────────────────────────────────────────
