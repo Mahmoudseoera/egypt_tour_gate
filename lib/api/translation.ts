@@ -67,7 +67,7 @@ export async function fetchTranslationEditor(
 
   try {
     const res = await fetch(`${base}/get-translation-editor?locale=${locale}`, {
-      cache: "no-store",
+      next: { revalidate: 3600, tags: ["translation"] },
     });
     if (!res.ok) return null;
     return (await res.json()) as TranslationEditorResponse;
