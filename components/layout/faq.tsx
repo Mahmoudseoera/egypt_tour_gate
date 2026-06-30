@@ -11,6 +11,9 @@ const staticFaqs: Faq[] = [
   { title: "What is the best time to visit Egypt?", answer: "October to April offers mild weather (15–25°C). Summer is very hot but offers significant discounts." },
 ];
 
+const ITEMS_INITIAL = 5;
+const ITEMS_STEP = 5;
+
 interface FAQSectionProps {
   /** Full FAQ section from the home API (includes title + description). */
   faqSection?: FaqSection | null;
@@ -20,6 +23,7 @@ interface FAQSectionProps {
 
 export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [visibleCount, setVisibleCount] = useState(ITEMS_INITIAL);
 
   // ── Dynamic section heading with fallbacks ──────────────────────────────
   const heading =
@@ -37,8 +41,27 @@ export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
       : staticFaqs;
 
   const mid = Math.ceil(rawFaqs.length / 2);
-  const leftItems = rawFaqs.slice(0, mid);
-  const rightItems = rawFaqs.slice(mid);
+  const allLeftItems = rawFaqs.slice(0, mid);
+  const allRightItems = rawFaqs.slice(mid);
+
+  // ── Determine how many items to show per side ───────────────────────────
+  // visibleCount applies independently to each side; a side simply shows
+  // up to visibleCount items, or all of its items if it has fewer.
+  const leftItems = allLeftItems.slice(0, visibleCount);
+  const rightItems = allRightItems.slice(0, visibleCount);
+
+  const longerSideLength = Math.max(allLeftItems.length, allRightItems.length);
+  const hasMoreToShow = visibleCount < longerSideLength;
+  const hasShownExtra = visibleCount > ITEMS_INITIAL;
+
+  const handleShowMore = () => {
+    setVisibleCount((prev) => prev + ITEMS_STEP);
+  };
+
+  const handleShowLess = () => {
+    setVisibleCount(ITEMS_INITIAL);
+    setOpenIndex(null);
+  };
 
   return (
     <section className="py-16 px-4 md:px-8 bg-white faq-section">
@@ -106,6 +129,28 @@ export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
             })}
           </div>
         </div>
+
+        {/* SHOW MORE / SHOW LESS controls */}
+        {(hasMoreToShow || hasShownExtra) && (
+          <div className="flex items-center justify-center gap-4 mt-10">
+            {hasMoreToShow && (
+              <button
+                onClick={handleShowMore}
+                className="px-6 py-3 rounded-full font-semibold text-white bg-[var(--main-color)] hover:opacity-90 transition-opacity"
+              >
+                Show More
+              </button>
+            )}
+            {hasShownExtra && (
+              <button
+                onClick={handleShowLess}
+                className="px-6 py-3 rounded-full font-semibold text-[var(--second-color)] border border-[var(--second-color)] hover:bg-gray-50 transition-colors"
+              >
+                Show Less
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );

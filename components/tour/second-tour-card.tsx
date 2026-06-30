@@ -94,7 +94,7 @@ export default function SecondTourCard({
               className={
                 i < Math.floor(rating)
                   ? "fill-gold text-gold"
-                  : "text-grey-light"
+                  : "text-grey-light text-gray-300 fill-gray-300"
               }
             />
           ))}

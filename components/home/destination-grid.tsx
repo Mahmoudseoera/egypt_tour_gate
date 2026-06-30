@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useT } from "@/lib/hooks/useTranslate";
 import type { TagCategoriesSection, TagCategory } from "@/lib/api/homeTypes";
-
+import FallbackImage from "@/components/shared/fallback-image";
 const PLACEHOLDER = "/placeholder.svg";
 
 function tagCategoryImageUrl(media: TagCategory["media"] | undefined): string {
@@ -83,7 +83,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             <Link href="/tailor-made">
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 0 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-100">
-              <Image
+              <FallbackImage
                 src={tagCategoryImageUrl(cat(0)?.media)}
                 alt={cat(0)?.media?.alt ?? cat(0)?.name ?? "Destination"}
                 fill
@@ -114,7 +114,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
            <Link href="/tailor-made">
             <div className={`absolute inset-0 bg-gradient-to-br transition-transform duration-500 ${hoveredIndex === 1 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-100">
-                <Image
+                <FallbackImage
                 src={tagCategoryImageUrl(cat(1)?.media)}
                 alt={cat(1)?.media?.alt ?? cat(1)?.name ?? "Destination"}
                 fill
@@ -144,7 +144,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             <Link href="/tailor-made">
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 2 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-100">
-                <Image
+                <FallbackImage
                 src={tagCategoryImageUrl(cat(2)?.media)}
                 alt={cat(2)?.media?.alt ?? cat(2)?.name ?? "Destination"}
                 fill
@@ -174,7 +174,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             <Link href="/tailor-made">
             <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 3 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-100">
-                <Image
+                <FallbackImage
                 src={tagCategoryImageUrl(cat(3)?.media)}
                 alt={cat(3)?.media?.alt ?? cat(3)?.name ?? "Destination"}
                 fill
@@ -204,7 +204,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
             <Link href="/tailor-made">
             <div className={`absolute inset-0 bg-gradient-to-br transition-transform duration-500 ${hoveredIndex === 4 ? 'scale-110' : 'scale-100'}`}>
               <div className="absolute inset-0 flex items-center justify-center text-8xl opacity-100">
-                <Image
+                <FallbackImage
                 src={tagCategoryImageUrl(cat(4)?.media)}
                 alt={cat(4)?.media?.alt ?? cat(4)?.name ?? "Destination"}
                 fill
@@ -235,7 +235,7 @@ export default function DestinationGrid({ tagCategoriesSection }: DestinationGri
               <Link href="/tailor-made">
               <div className={`absolute inset-0 bg-gradient-to-br  transition-transform duration-500 ${hoveredIndex === 5 ? 'scale-110' : 'scale-100'}`}>
                 <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-100">
-                  <Image
+                  <FallbackImage
                   src={tagCategoryImageUrl(cat(5)?.media)}
                   alt={cat(5)?.media?.alt ?? cat(5)?.name ?? "Destination"}
                   fill

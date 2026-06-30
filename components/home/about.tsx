@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { AboutSection } from "@/lib/api/homeTypes";
 import { getT } from "@/lib/hooks/getT";
+import FallbackImage from "@/components/shared/fallback-image";
 interface RoavioAboutSectionProps {
   aboutData?: AboutSection | null;
 }
@@ -29,7 +30,7 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
     <>
       <div className="bg-white py-16 px-4 md:px-8 lg:px-12">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
             <div className="flex flex-col justify-center">
               <p className="text-sm font-semibold text-[var(--second-color)] uppercase tracking-wider mb-2">{subTitle}</p>
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[var(--second-color)] mb-4 leading-tight">
@@ -44,7 +45,7 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-1 roavio-card-hover">
                 <div className="rounded-3xl overflow-hidden h-50 lg:h-full">
-                  <Image src={"/assets/images/tours/Pyramids-in-Egypt-webp.webp"} alt="Pyramids" className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
+                  <FallbackImage src={"/assets/images/tours/Pyramids-in-Egypt-webp.webp"} alt="Pyramids" className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
                 </div>
               </div>
               <div className="col-span-1 bg-[var(--second-800)] rounded-3xl p-2 md:p-8 flex flex-col justify-center items-center text-white h-50 lg:h-full">
@@ -65,12 +66,12 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="roavio-card-hover">
               <div className="rounded-3xl overflow-hidden h-full">
-                <Image src={imgAbout} alt="about image" className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
+                <FallbackImage src={imgAbout} alt="about image" className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
               </div>
             </div>
-            <div className="space-y-8">
+            <div className="space-y-2">
               <h3 className="text-xl font-semibold text-[var(--second-color)]">{title2}</h3>
-              <div className="text-gray-600 text-lg leading-relaxed">
+              <div className="text-gray-600 text-lg leading-relaxed mb-2">
                     <div
                         dangerouslySetInnerHTML={{
                           __html: desc,

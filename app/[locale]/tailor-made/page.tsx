@@ -10,6 +10,7 @@ import { Check, Calendar, CalendarDays, MapPin, User, Phone, Globe, Hotel, Messa
 // Import the required base styling and the plugin styling
 import "flatpickr/dist/flatpickr.min.css";
 import "flatpickr/dist/plugins/monthSelect/style.css";
+import FallbackImage from "@/components/shared/fallback-image";
 import {
   tailorMadeSchema,
   type TailorMadeFormData,
@@ -928,7 +929,7 @@ const budget_range_label =
                           className={`group relative overflow-hidden rounded-2xl border-2 transition-all duration-300 hover:shadow-lg focus:outline-none ${selected ? "border-[#e3b75e] shadow-md ring-2 ring-[#e3b75e]/30" : "border-[#e8eaf0] hover:border-[#e3b75e]/60"}`}
                         >
                           <div className="relative h-24 w-full overflow-hidden">
-                            <Image
+                            <FallbackImage
                               src={city.image}
                               alt={city.name}
                               fill
@@ -1243,7 +1244,7 @@ const budget_range_label =
           {/* ─── Summary Sidebar ──────────────────────────────── */}
           <div className="bg-white rounded-3xl shadow-xl border border-[#e8eaf0] overflow-hidden sticky top-4">
             <div className="relative h-36 w-full">
-              <Image
+              <FallbackImage
                 src="/assets/images/tours/Pyramids-in-Egypt-webp.webp"
                 alt="Egypt"
                 fill

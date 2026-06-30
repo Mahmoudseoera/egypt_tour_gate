@@ -33,7 +33,7 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
     <div className="bg-white py-16 px-4 md:px-8 lg:px-12">
         <div className="max-w-7xl mx-auto">
           {/* ── Top grid: heading + image pair ──────────────────────────────── */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
             <div className="flex flex-col justify-center">
               <p className="text-sm font-semibold text-[var(--main-color)] uppercase tracking-wider mb-2">
                 {subTitle}
@@ -118,13 +118,13 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
               </div>
             </div>
 
-            <div className="space-y-8">
-              <h3 className="text-xl font-semibold text-[var(--second-color)]">
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-[var(--second-color)] mb-2">
                 {title2}
               </h3>
-              <p className="text-gray-600 text-lg leading-relaxed">{desc}</p>
+              <p className="text-gray-600 text-lg leading-relaxed mb-2">{desc}</p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {features.map((feature) => (
                   <div
                     key={feature.id}

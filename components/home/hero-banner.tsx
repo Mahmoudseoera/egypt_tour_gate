@@ -37,7 +37,7 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
 
         {/* Full-width background image */}
         <div className="hero-bg-img">
-          <Image
+          <FallbackImage
             src={backgroundImg}
             alt={firstSlide?.media?.image_alt ?? title}
             fill

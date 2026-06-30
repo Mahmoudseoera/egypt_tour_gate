@@ -5,6 +5,7 @@ import SecondTourCard from "@/components/tour/second-tour-card";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
+import FallbackImage from "@/components/shared/fallback-image";
 import {
   breadcrumbSchema,
   buildSeoMetadata,
@@ -200,12 +201,11 @@ export default async function SubcategoryPage({
       <div className="relative py-16 h-80 overflow-hidden">
 
         {/* Background Image */}
-        <Image
+        <FallbackImage
           src={subcategoryCover}
           alt={subcategoryName}
           fill
-          priority
-          className="object-cover"
+           className="object-cover"
         />
 
         {/* Main Color Overlay */}

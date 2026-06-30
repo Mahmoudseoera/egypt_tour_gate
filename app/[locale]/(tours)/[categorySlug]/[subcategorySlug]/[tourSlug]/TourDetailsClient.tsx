@@ -1470,7 +1470,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   >
                     <div className="relative h-48 overflow-hidden bg-gray-100">
                       {relTour.image ? (
-                        <Image
+                        <FallbackImage
                           src={relTour.image}
                           alt={relTour.title}
                           fill

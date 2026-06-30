@@ -1,6 +1,7 @@
 // components/PartnersMarquee.tsx
 import Image from "next/image";
 import type { Partner } from "@/lib/api/homeTypes";
+import FallbackImage from "@/components/shared/fallback-image";
 
 interface PartnersProps {
   partners: Partner[];
@@ -13,7 +14,7 @@ export default function PartnersMarquee({ partners = [] }: PartnersProps) {
         <div className="flex animate-marquee gap-6 md:gap-4 lg:gap-8 hover:pause">
           {partners.map((img, index) => (
             <div key={`first-${index}`} className="flex-shrink-0">
-              <Image
+              <FallbackImage
                 src={img.image}
                 alt={img.img_alt}
                 width={150}
@@ -24,7 +25,7 @@ export default function PartnersMarquee({ partners = [] }: PartnersProps) {
           ))}
           {partners.map((img, index) => (
             <div key={`second-${index}`} className="flex-shrink-0 mx-4">
-              <Image
+              <FallbackImage
                 src={img.image}
                 alt={img.img_alt}
                 width={150}

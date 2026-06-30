@@ -76,7 +76,7 @@ export default function TravelTourSlider({
       : [];
 
   return (
-    <section className="home-tours min-h-screen bg-[var(--main-grey)] pt-16">
+    <section className="home-tours min-h-screen bg-[var(--main-grey)] pt-16" id="tours-section">
       <div className="max-w-7xl mx-auto px-5">
         <div className="text-center mb-5">
           <h2 className="text-2xl md:text-3xl font-semibold text-[var(--second-color)] mb-4">

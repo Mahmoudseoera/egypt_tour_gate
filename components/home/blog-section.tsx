@@ -209,7 +209,7 @@ export default function TravelBlogSection({
                     >
                       <div className="flex items-stretch gap-0 p-4">
                         <div className="flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden relative">
-                          <Image
+                          <FallbackImage
                             src={post.image}
                             alt={post.title}
                             fill

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { WhyChooseSection } from "@/lib/api/homeTypes";
+import FallbackImage from "@/components/shared/fallback-image";
 type WhyChooseSectionProps = {
   /** Full `tag_categories_section` object from `fetchHomeSections().tag_categories_section`. */
   whyChooseSection: WhyChooseSection | null;
@@ -57,7 +58,7 @@ export default function TravelServicesSection({
       <div className="services-bg-section py-12 md:py-16 px-4 md:px-8">
         {/* Background Image */}
         <div className="services-bg-image">
-          <Image
+          <FallbackImage
             src="/assets/images/tours/camel front of giza pyramids.jpg"
             alt="Egypt background"
             fill
@@ -107,7 +108,7 @@ export default function TravelServicesSection({
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div className="service-icon-wrap">
-                        <Image
+                        <FallbackImage
                           src={service.img}
                           alt="Star Icon"
                           width={24}
@@ -128,7 +129,7 @@ export default function TravelServicesSection({
                       className="featured-card service-fade-in md:col-span-2"
                       style={{ minHeight: "200px", maxHeight: "260px" }}
                     >
-                      <Image
+                      <FallbackImage
                         src="/assets/images/blogs/A-wonderful-picture-of-a-tourist-in-front-of-the-pyramids-webp.webp"
                         alt="Custom Tour Plan"
                         fill

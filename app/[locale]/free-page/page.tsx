@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { buildSeoMetadata } from "@/lib/seo";
 import Image from "next/image";
 import FreePageAccordion from "@/components/shared/free-page-accordion";
+import FallbackImage from "@/components/shared/fallback-image";
 // API
 import { getTermsAndConditions } from "@/lib/api/freePage";
 export const revalidate = 3600;
@@ -34,7 +35,7 @@ export default async function FreePage() {
 
         {/* ===== Hero Header ===== */}
         <div className="relative mb-10 rounded-2xl overflow-hidden shadow-lg">
-          <Image
+          <FallbackImage
             src="/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp"
             alt="Terms and Conditions"
             height={360}

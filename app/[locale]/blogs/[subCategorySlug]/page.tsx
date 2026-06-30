@@ -8,6 +8,7 @@ import { getCategoryPageData } from "@/lib/api/blog";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
+import FallbackImage from "@/components/shared/fallback-image";
 import {
   breadcrumbSchema,
   buildSeoMetadata,
@@ -89,11 +90,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         {/* Cover image background — falls back to gradient if no cover image */}
         {category.coverImage ? (
           <div className="absolute inset-0">
-            <Image
+            <FallbackImage
               src={category.coverImage}
               alt={category.coverImageAlt}
               fill
-              priority
               className="object-cover"
               sizes="100vw"
             />
@@ -174,7 +174,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                     <Link href={`/blogs/${subCategorySlug}/${post.slug}`}>
                       {/* Thumbnail */}
                       <div className="relative h-64 bg-gradient-to-br from-navy/20 to-gold/20 overflow-hidden">
-                        <Image
+                        <FallbackImage
                           src={post.image}
                           alt={post.imageAlt}
                           fill

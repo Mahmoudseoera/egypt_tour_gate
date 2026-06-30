@@ -16,6 +16,7 @@ import {
 } from "@/lib/seo";
 import { getCategoryBySlug, getGeneralCategories } from "@/lib/api/toursApi";
 import { routing } from "@/lib/i18n/routing";
+import {Binoculars} from "lucide-react";
 // import placeholder from "@/assets/images/placeholder.png";
 type CategoryPageProps = {
   params: Promise<{ locale: string; categorySlug: string }>;
@@ -221,7 +222,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                     style={{ animationDelay: `${index * 60}ms` }}
                   >
                     <div className="relative h-56 overflow-hidden flex-shrink-0">
-                      <Image
+                      <FallbackImage
                         src={rawImage}
                         alt={childImageAlt}
                         fill
@@ -254,7 +255,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                           className="inline-flex items-center capitalize gap-2 w-full justify-center py-3 px-6 rounded-xl font-semibold text-sm text-white transition-all duration-300 group-hover:gap-3"
                           style={{ backgroundColor: "var(--second-color)" }}
                         >
-                          {t("view_tours")}
+                           {t("view_tours")} <Binoculars />
                         </span>
                       </div>
                     </div>

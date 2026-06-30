@@ -25,9 +25,9 @@ export default function FavouritePage() {
         <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center mb-6">
           <PackageOpen size={40} className="text-red-300" />
         </div>
-        <h1 className="text-2xl font-bold text-[var(--second-color)] mb-2">
+        <h2 className="text-2xl font-bold text-[var(--second-color)] mb-2">
           {t("favourites_is_empty")}
-        </h1>
+        </h2>
         <p className="text-gray-500 max-w-md mb-8">
           Tap the{" "}
           <Heart
