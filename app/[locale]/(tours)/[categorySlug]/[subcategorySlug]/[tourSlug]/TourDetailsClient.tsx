@@ -269,6 +269,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   ) as string[];
   const safeTourImages =
     tourImages.length > 0 ? tourImages : ["/assets/images/tours/49-webp.webp"];
+    console.log("gallery images", safeTourImages);
   const highlights = tour.highlights?.filter(Boolean) ?? [];
   const itinerary = (
     tour.itinerary?.length
@@ -533,7 +534,6 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
         <section className="relative w-full h-[300px] sm:h-[420px] md:h-[550px] overflow-hidden">
           {(() => {
             const count = safeTourImages.length;
-
             // ── 1 image: full-width hero ──────────────────────────────────────
             if (count === 1) {
               return (
