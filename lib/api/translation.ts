@@ -68,9 +68,27 @@ export async function fetchTranslationEditor(
 
   try {
     const res = await fetch(`${base}/get-translation-editor?locale=${locale}`, {
-      // Default: always fetch fresh so i18n/request.ts never serves stale translations.
-      // Callers that want tag-based caching can override via `options`.
-      cache: "no-store",
+      // IMPORTANT: do NOT use cache: "no-store" here.
+      //
+      // This helper is called from i18n/request.ts -> getTranslations()/getT(),
+      // which runs inside EVERY server component, including ones that use
+      // generateStaticParams + `export const revalidate = N` (ISR/static pages,
+      // e.g. app/[locale]/blogs/[subCategorySlug]/page.tsx).
+      //
+      // "no-store" == revalidate: 0, which tells Next.js "this fetch must be
+      // dynamic, always". When that happens inside a route Next.js already
+      // decided was static at build time (because of generateStaticParams),
+      // you get:
+      //   "Error: Page changed from static to dynamic at runtime ...
+      //    reason: revalidate: 0"
+      // which surfaces to the user as an Internal Server Error.
+      //
+      // Using `next: { revalidate, tags }` instead keeps this fetch
+      // ISR-compatible — Next.js can prerender the page AND revalidate the
+      // translation data on the same schedule, with no static/dynamic
+      // conflict. Callers that genuinely need always-fresh data (e.g. a
+      // dedicated /api/revalidate webhook) can still override via `options`.
+      next: { revalidate: 3600, tags: ["translation", `translation:${locale}`] },
       ...options,
     });
     if (!res.ok) return null;
