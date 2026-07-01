@@ -849,7 +849,7 @@ const budget_range_label =
       <div className="relative min-h-screen bg-[#f4f6fb] flex items-center justify-center">
         <div className="text-center">
           <div className="w-14 h-14 border-4 border-[#272262] border-t-[#e3b75e] rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-[#272262] font-semibold text-sm">Loading your experience...</p>
+          <p className="text-[#272262] font-semibold text-sm">{t("loading_your_experience")}</p>
         </div>
       </div>
     );
@@ -955,7 +955,7 @@ const budget_range_label =
                   {formData.cities.length > 0 && (
                     <p className="text-xs text-[#888] flex items-center gap-1">
                       <MapPin size={12} className="text-[#e3b75e]" />
-                      Selected: <span className="font-semibold text-[#272262]">{formData.cities.map((id) => cities.find((c) => c.id === id)?.name).join(", ")}</span>
+                      {t("selected")}<span className="font-semibold text-[#272262]">{formData.cities.map((id) => cities.find((c) => c.id === id)?.name).join(", ")}</span>
                     </p>
                   )}
                 </div>
@@ -1065,7 +1065,7 @@ const budget_range_label =
                   {/* Phone row: country code + number */}
                   <div className="grid grid-cols-[140px_1fr] gap-3">
                     <FloatingSelect
-                      label="Code"
+                      label={t("code")}
                       value={formData.phoneCode}
                       onChange={(v) => updateFormData("phoneCode", v)}
                       icon={<Phone size={18} />}
@@ -1103,7 +1103,7 @@ const budget_range_label =
                     ))}
                   </FloatingSelect>
                   <FloatingSelect
-                    label="Hotel Rating"
+                    label={t("hotel_rating")}
                     value={formData.hotel}
                     onChange={(v) => updateFormData("hotel", v)}
                     icon={<Hotel size={18} />}
@@ -1184,8 +1184,8 @@ const budget_range_label =
               {currentStep === 5 && (
                 <div className="space-y-6">
                   <div className="bg-[#f8f9fc] rounded-2xl border-[1.5px] border-[#e8eaf0] px-5 py-6 text-center">
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">Welcome{formData.fullName ? `, ${formData.fullName}` : ""}! Almost there, 👋</h3>
-                    <p className="text-sm text-[#888] mt-2">Welcome to Egypt Tour Gate. We&apos;ll craft your trip and contact you shortly. Your request is almost ready. Click submit and our travel specialist will contact you.</p>
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#272262]">{t("welcome")}{formData.fullName ? `, ${formData.fullName}` : ""}{t("almost_there")}</h3>
+                    <p className="text-sm text-[#888] mt-2">{t("welcome_to_egypt_tour_gate_weaposll")}</p>
                   </div>
                   <form onSubmit={handleSubmit}>
                     <button
@@ -1199,8 +1199,7 @@ const budget_range_label =
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                           </svg>
-                          Submitting your request...
-                        </>
+                          {t("submitting_your_request")}</>
                       ) : "Submit Trip Request ✈️"}
                     </button>
                   </form>
@@ -1210,7 +1209,7 @@ const budget_range_label =
               {/* Step error */}
               {stepError && (
                 <div className="mt-5 flex items-start gap-2 text-sm font-semibold text-red-600 bg-red-50 border border-red-100 px-4 py-3 rounded-xl">
-                  <span className="text-red-500 mt-0.5">⚠️</span>
+                  <span className="text-red-500 mt-0.5">{t("")}</span>
                   {stepError}
                 </div>
               )}
@@ -1225,16 +1224,14 @@ const budget_range_label =
                       className="flex items-center gap-1 px-6 py-3 border-2 border-[#e8eaf0] text-[#272262] font-bold rounded-2xl hover:bg-[#f4f6fb] transition-all duration-200"
                     >
                       <ChevronLeft size={18} />
-                      Back
-                    </button>
+                      {t("back")}</button>
                   )}
                   <button
                     type="button"
                     onClick={nextStep}
                     className={`flex-1 flex items-center justify-center gap-1 py-3 font-bold rounded-2xl transition-all duration-200 shadow-md ${isStepValid() ? "bg-[#272262] hover:bg-[#1a1848] text-white hover:shadow-lg" : "bg-[#e8eaf0] text-[#aaa] cursor-not-allowed"}`}
                   >
-                    Continue
-                    <ChevronRight size={18} />
+                    {t("continue")}<ChevronRight size={18} />
                   </button>
                 </div>
               )}
@@ -1246,13 +1243,13 @@ const budget_range_label =
             <div className="relative h-36 w-full">
               <FallbackImage
                 src="/assets/images/tours/Pyramids-in-Egypt-webp.webp"
-                alt="Egypt"
+                alt={t("egypt")}
                 fill
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#272262]/80 to-transparent" />
               <div className="absolute bottom-4 left-5">
-                <h3 className="text-lg font-bold text-white">Trip Summary</h3>
+                <h3 className="text-lg font-bold text-white">{t("trip_summary")}</h3>
                 <p className="text-xs text-white/70">{summaryItems.length === 0 ? "Fill the form to see your summary" : `${summaryItems.length} detail${summaryItems.length > 1 ? "s" : ""} added`}</p>
               </div>
             </div>
@@ -1260,8 +1257,8 @@ const budget_range_label =
             <div className="p-5">
               {summaryItems.length === 0 ? (
                 <div className="text-center py-8">
-                  <div className="text-4xl mb-3">🗺️</div>
-                  <p className="text-sm text-[#aaa] font-medium">Your trip summary will appear here as you fill in the form</p>
+                  <div className="text-4xl mb-3">{t("")}</div>
+                  <p className="text-sm text-[#aaa] font-medium">{t("your_trip_summary_will_appear_here")}</p>
                 </div>
               ) : (
                 <div className="space-y-0 divide-y divide-[#f0f2f8]">
@@ -1277,8 +1274,8 @@ const budget_range_label =
               {/* Step indicator in sidebar */}
               <div className="mt-5 pt-4 border-t border-[#f0f2f8]">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-[#aaa] font-semibold">Progress</span>
-                  <span className="text-xs font-bold text-[#e3b75e]">Step {currentStep} of 5</span>
+                  <span className="text-xs text-[#aaa] font-semibold">{t("progress")}</span>
+                  <span className="text-xs font-bold text-[#e3b75e]">{t("step")}{currentStep} {t("of_5")}</span>
                 </div>
                 <div className="w-full bg-[#f0f2f8] rounded-full h-1.5">
                   <div

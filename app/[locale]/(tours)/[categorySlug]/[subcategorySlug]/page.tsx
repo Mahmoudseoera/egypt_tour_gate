@@ -6,6 +6,7 @@ import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
 import FallbackImage from "@/components/shared/fallback-image";
+import { getT } from "@/lib/hooks/getT";
 import {
   breadcrumbSchema,
   buildSeoMetadata,
@@ -137,7 +138,7 @@ export default async function SubcategoryPage({
   if (!category || !subcategory) {
     notFound();
   }
-
+const t = await getT("common");  
   const tours = await getToursBySubcategory(subcategorySlug, locale);
 
   const normalizedItems = tours.map((tour) => ({
@@ -223,7 +224,7 @@ export default async function SubcategoryPage({
         {/* Content */}
         <div className="relative z-[3] flex flex-col justify-center item-center h-full text-center px-4">
           <p className="text-white font-semibold tracking-widest uppercase text-xs mb-3">
-            Explore {categoryName}
+            {t("explore")}{categoryName}
           </p>
 
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white capitalize leading-tight">
@@ -253,8 +254,7 @@ export default async function SubcategoryPage({
           </div>
           {normalizedItems.length === 0 ? (
             <p className="text-lg text-center">
-              No tours found for this subcategory.
-            </p>
+              {t("no_tours_found_for_this_subcategory")}</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {normalizedItems.map((item) => (

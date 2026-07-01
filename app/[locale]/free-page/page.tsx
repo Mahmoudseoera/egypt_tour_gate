@@ -3,6 +3,7 @@ import { buildSeoMetadata } from "@/lib/seo";
 import Image from "next/image";
 import FreePageAccordion from "@/components/shared/free-page-accordion";
 import FallbackImage from "@/components/shared/fallback-image";
+import { getT } from "@/lib/hooks/getT";
 // API
 import { getTermsAndConditions } from "@/lib/api/freePage";
 export const revalidate = 3600;
@@ -25,7 +26,7 @@ export async function generateMetadata({
 
 export default async function FreePage() {
   const data = await getTermsAndConditions();
-
+   const t = await getT("common"); 
   const section =
     data?.data?.sections?.terms_and_conditions_section;
 
@@ -37,7 +38,7 @@ export default async function FreePage() {
         <div className="relative mb-10 rounded-2xl overflow-hidden shadow-lg">
           <FallbackImage
             src="/assets/images/blogs/A-snapshot-of-two-children-from-the-Nubian-village-of-Aswan-webp.webp"
-            alt="Terms and Conditions"
+            alt={t("terms_and_conditions")}
             height={360}
             width={1440}
             className="w-full h-[360px] object-cover"
@@ -81,13 +82,12 @@ export default async function FreePage() {
                 />
               ))  
             ) : (
-              <p>No terms and conditions available.</p>
+              <p>{t("no_terms_and_conditions_available")}</p>
             )}
 
             <div className="mt-12 border-t pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <span className="inline-flex items-center gap-2 text-main font-semibold">
-                ✈️ Travel with confidence
-              </span>
+                {t("travel_with_confidence")}</span>
             </div>
           </div>
         </div>

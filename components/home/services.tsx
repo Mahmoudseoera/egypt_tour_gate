@@ -1,16 +1,17 @@
 import Image from "next/image";
+import { getT } from "@/lib/hooks/getT";
 import type { WhyChooseSection } from "@/lib/api/homeTypes";
 import FallbackImage from "@/components/shared/fallback-image";
 type WhyChooseSectionProps = {
   /** Full `tag_categories_section` object from `fetchHomeSections().tag_categories_section`. */
   whyChooseSection: WhyChooseSection | null;
 };
-export default function TravelServicesSection({
+export default async function TravelServicesSection({
   whyChooseSection,
 }: WhyChooseSectionProps) {
   const sectionTitle = whyChooseSection?.title?.trim() || "Services We Offer";
   const sectionDescription = whyChooseSection?.description?.trim() || null;
-
+const t = await getT("home");  
   // ── Build services array from API data ──────────────────────────────────────
   const buildServicesFromAPI = () => {
     if (!whyChooseSection?.why_choose) return [];
@@ -60,7 +61,7 @@ export default function TravelServicesSection({
         <div className="services-bg-image">
           <FallbackImage
             src="/assets/images/tours/camel front of giza pyramids.jpg"
-            alt="Egypt background"
+            alt={t("egypt_background")}
             fill
             className="object-cover object-center"
             priority
@@ -110,7 +111,7 @@ export default function TravelServicesSection({
                       <div className="service-icon-wrap">
                         <FallbackImage
                           src={service.img}
-                          alt="Star Icon"
+                          alt={t("star_icon")}
                           width={24}
                           height={24}
                         />
@@ -131,7 +132,7 @@ export default function TravelServicesSection({
                     >
                       <FallbackImage
                         src="/assets/images/blogs/A-wonderful-picture-of-a-tourist-in-front-of-the-pyramids-webp.webp"
-                        alt="Custom Tour Plan"
+                        alt={t("custom_tour_plan")}
                         fill
                         className="object-cover"
                       />

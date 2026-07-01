@@ -36,16 +36,16 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[var(--second-color)] mb-4 leading-tight">
                 {title.split('<br')[0]}
                 <br className="hidden md:block"/>
-                <span className="text-gray-900">Egypt Tour Gate</span>
+                <span className="text-gray-900">{t("egypt_tour_gate")}</span>
               </h2>
               <p className="text-gray-600 text-lg">
-                We are started with 2005s, <span className="text-[var(--main-color)] font-semibold">20+ years of experience</span>
+                {t("we_are_started_with_2005s")}<span className="text-[var(--main-color)] font-semibold">{t("20_years_of_experience")}</span>
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-1 roavio-card-hover">
                 <div className="rounded-3xl overflow-hidden h-50 lg:h-full">
-                  <FallbackImage src={"/assets/images/tours/Pyramids-in-Egypt-webp.webp"} alt="Pyramids" className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
+                  <FallbackImage src={"/assets/images/tours/Pyramids-in-Egypt-webp.webp"} alt={t("pyramids")} className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
                 </div>
               </div>
               <div className="col-span-1 bg-[var(--second-800)] rounded-3xl p-2 md:p-8 flex flex-col justify-center items-center text-white h-50 lg:h-full">
@@ -57,8 +57,8 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
                     <path d="M32 56C32 56 52 44 52 28C52 22 48 16 40 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-center">Trusted & Secure</h3>
-                <p className="text-gray-300 text-sm text-center">Your safety and trust are our top priorities.</p>
+                <h3 className="text-lg font-semibold mb-2 text-center">{t("trusted_secure")}</h3>
+                <p className="text-gray-300 text-sm text-center">{t("your_safety_and_trust_are_our")}</p>
               </div>
             </div>
           </div>
@@ -66,7 +66,7 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="roavio-card-hover">
               <div className="rounded-3xl overflow-hidden h-full">
-                <FallbackImage src={imgAbout} alt="about image" className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
+                <FallbackImage src={imgAbout} alt={t("about_image")} className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
               </div>
             </div>
             <div className="space-y-2">
@@ -91,7 +91,7 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
                 ))}
               </div>
               <div>
-                <Link href="/about-us" className="btn-effect !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg" aria-label="Learn more about our company">
+                <Link href="/about-us" className="btn-effect !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg" aria-label={t("learn_more_about_our_company")}>
                   {t("learn_more")}
                 </Link>
               </div>

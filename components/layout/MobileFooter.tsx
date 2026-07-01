@@ -137,13 +137,13 @@ export default function MobileFooter() {
 
 
       {/* ── Markup ──────────────────────────────────────────────────────── */}
-      <nav id="mobileFixedFooter" aria-label="Mobile navigation">
+      <nav id="mobileFixedFooter" aria-label={t("mobile_navigation")}>
         <div className="mob-nav-row">
 
           {/* WhatsApp */}
           <NavItem
             href={whatsappHref}
-            label="WhatsApp"
+            label={t("whatsapp")}
             active={false}
             icon={<WhatsAppIcon />}
             external

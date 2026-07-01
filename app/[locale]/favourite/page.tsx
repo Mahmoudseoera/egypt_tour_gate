@@ -29,21 +29,19 @@ export default function FavouritePage() {
           {t("favourites_is_empty")}
         </h2>
         <p className="text-gray-500 max-w-md mb-8">
-          Tap the{" "}
+          {t("tap_the")}{" "}
           <Heart
             size={16}
             className="inline -mt-0.5 text-red-400 fill-red-400"
           />{" "}
-          icon on any tour to save it here for quick access later.
-        </p>
+          {t("icon_on_any_tour_to_save")}</p>
         <Link
           href={localePath("/")}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition hover:opacity-90"
           style={{ background: "var(--second-color)" }}
         >
           <ArrowLeft size={18} />
-          Explore Tours
-        </Link>
+          {t("explore_tours")}</Link>
       </main>
     );
   }
@@ -64,8 +62,7 @@ export default function FavouritePage() {
             </h1>
           </div>
           <p className="text-gray-500 text-sm pl-[52px]">
-            {favourites.length} {favourites.length === 1 ? "tour" : "tours"} saved
-          </p>
+            {favourites.length} {favourites.length === 1 ? "tour" : "tours"} {t("saved")}</p>
         </div>
 
         <div className="flex items-center gap-3 pl-0 md:pl-[52px] sm:pl-0">
@@ -74,16 +71,14 @@ export default function FavouritePage() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:border-[var(--second-color)] hover:text-[var(--second-color)] transition"
           >
             <ArrowLeft size={16} />
-            Browse more
-          </Link>
+            {t("browse_more")}</Link>
 
           <button
             onClick={clear}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 text-sm font-medium text-red-500 hover:bg-red-50 transition"
           >
             <Trash2 size={16} />
-            Clear all
-          </button>
+            {t("clear_all")}</button>
         </div>
       </div>
 

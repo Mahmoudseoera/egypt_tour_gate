@@ -52,7 +52,7 @@ export default async function BlogsPage({
         <div className="bg-gradient-to-br from-navy via-[#3d3586] to-navy absolute inset-0 z-[1] opacity-75">
         </div>
         <FallbackImage src={cover} fill sizes="(max-width: 768px) 100vw,
-          (max-width: 1200px) 50vw, 33vw" alt="Egypt Travel Blog - Tours, Tips & Cultural Guides | Egypt Tours Gate" 
+          (max-width: 1200px) 50vw, 33vw" alt={t("egypt_travel_blog_tours_tips_cultural")} 
           className="object-cover object-center" />
         <div className="absolute inset-0 z-20 opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 border-4 border-gold rounded-full" />
@@ -72,7 +72,7 @@ export default async function BlogsPage({
             )}
             <div className="mt-8 inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-white">
               <span className='font-semibold'>
-                {categories.length} categor{categories.length !== 1 ? "ies" : "y"}
+                {categories.length} {t("categor")}{categories.length !== 1 ? "ies" : "y"}
               </span>
             </div>
           </div>
@@ -144,17 +144,14 @@ export default async function BlogsPage({
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl font-bold text-white mb-6">
-              Ready to Start Your Egyptian Adventure?
-            </h2>
+              {t("ready_to_start_your_egyptian_adventure")}</h2>
             <p className="text-xl text-white/90 mb-8">
-              Let our expert team craft the perfect itinerary for your dream trip to Egypt
-            </p>
+              {t("let_our_expert_team_craft_the")}</p>
             <Link
               href="/contact"
               className="inline-block bg-gold hover:bg-gold/90 text-navy px-8 py-4 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-lg"
             >
-              Plan Your Trip Today
-            </Link>
+              {t("plan_your_trip_today")}</Link>
           </div>
         </div>
       </section>

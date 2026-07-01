@@ -103,6 +103,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const { locale, categorySlug } = await params;
   const category = await getCategoryData(categorySlug, locale);
     const t = await getT("view_tour");
+    
   if (!category) {
     notFound();
   }
@@ -160,8 +161,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
         <div className="relative z-[3] flex flex-col justify-center item-center h-full text-center px-4">
           <p className="text-[var(--main-color)] font-semibold tracking-widest uppercase text-xs mb-3">
-            Explore
-          </p>
+      {t("explore")}      </p>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white capitalize leading-tight">
             {categoryName.toLowerCase()}
           </h1>
@@ -183,8 +183,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           </div>
           {category.subs.length === 0 ? (
             <p className="text-lg text-center">
-              No subcategory found for this category.
-            </p>
+        {t("no_subcategory_found_for_this_category")}      </p>
           ): (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {(category.subs ?? []).map((child: any, index: number) => {

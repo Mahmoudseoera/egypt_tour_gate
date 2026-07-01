@@ -274,7 +274,7 @@ export default function TravelBlogSection({
                         <div>
                           <div className="flex items-center gap-2 mb-2">
                             <User className="w-4 h-4 text-[var(--main-color)]" />
-                            <span className="text-[var(--main-color)] font-bold text-sm">By {post.author}</span>
+                            <span className="text-[var(--main-color)] font-bold text-sm">{t("by")}{post.author}</span>
                           </div>
                           <h4 className="text-white font-bold text-xl leading-tight mb-2 group-hover:text-[var(--main-color)] transition-colors duration-300">
                             {post.title}

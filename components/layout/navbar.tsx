@@ -176,14 +176,13 @@ export default function Navbar() {
           <Link href="/" className="inline-flex items-center">
             <Image
               src="/assets/images/egypt-tour-gate-logo.png"
-              alt="Egypt Tour Gate"
+              alt={t("egypt_tour_gate")}
               width={70}
               height={30}
             />
           </Link>
           <div className="text-sm text-gray-600">
-            Menu unavailable, using fallback.
-          </div>
+            {t("menu_unavailable_using_fallback")}</div>
         </div>
       </nav>
     );
@@ -271,7 +270,7 @@ export default function Navbar() {
                           src="/assets/images/tripadvisor-icon.svg"
                           width={70}
                           height={30}
-                          alt="TripAdvisor"
+                          alt={t("tripadvisor")}
                           className="w-5 h-5 object-contain inline-block"
                         />
                       </Link>
@@ -346,7 +345,7 @@ export default function Navbar() {
               </div>
 
               <div className="flex items-center gap-1 pl-4 cursor-pointer text-[var(--second-color)]">
-                <span className="inline">USD</span>
+                <span className="inline">{t("usd")}</span>
                 <ChevronDown className="h-4 w-4" />
               </div>
               <Link
@@ -386,7 +385,7 @@ export default function Navbar() {
               <button
                 onClick={() => setMobileOpen(true)}
                 className="md:hidden flex flex-col gap-[5px] p-2 group"
-                aria-label="Open menu"
+                aria-label={t("open_menu")}
               >
                 <span className="block w-6 h-0.5 bg-[var(--second-color)] transition-all duration-300" />
                 <span className="block w-4 h-0.5 bg-[var(--second-color)] transition-all duration-300 group-hover:w-6" />
@@ -710,10 +709,10 @@ export default function Navbar() {
                 className="flex items-center justify-between px-5 py-4"
                 style={{ background: "var(--second-color)" }}
               >
-                <Link href="/" aria-label="Homepage">
+                <Link href="/" aria-label={t("homepage")}>
                   <Image
                     src="/assets/images/egypt-tour-gate-logo.png"
-                    alt="Egypt Tour Gate"
+                    alt={t("egypt_tour_gate")}
                     width={60}
                     height={26}
                     className="brightness-0 invert"
@@ -722,7 +721,7 @@ export default function Navbar() {
                 <button
                   onClick={closeMenu}
                   className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:bg-white/20"
-                  aria-label="Close menu"
+                  aria-label={t("close_menu")}
                 >
                   <X size={20} />
                 </button>
@@ -732,8 +731,7 @@ export default function Navbar() {
               <div className="flex-1 overflow-y-auto">
                 <div className="px-5 pt-5 pb-2">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
-                    Explore
-                  </p>
+                    {t("explore")}</p>
                 </div>
 
                 {/* Home */}
@@ -752,8 +750,7 @@ export default function Navbar() {
                     className="font-semibold text-[15px]"
                     style={{ color: "var(--second-color)" }}
                   >
-                    Home
-                  </span>
+                    {t("home")}</span>
                   <ChevronRight
                     size={15}
                     className="ml-auto text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all duration-200"
@@ -795,8 +792,7 @@ export default function Navbar() {
                           </span>
                           {cat.subs.length > 0 && (
                             <span className="block text-xs text-gray-400">
-                              {cat.subs.length} subcategories
-                            </span>
+                              {cat.subs.length} {t("subcategories")}</span>
                           )}
                         </Link>
                         <span
@@ -962,8 +958,7 @@ export default function Navbar() {
                 <div className="mx-5 my-4 border-t border-gray-100" />
                 <div className="px-5 pb-2">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
-                    Preferences
-                  </p>
+                    {t("preferences")}</p>
                 </div>
 
                 {/* Currency */}
@@ -981,11 +976,9 @@ export default function Navbar() {
                     className="font-semibold text-[15px]"
                     style={{ color: "var(--second-color)" }}
                   >
-                    Currency
-                  </span>
+                    {t("currency")}</span>
                   <span className="ml-auto text-sm text-gray-400 font-medium">
-                    EGP
-                  </span>
+                    {t("egp")}</span>
                   <ChevronRight
                     size={15}
                     className="text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200"
@@ -1004,8 +997,7 @@ export default function Navbar() {
                     className="font-semibold text-[15px]"
                     style={{ color: "var(--second-color)" }}
                   >
-                    Language
-                  </span>
+                    {t("language")}</span>
                   <span className="ml-auto text-sm text-gray-400 font-medium capitalize">
                     {currentLanguage?.slug ?? locale}
                   </span>
@@ -1046,8 +1038,7 @@ export default function Navbar() {
                     className="font-semibold text-[15px]"
                     style={{ color: "var(--second-color)" }}
                   >
-                    Support
-                  </span>
+                    {t("support")}</span>
                   <ChevronRight
                     size={15}
                     className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200"
@@ -1066,8 +1057,7 @@ export default function Navbar() {
                   style={{ background: "var(--main-color)" }}
                 >
                   <Phone size={16} />
-                  Plan Your Egypt Trip
-                </Link>
+                  {t("plan_your_egypt_trip")}</Link>
               </div>
             </div>
           </div>

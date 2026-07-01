@@ -41,7 +41,7 @@ export default function Footer() {
   // ── Main footer ─────────────────────────────────────────────────────────────
   return (
     <footer
-      aria-label="Site footer"
+      aria-label={t("site_footer")}
       className="relative bg-[var(--second-color)] text-white pt-16 pb-10 overflow-hidden"
     >
       {/* Golden top accent */}
@@ -56,7 +56,7 @@ export default function Footer() {
 
           {/* ── Brand column ─────────────────────────────────────────────── */}
           <div className="space-y-6 lg:col-span-1">
-            <Link href={homePath} className="inline-flex items-center hover:opacity-90 transition-opacity" aria-label="Homepage">
+            <Link href={homePath} className="inline-flex items-center hover:opacity-90 transition-opacity" aria-label={t("homepage")}>
               <div className="relative w-32 h-10">
                 <Image
                   src={footerLogo?.image || "/assets/images/egypt-tour-gate-logo.png"}
@@ -75,8 +75,7 @@ export default function Footer() {
             </Link>
 
             <p className="text-white/80 text-sm leading-relaxed">
-              Discover the wonders of ancient Egypt with expertly curated tours to the Pyramids, Nile cruises, and historic temples.
-            </p>
+              {t("discover_the_wonders_of_ancient_egypt")}</p>
 
             {/* Contact info from API */}
             <div className="space-y-3 pt-2 border-t border-[var(--main-color)]/15">
@@ -175,7 +174,7 @@ export default function Footer() {
             © {currentYear} {t("rights_reserved")}
           </p>
 
-          <div className="flex items-center justify-center gap-3 md:justify-end" role="region" aria-label="Social media links">
+          <div className="flex items-center justify-center gap-3 md:justify-end" role="region" aria-label={t("social_media_links")}>
             <span className="text-white/60 text-sm hidden md:inline">{t("follow_us").toLowerCase()}:</span>
             <div className="flex gap-3">
               {socialData.map((item, index) => {
@@ -197,7 +196,7 @@ export default function Footer() {
                     >
                       <Image
                         src="/assets/images/tripadvisor-icon.svg"
-                        alt="TripAdvisor"
+                        alt={t("tripadvisor")}
                         width={70}
                         height={30}
                         className="w-5 h-5 object-contain brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition duration-300"

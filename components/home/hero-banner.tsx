@@ -41,7 +41,6 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
             src={backgroundImg}
             alt={firstSlide?.media?.image_alt ?? title}
             fill
-            priority
             className="object-cover object-center"
           />
         </div>
@@ -119,7 +118,7 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
             <div className="hero-left animate-slide-in-left">
               <div className="hero-label-row">
                 <span className="hero-label-line" />
-                <span className="hero-label-text">Premium Egypt Travel</span>
+                <span className="hero-label-text">{t("premium_egypt_travel")}</span>
                 <span className="hero-label-line" />
               </div>
               <h1 className="hero-title">{title}</h1>
@@ -144,14 +143,14 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
               <div className="photo-wrapper-1 animate-floating">
                 <div className="photo-ring" />
                 <div className="photo-frame photo-frame-1">
-                  <FallbackImage src={imageOne} alt="Egypt Tour" fill className="object-cover" />
+                  <FallbackImage src={imageOne} alt={t("egypt_tour")} fill className="object-cover" />
                   <div className="photo-shimmer overlay-animated opacity-10" />
                 </div>
               </div>
               <div className="photo-wrapper-2 animate-floating-delayed">
                 <div className="photo-ring photo-ring-2" />
                 <div className="photo-frame photo-frame-2">
-                  <FallbackImage src={imageTwo} alt="Luxury Tour" fill className="object-cover" />
+                  <FallbackImage src={imageTwo} alt={t("luxury_tour")} fill className="object-cover" />
                   <div className="photo-shimmer overlay-animated opacity-10" />
                 </div>
               </div>
@@ -160,8 +159,8 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
         </div>
 
         {/* Scroll Indicator */}
-        <Link href="#tours-section" className="scroll-indicator bottom-3 md:bottom-4" aria-label="Scroll to tours">
-          <span className="scroll-label">Scroll</span>
+        <Link href="#tours-section" className="scroll-indicator bottom-3 md:bottom-4" aria-label={t("scroll_to_tours")}>
+          <span className="scroll-label">{t("scroll")}</span>
           <div className="scroll-pill">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
               stroke="#c4973e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

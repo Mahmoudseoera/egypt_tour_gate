@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { buildSeoMetadata } from "@/lib/seo";
+import { getT } from "@/lib/hooks/getT";
 export async function generateMetadata({
   params,
 }: {
@@ -17,7 +18,8 @@ export async function generateMetadata({
   });
 }
 
-export default function ThankYouPage() {
+export default async function ThankYouPage() {
+  const t = await getT("common");  
   const styles =`
   @keyframes fade-in-up {
     from {
@@ -176,23 +178,20 @@ export default function ThankYouPage() {
 
         {/* Main Heading */}
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-[#272262] animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-          Thank You!
-        </h1>
+          {t("thank_you")}</h1>
 
         {/* Subheading */}
         <p className="text-xl mb-6 text-[#e3b75e] animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-          Your Journey Begins Here
-        </p>
+          {t("your_journey_begins_here")}</p>
 
         {/* Message */}
         <p className="text-gray-600 text-lg leading-relaxed mb-8 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-          Your message has been sent successfully. Our travel experts will contact you soon to craft your perfect Egyptian adventure.
-        </p>
+          {t("your_message_has_been_sent_successfully")}</p>
 
         {/* Additional Info */}
         <div className="pt-6 border-t border-gray-200 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
           <p className="text-sm text-gray-500">
-            Expected response time: <span className="font-semibold text-[#e3b75e]">24 hours</span>
+            {t("expected_response_time")}<span className="font-semibold text-[#e3b75e]">{t("24_hours")}</span>
           </p>
         </div>
 

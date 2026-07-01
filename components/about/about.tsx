@@ -42,13 +42,12 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
                 {/* Strip any embedded <br> tags from the title string */}
                 {title.split("<br")[0]}
                 <br className="hidden md:block" />
-                <span className="text-gray-900">Egypt Tour Gate</span>
+                <span className="text-gray-900">{t("egypt_tour_gate")}</span>
               </h2>
               <p className="text-gray-600 text-lg">
-                We are started with 2005s,{" "}
+                {t("we_are_started_with_2005s")}{" "}
                 <span className="text-[var(--second-800)] font-semibold">
-                  20+ years of experience
-                </span>
+                  {t("20_years_of_experience")}</span>
               </p>
             </div>
 
@@ -57,7 +56,7 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
                 <div className="rounded-3xl overflow-hidden h-50 lg:h-full">
                   <Image
                     src="/assets/images/tours/Pyramids-in-Egypt-webp.webp"
-                    alt="Pyramids"
+                    alt={t("pyramids")}
                     className="w-full h-full object-cover roavio-image-zoom"
                     width={800}
                     height={800}
@@ -95,11 +94,9 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
                   </svg>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-center">
-                  Trusted & Secure
-                </h3>
+                  {t("trusted_secure")}</h3>
                 <p className="text-gray-300 text-sm text-center">
-                  Your safety and trust are our top priorities.
-                </p>
+                  {t("your_safety_and_trust_are_our")}</p>
               </div>
             </div>
           </div>
@@ -147,8 +144,7 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
                   href="/contact"
                   className="btn-effect !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg"
                 >
-                  Contact Us
-                </Link>
+                  {t("contact_us")}</Link>
               </div>
             </div>
           </div>

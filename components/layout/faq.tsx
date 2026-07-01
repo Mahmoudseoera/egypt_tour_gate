@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Faq, FaqSection } from "@/lib/api/homeTypes";
-
+import { useT } from "@/lib/hooks/useTranslate";
 // ─── Static fallback FAQs (used only when API returns nothing) ─────────────
 const staticFaqs: Faq[] = [
   { title: "Is it safe to travel to Egypt 2024?", answer: "Egypt has been one of the most secure tourist destinations for decades. With sensible precautions you'll explore safely." },
@@ -24,7 +24,7 @@ interface FAQSectionProps {
 export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(ITEMS_INITIAL);
-
+  const t = useT("common");
   // ── Dynamic section heading with fallbacks ──────────────────────────────
   const heading =
     faqSection?.title?.trim() || "Most Asked Questions";
@@ -138,16 +138,14 @@ export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
                 onClick={handleShowMore}
                 className="px-6 py-3 rounded-full font-semibold text-white bg-[var(--main-color)] hover:opacity-90 transition-opacity"
               >
-                Show More
-              </button>
+                {t("show_more")}</button>
             )}
             {hasShownExtra && (
               <button
                 onClick={handleShowLess}
                 className="px-6 py-3 rounded-full font-semibold text-[var(--second-color)] border border-[var(--second-color)] hover:bg-gray-50 transition-colors"
               >
-                Show Less
-              </button>
+                {t("show_less")}</button>
             )}
           </div>
         )}

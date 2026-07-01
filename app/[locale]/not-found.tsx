@@ -1,5 +1,5 @@
 "use client";
-
+import { useT } from "@/lib/hooks/useTranslate";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { buildLocalizedPath, getPathLocale } from "@/lib/i18n/routing";
@@ -8,7 +8,7 @@ export default function NotFound() {
   const pathname = usePathname();
   const locale = getPathLocale(pathname);
   const homePath = buildLocalizedPath("/", locale);
-
+  const t = useT("common"); 
   return (
     <div className="main-error bg-[#f9f9f9] h-[600px] relative">
       <div className="container max-w-7xl mx-auto h-full">
@@ -30,11 +30,11 @@ export default function NotFound() {
           <div className="relative flex-1">
             <div className="message-box">
               <h1 className="text-[#1e2256] text-[100px] leading-[80px] mb-[20px] font-light">404</h1>
-              <p className="text-[#666] text-[16px]">Oops, the page you&apos;re looking for doesn&apos;t exist.</p>
+              <p className="text-[#666] text-[16px]">{t("oops_the_page_youaposre_looking_for")}</p>
               <div className="buttons-con mt-[20px]">
                 <div className="action-link-wrap">
                   <button className="btn-effect">
-                    <Link href={homePath}>Go to Home Page</Link>
+                    <Link href={homePath}>{t("go_to_home_page")}</Link>
                   </button>
                 </div>
               </div>

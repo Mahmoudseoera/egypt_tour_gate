@@ -545,7 +545,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
                   <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
                     <BookOpen className="w-4 h-4" />
-                    View Gallery ({count})
+                    {t("view_gallery")}{count})
                   </span>
                 </div>
               );
@@ -566,7 +566,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       {i === 0 && (
                         <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
                           <BookOpen className="w-4 h-4" />
-                          View Gallery ({count})
+                          {t("view_gallery")}{count})
                         </span>
                       )}
                     </div>
@@ -588,7 +588,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
                     <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
                       <BookOpen className="w-4 h-4" />
-                      View Gallery ({count})
+                      {t("view_gallery")}{count})
                     </span>
                   </div>
                   {/* Right stack */}
@@ -621,7 +621,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
                     <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
                       <BookOpen className="w-4 h-4" />
-                      View Gallery ({count})
+                      {t("view_gallery")}{count})
                     </span>
                   </div>
                   {/* Right 3-stack */}
@@ -655,7 +655,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 group-hover:from-black/65 transition-all duration-300" />
                   <span className="absolute bottom-4 left-4 text-white font-semibold text-sm z-20 flex items-center gap-2">
                     <BookOpen className="w-4 h-4" />
-                    View Gallery ({count})
+                    {t("view_gallery")}{count})
                   </span>
                 </div>
                 {/* Right 4 thumbnails — only render actual images (max 4) */}
@@ -674,8 +674,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                           +{count - 5}
                         </span>
                         <span className="text-white/80 text-xs font-medium">
-                          more photos
-                        </span>
+                          {t("more_photos")}</span>
                       </div>
                     )}
                   </div>
@@ -734,13 +733,11 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     {allOpen ? (
                       <>
                         <ChevronsDownUp className="w-3.5 h-3.5" />
-                        Collapse All
-                      </>
+                        {t("collapse_all")}</>
                     ) : (
                       <>
                         <ChevronsUpDown className="w-3.5 h-3.5" />
-                        Expand All
-                      </>
+                        {t("expand_all")}</>
                     )}
                   </button>
                 </div>
@@ -748,9 +745,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 <div className="space-y-3">
                   {itinerary.length === 0 && (
                     <p className="text-sm text-gray-500">
-                      Detailed itinerary will be shared after booking
-                      confirmation.
-                    </p>
+                      {t("detailed_itinerary_will_be_shared_after")}</p>
                   )}
                   {itinerary.map((day) => {
                     const open = isDayOpen(day.day);
@@ -853,8 +848,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               {highlights.length > 0 && (
                 <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
                   <h2 className="text-2xl font-bold text-[var(--second-color)] mb-5">
-                    Highlights
-                  </h2>
+                    {t("highlights")}</h2>
                   <ul className="space-y-3">
                     {highlights.map((h, i) => (
                       <li key={i} className="flex items-start gap-3">
@@ -873,8 +867,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               {/* Pricing */}
               <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
                 <h2 className="text-2xl font-bold text-[var(--second-color)] mb-1">
-                  Pricing
-                </h2>
+                  {t("pricing")}</h2>
                 {pricingTableTitle && (
                   <p className="text-sm text-gray-400 mb-5">
                     {pricingTableTitle}
@@ -885,11 +878,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     <thead>
                       <tr className="bg-[var(--second-color)] text-white">
                         <th className="text-left py-3 px-5 text-sm font-semibold">
-                          No. of Persons
-                        </th>
+                          {t("no_of_persons")}</th>
                         <th className="text-right py-3 px-5 text-sm font-semibold">
-                          Price / Person
-                        </th>
+                          {t("price_person")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -911,10 +902,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 </div>
                 <div className="mt-4 p-4 bg-blue-50 rounded-xl border-l-4 border-blue-400">
                   <p className="text-sm text-gray-600">
-                    <strong>Note:</strong> Prices are subject to availability
-                    and may vary during peak seasons. Contact us for group
-                    discounts and special offers.
-                  </p>
+                    <strong>{t("note")}</strong> {t("prices_are_subject_to_availability_and")}</p>
                 </div>
               </div>
 
@@ -934,11 +922,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-[var(--second-color)] leading-tight">
-                        Children Policy
-                      </h2>
+                        {t("children_policy")}</h2>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        Age-based pricing for this tour
-                      </p>
+                        {t("agebased_pricing_for_this_tour")}</p>
                     </div>
                   </div>
 
@@ -975,22 +961,18 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       border: "1.5px solid rgba(227,183,94,0.3)",
                     }}
                   >
-                    <span className="text-xl flex-shrink-0">💡</span>
+                    <span className="text-xl flex-shrink-0">{t("")}</span>
                     <p className="text-sm text-gray-700 leading-relaxed">
-                      Traveling with a family? We offer{" "}
+                      {t("traveling_with_a_family_we_offer")}{" "}
                       <strong className="text-[var(--second-color)]">
-                        customized family packages
-                      </strong>{" "}
-                      with dedicated child-friendly guides, kid-safe activities,
-                      and flexible scheduling.{" "}
+                        {t("customized_family_packages")}</strong>{" "}
+                      {t("with_dedicated_childfriendly_guides_kidsafe_activities")}{" "}
                       <Link
                         href="/contact"
                         className="text-[var(--main-color)] font-bold underline underline-offset-2 hover:text-[var(--second-color)] transition-colors"
                       >
-                        Contact us
-                      </Link>{" "}
-                      for a tailored quote.
-                    </p>
+                        {t("contact_us")}</Link>{" "}
+                      {t("for_a_tailored_quote")}</p>
                   </div>
                 </div>
               )}
@@ -1002,11 +984,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
                 <div className="sh-form px-6 py-4 text-center">
                   <h3 className="text-lg font-bold text-white tracking-wide">
-                    Check Availability
-                  </h3>
+                    {t("check_availability")}</h3>
                   <p className="text-white/70 text-xs mt-0.5">
-                    Fill in your details to request this trip
-                  </p>
+                    {t("fill_in_your_details_to_request")}</p>
                 </div>
 
                 <form
@@ -1017,14 +997,11 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   {/* ── Success banner ── */}
                   {submitStatus === "success" && (
                     <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                      <div className="text-2xl mb-1">🎉</div>
+                      <div className="text-2xl mb-1">{t("")}</div>
                       <h3 className="font-bold text-green-800 text-sm">
-                        Booking Request Received!
-                      </h3>
+                        {t("booking_request_received")}</h3>
                       <p className="text-green-700 text-xs mt-1">
-                        Our team will reach out within 24 hours to confirm your
-                        trip.
-                      </p>
+                        {t("our_team_will_reach_out_within")}</p>
                     </div>
                   )}
 
@@ -1033,15 +1010,13 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     !Object.keys(fieldErrors).length && (
                       <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
                         <p className="text-red-700 text-xs font-medium">
-                          Something went wrong. Please try again or contact us
-                          directly.
-                        </p>
+                          {t("something_went_wrong_please_try_again")}</p>
                       </div>
                     )}
 
                   {/* Name */}
                   <div>
-                    <label className={labelCls}>Full Name</label>
+                    <label className={labelCls}>{t("full_name")}</label>
                     <input
                       type="text"
                       name="name"
@@ -1049,7 +1024,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       className={inputCls(fieldErrors.name)}
-                      placeholder="Mahmoud Abozeid"
+                      placeholder={t("mahmoud_abozeid")}
                     />
                     {fieldErrors.name && (
                       <p className={errCls} data-err>
@@ -1060,7 +1035,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
 
                   {/* Email */}
                   <div>
-                    <label className={labelCls}>Email Address</label>
+                    <label className={labelCls}>{t("email_address")}</label>
                     <input
                       type="email"
                       name="email"
@@ -1068,7 +1043,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       className={inputCls(fieldErrors.email)}
-                      placeholder="you@email.com"
+                      placeholder={t("youemailcom")}
                     />
                     {fieldErrors.email && (
                       <p className={errCls} data-err>
@@ -1079,7 +1054,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
 
                   {/* Nationality */}
                   <div>
-                    <label className={labelCls}>Nationality</label>
+                    <label className={labelCls}>{t("nationality")}</label>
                     <select
                       name="nationality"
                       value={formData.nationality}
@@ -1087,7 +1062,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       onBlur={handleBlur}
                       className={`${inputCls(fieldErrors.nationality)} appearance-none cursor-pointer`}
                     >
-                      <option value="">Select nationality…</option>
+                      <option value="">{t("select_nationality")}</option>
                       {NATIONALITIES.map((n) => (
                         <option key={n} value={n}>
                           {n}
@@ -1104,7 +1079,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   {/* Country Code + Phone */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className={labelCls}>Code</label>
+                      <label className={labelCls}>{t("code")}</label>
                       <select
                         name="countryCode"
                         value={formData.countryCode}
@@ -1112,7 +1087,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                         onBlur={handleBlur}
                         className={`${inputCls(fieldErrors.countryCode)} appearance-none cursor-pointer`}
                       >
-                        <option value="">Select code…</option>
+                        <option value="">{t("select_code")}</option>
                         {PHONE_CODES.map((item) => (
                           <option key={item.label} value={item.code}>
                             {item.label}
@@ -1126,7 +1101,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       )}
                     </div>
                     <div>
-                      <label className={labelCls}>Phone</label>
+                      <label className={labelCls}>{t("phone")}</label>
                       <input
                         type="tel"
                         name="phone"
@@ -1147,13 +1122,13 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   {/* Check In / Check Out */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className={labelCls}>Check In</label>
+                      <label className={labelCls}>{t("check_in")}</label>
                       <div className="relative">
                         <input
                           ref={checkInRef}
                           name="checkIn"
                           readOnly
-                          placeholder="Pick date"
+                          placeholder={t("pick_date")}
                           className={`${inputCls(fieldErrors.checkIn)} pr-9 cursor-pointer`}
                         />
                         <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -1171,13 +1146,13 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       )}
                     </div>
                     <div>
-                      <label className={labelCls}>Check Out</label>
+                      <label className={labelCls}>{t("check_out")}</label>
                       <div className="relative">
                         <input
                           ref={checkOutRef}
                           name="checkOut"
                           readOnly
-                          placeholder="Pick date"
+                          placeholder={t("pick_date")}
                           className={`${inputCls(fieldErrors.checkOut)} pr-9 cursor-pointer`}
                         />
                         <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -1199,7 +1174,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                   {/* Adults + Children counters */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className={labelCls}>Adults</label>
+                      <label className={labelCls}>{t("adults")}</label>
                       <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-2 py-2 border border-gray-200">
                         <button
                           type="button"
@@ -1226,7 +1201,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       )}
                     </div>
                     <div>
-                      <label className={labelCls}>Children</label>
+                      <label className={labelCls}>{t("children")}</label>
                       <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-2 py-2 border border-gray-200">
                         <button
                           type="button"
@@ -1261,8 +1236,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                         className={`${labelCls} flex items-center gap-1.5`}
                       >
                         <Baby className="w-3.5 h-3.5 text-[var(--second-color)]" />
-                        Child Ages (0–17)
-                      </label>
+                        {t("child_ages_017")}</label>
                       <div className="grid grid-cols-2 gap-2">
                         {Array.from({ length: formData.children }).map(
                           (_, i) => (
@@ -1305,7 +1279,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
 
                   {/* Message */}
                   <div>
-                    <label className={labelCls}>Message (optional)</label>
+                    <label className={labelCls}>{t("message_optional")}</label>
                     <textarea
                       name="message"
                       value={formData.message}
@@ -1313,7 +1287,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       onBlur={handleBlur}
                       rows={3}
                       className={`${inputCls(fieldErrors.message)} resize-none`}
-                      placeholder="Any special requests or questions…"
+                      placeholder={t("any_special_requests_or_questions")}
                     />
                     {fieldErrors.message && (
                       <p className={errCls} data-err>
@@ -1332,16 +1306,14 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     {submitStatus === "loading" ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        SUBMITTING…
-                      </>
+                        {t("submitting")}</>
                     ) : submitStatus === "success" ? (
                       <>
                         <span>✓</span>
-                        BOOKING SENT!
-                      </>
+                        {t("booking_sent")}</>
                     ) : (
                       <>
-                        REQUEST THIS TRIP <ArrowRight className="w-4 h-4" />
+                        {t("request_this_trip")}<ArrowRight className="w-4 h-4" />
                       </>
                     )}
                   </button>
@@ -1352,11 +1324,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
                 <div className="sh-contact px-6 py-4 text-center">
                   <p className="text-white/80 text-xs uppercase tracking-widest mb-1">
-                    Need Help?
-                  </p>
+                    {t("need_help")}</p>
                   <h3 className="text-base font-bold text-white">
-                    Talk to Our Team
-                  </h3>
+                    {t("talk_to_our_team")}</h3>
                 </div>
                 <div className="p-5 space-y-3">
                   <a
@@ -1366,8 +1336,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     <span className="w-9 h-9 rounded-full bg-[var(--second-color)]/8 flex items-center justify-center flex-shrink-0 group-hover:bg-[var(--second-color)]/15 transition-colors">
                       <Mail className="w-4 h-4 text-[var(--second-color)]" />
                     </span>
-                    info@egypttoursgate.com
-                  </a>
+                    {t("infoegypttoursgatecom")}</a>
                   <a
                     href="tel:+201110008407"
                     className="flex items-center gap-3 text-gray-700 hover:text-[var(--second-color)] transition-colors group"
@@ -1386,11 +1355,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     <span className="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
                       <MessageCircle className="w-4 h-4 text-green-500" />
                     </span>
-                    WhatsApp Chat
-                  </a>
+                    {t("whatsapp_chat")}</a>
                   <button className="w-full mt-2 bg-[var(--second-color)] hover:bg-[#1e1a5e] text-white font-semibold py-2.5 px-6 rounded-xl transition-all text-sm">
-                    CUSTOMIZE YOUR TRIP
-                  </button>
+                    {t("customize_your_trip")}</button>
                 </div>
               </div>
 
@@ -1399,8 +1366,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
                   <div className="sh-articles px-6 py-4 text-center">
                     <h3 className="text-base font-bold text-white">
-                      Related Articles
-                    </h3>
+                      {t("related_articles")}</h3>
                   </div>
                   <div className="p-4 space-y-3">
                     {relatedArticles.map((article) => (
@@ -1455,11 +1421,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
             <div className="mt-14">
               <div className="text-center mb-8">
                 <h2 className="text-2xl md:text-3xl font-bold text-[var(--second-color)] mb-2">
-                  You May Also Like
-                </h2>
+                  {t("you_may_also_like")}</h2>
                 <p className="text-gray-500 text-sm">
-                  Discover more amazing Egypt tours
-                </p>
+                  {t("discover_more_amazing_egypt_tours")}</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {relatedTours.map((relTour) => (
@@ -1500,7 +1464,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                           {relTour.duration}
                         </span>
                         <div className="text-right">
-                          <div className="text-xs text-gray-400">From</div>
+                          <div className="text-xs text-gray-400">{t("from")}</div>
                           <div className="text-xl font-bold text-[var(--second-color)]">
                             ${relTour.price_from}
                           </div>
@@ -1516,11 +1480,9 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                         <div className="mt-14 related-tours">
               <div className="text-center mb-8">
                 <h2 className="text-2xl md:text-3xl font-bold text-[var(--second-color)] mb-2">
-                  You May Also Like
-                </h2>
+                  {t("you_may_also_like")}</h2>
                 <p className="text-gray-500 text-sm">
-                  Discover more amazing Egypt tours
-                </p>
+                  {t("discover_more_amazing_egypt_tours")}</p>
               </div>
                       <Swiper
                         modules={[Navigation]}
@@ -1542,7 +1504,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                                 >
                     <div className="relative h-48 overflow-hidden bg-gray-100">
                       {relTour.image ? (
-                        <Image
+                        <FallbackImage
                           src={relTour.image}
                           alt={relTour.title}
                           fill
@@ -1572,7 +1534,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                           {relTour.duration}
                         </span>
                         <div className="text-right">
-                          <div className="text-xs text-gray-400">From</div>
+                          <div className="text-xs text-gray-400">{t("from")}</div>
                           <div className="text-xl font-bold text-[var(--second-color)]">
                             ${relTour.price_from}
                           </div>

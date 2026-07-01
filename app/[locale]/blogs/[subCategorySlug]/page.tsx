@@ -149,20 +149,16 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           <div className="max-w-7xl mx-auto">
             {posts.length === 0 ? (
               <div className="text-center py-20">
-                <div className="text-6xl mb-6">📝</div>
+                <div className="text-6xl mb-6">{t("")}</div>
                 <h2 className="text-3xl font-bold text-navy mb-4">
-                  No Articles Yet
-                </h2>
+                  {t("no_articles_yet")}</h2>
                 <p className="text-gray-600 mb-8">
-                  We&apos;re working on creating amazing content for this
-                  category. Check back soon!
-                </p>
+                  {t("weaposre_working_on_creating_amazing_content")}</p>
                 <Link
                   href="/blogs"
                   className="inline-block bg-gold hover:bg-gold/90 text-navy px-6 py-3 rounded-full font-bold transition-all"
                 >
-                  Browse All Categories
-                </Link>
+                  {t("browse_all_categories")}</Link>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -263,7 +259,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                   d="M15 19l-7-7 7-7"
                 />
               </svg>
-              <span>Back to All Categories</span>
+              <span>{t("back_to_all_categories")}</span>
             </Link>
           </div>
         </div>

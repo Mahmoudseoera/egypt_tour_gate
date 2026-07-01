@@ -169,7 +169,7 @@ export default async function BlogDetailsPage({
               className="inline-flex items-center gap-2 text-[var(--second-color)] hover:text-[var(--main-color)] transition-colors mb-8 group"
             >
               <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-              <span className="font-semibold">Back to Blog</span>
+              <span className="font-semibold">{t("back_to_blog")}</span>
             </Link>
 
             <article
@@ -213,7 +213,7 @@ export default async function BlogDetailsPage({
                   <div className="flex items-center gap-3 flex-wrap">
                     <Tag className="w-5 h-5 text-[var(--main-color)]" />
                     <span className="font-semibold text-[var(--second-color)]">
-                      Tags:{" "}
+                      {t("tags")}{" "}
                     </span>
                     {post.tags.map((tag) => (
                       <Link
@@ -237,7 +237,7 @@ export default async function BlogDetailsPage({
                   <p className="font-bold text-[var(--second-color)] text-lg">
                     {post.author.name}
                   </p>
-                  <p className="text-gray-600">Travel Writer & Egypt Expert</p>
+                  <p className="text-gray-600">{t("travel_writer_egypt_expert")}</p>
                 </div>
               </div>
 
@@ -277,8 +277,7 @@ export default async function BlogDetailsPage({
                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
                       />
                     </svg>
-                    Blog Categories
-                  </h3>
+                    {t("blog_categories")}</h3>
                 </div>
                 <div className="p-6">
                   <ul className="space-y-3">
@@ -306,8 +305,7 @@ export default async function BlogDetailsPage({
                       {commonT("related_tours")}
                     </h3>
                     <span className="text-xs text-gray-400 font-medium">
-                      {relatedtours.length} tours
-                    </span>
+                      {relatedtours.length} {t("tours")}</span>
                   </div>
 
                   <div className="divide-y divide-gray-100">
@@ -375,8 +373,7 @@ export default async function BlogDetailsPage({
                               ${tour.price_after_discount}
                             </span>
                             <span className="text-xs text-gray-400 ml-1">
-                              / person
-                            </span>
+                              {t("person")}</span>
                           </div>
                         </div>
                       </Link>
