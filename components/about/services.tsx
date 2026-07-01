@@ -140,7 +140,7 @@ export default function TravelServicesSection({
         <div className="services-bg-image">
           <Image
             src="/assets/images/tours/camel front of giza pyramids.jpg"
-            alt={t("egypt_background")}
+            alt="services-background-image"
             fill
             className="object-cover object-center"
             priority
@@ -189,7 +189,7 @@ export default function TravelServicesSection({
                       <div className="service-icon-wrap">
                         <Image
                           src={service.img}
-                          alt={t("star_icon")}
+                          alt="service-icon"
                           width={24}
                           height={24}
                         />
@@ -211,7 +211,7 @@ export default function TravelServicesSection({
                     >
                       <Image
                         src="/assets/images/blogs/A-wonderful-picture-of-a-tourist-in-front-of-the-pyramids-webp.webp"
-                        alt={t("custom_tour_plan")}
+                        alt="services-background-image"
                         fill
                         className="object-cover"
                       />

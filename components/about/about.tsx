@@ -5,12 +5,12 @@ import { Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { AboutSectionData } from "@/lib/api/aboutTypes";
-
+import { getT } from "@/lib/hooks/getT";
 interface AboutSectionProps {
   aboutData?: AboutSectionData | null;
 }
 
-export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
+export default async function RoavioAboutSection({ aboutData }: AboutSectionProps) {
   const features = [
     { id: 1, text: "Destination Search & Filters" },
     { id: 2, text: "Online Booking System" },
@@ -19,7 +19,7 @@ export default function RoavioAboutSection({ aboutData }: AboutSectionProps) {
     { id: 5, text: "Pricing & Discounts" },
     { id: 6, text: "Reviews & Ratings" },
   ];
-
+  const t = await getT("about");  
   // Strip HTML tags that may come from the backend rich-text field
   const rawDesc = aboutData?.about_desc ?? "";
   const cleanDesc = rawDesc.replace(/<[^>]+>/g, "").trim();
