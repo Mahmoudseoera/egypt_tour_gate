@@ -269,7 +269,6 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
   ) as string[];
   const safeTourImages =
     tourImages.length > 0 ? tourImages : ["/assets/images/tours/49-webp.webp"];
-    console.log("gallery images", safeTourImages);
   const highlights = tour.highlights?.filter(Boolean) ?? [];
   const itinerary = (
     tour.itinerary?.length
@@ -464,10 +463,10 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
     const payload = buildBookingPayload(bookingFormState);
 
     // ── Console log for debugging (remove after confirming API works) ───────
-    console.log(
-      "[BookingForm] payload being sent to /api/booking:",
-      JSON.stringify(payload, null, 2),
-    );
+    // console.log(
+    //   "[BookingForm] payload being sent to /api/booking:",
+    //   JSON.stringify(payload, null, 2),
+    // );
 
     // ── Step 3: Submit to API ───────────────────────────────────────────────
     const result = await submitBooking(payload);

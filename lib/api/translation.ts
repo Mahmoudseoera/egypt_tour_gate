@@ -91,7 +91,7 @@ export async function fetchTranslationEditor(
       // dedicated /api/revalidate webhook) can still override via `options`.
      next: { revalidate: REVALIDATE.STANDARD, tags: [CACHE_TAGS.translation, translationTag(locale)] },
 
-      ...options,
+      // ...options //
     });
     if (!res.ok) return null;
     return (await res.json()) as TranslationEditorResponse;
