@@ -921,12 +921,16 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-[var(--second-color)] leading-tight">
-                        {t("children_policy")}</h2>
+                        {t("children_policy_title")}
+                        </h2>
                       <p className="text-xs text-gray-500 mt-0.5">
                         {t("agebased_pricing_for_this_tour")}</p>
                     </div>
                   </div>
-
+                      <div
+                      className="prose prose-lg max-w-none prose-headings:text-[var(--second-color)] prose-headings:font-bold prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-[var(--main-color)] prose-a:no-underline hover:prose-a:underline prose-strong:text-[var(--second-color)] prose-ul:text-gray-700 prose-ol:text-gray-700 prose-li:text-gray-700"
+                      dangerouslySetInnerHTML={{ __html:  t("children_policy") }}
+                      />
                   {/* Policy rules */}
                   <div className="space-y-8">
                     {policySections.map((section, sectionIndex) => (
