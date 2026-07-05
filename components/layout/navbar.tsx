@@ -651,7 +651,7 @@ export default function Navbar() {
                         ].map((item) => (
                           <Link
                             key={item.href}
-                            href={item.href}
+                            href={item.href} aria-label={t(item.labelKey)}
                             className="simple-dropdown-item flex items-center gap-3 px-4 py-2.5 hover:text-[var(--second-color)] text-gray-600 font-medium text-[13.5px]"
                           >
                             <span
@@ -942,7 +942,7 @@ export default function Navbar() {
                             className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                             style={{ background: "var(--main-color)" }}
                           />
-                          <span className="text-[14px] text-gray-700 group-hover:text-[var(--second-color)] transition-colors font-medium">
+                          <span className="text-[14px] text-gray-700 group-hover:text-[var(--second-color)] transition-colors font-medium" aria-label={t(item.labelKey)}>
                             {t(item.labelKey)}
                           </span>
                           <ChevronRight
