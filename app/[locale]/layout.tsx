@@ -19,20 +19,6 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
-export const metadata: Metadata = {
-  title: {
-    default: "Egypt Tour Gate",
-    template: "%s | Egypt Tour Gate",
-  },
-  icons: {
-    icon: '/assets/images/favicon.ico',
-    shortcut: '/shortcut-icon.png',
-    apple: '/apple-icon.png',
-  },
-  description: "Discover Egypt with the best tours & Nile cruises",
-  metadataBase: new URL("https://www.egypttoursgate.com/"),
-};
-
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }

@@ -20,6 +20,7 @@
 //   useTranslations("contact") → t("contact_title")
 //   useTranslations("common")  → t("read_more")
 // instead of one giant flat lookup. Each page only deals with its own group.
+import { REVALIDATE, CACHE_TAGS, translationTag } from "@/lib/cache/tags";
 
 export type TranslationGroup = Record<string, string>;
 export type TranslationMessages = Record<string, TranslationGroup>;
@@ -88,7 +89,8 @@ export async function fetchTranslationEditor(
       // translation data on the same schedule, with no static/dynamic
       // conflict. Callers that genuinely need always-fresh data (e.g. a
       // dedicated /api/revalidate webhook) can still override via `options`.
-      next: { revalidate: 3600, tags: ["translation", `translation:${locale}`] },
+     next: { revalidate: REVALIDATE.STANDARD, tags: [CACHE_TAGS.translation, translationTag(locale)] },
+
       ...options,
     });
     if (!res.ok) return null;

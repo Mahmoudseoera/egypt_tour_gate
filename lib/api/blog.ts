@@ -1,5 +1,7 @@
 import { routing, type AppLocale } from '@/lib/i18n/routing';
 import { cache } from 'react';
+import { REVALIDATE, CACHE_TAGS, blogCategoryTag, blogPostTag } from "@/lib/cache/tags";
+
 // ─── Raw API shapes ────────────────────────────────────────────────────────────
 export interface BlogCategoryMediaItem {
   image: string;
@@ -309,7 +311,7 @@ export const getBlogPageData = cache(
   async (locale?: string): Promise<BlogPageData> => {
     const res = await fetchWithRetry(
       withLocale(`${API_BASE}/get-article-categories`, locale),
-      { next: { revalidate: 3600, tags: ['blog-categories'] } }
+      { next: { revalidate: REVALIDATE.STANDARD, tags: [CACHE_TAGS.blog] } }
     );
 
     if (!res.ok) {
@@ -367,7 +369,7 @@ export const getCategoryPageData = cache(
   ): Promise<CategoryPageData | null> => {
     const res = await fetchWithRetry(
       withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale),
-      { next: { revalidate: 3600, tags: ['blog-categories', `blog-category-${slug}`] } }
+      { next: { revalidate: REVALIDATE.STANDARD, tags: [blogCategoryTag(slug), CACHE_TAGS.blog] } }
     );
 
     if (res.status === 404) return null;
@@ -403,7 +405,7 @@ export const getArticleDetailBySlug = cache(
   ): Promise<ArticleDetailData | null> => {
       const res = await fetchWithRetry(
         withLocale(`${API_BASE}/get-ditals-article/${slug}`, locale),
-        { next: { revalidate: 3600, tags: ['blog-categories', `blog-article-${slug}`] } }
+        { next: { revalidate: REVALIDATE.STANDARD, tags: [blogPostTag(slug), CACHE_TAGS.blog] } }
       );
 
     if (res.status === 404) return null;
@@ -428,7 +430,7 @@ export const getArticleDetailBySlug = cache(
 // ─── Helper: Get category by slug (for breadcrumbs) ──────────────────────────
 export async function getCategoryBySlug(slug: string, locale?: string): Promise<BlogCategory | null> {
   const res = await fetch(withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale), {
-    next: { revalidate: 3600 },
+    next: { revalidate: REVALIDATE.STANDARD, tags: [blogCategoryTag(slug), CACHE_TAGS.blog] },
   });
   if (!res.ok) return null;
   const json = await res.json();
@@ -441,7 +443,7 @@ export async function getCategoryBySlug(slug: string, locale?: string): Promise<
 // ─── Helper: Get all categories for sidebar ──────────────────────────────────
 export async function getAllBlogCategories(locale?: string): Promise<BlogCategory[]> {
   const res = await fetch(withLocale(`${API_BASE}/get-article-categories`, locale), {
-    next: { revalidate: 3600 },
+    next: { revalidate: REVALIDATE.STANDARD, tags: [CACHE_TAGS.blog] },
   });
   if (!res.ok) return [];
   const json = await res.json();

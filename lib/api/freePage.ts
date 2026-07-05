@@ -1,5 +1,7 @@
 // lib/api/freepage.ts
 import { unstable_cache } from "next/cache";
+import { REVALIDATE, CACHE_TAGS, pageTag } from "@/lib/cache/tags";
+
 export interface TermsAndConditionsResponse {
   success: boolean;
   data: {
@@ -60,8 +62,8 @@ export const getTermsAndConditions = unstable_cache(async (): Promise<TermsAndCo
 
     let response: Response;
     try {
-      response = await fetch(url, {
-        next: { revalidate: 3600, tags: ["free-page"] },
+    response = await fetch(url, {
+        next: { revalidate: REVALIDATE.STANDARD, tags: [pageTag("free-page"), CACHE_TAGS.pages] },
       });
     } catch (error) {
       // Network-level failure (not an HTTP status) — back off and retry,

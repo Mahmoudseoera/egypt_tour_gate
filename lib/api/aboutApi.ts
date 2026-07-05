@@ -3,7 +3,8 @@
 // ⚠️  No dependency on homeApi or homeTypes — completely standalone.
 
 import type { AboutApiResponse, AboutPageSections } from "./aboutTypes";
-import { cache } from 'react';
+import { REVALIDATE, CACHE_TAGS } from "@/lib/cache/tags";
+
 /**
  * Server-side fetcher for the About page.
  *
@@ -37,7 +38,8 @@ export async function fetchAboutSections(
   try {
     const res = await fetch(url, {
       // ISR: revalidate every hour; tag so you can purge on-demand
-      next: { revalidate: 3600, tags: ["about"] },
+       next: { revalidate: REVALIDATE.STANDARD, tags: [CACHE_TAGS.about, CACHE_TAGS.pages] },
+
     });
 
     if (!res.ok) {

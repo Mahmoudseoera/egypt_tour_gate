@@ -12,7 +12,7 @@
 // لو بعت للـ external API مباشرة → CORS error.
 // الحل: البراوزر يبعت لـ /api/general (same origin ✅)
 // والـ route ده يعمل fetch للـ external API من الـ server (مفيش CORS).
-
+import { REVALIDATE, CACHE_TAGS } from "@/lib/cache/tags"
 import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE = (
@@ -26,10 +26,13 @@ export async function GET(req: NextRequest) {
   const url = `${API_BASE}/general-data?locale=${locale}`;
 
   try {
-    const externalRes = await fetch(url, {
-      headers: { Accept: "application/json" },
-      next: { revalidate: 3600, tags: ["general"] },
-    });
+  const externalRes = await fetch(url, {
+    headers: { Accept: "application/json" },
+    next: {
+      revalidate: REVALIDATE.STANDARD,
+      tags: [CACHE_TAGS.general, CACHE_TAGS.header, CACHE_TAGS.footer, CACHE_TAGS.categories],
+    },
+  });
 
     const contentType = externalRes.headers.get("content-type") ?? "";
     if (!contentType.includes("application/json")) {

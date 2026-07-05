@@ -176,19 +176,29 @@ export interface WhyChooseSection {
     partners: Partner[]; 
   }
 
-  export interface HomeSections {
-    sliders_section: SliderItem[];
-    about_section: AboutSection;
-    first_tours_section: FirstToursSection;
-    tag_categories_section: TagCategoriesSection;
-    why_choose_section: WhyChooseSection;
-    reviews_section: ReviewsSection;
-    second_tours_section: SecondToursSection;
-    articles_section: ArticlesSection;
-    faq_section: FaqSection;
-    partners_section: PartnersSection; // ← snake_case to match API key
-  }
-  
+export interface PageSeoScripts {
+  home_page_scripts?: string;
+  about_page_scripts?: string;
+  contact_page_scripts?: string;
+  favourites_page_scripts?: string;
+  blog_page_scripts?: string;
+  faq_page_scripts?: string;
+  tailormade_page_scripts?: string;
+}
+
+export interface HomeSections {
+  sliders_section: SliderItem[];
+  about_section: AboutSection;
+  first_tours_section: FirstToursSection;
+  tag_categories_section: TagCategoriesSection;
+  why_choose_section: WhyChooseSection;
+  reviews_section: ReviewsSection;
+  second_tours_section: SecondToursSection;
+  articles_section: ArticlesSection;
+  faq_section: FaqSection;
+  partners_section: PartnersSection;
+  seo: PageSeoScripts; // ← was missing; this is where every static page's SEO html actually lives
+}
   export interface HomeApiResponse {
     success: boolean;
     data: {

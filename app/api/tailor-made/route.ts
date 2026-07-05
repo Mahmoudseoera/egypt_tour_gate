@@ -1,7 +1,7 @@
 // app/api/tailor-made/route.ts
 // GET  → proxies static form data  (was: app/api/tailor-made-data/route.ts)
 // POST → submits tailor-made form  (unchanged)
-
+import { REVALIDATE, CACHE_TAGS, pageTag } from "@/lib/cache/tags";
 import { NextRequest, NextResponse } from "next/server";
 import { tailorMadeSchema, type TailorMadeFormData } from "@/lib/validations/tailor-made.schema";
 
@@ -15,10 +15,10 @@ export async function GET(req: NextRequest) {
   const externalUrl = `https://www.egypttoursgate.com/api/v1/forms/get/tailor-made?locale=${locale}`;
 
   try {
-    const res = await fetch(externalUrl, {
-      next: { revalidate: 3600 },
-      headers: { Accept: "application/json" },
-    });
+const res = await fetch(externalUrl, {
+  next: { revalidate: REVALIDATE.STANDARD, tags: [pageTag("tailor-made"), CACHE_TAGS.pages] },
+  headers: { Accept: "application/json" },
+});
 
     if (!res.ok) {
       return NextResponse.json(

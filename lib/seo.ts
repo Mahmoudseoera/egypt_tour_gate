@@ -75,7 +75,52 @@ function decodeAttribute(value: string): string {
     .replace(/&lt;/gi, "<")
     .replace(/&gt;/gi, ">");
 }
+export function aboutPageSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: `About ${SITE_NAME}`,
+    url: absoluteUrl("/about-us"),
+    about: { "@type": "TravelAgency", name: SITE_NAME, url: SITE_URL },
+    isPartOf: { "@id": `${SITE_URL}/#website` },
+  };
+}
 
+export function localBusinessSchema(input: {
+  phone?: string;
+  email?: string;
+  address?: string;
+  image?: SeoImageInput;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": `${SITE_URL}/#localbusiness`,
+    name: SITE_NAME,
+    url: absoluteUrl("/contact"),
+    image: input.image ? absoluteUrl(input.image) : DEFAULT_SEO_IMAGE,
+    telephone: input.phone || undefined,
+    email: input.email || undefined,
+    address: input.address
+      ? { "@type": "PostalAddress", streetAddress: input.address, addressCountry: "EG" }
+      : undefined,
+  };
+}
+
+/** Built only from real FAQ content already returned by the API — never
+ * fabricated, since Google requires FAQPage markup to match visible content. */
+export function faqPageSchema(faqs: Array<{ title: string; answer: string }>) {
+  if (!faqs?.length) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.title,
+      acceptedAnswer: { "@type": "Answer", text: stripHtml(faq.answer) },
+    })),
+  };
+}
 function getAttribute(tag: string, name: string): string | undefined {
   const pattern = new RegExp(`${name}\\s*=\\s*(["'])(.*?)\\1`, "i");
   const match = tag.match(pattern);

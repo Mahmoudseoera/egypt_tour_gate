@@ -72,7 +72,7 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
             <div className="space-y-2">
               <h3 className="text-xl font-semibold text-[var(--second-color)]">{title2}</h3>
               <div className="text-gray-600 text-lg leading-relaxed mb-2">
-                    <div
+                    <div className="prose prose-sm max-w-none [&_a]:text-[var(--main-color)] [&_a:hover]:underline"
                         dangerouslySetInnerHTML={{
                           __html: desc,
                         }}

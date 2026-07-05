@@ -1,6 +1,7 @@
 //lib/api/toursApi.ts
 import { apiGet } from "@/lib/api/client";
 import { routing, type AppLocale } from "@/lib/i18n/routing";
+import { REVALIDATE, CACHE_TAGS, categoryTag, subcategoryTag, tourTag } from "@/lib/cache/tags";
 
 type AnyObj = Record<string, any>;
 
@@ -260,9 +261,12 @@ export async function getGeneralCategories(locale?: string): Promise<AnyObj[]> {
 
   let response: any;
   try {
-    response = await apiGet<any>(withLocale("/general-data", l), {
-      next: { revalidate: 3600, tags: ["general"] },
-    });
+  response = await apiGet<any>(withLocale("/general-data", l), {
+    next: {
+      revalidate: REVALIDATE.STANDARD,
+      tags: [CACHE_TAGS.general, CACHE_TAGS.header, CACHE_TAGS.footer, CACHE_TAGS.categories],
+    },
+  });
   } catch (error) {
     // Critical path: this runs inside `generateStaticParams` for every locale.
     // If it throws, Next.js aborts static generation for that locale entirely
@@ -305,9 +309,12 @@ export async function getCategoryBySlug(
 
   let response: any;
   try {
-    response = await apiGet<any>(withLocale(`/categories/${cleanSlug}`, l), {
-      next: { revalidate: 3600, tags: [`category:${cleanSlug}`, "categories", "tours"] },
-    });
+response = await apiGet<any>(withLocale(`/categories/${cleanSlug}`, l), {
+  next: {
+    revalidate: REVALIDATE.STANDARD,
+    tags: [categoryTag(cleanSlug), CACHE_TAGS.categories],
+  },
+});
   } catch (error) {
     // A throttled/failed fetch here must not crash the build. Callers
     // (`getCategoryData`, `generateStaticParams`) already treat `null` as
@@ -349,7 +356,10 @@ export async function getSubcategoryBySlug(
   let response: any;
   try {
     response = await apiGet<any>(withLocale(`/sub-category/${cleanSlug}`, l), {
-      next: { revalidate: 3600, tags: [`subcategory:${cleanSlug}`, "subcategories", "tours"] },
+      next: {
+  revalidate: REVALIDATE.STANDARD,
+  tags: [subcategoryTag(cleanSlug), CACHE_TAGS.tours],
+},
     });
   } catch (error) {
     // SubcategoryPage's getPageData() already merges this with a header-stub
@@ -381,7 +391,10 @@ export async function getToursBySubcategory(
   let response: any;
   try {
     response = await apiGet<any>(withLocale(`/sub-category/${cleanSlug}`, l), {
-      next: { revalidate: 3600, tags: [`subcategory:${cleanSlug}`, "subcategories", "tours"] },
+      next: {
+  revalidate: REVALIDATE.STANDARD,
+  tags: [subcategoryTag(cleanSlug), CACHE_TAGS.tours],
+},
     });
   } catch (error) {
     // SubcategoryPage already renders a "No tours found" message when this
@@ -411,7 +424,10 @@ export async function getTourBySlug(
   let response: any;
   try {
     response = await apiGet<any>(withLocale(`/tour/${cleanSlug}`, l), {
-      next: { revalidate: 3600, tags: [`tour:${cleanSlug}`, "tours"] },
+      next: {
+  revalidate: REVALIDATE.STANDARD,
+  tags: [tourTag(cleanSlug), CACHE_TAGS.tours],
+},
     });
   } catch (error) {
     // TourDetailPage already calls notFound() when this returns null.

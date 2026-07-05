@@ -1,6 +1,7 @@
 // app/api/contact/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
+import { REVALIDATE, CACHE_TAGS } from "@/lib/cache/tags";
 
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://www.egypttoursgate.com/api/v1"
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
   try {
     const externalRes = await fetch(url, {
       headers: { Accept: "application/json" },
-      next: { revalidate: 300 },
+      next: { revalidate: REVALIDATE.FAST, tags: [CACHE_TAGS.contact] },
     });
 
     const contentType = externalRes.headers.get("content-type") ?? "";

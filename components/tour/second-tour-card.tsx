@@ -69,6 +69,7 @@ export default function SecondTourCard({
           src={image || "/placeholder.svg"}
           alt={title}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           className="object-cover transition-transform group-hover:scale-110 duration-300"
         />
         <div className="absolute top-4 right-4 px-4 py-2 rounded-lg bg-[rgba(255,255,255,0.2)] backdrop-blur-lg">

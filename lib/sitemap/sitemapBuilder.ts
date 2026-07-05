@@ -5,6 +5,7 @@
 
 import { SITE_URL } from '@/lib/seo';
 import { routing } from '@/lib/i18n/routing';
+import { REVALIDATE, CACHE_TAGS } from "@/lib/cache/tags";
 
 export const API_BASE_URL = `${SITE_URL}/api/v1`;
 export const LAST_MODIFIED = new Date().toISOString().split('T')[0] + 'T00:00:00+00:00';
@@ -23,6 +24,15 @@ export type Entry = { path: string; priority: string };
  *   en → https://site.com/egypt-day-tours
  *   de → https://site.com/de/egypt-day-tours
  */
+
+function tagsForEndpoint(endpoint: string): string[] {
+  if (endpoint.startsWith("/general-data")) return [CACHE_TAGS.general, CACHE_TAGS.categories];
+  if (endpoint.startsWith("/sub-category/")) return [CACHE_TAGS.tours];
+  if (endpoint.includes("/articles/get-article-categories")) return [CACHE_TAGS.blog];
+  if (endpoint.includes("/articles/get-article-by-category/")) return [CACHE_TAGS.blog];
+  return [];
+}
+
 export function buildUrl(canonicalPath: string, locale: string): string {
   const clean =
     canonicalPath === "/"
@@ -46,13 +56,11 @@ export function escapeXml(str: string): string {
 
 // ─── API helpers ──────────────────────────────────────────────────────────────
 
-export async function safeFetch<T = AnyRecord>(
-  endpoint: string
-): Promise<T | null> {
+export async function safeFetch<T = AnyRecord>(endpoint: string): Promise<T | null> {
   try {
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-      next: { revalidate: 3600 },
-      headers: { Accept: 'application/json' },
+      next: { revalidate: REVALIDATE.STANDARD, tags: tagsForEndpoint(endpoint) },
+      headers: { Accept: "application/json" },
     });
     if (!res.ok) return null;
     return (await res.json()) as T;

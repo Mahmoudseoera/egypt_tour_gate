@@ -9,6 +9,8 @@
 //   "status": 200
 // }
 
+import { REVALIDATE, CACHE_TAGS } from "@/lib/cache/tags";
+
 export interface SiteSettings {
   id?: number;
   language_id?: string;
@@ -65,9 +67,9 @@ export async function fetchSiteSettings(locale = "en"): Promise<SiteSettings | n
   ).replace(/\/+$/, "");
 
   try {
-    const res = await fetch(`${base}/get-settings?locale=${locale}`, {
-      next: { revalidate: 3600, tags: ["settings"] },
-    });
+const res = await fetch(`${base}/get-settings?locale=${locale}`, {
+  next: { revalidate: REVALIDATE.STANDARD, tags: [CACHE_TAGS.settings] },
+});
     if (!res.ok) return null;
     const json: SiteSettingsApiResponse = await res.json();
     return json?.data?.[0] ?? null;

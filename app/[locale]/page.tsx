@@ -28,8 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale } = await params;
 
   const seoHtml = await fetchSeoHtmlFromEndpoint("", locale);
-
-  return buildSeoMetadata({
+  const baseSeo = buildSeoMetadata({
     seoHtml,
     title: "Egypt Tours: Best Vacations, Trips, and Tours to Egypt",
     description:
@@ -38,7 +37,65 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       "Egypt tours, Egypt trips, Egypt vacations, Egypt travel, tours to Egypt, Egypt holidays, Nile cruises",
     path: "/",
     locale,
+    type: "website",
+    image: "/assets/images/egypt-tour-gate-logo.png",
   });
+
+  return {
+    ...baseSeo,
+    title: baseSeo.title,
+    description: baseSeo.description,
+    keywords: baseSeo.keywords,
+    authors: [{ name: "Egypt Tours Gate", url: "https://www.egypttoursgate.com" }],
+    creator: "Egypt Tours Gate",
+    publisher: "Egypt Tours Gate",
+    category: "travel",
+    applicationName: "Egypt Tours Gate",
+    openGraph: {
+      ...baseSeo.openGraph,
+      title: baseSeo.openGraph?.title || "Egypt Tours: Best Vacations, Trips, and Tours to Egypt",
+      description: baseSeo.openGraph?.description || "Egypt Tours from all countries are made for you. Visit Egypt, explore Egypt trips, enjoy Nile cruises, and discover the Egypt Pyramids.",
+      url: baseSeo.openGraph?.url || "https://www.egypttoursgate.com",
+      siteName: "Egypt Tours Gate",
+      type: "website",
+      images: baseSeo.openGraph?.images || [
+        {
+          url: "https://www.egypttoursgate.com/assets/images/egypt-tour-gate-logo.png",
+          width: 1200,
+          height: 630,
+          alt: "Egypt Tours Gate",
+        }
+      ],
+    },
+    twitter: {
+      ...baseSeo.twitter,
+      card: "summary_large_image",
+      title: baseSeo.twitter?.title || "Egypt Tours: Best Vacations, Trips, and Tours to Egypt",
+      description: baseSeo.twitter?.description || "Egypt Tours from all countries are made for you. Visit Egypt, explore Egypt trips, enjoy Nile cruises, and discover the Egypt Pyramids.",
+      creator: "@Egypttoursgate1",
+      site: "@Egypttoursgate1",
+      images: baseSeo.twitter?.images || ["https://www.egypttoursgate.com/assets/images/egypt-tour-gate-logo.png"],
+    },
+    alternates: {
+      ...baseSeo.alternates,
+      canonical: baseSeo.alternates?.canonical || "https://www.egypttoursgate.com",
+    },
+    robots: {
+      ...((baseSeo.robots as any) || {}),
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    verification: {
+      google: "your-google-verification-code",
+    },
+  };
 }
 
 export default async function Home({ params }: PageProps) {
