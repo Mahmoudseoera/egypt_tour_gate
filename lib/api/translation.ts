@@ -61,7 +61,7 @@ function toMessages(json: TranslationEditorResponse | null): TranslationMessages
 
 export async function fetchTranslationEditor(
   locale = "en",
-  options?: RequestInit
+  // options?: RequestInit
 ): Promise<TranslationEditorResponse | null> {
   const base = (
     process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://www.egypttoursgate.com/api/v1"

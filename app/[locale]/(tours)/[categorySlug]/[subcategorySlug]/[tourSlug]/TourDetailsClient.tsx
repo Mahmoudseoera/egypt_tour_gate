@@ -105,62 +105,62 @@ const INITIAL: FormState = {
 };
 
 /* ─── prices policy ─── */
-const policySections = [
-  {
-    title: "Prices",
-    rules: [
-      "Tour prices are quoted in USD, but payment can also be made in Euro or British Pound.",
-      "Prices are quoted per person and are all-inclusive.",
-      "Rates are regularly updated to ensure the best available price.",
-      "Prices are valid until 30 December 2025.",
-      "Special rates may apply during Christmas, New Year, and Easter holidays.",
-    ],
-  },
-  {
-    title: "Children Policy",
-    rules: [
-      "Child traveling with two accompanying adults will pay the following:",
-      "0 Years to 1.99 Years of age: Free of charge.",
-      "2 Years to 4.99 Years of age: 50% from the full rate.",
-      "5 Years to 11.99 Years of age: 75% from the full rate.",
-      "12+ pay full tour price as per adult person.",
-      "If your tour includes airfare, an extra child fare charge may apply.",
-    ],
-  },
-  {
-    title: "Cancellation",
-    rules: [
-      "Cancellation requests must be sent via email or fax.",
-      "Written confirmation is required to process any cancellation.",
-    ],
-  },
-  {
-    title: "Deposit & Balance of Payment",
-    rules: [
-      "Reservations should be made as early as possible.",
-      "A deposit of 25% of the total tour price is required to secure your booking.",
-      "A 50% deposit is required during Christmas and New Year holidays and for packages including airfare.",
-      "The deposit forms part of your final payment.",
-      "Payments can be made via bank transfer, Western Union, Visa, or MasterCard.",
-      "Payment must be received within 7 days of booking.",
-    ],
-  },
-  {
-    title: "Tipping",
-    rules: [
-      "Tipping is customary in Egypt but is not mandatory.",
-      "Guests are welcome to tip guides and service providers at their discretion.",
-    ],
-  },
-  {
-    title: "Tour Voucher",
-    rules: [
-      "A final confirmation voucher will be emailed after your booking is confirmed.",
-      "Please print and bring the voucher during your trip.",
-      "The voucher will include contact details for your tour operator, customer support, and additional travel information.",
-    ],
-  },
-];
+// const policySections = [
+//   {
+//     title: "Prices",
+//     rules: [
+//       "Tour prices are quoted in USD, but payment can also be made in Euro or British Pound.",
+//       "Prices are quoted per person and are all-inclusive.",
+//       "Rates are regularly updated to ensure the best available price.",
+//       "Prices are valid until 30 December 2025.",
+//       "Special rates may apply during Christmas, New Year, and Easter holidays.",
+//     ],
+//   },
+//   {
+//     title: "Children Policy",
+//     rules: [
+//       "Child traveling with two accompanying adults will pay the following:",
+//       "0 Years to 1.99 Years of age: Free of charge.",
+//       "2 Years to 4.99 Years of age: 50% from the full rate.",
+//       "5 Years to 11.99 Years of age: 75% from the full rate.",
+//       "12+ pay full tour price as per adult person.",
+//       "If your tour includes airfare, an extra child fare charge may apply.",
+//     ],
+//   },
+//   {
+//     title: "Cancellation",
+//     rules: [
+//       "Cancellation requests must be sent via email or fax.",
+//       "Written confirmation is required to process any cancellation.",
+//     ],
+//   },
+//   {
+//     title: "Deposit & Balance of Payment",
+//     rules: [
+//       "Reservations should be made as early as possible.",
+//       "A deposit of 25% of the total tour price is required to secure your booking.",
+//       "A 50% deposit is required during Christmas and New Year holidays and for packages including airfare.",
+//       "The deposit forms part of your final payment.",
+//       "Payments can be made via bank transfer, Western Union, Visa, or MasterCard.",
+//       "Payment must be received within 7 days of booking.",
+//     ],
+//   },
+//   {
+//     title: "Tipping",
+//     rules: [
+//       "Tipping is customary in Egypt but is not mandatory.",
+//       "Guests are welcome to tip guides and service providers at their discretion.",
+//     ],
+//   },
+//   {
+//     title: "Tour Voucher",
+//     rules: [
+//       "A final confirmation voucher will be emailed after your booking is confirmed.",
+//       "Please print and bring the voucher during your trip.",
+//       "The voucher will include contact details for your tour operator, customer support, and additional travel information.",
+//     ],
+//   },
+// ];
 
 type TourDetailsClientProps = {
   tour: ApiTourDetails;
@@ -825,7 +825,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                         <span className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center">
                           <X className="w-4 h-4 text-red-500" />
                         </span>
-                        {t("Excluded")}
+                        {t("excluded")}
                       </h3>
                       <ul className="space-y-2">
                         {excluded.map((item, i) => (
@@ -930,12 +930,15 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                       <div
                       className="[&_:is(p,span)]:!m-0 [&_a]:!text-blue-500
              [&_ul]:!list-item
+             [&_li]:!list-disc
+             [&_p]:!text-[#555]
              [&_li]:!ms-5
-             [&_strong]:!text-[var(--second-color)]"
+             [&_strong]:!text-[var(--second-color)]
+             [&_strong]:!block"
                       dangerouslySetInnerHTML={{ __html:  t("children_policy") }}
                       />
                   {/* Policy rules */}
-                  <div className="space-y-8">
+                  {/* <div className="space-y-8">
                     {policySections.map((section, sectionIndex) => (
                       <div key={sectionIndex}>
                         <div className="flex items-center gap-3 mb-4">
@@ -956,7 +959,7 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                         </div>
                       </div>
                     ))}
-                  </div>
+                  </div> */}
 
                   {/* Footer callout */}
                   <div
