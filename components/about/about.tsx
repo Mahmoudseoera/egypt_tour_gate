@@ -119,7 +119,7 @@ export default async function RoavioAboutSection({ aboutData }: AboutSectionProp
               <h3 className="text-xl font-semibold text-[var(--second-color)] mb-2">
                 {title2}
               </h3>
-              <p className="text-gray-600 text-lg leading-relaxed mb-2">{desc}</p>
+              <p className="text-gray-600 text-base leading-relaxed mb-2">{desc}</p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {features.map((feature) => (
@@ -142,7 +142,7 @@ export default async function RoavioAboutSection({ aboutData }: AboutSectionProp
               <div>
                 <Link
                   href="/contact"
-                  className="btn-effect !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg"
+                  className="btn-effect mt-2 inline-block !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg"
                 >
                   {t("contact_us")}</Link>
               </div>

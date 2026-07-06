@@ -91,7 +91,7 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
                 ))}
               </div>
               <div>
-                <Link href="/about-us" className="btn-effect !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg" aria-label={t("learn_more_about_our_company")}>
+                <Link href="/about-us" className="btn-effect mt-2 inline-block !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg" aria-label={t("learn_more_about_our_company")}>
                   {t("learn_more")}
                 </Link>
               </div>
