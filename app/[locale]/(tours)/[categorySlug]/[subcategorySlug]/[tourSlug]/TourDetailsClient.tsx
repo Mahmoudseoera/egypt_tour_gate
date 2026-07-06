@@ -928,7 +928,10 @@ export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
                     </div>
                   </div>
                       <div
-                      className="prose prose-lg max-w-none prose-headings:text-[var(--second-color)] prose-headings:font-bold prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-[var(--main-color)] prose-a:no-underline hover:prose-a:underline prose-strong:text-[var(--second-color)] prose-ul:text-gray-700 prose-ol:text-gray-700 prose-li:text-gray-700"
+                      className="[&_:is(p,span)]:!m-0 [&_a]:!text-blue-500
+             [&_ul]:!list-item
+             [&_li]:!ms-5
+             [&_strong]:!text-[var(--second-color)]"
                       dangerouslySetInnerHTML={{ __html:  t("children_policy") }}
                       />
                   {/* Policy rules */}
