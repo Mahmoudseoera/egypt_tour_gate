@@ -32,33 +32,22 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   setRequestLocale(locale);
 
+
   // Fetch messages directly using the locale from params — this guarantees
   // we always get the correct locale's translations, bypassing getMessages()
   // which depends on next-intl's async storage context (unreliable in layouts).
   const messages = await getMessages();
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
-        />
-      </head>
-      <body suppressHydrationWarning>
-        <NextIntlClientProvider key={locale} locale={locale} messages={messages}>
-          <GlobalSeoSchema />
-          <RouteProgress />
-          <Navbar />
-          {children}
-          <ScrollToTop />
-          <MobileFooter />
-          <WhatsappIcon />
-          <Footer />
-          <Toaster position="top-right" richColors closeButton />
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider key={locale} locale={locale} messages={messages}>
+      <GlobalSeoSchema />
+      <RouteProgress />
+      <Navbar />
+      {children}
+      <ScrollToTop />
+      <MobileFooter />
+      <WhatsappIcon />
+      <Footer />
+      <Toaster position="top-right" richColors closeButton />
+    </NextIntlClientProvider>
   );
 }

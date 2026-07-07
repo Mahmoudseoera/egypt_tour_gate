@@ -171,7 +171,7 @@ const t = await getT("common");
 
   // second_title is a subtitle (e.g. "Egypt Luxury Tours and Trips")
   const subcategorySecondTitle: string = subcategory.second_title ?? "";
-  const subcategoryCover: string = subcategory.media?.cover.image ?? "";
+  const subcategoryCover: string = subcategory.media?.cover?.image ?? "";
   // console.log("subcategoryCover", subcategoryCover);
   // plainDesc is the HTML-stripped `desc` field set by getSubcategoryBySlug
   const shortDescription: string =
