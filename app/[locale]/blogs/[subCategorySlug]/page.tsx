@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calendar, User } from "lucide-react";
 import { getT } from "@/lib/hooks/getT";
-import { getCategoryPageData } from "@/lib/api/blog";
+import { getBlogPageData, getCategoryPageData } from "@/lib/api/blog";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
@@ -26,15 +26,13 @@ interface CategoryPageProps {
 export async function generateStaticParams({
   params,
 }: {
-  params: { locale: string; subCategorySlug: string };
+  params: { locale: string };
 }) {
-  const { locale, subCategorySlug } = params;
-  const data = await getCategoryPageData(subCategorySlug, locale);
+  const { locale } = params;
+  const { categories } = await getBlogPageData(locale);
 
-  if (!data) return [];
-
-  return data.posts.map((post) => ({
-    postSlug: post.slug,
+  return categories.map((category) => ({
+    subCategorySlug: category.slug,
   }));
 }
 export async function generateMetadata({
