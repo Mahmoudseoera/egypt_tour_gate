@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: TourDetailPageProps): Promise
   const item = await getTourBySlug(tourSlug, locale);
   const readableName = item?.title || tourSlug.replace(/-/g, " ");
   return buildSeoMetadata({
-    seoHtml: item?.seo,
+    seo: item?.seo,
     title: `${readableName} | Egypt Tours Gate`,
     description:
       item?.short_description ||

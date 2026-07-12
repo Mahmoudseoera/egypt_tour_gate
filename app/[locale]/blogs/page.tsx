@@ -13,8 +13,10 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>; 
 }): Promise<Metadata> {
   const { locale } = await params;
+  const pageData = await getBlogPageData(locale);
 
   return buildSeoMetadata({
+    seo: pageData.seo,
     title: 'Egypt Travel Blog - Tours, Tips & Cultural Guides | Egypt Tours Gate',
     description:
       'Explore our comprehensive guides on Egyptian tours, travel tips, cultural experiences, and historical insights. Plan your perfect Egyptian adventure with expert advice.',

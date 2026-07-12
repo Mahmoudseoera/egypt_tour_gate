@@ -176,16 +176,6 @@ export interface WhyChooseSection {
     partners: Partner[]; 
   }
 
-export interface PageSeoScripts {
-  home_page_scripts?: string;
-  about_page_scripts?: string;
-  contact_page_scripts?: string;
-  favourites_page_scripts?: string;
-  blog_page_scripts?: string;
-  faq_page_scripts?: string;
-  tailormade_page_scripts?: string;
-}
-
 export interface HomeSections {
   sliders_section: SliderItem[];
   about_section: AboutSection;
@@ -197,7 +187,6 @@ export interface HomeSections {
   articles_section: ArticlesSection;
   faq_section: FaqSection;
   partners_section: PartnersSection;
-  seo: PageSeoScripts; // ← was missing; this is where every static page's SEO html actually lives
 }
   export interface HomeApiResponse {
     success: boolean;

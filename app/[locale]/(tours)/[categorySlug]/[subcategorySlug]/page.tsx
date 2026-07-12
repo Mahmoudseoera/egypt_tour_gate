@@ -116,7 +116,7 @@ export async function generateMetadata({
     `Discover ${subcategoryName} experiences in ${categoryName} with curated programs and flexible itineraries.`;
 
   return buildSeoMetadata({
-    seoHtml: subcategory.seo,
+    seo: subcategory.seo,
     title: `${subcategoryName} ${categoryName} | Egypt Tours Gate`,
     description: metaDescription,
     path: `/${categorySlug}/${subcategorySlug}`,

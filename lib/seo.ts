@@ -6,12 +6,17 @@ export const SITE_NAME = "Egypt Tours Gate";
 export const DEFAULT_SEO_IMAGE = `${SITE_URL}/assets/images/egypt-tour-gate-logo.png`;
 export const TWITTER_HANDLE = "@Egypttoursgate1";
 
-type SeoTagMap = Record<string, string>;
+/** The only SEO payload accepted from the API. */
+export type ApiSeo = {
+  title?: string | null;
+  description?: string | null;
+  keywords?: string | string[] | null;
+};
 
 type SeoImageInput = string | { image?: string | null; url?: string | null; image_url?: string | null } | null;
 
 type BuildSeoMetadataInput = {
-  seoHtml?: string | null;
+  seo?: ApiSeo | null;
   title?: string;
   description?: string;
   keywords?: string | string[];
@@ -66,15 +71,6 @@ export function truncateSeoText(value: string, maxLength = 160): string {
   return `${clean.slice(0, maxLength - 1).trim()}…`;
 }
 
-function decodeAttribute(value: string): string {
-  return value
-    .replace(/&quot;/gi, '"')
-    .replace(/&#34;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">");
-}
 export function aboutPageSchema() {
   return {
     "@context": "https://schema.org",
@@ -121,28 +117,6 @@ export function faqPageSchema(faqs: Array<{ title: string; answer: string }>) {
     })),
   };
 }
-function getAttribute(tag: string, name: string): string | undefined {
-  const pattern = new RegExp(`${name}\\s*=\\s*(["'])(.*?)\\1`, "i");
-  const match = tag.match(pattern);
-  return match?.[2] ? decodeAttribute(match[2].trim()) : undefined;
-}
-
-export function parseApiSeoHtml(seoHtml?: string | null): SeoTagMap {
-  if (!seoHtml) return {};
-  const tags: SeoTagMap = {};
-  const titleMatch = seoHtml.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  if (titleMatch?.[1]) tags.title = stripHtml(titleMatch[1]);
-
-  const metaMatches = seoHtml.match(/<meta\b[^>]*>/gi) ?? [];
-  metaMatches.forEach((tag) => {
-    const key = getAttribute(tag, "property") || getAttribute(tag, "name");
-    const content = getAttribute(tag, "content");
-    if (key && content) tags[key.toLowerCase()] = content;
-  });
-
-  return tags;
-}
-
 export function localizedAlternates(path: string) {
   const normalizedPath = normalizePath(path);
   return Object.fromEntries(
@@ -154,7 +128,7 @@ export function localizedAlternates(path: string) {
 }
 
 export function buildSeoMetadata({
-  seoHtml,
+  seo,
   title,
   description,
   keywords,
@@ -164,23 +138,19 @@ export function buildSeoMetadata({
   type = "website",
   noIndex = false,
 }: BuildSeoMetadataInput): Metadata {
-  const parsedSeo = parseApiSeoHtml(seoHtml);
   const canonicalPath = normalizePath(path);
   const metadataLocale = routing.locales.includes(locale as AppLocale)
     ? (locale as AppLocale)
     : routing.defaultLocale;
   const canonical = absoluteUrl(buildLocalizedPath(canonicalPath, metadataLocale));
-  const seoTitle = parsedSeo.title || parsedSeo["og:title"] || parsedSeo["twitter:title"] || title || SITE_NAME;
+  const seoTitle = stripHtml(seo?.title) || title || SITE_NAME;
   const seoDescription = truncateSeoText(
-    parsedSeo.description ||
-      parsedSeo["og:description"] ||
-      parsedSeo["twitter:description"] ||
-      description ||
+    seo?.description || description ||
       "Discover Egypt tours, Nile cruises, day trips, and tailor-made travel packages with Egypt Tours Gate."
   );
-  const seoKeywords = parsedSeo.keywords || keywords;
+  const seoKeywords = seo?.keywords || keywords;
   const seoImage = absoluteUrl(
-    parsedSeo["og:image"] || parsedSeo["twitter:image"] || image || DEFAULT_SEO_IMAGE
+    image || DEFAULT_SEO_IMAGE
   );
   const alternates = localizedAlternates(canonicalPath);
 
@@ -209,28 +179,28 @@ export function buildSeoMetadata({
       },
     },
     openGraph: {
-      title: parsedSeo["og:title"] || seoTitle,
-      description: parsedSeo["og:description"] || seoDescription,
+      title: seoTitle,
+      description: seoDescription,
       url: canonical,
-      siteName: parsedSeo["og:site_name"] || SITE_NAME,
-      type: (parsedSeo["og:type"] as "website" | "article" | undefined) || type,
+      siteName: SITE_NAME,
+      type,
       locale: metadataLocale,
       alternateLocale: routing.locales.filter((item) => item !== metadataLocale),
       images: [
         {
           url: seoImage,
-          width: Number(parsedSeo["og:image:width"] || 1200),
-          height: Number(parsedSeo["og:image:height"] || 630),
+          width: 1200,
+          height: 630,
           alt: seoTitle,
         },
       ],
     },
     twitter: {
-      card: (parsedSeo["twitter:card"] as "summary" | "summary_large_image" | undefined) || "summary_large_image",
-      site: parsedSeo["twitter:site"] || TWITTER_HANDLE,
-      creator: parsedSeo["twitter:creator"] || TWITTER_HANDLE,
-      title: parsedSeo["twitter:title"] || seoTitle,
-      description: parsedSeo["twitter:description"] || seoDescription,
+      card: "summary_large_image",
+      site: TWITTER_HANDLE,
+      creator: TWITTER_HANDLE,
+      title: seoTitle,
+      description: seoDescription,
       images: [seoImage],
     },
     other: {

@@ -2,6 +2,7 @@
 import { apiGet } from "@/lib/api/client";
 import { routing, type AppLocale } from "@/lib/i18n/routing";
 import { REVALIDATE, CACHE_TAGS, categoryTag, subcategoryTag, tourTag } from "@/lib/cache/tags";
+import type { ApiSeo } from "@/lib/seo";
 
 type AnyObj = Record<string, any>;
 
@@ -16,7 +17,7 @@ export interface ApiTourListItem {
   duration: string;
   location: string;
   short_description?: string;
-  seo?: string;
+  seo?: ApiSeo;
 
   media?: {
     image?: string;
@@ -182,6 +183,7 @@ function mapTour(item: AnyObj, fallbackSlug: string): ApiTourListItem {
       item.small_desc ??
       item.short_description ??
       "",
+    seo: item.seo && typeof item.seo === "object" ? item.seo as ApiSeo : undefined,
 
     categorySlug,
     subCategorySlug,

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { buildSeoMetadata } from "@/lib/seo";
+import { fetchSeoFromEndpoint } from "@/lib/api/seoApi";
 
 
 // import CategoryCard from "@/components/tour/category-card";
@@ -11,8 +12,10 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const seo = await fetchSeoFromEndpoint("tours", locale);
 
   return buildSeoMetadata({
+    seo,
     title: "Egypt Tours",
     description: "Browse Egypt Tours Gate travel packages, day tours, Nile cruises, and private guided experiences across Egypt.",
     path: "/tours",

@@ -39,7 +39,7 @@ export async function generateMetadata({
   const post = data.post;
 
   return buildSeoMetadata({
-    seoHtml: post.seo,
+    seo: post.seo,
     title: `${post.title} | Egypt Tours Gate Blog`,
     description: post.excerpt,
     path: `/blogs/${subCategorySlug}/${blogslug}`,

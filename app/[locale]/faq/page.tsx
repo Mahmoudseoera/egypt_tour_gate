@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { buildSeoMetadata } from "@/lib/seo";
+import { fetchSeoFromEndpoint } from "@/lib/api/seoApi";
 // app/أي-فولدر/page.tsx
 import React from "react";
 
@@ -9,8 +10,10 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const seo = await fetchSeoFromEndpoint("faq", locale);
 
   return buildSeoMetadata({
+    seo,
     title: "Egypt Tours Gate FAQs",
     description:
       "Find answers to frequently asked questions about Egypt Tours Gate tours, bookings, payments, private trips, and travel services.",

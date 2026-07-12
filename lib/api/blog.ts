@@ -1,6 +1,7 @@
 import { routing, type AppLocale } from '@/lib/i18n/routing';
 import { cache } from 'react';
 import { REVALIDATE, CACHE_TAGS, blogCategoryTag, blogPostTag } from "@/lib/cache/tags";
+import type { ApiSeo } from "@/lib/seo";
 
 // ─── Raw API shapes ────────────────────────────────────────────────────────────
 export interface BlogCategoryMediaItem {
@@ -25,7 +26,7 @@ export interface BlogCategoryRaw {
   id: number;
   name: string;
   slug: string;
-  seo: string;
+  seo: ApiSeo;
   small_desc?: string; // listing endpoint
   desc?: string;       // detail endpoint
   media: {
@@ -61,7 +62,7 @@ export interface BlogArticleDetailRaw {
   id: number;
   name: string;
   slug: string;
-  seo: string;
+  seo: ApiSeo;
   desc: string;
   author?: string;
 
@@ -120,7 +121,7 @@ export interface BlogCategory {
   imageAlt: string;
   coverImage: string;  // hero / cover image for the category page
   coverImageAlt: string;
-  seo: string;
+  seo: ApiSeo;
   icon?: React.ReactNode;
 }
 
@@ -139,7 +140,7 @@ export interface BlogPost {
   author: { name: string };
   readTime: string;
   tags: string[];
-  seo?: string; // Raw SEO meta for advanced parsing
+  seo?: ApiSeo;
 }
 
 // ─── Resilient fetch wrapper ──────────────────────────────────────────────
@@ -241,38 +242,20 @@ function normalisePost(raw: BlogArticleRaw): BlogPost {
   };
 }
 
-// NEW: Normalise detailed article with SEO parsing
+// Normalize detailed article. SEO is now a structured API object.
 function normalisePostDetail(raw: BlogArticleDetailRaw): BlogPost {
-  // Extract title from SEO <title> tag
-  const seoTitleMatch = raw.seo?.match(/<title>([^<]*)<\/title>/i);
-  const title = seoTitleMatch ? seoTitleMatch[1].trim() : raw.name;
-  
-  // Extract meta description from SEO
-  const seoDescMatch = raw.seo?.match(/<meta name="description" content="([^"]*)"/i);
-  const excerpt = seoDescMatch ? seoDescMatch[1].trim() : stripHtml(raw.desc);
-  
-  // Parse published date from JSON-LD schema if available
-  let publishedAt = new Date().toISOString().split('T')[0];
-  const jsonLdMatch = raw.seo?.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
-  if (jsonLdMatch) {
-    try {
-      const jsonLd = JSON.parse(jsonLdMatch[1]);
-      if (jsonLd.datePublished) publishedAt = jsonLd.datePublished;
-    } catch {}
-  }
-
   return {
     id: raw.id,
     slug: raw.slug,
     categorySlug: raw.blog_category.slug,
     categoryTitle: raw.blog_category.name,
-    title: title,
-    excerpt: excerpt,
+    title: raw.name,
+    excerpt: stripHtml(raw.desc),
     content: raw.desc, // Full HTML content for article body
     image: raw.media.image.image,
     imageAlt: raw.media.image.alt,
     date: raw.media.image.title,
-    publishedAt: publishedAt,
+    publishedAt: new Date().toISOString().split('T')[0],
     author: {
       name: raw.author || 'Egypt Tours Gate',
     },
@@ -301,7 +284,7 @@ function withLocale(url: string, locale?: string): string {
 export interface BlogPageData {
   subTitle: string;
   title: string;
-  seo: string;
+  seo: ApiSeo;
   description: string;
   cover: string;
   categories: BlogCategory[];
@@ -329,7 +312,7 @@ export const getBlogPageData = cache(
     return {
       subTitle: d.blog_sub_title ?? '',
       title: d.blog_title ?? '',
-      seo: d.seo ?? '',
+      seo: d.seo ?? {},
       cover: d.cover ?? '',
       description: d.blog_desc ?? '',
       categories: (d.blog_categories as BlogCategoryRaw[]).map(
@@ -348,7 +331,7 @@ export interface CategoryPageData {
 export interface categoryData {
   name: string;
   slug: string;
-  seo: string;
+  seo: ApiSeo;
   desc: string;
   media: {
     image: categoryDataMedia;

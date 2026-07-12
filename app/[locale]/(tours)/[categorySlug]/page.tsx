@@ -90,7 +90,7 @@ export async function generateMetadata({
     `Explore ${categoryName} tours, itineraries, and travel options in Egypt with Egypt Tours Gate.`;
 
   return buildSeoMetadata({
-    seoHtml: category.seo,
+    seo: category.seo,
     title: `${categoryName} Tours | Egypt Tours Gate`,
     description,
     path: `/${categorySlug}`,

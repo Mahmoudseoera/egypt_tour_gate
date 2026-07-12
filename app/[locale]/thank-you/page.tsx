@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { buildSeoMetadata } from "@/lib/seo";
+import { fetchSeoFromEndpoint } from "@/lib/api/seoApi";
 import { getT } from "@/lib/hooks/getT";
 export async function generateMetadata({
   params,
@@ -7,8 +8,10 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const seo = await fetchSeoFromEndpoint("thank-you", locale);
 
   return buildSeoMetadata({
+    seo,
     title: "Thank You",
     description:
       "Thank you for contacting Egypt Tours Gate. Our travel team will review your request and reply as soon as possible.",

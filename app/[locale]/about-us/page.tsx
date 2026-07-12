@@ -10,6 +10,7 @@ import RoavioAboutSection from "@/components/about/about";
 import TravelServicesSection from "@/components/about/services";
 import { fetchAboutSections } from "@/lib/api/aboutApi";
 import { buildSeoMetadata } from "@/lib/seo";
+import { fetchSeoFromEndpoint } from "@/lib/api/seoApi";
 import AboutContent  from "@/components/about/about-content";
 
 export async function generateMetadata({
@@ -18,8 +19,10 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const seo = await fetchSeoFromEndpoint("about-us", locale);
 
   return buildSeoMetadata({
+    seo,
     title: "About Egypt Tours Gate",
     description:
       "Learn about Egypt Tours Gate, our expert local team, and our Egypt tours, travel packages, Nile cruises, and tailor-made trips.",

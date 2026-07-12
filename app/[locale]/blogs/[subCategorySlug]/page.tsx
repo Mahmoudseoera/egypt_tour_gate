@@ -46,7 +46,7 @@ export async function generateMetadata({
   if (!data) return { title: "Category Not Found" };
 
   return buildSeoMetadata({
-    seoHtml: data.category.seo,
+    seo: data.category.seo,
     title: `${data.category.title} - Egypt Travel Blog | Egypt Tours Gate`,
     description: data.category.description,
     path: `/blogs/${subCategorySlug}`,

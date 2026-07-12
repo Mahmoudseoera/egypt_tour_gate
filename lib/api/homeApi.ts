@@ -1,4 +1,4 @@
-import type { HomeApiResponse, HomeSections, PageSeoScripts } from "./homeTypes";
+import type { HomeApiResponse, HomeSections } from "./homeTypes";
 import { cache } from "react";
 import { REVALIDATE, CACHE_TAGS } from "@/lib/cache/tags";
 
@@ -37,10 +37,3 @@ export const fetchHomeSections = cache(fetchHomeSectionsFn);
  * React's cache() dedupes this across every generateMetadata() call within
  * the same request, so calling it from multiple pages costs nothing extra.
  */
-export async function getPageSeoHtml(
-  locale: string,
-  key: keyof PageSeoScripts
-): Promise<string | null> {
-  const sections = await fetchHomeSections(locale);
-  return sections?.seo?.[key] ?? null;
-}

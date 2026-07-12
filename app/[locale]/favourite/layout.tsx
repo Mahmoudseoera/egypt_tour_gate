@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { buildSeoMetadata } from "@/lib/seo";
-import { getPageSeoHtml } from "@/lib/api/homeApi";
+import { fetchSeoFromEndpoint } from "@/lib/api/seoApi";
 
 export async function generateMetadata({
   params,
@@ -8,10 +8,9 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const seoHtml = await getPageSeoHtml(locale, "favourites_page_scripts");
-
+  const seo = await fetchSeoFromEndpoint("favourite", locale);
   return buildSeoMetadata({
-    seoHtml,
+    seo,
     title: "Your Favourite Egypt Tours",
     description:
       "View and manage the Egypt tours, packages, and Nile cruises you've saved to your favourites list.",

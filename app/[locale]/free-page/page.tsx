@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { buildSeoMetadata } from "@/lib/seo";
+import { fetchSeoFromEndpoint } from "@/lib/api/seoApi";
 import Image from "next/image";
 import FreePageAccordion from "@/components/shared/free-page-accordion";
 import FallbackImage from "@/components/shared/fallback-image";
@@ -13,8 +14,10 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const seo = await fetchSeoFromEndpoint("terms-conditions", locale);
 
   return buildSeoMetadata({
+    seo,
     title: "Terms and Conditions",
     description:
       "Read Egypt Tours Gate terms and conditions for website use, bookings, tour services, payments, cancellations, and traveler responsibilities.",
