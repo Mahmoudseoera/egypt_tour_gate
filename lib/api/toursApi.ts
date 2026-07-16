@@ -74,6 +74,16 @@ export interface ApiTourDetails extends ApiTourListItem {
   relatedArticles?: RelatedArticle[];
   /** Tour code */
   code?: string;
+  subCategory: {
+  category: {
+    name: string;
+    slug: string;
+  };
+  subCategory: {
+    name: string;
+    slug: string;
+  };
+};
 }
 
 function normalizeLocale(locale?: string): AppLocale {

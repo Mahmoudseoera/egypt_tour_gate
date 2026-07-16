@@ -48,15 +48,19 @@ async function getPageData(
   const subcategoryFromHeader = category?.subs?.find(
     (ch: any) => ch?.slug === cleanSubcategorySlug
   );
-
+  if (!subcategoryFromHeader) {
+    return {
+      category: null,
+      subcategory: null,
+    };
+  }
   // Fetch the full subcategory detail (includes desc, tours, media, seo…)
   const directSubcategory = await getSubcategoryBySlug(cleanSubcategorySlug, locale);
 
-  return {
-    category,
-    // Prefer the detailed endpoint; merge header stub as fallback
-    subcategory: directSubcategory ?? subcategoryFromHeader ?? null,
-  };
+return {
+  category,
+  subcategory: directSubcategory ?? subcategoryFromHeader,
+};
 }
 
 export async function generateStaticParams() {
