@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calendar, User } from "lucide-react";
 import { getT } from "@/lib/hooks/getT";
-import { getBlogPageData, getCategoryPageData } from "@/lib/api/blog";
+import { getCategoryPageData } from "@/lib/api/blog";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
@@ -26,13 +26,15 @@ interface CategoryPageProps {
 export async function generateStaticParams({
   params,
 }: {
-  params: { locale: string };
+  params: { locale: string; subCategorySlug: string };
 }) {
-  const { locale } = params;
-  const { categories } = await getBlogPageData(locale);
+  const { locale, subCategorySlug } = params;
+  const data = await getCategoryPageData(subCategorySlug, locale);
 
-  return categories.map((category) => ({
-    subCategorySlug: category.slug,
+  if (!data) return [];
+
+  return data.posts.map((post) => ({
+    postSlug: post.slug,
   }));
 }
 export async function generateMetadata({
@@ -44,11 +46,14 @@ export async function generateMetadata({
   if (!data) return { title: "Category Not Found" };
 
   return buildSeoMetadata({
+    // getCategoryPageData()/normaliseCategory() already converts the raw
+    // HTML seo string from this endpoint into a structured ApiSeo object,
+    // so this stays consistent with every other buildSeoMetadata() call.
     seo: data.category.seo,
     title: `${data.category.title} - Egypt Travel Blog | Egypt Tours Gate`,
     description: data.category.description,
     path: `/blogs/${subCategorySlug}`,
-    locale,
+    locale,  
   });
 }
 

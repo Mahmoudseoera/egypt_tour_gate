@@ -128,7 +128,7 @@ export interface BlogCategory {
   imageAlt: string;
   coverImage: string;  // hero / cover image for the category page
   coverImageAlt: string;
-  seo: string;
+  seo: ApiSeo;
   icon?: React.ReactNode;
 }
 
@@ -182,6 +182,32 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').trim();
 }
 
+/**
+ * The category endpoint (/get-article-by-category/:slug) still returns `seo`
+ * as a raw HTML <title>/<meta> string, unlike the newer article-detail and
+ * tour/category endpoints, which return a structured ApiSeo object directly.
+ * buildSeoMetadata() only accepts the structured `seo` shape now (no more
+ * `seoHtml` param), so we parse this HTML blob into the same ApiSeo shape
+ * once, here, rather than special-casing every caller.
+ */
+function parseSeoHtmlToApiSeo(html?: string | null): ApiSeo {
+  if (!html) return { title: '', description: '', keywords: null };
+
+  const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  const descMatch = html.match(
+    /<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i
+  );
+  const keywordsMatch = html.match(
+    /<meta\s+name=["']keywords["']\s+content=["']([^"']*)["']/i
+  );
+
+  return {
+    title: titleMatch ? stripHtml(titleMatch[1]).trim() : '',
+    description: descMatch ? descMatch[1].trim() : '',
+    keywords: keywordsMatch ? keywordsMatch[1].trim() : null,
+  };
+}
+
 function normaliseCategory(raw: BlogCategoryRaw): BlogCategory {
   // desc is used on the detail endpoint; small_desc on the listing endpoint
   const rawDesc = raw.desc ?? raw.small_desc ?? '';
@@ -216,7 +242,7 @@ function normaliseCategory(raw: BlogCategoryRaw): BlogCategory {
     imageAlt,
     coverImage,
     coverImageAlt,
-    seo: raw.seo,
+    seo: parseSeoHtmlToApiSeo(raw.seo),
   };
 }
 
