@@ -22,7 +22,7 @@ type TourDetailPageProps = {
 
 export async function generateMetadata({ params }: TourDetailPageProps): Promise<Metadata> {
   const { locale, categorySlug, subcategorySlug, tourSlug } = await params;
-  const item = await getTourBySlug(tourSlug, locale);
+  const item = await getTourBySlug(categorySlug, subcategorySlug, tourSlug, locale);
   const readableName = item?.title || tourSlug.replace(/-/g, " ");
   return buildSeoMetadata({
     seo: item?.seo,
@@ -42,7 +42,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
 
   let item = null;
   try {
-    item = await getTourBySlug(tourSlug, locale);
+    item = await getTourBySlug(categorySlug, subcategorySlug, tourSlug, locale);
   } catch {
     item = null;
   }

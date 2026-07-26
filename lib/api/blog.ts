@@ -26,7 +26,7 @@ export interface BlogCategoryRaw {
   id: number;
   name: string;
   slug: string;
-  seo: ApiSeo;
+  seo: string;
   small_desc?: string; // listing endpoint
   desc?: string;       // detail endpoint
   media: {
@@ -62,9 +62,16 @@ export interface BlogArticleDetailRaw {
   id: number;
   name: string;
   slug: string;
+  // Real endpoint (/blog/{categorySlug}/{articleSlug}) returns seo as a
+  // structured object — same ApiSeo shape used across tours/categories —
+  // not an HTML <title>/<meta> string like the old article endpoint did.
   seo: ApiSeo;
   desc: string;
   author?: string;
+  // Optional explicit published-date field. Not yet returned by the backend
+  // (tracked separately) — normalisePostDetail() falls back gracefully when
+  // it's absent instead of trying to mine it out of HTML/JSON-LD in `seo`.
+  date?: string;
 
   media: {
     image: blogDetailsMedia;
@@ -121,7 +128,7 @@ export interface BlogCategory {
   imageAlt: string;
   coverImage: string;  // hero / cover image for the category page
   coverImageAlt: string;
-  seo: ApiSeo;
+  seo: string;
   icon?: React.ReactNode;
 }
 
@@ -140,7 +147,7 @@ export interface BlogPost {
   author: { name: string };
   readTime: string;
   tags: string[];
-  seo?: ApiSeo;
+  seo?: ApiSeo; // Structured SEO object from the detail endpoint
 }
 
 // ─── Resilient fetch wrapper ──────────────────────────────────────────────
@@ -242,20 +249,32 @@ function normalisePost(raw: BlogArticleRaw): BlogPost {
   };
 }
 
-// Normalize detailed article. SEO is now a structured API object.
+// NEW: Normalise detailed article — seo now arrives as a structured
+// ApiSeo object ({ title, description, keywords }), same as tours/categories,
+// so no more regex-mining of an HTML <title>/<meta>/JSON-LD blob.
 function normalisePostDetail(raw: BlogArticleDetailRaw): BlogPost {
+  const title = raw.seo?.title?.trim() || raw.name;
+  const excerpt = raw.seo?.description?.trim() || stripHtml(raw.desc);
+
+  // KNOWN GAP: the detail endpoint doesn't return an explicit published-date
+  // field yet (tracked separately with the backend team — previously this was
+  // mined out of JSON-LD inside the old HTML `seo` blob, which no longer
+  // exists in the structured response). Use raw.date if the backend adds it;
+  // otherwise fall back to today's date rather than crash.
+  const publishedAt = raw.date || new Date().toISOString().split('T')[0];
+
   return {
     id: raw.id,
     slug: raw.slug,
     categorySlug: raw.blog_category.slug,
     categoryTitle: raw.blog_category.name,
-    title: raw.name,
-    excerpt: stripHtml(raw.desc),
+    title: title,
+    excerpt: excerpt,
     content: raw.desc, // Full HTML content for article body
     image: raw.media.image.image,
     imageAlt: raw.media.image.alt,
     date: raw.media.image.title,
-    publishedAt: new Date().toISOString().split('T')[0],
+    publishedAt: publishedAt,
     author: {
       name: raw.author || 'Egypt Tours Gate',
     },
@@ -267,6 +286,10 @@ function normalisePostDetail(raw: BlogArticleDetailRaw): BlogPost {
 
 // ─── API Configuration ───────────────────────────────────────────────────────
 const API_BASE = 'https://www.egypttoursgate.com/api/v1/articles';
+// Article detail lives under a different base path than the listing/category
+// endpoints — confirmed from the real endpoint:
+//   https://www.egypttoursgate.com/api/v1/blog/{categorySlug}/{articleSlug}
+const BLOG_DETAIL_BASE = 'https://www.egypttoursgate.com/api/v1/blog';
 
 function normalizeLocale(locale?: string): AppLocale {
   const nextLocale = (locale ?? routing.defaultLocale) as AppLocale;
@@ -284,7 +307,7 @@ function withLocale(url: string, locale?: string): string {
 export interface BlogPageData {
   subTitle: string;
   title: string;
-  seo: ApiSeo;
+  seo: string;
   description: string;
   cover: string;
   categories: BlogCategory[];
@@ -312,7 +335,7 @@ export const getBlogPageData = cache(
     return {
       subTitle: d.blog_sub_title ?? '',
       title: d.blog_title ?? '',
-      seo: d.seo ?? {},
+      seo: d.seo ?? '',
       cover: d.cover ?? '',
       description: d.blog_desc ?? '',
       categories: (d.blog_categories as BlogCategoryRaw[]).map(
@@ -331,7 +354,7 @@ export interface CategoryPageData {
 export interface categoryData {
   name: string;
   slug: string;
-  seo: ApiSeo;
+  seo: string;
   desc: string;
   media: {
     image: categoryDataMedia;
@@ -374,7 +397,7 @@ export const getCategoryPageData = cache(
   }
 );
 
-// ─── NEW: Fetch single article details by slug ────────────────────────────────
+// ─── NEW: Fetch single article details by category slug + article slug ────────
 export interface ArticleDetailData {
   post: BlogPost;
   relatedPosts: BlogPost[];
@@ -383,11 +406,15 @@ export interface ArticleDetailData {
 
 export const getArticleDetailBySlug = cache(
   async (
+    categorySlug: string,
     slug: string,
     locale?: string
   ): Promise<ArticleDetailData | null> => {
+      // Real endpoint requires BOTH the blog category slug and the article
+      // slug in the path, e.g.:
+      //   /api/v1/blog/the-blonde-abroad/why-you-should-visit-Egypt-in-2020
       const res = await fetchWithRetry(
-        withLocale(`${API_BASE}/get-ditals-article/${slug}`, locale),
+        withLocale(`${BLOG_DETAIL_BASE}/${categorySlug}/${slug}`, locale),
         { next: { revalidate: REVALIDATE.STANDARD, tags: [blogPostTag(slug), CACHE_TAGS.blog] } }
       );
 

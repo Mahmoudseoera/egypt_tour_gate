@@ -427,20 +427,30 @@ export async function getToursBySubcategory(
 }
 
 export async function getTourBySlug(
+  categorySlug: string,
+  subcategorySlug: string,
   slug: string,
   locale?: string
 ): Promise<ApiTourDetails | null> {
   const l = normalizeLocale(locale);
+  const cleanCategorySlug = normalizeSlug(categorySlug);
+  const cleanSubcategorySlug = normalizeSlug(subcategorySlug);
   const cleanSlug = normalizeSlug(slug);
 
   let response: any;
   try {
-    response = await apiGet<any>(withLocale(`/tour/${cleanSlug}`, l), {
-      next: {
-  revalidate: REVALIDATE.STANDARD,
-  tags: [tourTag(cleanSlug), CACHE_TAGS.tours],
-},
-    });
+    // Real backend endpoint requires the full path:
+    // /{categorySlug}/{subcategorySlug}/{tourSlug} — not a flat /tour/{slug}.
+    // e.g. /egypt-day-tours/cairo-day-tours/pyramids-sakkara-memphis-tour
+    response = await apiGet<any>(
+      withLocale(`/${cleanCategorySlug}/${cleanSubcategorySlug}/${cleanSlug}`, l),
+      {
+        next: {
+          revalidate: REVALIDATE.STANDARD,
+          tags: [tourTag(cleanSlug), CACHE_TAGS.tours],
+        },
+      }
+    );
   } catch (error) {
     // TourDetailPage already calls notFound() when this returns null.
     console.warn(`[getTourBySlug] fetch failed for "${cleanSlug}" (${l}):`, String(error));

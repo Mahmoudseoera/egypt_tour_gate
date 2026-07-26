@@ -32,7 +32,7 @@ export async function generateMetadata({
   params,
 }: BlogDetailsPageProps): Promise<Metadata> {
   const { locale, subCategorySlug, blogslug } = await params;
-  const data = await getArticleDetailBySlug(blogslug, locale);
+  const data = await getArticleDetailBySlug(subCategorySlug, blogslug, locale);
 
   if (!data?.post) return { title: "Blog Not Found" };
 
@@ -52,11 +52,12 @@ export async function generateMetadata({
 export default async function BlogDetailsPage({
   params,
 }: BlogDetailsPageProps) {
-  const { locale, blogslug } = await params;
+  const { locale, subCategorySlug, blogslug } = await params;
   const t = await getT("blogs");
   const commonT =  await getT("common");
-  // Fetch article data from API
-  const data = await getArticleDetailBySlug(blogslug, locale);
+  // Fetch article data from API — real endpoint needs both the category
+  // slug and the article slug: /blog/{subCategorySlug}/{blogslug}
+  const data = await getArticleDetailBySlug(subCategorySlug, blogslug, locale);
   if (!data?.post) notFound();
  
   const post = data.post;
@@ -240,20 +241,6 @@ export default async function BlogDetailsPage({
                   <p className="text-gray-600">{t("travel_writer_egypt_expert")}</p>
                 </div>
               </div>
-
-              {/* Share Section */}
-              {/* <div className="mt-8 pt-8 border-t border-gray-200">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <span className="font-semibold text-[var(--second-color)]">
-                    Share this article:
-                  </span>
-                  <div className="flex gap-3">
-                    <button className="w-10 h-10 rounded-full bg-gray-100 hover:bg-[var(--main-color)] hover:text-white flex items-center justify-center transition-colors">
-                      <Share2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div> */}
             </article>
           </div>
 
@@ -334,7 +321,6 @@ export default async function BlogDetailsPage({
 
                           <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
                             <span className="flex items-center gap-1">
-                              {/* map-pin inline svg — no external dep */}
                               <svg
                                 width="11"
                                 height="11"
