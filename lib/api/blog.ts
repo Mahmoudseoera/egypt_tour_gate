@@ -164,20 +164,26 @@ async function fetchWithRetry(
   retries = 3
 ): Promise<Response> {
   for (let attempt = 0; attempt <= retries; attempt++) {
-    const res = await fetch(url, init);
+    const controller = new AbortController();
+    // Static generation gives a page 60 seconds to finish.  Do not let one
+    // slow upstream request use that entire budget (or hold up every locale).
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    try {
+      const res = await fetch(url, { ...init, signal: controller.signal });
+      if (res.status !== 429 || attempt === retries) return res;
 
-    if (res.status !== 429 || attempt === retries) {
-      return res;
+      const retryAfterHeader = res.headers.get('retry-after');
+      const retryAfterMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : null;
+      const backoffMs = retryAfterMs ?? 500 * 2 ** attempt + Math.random() * 250;
+      await new Promise((resolve) => setTimeout(resolve, backoffMs));
+    } catch (error) {
+      if (attempt === retries) throw error; // let caller's try/catch handle it
+      await new Promise((resolve) => setTimeout(resolve, 500 * 2 ** attempt));
+    } finally {
+      clearTimeout(timeout);
     }
-
-    const retryAfterHeader = res.headers.get('retry-after');
-    const retryAfterMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : null;
-    const backoffMs = retryAfterMs ?? 500 * 2 ** attempt + Math.random() * 250;
-
-    await new Promise((resolve) => setTimeout(resolve, backoffMs));
   }
-
-  return fetch(url, init); // unreachable, satisfies TS
+  return fetch(url, init);
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -229,29 +235,21 @@ function parseSeoHtmlToApiSeo(input?: string | ApiSeo | null): ApiSeo {
 }
 
 function normaliseCategory(raw: BlogCategoryRaw): BlogCategory {
-  // desc is used on the detail endpoint; small_desc on the listing endpoint
   const rawDesc = raw.desc ?? raw.small_desc ?? '';
+  const media = raw.media ?? ({} as BlogCategoryRaw['media']); // ← guard against missing media
 
-  /**
-   * Listing endpoint → media.image is a plain string URL:
-   *   { image: "https://...", title: "...", alt: "..." }
-   *
-   * Detail endpoint → media.image is a nested object:
-   *   { image: { image: "https://...", title: "...", alt: "..." }, cover: { ... } }
-   */
-  const isNested = typeof raw.media.image === 'object' && raw.media.image !== null;
+  const isNested = typeof media.image === 'object' && media.image !== null;
 
-  const image       = isNested
-    ? (raw.media.image as BlogCategoryMediaItem).image
-    : (raw.media.image as string);
+  const image = isNested
+    ? (media.image as BlogCategoryMediaItem).image ?? ''
+    : ((media.image as string) ?? '');
 
-  const imageAlt    = isNested
-    ? (raw.media.image as BlogCategoryMediaItem).alt
-    : (raw.media.alt ?? '');
+  const imageAlt = isNested
+    ? (media.image as BlogCategoryMediaItem).alt ?? ''
+    : (media.alt ?? '');
 
-  // cover is only present on the detail endpoint's nested shape
-  const coverImage    = raw.media.cover?.image    ?? image;
-  const coverImageAlt = raw.media.cover?.alt      ?? imageAlt;
+  const coverImage = media.cover?.image ?? image;
+  const coverImageAlt = media.cover?.alt ?? imageAlt;
 
   return {
     id: raw.id,
@@ -359,35 +357,55 @@ export interface BlogPageData {
   categories: BlogCategory[];
 }
 
+function emptyBlogPageData(): BlogPageData {
+  return {
+    subTitle: '',
+    title: '',
+    seo: { title: '', description: '', keywords: null },
+    description: '',
+    cover: '',
+    categories: [],
+  };
+}
+
+// getBlogPageData
 export const getBlogPageData = cache(
   async (locale?: string): Promise<BlogPageData> => {
-    const res = await fetchWithRetry(
-      withLocale(`${API_BASE}/get-article-categories`, locale),
-      { next: { revalidate: REVALIDATE.STANDARD, tags: [CACHE_TAGS.blog] } }
-    );
+    try {
+      // The categories endpoint is currently not localised. Appending
+      // `?locale=de` (and the other non-default locales) returns 404, which
+      // unnecessarily fans out into failed build-time requests. The content
+      // itself is shared while the surrounding UI remains translated.
+      const res = await fetchWithRetry(
+        `${API_BASE}/get-article-categories`,
+        { next: { revalidate: REVALIDATE.STANDARD, tags: [CACHE_TAGS.blog] } }
+      );
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch blog categories: ${res.status}`);
+      if (!res.ok) {
+        console.warn(`[getBlogPageData] API responded ${res.status}`);
+        return emptyBlogPageData();
+      }
+
+      const json = await res.json();
+
+      if (!json.success) {
+        console.warn('[getBlogPageData] get-article-categories returned success: false');
+        return emptyBlogPageData();
+      }
+
+      const d = json.data;
+      return {
+        subTitle: d.blog_sub_title ?? '',
+        title: d.blog_title ?? '',
+        seo: parseSeoHtmlToApiSeo(d.seo),
+        cover: d.cover ?? '',
+        description: d.blog_desc ?? '',
+        categories: (d.blog_categories as BlogCategoryRaw[]).map(normaliseCategory),
+      };
+    } catch (error) {
+      console.error(`[getBlogPageData] Request failed for locale "${locale}":`, error);
+      return emptyBlogPageData();
     }
-
-    const json = await res.json();
-
-    if (!json.success) {
-      throw new Error('get-article-categories returned success: false');
-    }
-
-    const d = json.data;
-
-    return {
-      subTitle: d.blog_sub_title ?? '',
-      title: d.blog_title ?? '',
-      seo: parseSeoHtmlToApiSeo(d.seo),
-      cover: d.cover ?? '',
-      description: d.blog_desc ?? '',
-      categories: (d.blog_categories as BlogCategoryRaw[]).map(
-        normaliseCategory
-      ),
-    };
   }
 );
 
@@ -415,34 +433,49 @@ export interface categoryDataMedia {
 }
 
 export const getCategoryPageData = cache(
-  async ( 
+  async (
     slug: string,
     locale?: string
   ): Promise<CategoryPageData | null> => {
-    const res = await fetchWithRetry(
-      withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale),
-      { next: { revalidate: REVALIDATE.STANDARD, tags: [blogCategoryTag(slug), CACHE_TAGS.blog] } }
-    );
+    try {
+      const res = await fetchWithRetry(
+        // This endpoint, like the categories listing endpoint, does not
+        // support the locale query parameter. Use the canonical URL so the
+        // same category data can be rendered for each translated UI route.
+        `${API_BASE}/get-article-by-category/${encodeURIComponent(slug)}`,
+        { next: { revalidate: REVALIDATE.STANDARD, tags: [blogCategoryTag(slug), CACHE_TAGS.blog] } }
+      );
 
-    if (res.status === 404) return null;
+      if (res.status === 404) return null;
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch category "${slug}": ${res.status}`);
+      if (!res.ok) {
+        console.warn(`[getCategoryPageData] API responded ${res.status} for "${slug}"`);
+        return null;
+      }
+
+      const json = await res.json().catch((e) => {
+        console.warn(`[getCategoryPageData] JSON parse failed for "${slug}":`, String(e));
+        return null;
+      });
+
+      if (!json?.success) return null;
+
+      const raw: BlogCategoryWithArticles | undefined = json?.data?.articles;
+      if (!raw || typeof raw !== 'object') {
+        console.warn(`[getCategoryPageData] Missing/invalid "data.articles" for "${slug}"`);
+        return null;
+      }
+
+      return {
+        category: normaliseCategory(raw),
+        posts: (raw.articles ?? []).map(normalisePost),
+      };
+    } catch (error) {
+      console.error(`[getCategoryPageData] Unhandled error for "${slug}":`, error);
+      return null;
     }
-
-    const json = await res.json();
-
-    if (!json.success) return null;
-
-    const raw: BlogCategoryWithArticles = json.data.articles;
-
-    return {
-      category: normaliseCategory(raw),
-      posts: (raw.articles ?? []).map(normalisePost),
-    };
   }
 );
-
 // ─── NEW: Fetch single article details by category slug + article slug ────────
 export interface ArticleDetailData {
   post: BlogPost;
@@ -466,9 +499,10 @@ export const getArticleDetailBySlug = cache(
 
     if (res.status === 404) return null;
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch article "${slug}": ${res.status}`);
-    }
+  if (!res.ok) {
+    console.warn(`[getArticleDetailBySlug] API responded ${res.status} for "${slug}"`);
+    return null;
+  }
 
     const json = await res.json();
 

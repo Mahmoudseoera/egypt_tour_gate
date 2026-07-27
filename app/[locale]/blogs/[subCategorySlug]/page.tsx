@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calendar, User } from "lucide-react";
 import { getT } from "@/lib/hooks/getT";
-import { getCategoryPageData } from "@/lib/api/blog";
+import { getBlogPageData, getCategoryPageData } from "@/lib/api/blog";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import ExpandableDescription from "@/components/shared/expandable-description";
 import SchemaScript from "@/components/seo/schema-script";
@@ -23,18 +23,15 @@ interface CategoryPageProps {
   }>;
 }
 
-export async function generateStaticParams({
-  params,
-}: {
-  params: { locale: string; subCategorySlug: string };
-}) {
-  const { locale, subCategorySlug } = params;
-  const data = await getCategoryPageData(subCategorySlug, locale);
+export async function generateStaticParams() {
+  // This function generates params for *this* dynamic segment only. It has no
+  // `subCategorySlug` input, so the old implementation requested
+  // `/get-article-by-category/undefined` and returned a parameter belonging
+  // to the child article route instead.
+  const data = await getBlogPageData();
 
-  if (!data) return [];
-
-  return data.posts.map((post) => ({
-    postSlug: post.slug,
+  return data.categories.map((category) => ({
+    subCategorySlug: category.slug,
   }));
 }
 export async function generateMetadata({
