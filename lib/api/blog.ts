@@ -26,7 +26,10 @@ export interface BlogCategoryRaw {
   id: number;
   name: string;
   slug: string;
-  seo: string;
+  // Observed as either a raw HTML <title>/<meta> string or an already
+  // structured object depending on the endpoint/response — see
+  // parseSeoHtmlToApiSeo() which normalises both.
+  seo: string | ApiSeo;
   small_desc?: string; // listing endpoint
   desc?: string;       // detail endpoint
   media: {
@@ -190,9 +193,26 @@ function stripHtml(html: string): string {
  * `seoHtml` param), so we parse this HTML blob into the same ApiSeo shape
  * once, here, rather than special-casing every caller.
  */
-function parseSeoHtmlToApiSeo(html?: string | null): ApiSeo {
-  if (!html) return { title: '', description: '', keywords: null };
+/**
+ * `seo` on the category endpoints has been observed as BOTH shapes at
+ * runtime — a raw HTML <title>/<meta> string on some responses, and an
+ * already-structured { title, description, keywords } object on others
+ * (the backend appears inconsistent here). Handle both so this never
+ * crashes regardless of which one comes back on a given request.
+ */
+function parseSeoHtmlToApiSeo(input?: string | ApiSeo | null): ApiSeo {
+  if (!input) return { title: '', description: '', keywords: null };
 
+  // Already a structured object — pass it through (with safe defaults).
+  if (typeof input === 'object') {
+    return {
+      title: input.title ?? '',
+      description: input.description ?? '',
+      keywords: input.keywords ?? null,
+    };
+  }
+
+  const html = input;
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   const descMatch = html.match(
     /<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i
@@ -333,7 +353,7 @@ function withLocale(url: string, locale?: string): string {
 export interface BlogPageData {
   subTitle: string;
   title: string;
-  seo: string;
+  seo: ApiSeo;
   description: string;
   cover: string;
   categories: BlogCategory[];
@@ -361,7 +381,7 @@ export const getBlogPageData = cache(
     return {
       subTitle: d.blog_sub_title ?? '',
       title: d.blog_title ?? '',
-      seo: d.seo ?? '',
+      seo: parseSeoHtmlToApiSeo(d.seo),
       cover: d.cover ?? '',
       description: d.blog_desc ?? '',
       categories: (d.blog_categories as BlogCategoryRaw[]).map(

@@ -580,6 +580,22 @@ export async function getTourBySlug(
       : undefined,
   }));
 
+  // ── subCategory — required by ApiTourDetails, mirrors the real API shape
+  // { category: {name, slug}, subCategory: {name, slug} }. Prefer whatever
+  // the API itself returns on `raw.subCategory`; fall back to the slugs we
+  // already have from the route params (categorySlug/subcategorySlug) so
+  // the page never crashes even if a field is momentarily missing upstream.
+  const subCategory = {
+    category: {
+      name: raw.subCategory?.category?.name ?? "",
+      slug: raw.subCategory?.category?.slug ?? cleanCategorySlug,
+    },
+    subCategory: {
+      name: raw.subCategory?.subCategory?.name ?? "",
+      slug: raw.subCategory?.subCategory?.slug ?? cleanSubcategorySlug,
+    },
+  };
+
   return {
     ...mapTour(raw, cleanSlug),
     code: raw.code ?? undefined,
@@ -595,5 +611,6 @@ export async function getTourBySlug(
     pricingTables,
     relatedTours,
     relatedArticles,
+    subCategory,
   };
 }
