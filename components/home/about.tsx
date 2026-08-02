@@ -38,7 +38,7 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
                 <br className="hidden md:block"/>
                 <span className="text-gray-900">{t("egypt_tour_gate")}</span>
               </h2>
-              <p className="text-gray-600 text-lg">
+              <p className="text-gray-600 text-lg text-wrap">
                 {t("we_are_started_with_2005s")}<span className="text-[var(--main-color)] font-semibold">{t("20_years_of_experience")}</span>
               </p>
             </div>

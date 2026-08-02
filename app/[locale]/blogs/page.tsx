@@ -76,41 +76,64 @@ export default async function BlogsPage({
               {t("articles")}
             </h2>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
               {categories.map((category) => (
                 <Link
                   key={category.id}
                   href={`/blogs/${category.slug}`}
-                  className="group block bg-grey-light rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+                  className="group relative flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-gray-100 bg-white shadow-[0_10px_35px_rgba(30,26,94,0.08)] transition-all duration-500 hover:-translate-y-1.5 hover:border-gold/45 hover:shadow-[0_22px_55px_rgba(30,26,94,0.16)]"
                 >
-                  <div className="relative h-56 overflow-hidden">
+                  <div className="relative h-60 overflow-hidden bg-gray-100">
                     <FallbackImage
                       src={category.image}
-                      alt={category.imageAlt}
+                      alt={category.imageAlt || category.title}
+                      title={category.title}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-gold transition-colors">
-                        {category.title}
-                      </h3>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    {category.description && (
-                      <p className="text-gray-600 leading-relaxed line-clamp-3">
-                        {category.description}
-                      </p>
-                    )}
-                    <div className="mt-4 flex items-center text-gold font-semibold gap-2 group-hover:gap-3 transition-all">
-                      <span>{commonT("view_details")}</span>
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/15 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent opacity-80" />
+
+                    <div className="absolute end-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-navy/55 text-white shadow-lg backdrop-blur-md transition-all duration-300 group-hover:rotate-45 group-hover:border-gold group-hover:bg-gold group-hover:text-navy rtl:group-hover:-rotate-45">
                       <svg
-                        className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                        className="h-5 w-5 rtl:-scale-x-100"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 17 17 7M7 7h10v10"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div className="relative flex flex-1 flex-col px-6 pb-6 pt-7">
+                    <span className="absolute start-6 top-0 h-1 w-14 -translate-y-1/2 rounded-full bg-gold transition-all duration-500 group-hover:w-24" />
+
+                    <h3 className="mb-3 text-xl font-bold leading-snug text-navy transition-colors duration-300 group-hover:text-gold">
+                      {category.title}
+                    </h3>
+
+                    {category.description && (
+                      <p className="line-clamp-3 text-sm leading-7 text-gray-600">
+                        {category.description}
+                      </p>
+                    )}
+
+                    <div className="mt-auto flex items-center gap-2 border-t border-gray-100 pt-5 text-sm font-bold text-navy transition-colors duration-300 group-hover:text-gold">
+                      <span>{commonT("view_details")}</span>
+                      <svg
+                        className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
                       >
                         <path
                           strokeLinecap="round"

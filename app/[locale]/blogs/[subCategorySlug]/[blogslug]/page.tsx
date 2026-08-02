@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {  Clock, User, Calendar, ArrowLeft, Tag} from "lucide-react";
+import { Clock, User, Calendar, ArrowLeft, ArrowRight, Tag } from "lucide-react";
 import RelatedPostsSlider from "@/components/layout/related-posts-slider";
 import FallbackImage from "@/components/shared/fallback-image";
 import { getT } from "@/lib/hooks/getT";
@@ -248,41 +248,77 @@ export default async function BlogDetailsPage({
           <div className="lg:col-span-4">
             <div className="sticky top-10 space-y-8">
               {/* Categories Widget */}
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                <div className="px-6 py-4 bg-[var(--main-grey)] border-b border-gray-200">
-                  <h3 className="text-lg font-bold text-[var(--second-color)] flex items-center gap-2">
-                    <svg
-                      className="w-5 h-5 text-[var(--main-color)]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                      />
-                    </svg>
-                    {t("blog_categories")}</h3>
+              <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_12px_35px_rgba(30,26,94,0.08)]">
+                <div className="relative overflow-hidden bg-[var(--second-color)] px-6 py-5">
+                  <div className="absolute -end-6 -top-8 h-24 w-24 rounded-full bg-[var(--main-color)]/15" />
+                  <div className="absolute -bottom-10 end-10 h-20 w-20 rounded-full border border-white/10" />
+                  <div className="relative flex items-center gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--main-color)] text-[var(--second-color)] shadow-sm">
+                      <Tag className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <h3 className="text-lg font-bold leading-tight text-white">
+                        {t("blog_categories")}
+                      </h3>
+                      <span className="mt-1 block text-xs font-medium text-white/65">
+                        {allCategories.length} {t("blog_categories")}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="p-6">
-                  <ul className="space-y-3">
-                    {allCategories.map((blogCategory) => (
-                      <li key={blogCategory.slug}>
-                        <Link
-                          href={`/blogs/${blogCategory.slug}`}
-                          className="flex items-center justify-between text-[var(--black-color)] hover:text-[var(--main-color)] transition-colors group"
-                        >
-                          <span className="flex items-center gap-2 group-hover:translate-x-1 transition-transform duration-200">
-                            <span>{blogCategory.icon}</span>
-                            <span>{blogCategory.title}</span>
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
+
+                <nav className="p-3" aria-label={t("blog_categories")}>
+                  <ul className="space-y-2">
+                    {allCategories.map((blogCategory) => {
+                      const isActive = blogCategory.slug === subCategorySlug;
+
+                      return (
+                        <li key={blogCategory.slug}>
+                          <Link
+                            href={`/blogs/${blogCategory.slug}`}
+                            aria-current={isActive ? "page" : undefined}
+                            className={`group flex min-h-16 items-center gap-3 rounded-xl border p-2.5 transition-all duration-300 ${
+                              isActive
+                                ? "border-[var(--main-color)]/40 bg-[var(--main-color)]/10 shadow-sm"
+                                : "border-transparent hover:border-gray-200 hover:bg-[var(--main-grey)] hover:shadow-sm"
+                            }`}
+                          >
+                            <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                              <FallbackImage
+                                src={blogCategory.image}
+                                alt={blogCategory.imageAlt || blogCategory.title}
+                                title={blogCategory.title}
+                                fill
+                                sizes="44px"
+                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                              />
+                            </span>
+
+                            <span
+                              className={`min-w-0 flex-1 text-sm font-semibold leading-snug transition-colors ${
+                                isActive
+                                  ? "text-[var(--second-color)]"
+                                  : "text-[var(--black-color)] group-hover:text-[var(--second-color)]"
+                              }`}
+                            >
+                              {blogCategory.title}
+                            </span>
+
+                            <span
+                              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300 rtl:rotate-180 ${
+                                isActive
+                                  ? "bg-[var(--main-color)] text-[var(--second-color)]"
+                                  : "bg-gray-100 text-gray-400 group-hover:bg-[var(--main-color)] group-hover:text-[var(--second-color)]"
+                              }`}
+                            >
+                              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                            </span>
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
-                </div>
+                </nav>
               </div>
 
               {relatedtours.length > 0 && (
