@@ -300,28 +300,30 @@ export default function Navbar() {
                   );
                 })}
               </div>
-              <Link
-                href={`tel:${data.header.info?.phone ?? "+201110008407"}`}
-                className="flex items-center gap-1 pl-2 md:pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
-              >
-                <Phone className="h-4 w-4" />
-                <span className="hidden md:inline font-medium">{t("mobile")}:</span>
-                <span className="hidden lg:inline">
-                  {data.header.info?.phone ?? "+201110008407"}
-                </span>
-              </Link>
+              {data.header.info?.phone && (
+                <Link
+                  href={`tel:${data.header.info.phone}`}
+                  className="flex items-center gap-1 pl-2 md:pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
+                >
+                  <Phone className="h-4 w-4" />
+                  <span className="hidden md:inline font-medium">{t("mobile")}:</span>
+                  <span className="hidden lg:inline">{data.header.info.phone}</span>
+                </Link>
+              )}
             </div>
 
             <div className="flex items-center">
-              <Link
-                href={`mailto:${data.header.info?.email ?? "info@egypttoursgate.com"}`}
-                className="flex items-center gap-2 pr-4 border-r border-gray-200 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
-              >
-                <Mail className="h-4 w-4" />
-                <span className="hidden lg:inline font-medium">
-                  {data.header.info?.email ?? "info@egypttoursgate.com"}
-                </span>
-              </Link>
+              {data.header.info?.email && (
+                <Link
+                  href={`mailto:${data.header.info.email}`}
+                  className="flex items-center gap-2 pr-4 border-r border-gray-200 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
+                >
+                  <Mail className="h-4 w-4" />
+                  <span className="hidden lg:inline font-medium">
+                    {data.header.info.email}
+                  </span>
+                </Link>
+              )}
 
               {/* Language switcher */}
               <div className="relative group flex items-center gap-1  px-4 border-r border-gray-200 cursor-pointer text-[var(--second-color)]">

@@ -143,7 +143,6 @@ export default function TravelServicesSection({
             alt="services-background-image"
             fill
             className="object-cover object-center"
-            priority
           />
         </div>
 

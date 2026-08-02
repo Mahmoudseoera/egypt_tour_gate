@@ -241,11 +241,6 @@ export function websiteSchema() {
     url: SITE_URL,
     inLanguage: "en",
     isFamilyFriendly: true,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${SITE_URL}/search?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
   };
 }
 
@@ -257,18 +252,11 @@ export function travelAgencySchema() {
     url: SITE_URL,
     logo: DEFAULT_SEO_IMAGE,
     image: DEFAULT_SEO_IMAGE,
-    priceRange: "Starting From 35$",
     address: {
       "@type": "PostalAddress",
       addressCountry: "EG",
       addressLocality: "Giza",
       addressRegion: "Giza Governorate",
-    },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      bestRating: 5,
-      ratingValue: 5,
-      reviewCount: 255,
     },
   };
 }

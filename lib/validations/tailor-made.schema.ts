@@ -35,7 +35,12 @@ export const tailorMadeSchema = z
     monthSelect: z.string().optional().default(""),
     vacationDays: z.string().optional().default(""),
     timeOption: timeOptionSchema,
-    fullName: safeStr("Full name").pipe(z.string().min(2, "Full name must be at least 2 characters").max(120, "Full name is too long")),
+    fullName: safeStr("Full name").pipe(
+      z.string()
+        .min(2, "Full name must be at least 2 characters")
+        .max(120, "Full name is too long")
+        .regex(/^[\p{L}\p{M}'\-\s.]+$/u, "Full name may only contain letters")
+    ),
     email: safeStr("Email").pipe(z.string().toLowerCase().email("Please enter a valid email address")),
     phoneCode: safeStr("Phone code").pipe(z.string().min(1, "Please select a phone code").regex(/^\+?\d{1,6}$/, "Phone code is invalid")),
     phoneNumber: safeStr("Phone number")
@@ -44,7 +49,7 @@ export const tailorMadeSchema = z
           .string()
           .min(6, "Phone number must be at least 6 digits")
           .max(20, "Phone number is too long")
-          .regex(/^[0-9+()\-\s]+$/, "Phone number contains invalid characters")
+          .regex(/^\d+$/, "Phone number must contain digits only")
       ),
     nationality: safeStr("Nationality").pipe(z.string().min(1, "Please select a nationality").max(100)),
     hotel: safeStr("Hotel preference").pipe(z.string().min(1, "Please select a hotel preference").max(120)),
@@ -56,6 +61,9 @@ export const tailorMadeSchema = z
     priceMax: z.number().min(0, "Maximum price must be 0 or greater"),
   })
   .superRefine((data, ctx) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const currentMonth = today.slice(0, 7);
+
     if (data.priceMax < data.priceMin) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -69,6 +77,8 @@ export const tailorMadeSchema = z
         ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["checkIn"], message: "Please select a check-in date" });
       } else if (!dateRegex.test(data.checkIn)) {
         ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["checkIn"], message: "Check-in date must be YYYY-MM-DD" });
+      } else if (data.checkIn < today) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["checkIn"], message: "Check-in date cannot be in the past" });
       }
 
       if (!data.checkOut) {
@@ -91,6 +101,8 @@ export const tailorMadeSchema = z
         ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["monthSelect"], message: "Please select an approximate month" });
       } else if (!monthRegex.test(data.monthSelect)) {
         ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["monthSelect"], message: "Month must be YYYY-MM" });
+      } else if (data.monthSelect < currentMonth) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["monthSelect"], message: "Travel month cannot be in the past" });
       }
     }
 

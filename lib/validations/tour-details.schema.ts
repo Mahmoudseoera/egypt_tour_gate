@@ -151,10 +151,7 @@ export const tourDetailsSchema = z
         .string()
         .min(6, "Phone number must be at least 6 digits")
         .max(20, "Phone number is too long")
-        .regex(
-          /^[0-9+()\-\s]+$/,
-          "Phone may only contain digits, +, -, (, ), and spaces"
-        )
+        .regex(/^\d+$/, "Phone number must contain digits only")
     ),
 
     /* Check-in must be today or later.

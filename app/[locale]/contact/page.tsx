@@ -55,8 +55,6 @@ const SKELETON_CARDS: ContactCard[] = [
   },
 ];
 
-const fallbackIframe = "test";
-
 // ✅ FIX 2: Memoize the Map component so it never re-renders when the form changes.
 const ContactMap = memo(function ContactMap({ html }: { html: string }) {
   return (
@@ -73,7 +71,7 @@ export default function ContactPage() {
   const [contactCards, setContactCards] = useState<ContactCard[]>(SKELETON_CARDS);
   const [bgImage, setBgImage] = useState<string>("");
   // ✅ Store the iframe html in a ref-stable state — only set once from the API.
-  const [mapIframe, setMapIframe] = useState<string>(fallbackIframe);
+  const [mapIframe, setMapIframe] = useState<string>("");
   const locale = useLocale();
   const router = useRouter();
   const t = useT("contact");
@@ -344,7 +342,18 @@ const breadcrumbItems = [
               >
                 {/* Full Name */}
                 <div className="relative sm:col-span-1">
-                  <input type="text" autoComplete="name" className={inputClass("name")} {...register("name")} />
+                  <input
+                    type="text"
+                    autoComplete="name"
+                    className={inputClass("name")}
+                    onInput={(event) => {
+                      event.currentTarget.value = event.currentTarget.value.replace(
+                        /[^\p{L}\p{M}'\-\s.]/gu,
+                        "",
+                      );
+                    }}
+                    {...register("name")}
+                  />
                   <label className={labelClass}>{t("full_name")}</label>
                   {errors.name && <p className="mt-1.5 text-xs text-red-600">{errors.name.message}</p>}
                 </div>
@@ -436,7 +445,17 @@ const breadcrumbItems = [
                   </div>
 
                   <div className="relative flex-1">
-                    <input type="tel" autoComplete="tel" className={inputClass("phone")} {...register("phone")} />
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      autoComplete="tel-national"
+                      className={inputClass("phone")}
+                      onInput={(event) => {
+                        event.currentTarget.value = event.currentTarget.value.replace(/\D/g, "");
+                      }}
+                      {...register("phone")}
+                    />
                     <label className={labelClass}>{t("phone_number")}</label>
                     {errors.phone && <p className="mt-1.5 text-xs text-red-600">{errors.phone.message}</p>}
                   </div>
@@ -578,7 +597,7 @@ const breadcrumbItems = [
             </div>
 
             {/* ✅ FIX 2: Map wrapped in memo component — won't re-render on form changes */}
-            <ContactMap html={mapIframe} />
+            {mapIframe && <ContactMap html={mapIframe} />}
           </div>
         </div>
       </section>

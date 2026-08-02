@@ -164,9 +164,14 @@ const INITIAL: FormState = {
 
 type TourDetailsClientProps = {
   tour: ApiTourDetails;
+  contact: {
+    email: string | null;
+    phone: string | null;
+    whatsapp: string | null;
+  };
 };
 
-export default function TourDetailsClient({ tour }: TourDetailsClientProps) {
+export default function TourDetailsClient({ tour, contact }: TourDetailsClientProps) {
   const [activeDay, setActiveDay] = useState<number | null>(1);
   const [allOpen, setAllOpen] = useState(false);
   const [pickerReady, setPickerReady] = useState(false);
@@ -325,7 +330,13 @@ useEffect(() => {
       >,
     ) => {
       const { name, value } = e.target;
-      setFormData((p) => ({ ...p, [name]: value }));
+      const sanitizedValue =
+        name === "phone"
+          ? value.replace(/\D/g, "")
+          : name === "name"
+            ? value.replace(/[^\p{L}\p{M}'\-\s.]/gu, "")
+            : value;
+      setFormData((p) => ({ ...p, [name]: sanitizedValue }));
       setFieldErrors((p) => ({ ...p, [name]: undefined }));
     },
     [],
@@ -1083,6 +1094,8 @@ useEffect(() => {
                       <label className={labelCls}>{t("phone")}</label>
                       <input
                         type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
@@ -1310,25 +1323,25 @@ useEffect(() => {
                     {t("talk_to_our_team")}</h3>
                 </div>
                 <div className="p-5 space-y-3">
-                  <a
-                    href="mailto:info@egypttoursgate.com"
+                  {contact.email && <a
+                    href={`mailto:${contact.email}`}
                     className="flex items-center gap-3 text-gray-600 hover:text-[var(--second-color)] transition-colors text-sm group"
                   >
                     <span className="w-9 h-9 rounded-full bg-[var(--second-color)]/8 flex items-center justify-center flex-shrink-0 group-hover:bg-[var(--second-color)]/15 transition-colors">
                       <Mail className="w-4 h-4 text-[var(--second-color)]" />
                     </span>
-                    {t("infoegypttoursgatecom")}</a>
-                  <a
-                    href="tel:+201110008407"
+                    {contact.email}</a>}
+                  {contact.phone && <a
+                    href={`tel:${contact.phone}`}
                     className="flex items-center gap-3 text-gray-700 hover:text-[var(--second-color)] transition-colors group"
                   >
                     <span className="w-9 h-9 rounded-full bg-[var(--second-color)]/8 flex items-center justify-center flex-shrink-0 group-hover:bg-[var(--second-color)]/15 transition-colors">
                       <Phone className="w-4 h-4 text-[var(--second-color)]" />
                     </span>
-                    <span className="text-lg font-bold">+201110008407</span>
-                  </a>
-                  <a
-                    href="https://wa.me/201110008407"
+                    <span className="text-lg font-bold">{contact.phone}</span>
+                  </a>}
+                  {contact.whatsapp && <a
+                    href={contact.whatsapp.startsWith("http") ? contact.whatsapp : `https://wa.me/${contact.whatsapp.replace(/\D/g, "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 text-green-600 hover:text-green-700 transition-colors font-semibold text-sm"
@@ -1336,9 +1349,9 @@ useEffect(() => {
                     <span className="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
                       <MessageCircle className="w-4 h-4 text-green-500" />
                     </span>
-                    {t("whatsapp_chat")}</a>
-                  <button className="w-full mt-2 bg-[var(--second-color)] hover:bg-[#1e1a5e] text-white font-semibold py-2.5 px-6 rounded-xl transition-all text-sm">
-                    {t("customize_your_trip")}</button>
+                    {t("whatsapp_chat")}</a>}
+                  <Link href="/tailor-made" className="block w-full mt-2 bg-[var(--second-color)] hover:bg-[#1e1a5e] text-white text-center font-semibold py-2.5 px-6 rounded-xl transition-all text-sm">
+                    {t("customize_your_trip")}</Link>
                 </div>
               </div>
 

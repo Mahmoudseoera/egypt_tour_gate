@@ -8,7 +8,6 @@ import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
 import ScrollToTop from '@/components/layout/scrollTop';
 import MobileFooter from '@/components/layout/MobileFooter';
-import WhatsappIcon from '@/components/layout/Whatsapp-icon';
 import GlobalSeoSchema from '@/components/seo/global-seo-schema';
 import RouteProgress from '@/components/layout/route-progress';
 import { routing } from '@/lib/i18n/routing';
@@ -45,7 +44,6 @@ export default async function LocaleLayout({ children, params }: Props) {
       {children}
       <ScrollToTop />
       <MobileFooter />
-      <WhatsappIcon />
       <Footer />
       <Toaster position="top-right" richColors closeButton />
     </NextIntlClientProvider>

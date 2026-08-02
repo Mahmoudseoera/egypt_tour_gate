@@ -7,7 +7,9 @@ import { SITE_URL } from '@/lib/seo';
 import { routing } from '@/lib/i18n/routing';
 import { REVALIDATE, CACHE_TAGS } from "@/lib/cache/tags";
 
-export const API_BASE_URL = `${SITE_URL}/api/v1`;
+export const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? `${SITE_URL}/api/v1`
+).replace(/\/+$/, '');
 export const LAST_MODIFIED = new Date().toISOString().split('T')[0] + 'T00:00:00+00:00';
 
 export const DEFAULT_LOCALE = routing.defaultLocale;
@@ -83,10 +85,9 @@ export const STATIC_PATHS: Entry[] = [
   { path: '/',                     priority: '1.00' },
   { path: '/about-us',             priority: '0.80' },
   { path: '/contact',              priority: '0.80' },
-  { path: '/tailormade',           priority: '0.80' },
+  { path: '/tailor-made',          priority: '0.80' },
   { path: '/faq',                  priority: '0.80' },
-  { path: '/favourite',            priority: '0.80' },
-  { path: '/terms-and-conditions', priority: '0.80' },
+  { path: '/free-page',            priority: '0.80' },
   { path: '/blogs',                priority: '0.80' },
 ];
 

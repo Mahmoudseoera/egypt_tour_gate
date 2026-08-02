@@ -9,9 +9,10 @@ import Link from "next/link";
 import RoavioAboutSection from "@/components/about/about";
 import TravelServicesSection from "@/components/about/services";
 import { fetchAboutSections } from "@/lib/api/aboutApi";
-import { buildSeoMetadata } from "@/lib/seo";
+import { aboutPageSchema, buildSeoMetadata } from "@/lib/seo";
 import { fetchSeoFromEndpoint } from "@/lib/api/seoApi";
 import AboutContent  from "@/components/about/about-content";
+import SchemaScript from "@/components/seo/schema-script";
 
 export async function generateMetadata({
   params,
@@ -45,6 +46,7 @@ export default async function AboutPage({
   const whyChooseData   = sections?.why_choose_section  ?? null;
   return (
     <>
+      <SchemaScript schema={aboutPageSchema()} />
       {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
       <div className="bg-white border border-gray-200">
         <div className="container mx-auto px-4 md:px-8 lg:px-16 py-4">
