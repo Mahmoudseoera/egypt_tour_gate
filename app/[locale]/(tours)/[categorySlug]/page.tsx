@@ -16,7 +16,7 @@ import {
 } from "@/lib/seo";
 import { getCategoryBySlug, getGeneralCategories } from "@/lib/api/toursApi";
 import { routing } from "@/lib/i18n/routing";
-import {Binoculars} from "lucide-react";
+import { ArrowUpRight, Binoculars } from "lucide-react";
 // import placeholder from "@/assets/images/placeholder.png";
 type CategoryPageProps = {
   params: Promise<{ locale: string; categorySlug: string }>;
@@ -185,7 +185,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             <p className="text-lg text-center">
         {t("no_subcategory_found_for_this_category")}      </p>
           ): (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
               {(category.subs ?? []).map((child: any, index: number) => {
                 // ── Real image from API media, fallback only when absent ──
                 const rawImage: string =
@@ -217,52 +217,64 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                   <Link
                     key={child.slug}
                     href={`/${category.slug}/${child.slug}`}
-                    className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-400 border border-gray-100 hover:border-[var(--main-color)]"
+                    className="group relative flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-gray-100 bg-white shadow-[0_10px_35px_rgba(30,26,94,0.08)] transition-all duration-500 hover:-translate-y-1.5 hover:border-[var(--main-color)]/45 hover:shadow-[0_22px_55px_rgba(30,26,94,0.16)]"
                     style={{ animationDelay: `${index * 60}ms` }}
                   >
-                    <div className="relative h-56 overflow-hidden flex-shrink-0">
+                    <div className="relative h-64 flex-shrink-0 overflow-hidden bg-gray-100">
                       <FallbackImage
                         src={rawImage}
                         alt={childImageAlt}
+                        title={childName}
                         fill
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                         unoptimized={rawImage.startsWith("http")}
                       />
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--second-color)]/90 via-[var(--second-color)]/10 to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--main-color)] to-transparent opacity-90" />
 
-                      <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-[var(--main-color)] shadow-md">
-                        {categoryName}
+                      <div className="absolute start-4 top-4">
+                        <span className="inline-flex max-w-[15rem] items-center rounded-full border border-white/25 bg-[var(--second-color)]/65 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-md">
+                          {categoryName}
+                        </span>
+                      </div>
+
+                      <div className="absolute end-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white shadow-lg backdrop-blur-md transition-all duration-300 group-hover:rotate-45 group-hover:border-[var(--main-color)] group-hover:bg-[var(--main-color)] group-hover:text-[var(--second-color)] rtl:group-hover:-rotate-45">
+                        <ArrowUpRight
+                          className="h-5 w-5 rtl:-scale-x-100"
+                          aria-hidden="true"
+                        />
+                      </div>
+
+                      <div className="absolute bottom-5 start-5 end-5">
+                        <span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--main-color)]">
+                          {t("explore")}
+                        </span>
+                        <h3 className="line-clamp-2 text-2xl font-bold capitalize leading-snug text-white transition-colors duration-300 group-hover:text-[var(--main-color)]">
+                          {childName.toLowerCase()}
+                        </h3>
                       </div>
                     </div>
 
-                    <div className="flex flex-col flex-1 p-6 gap-4">
-                      <h3
-                        className="text-xl font-bold capitalize leading-snug transition-colors duration-200 group-hover:text-[var(--main-color)]"
-                        style={{ color: "var(--second-color)" }}
-                      >
-                        {childName.toLowerCase()}
-                      </h3>
+                    <div className="relative flex flex-1 flex-col px-6 pb-6 pt-7">
+                      <span className="absolute start-6 top-0 h-1 w-14 -translate-y-1/2 rounded-full bg-[var(--main-color)] transition-all duration-500 group-hover:w-24" />
 
-                      <p className="text-sm leading-relaxed flex-1 text-[var(--black-color)] line-clamp-4">
+                      <p className="mb-6 line-clamp-3 flex-1 text-sm leading-7 text-[var(--black-color)]/75">
                         {childDesc ||
                           `Discover top ${childName} programs and tailor your perfect Egyptian journey.`}
                       </p>
 
-                      <div className="pt-2 border-t border-gray-100">
-                        <span
-                          className="inline-flex items-center capitalize gap-2 w-full justify-center py-3 px-6 rounded-xl font-semibold text-sm text-white transition-all duration-300 group-hover:gap-3"
-                          style={{ backgroundColor: "var(--second-color)" }}
-                        >
-                           {t("view_tours")} <Binoculars />
+                      <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-5">
+                        <span className="inline-flex items-center gap-2 text-sm font-bold capitalize text-[var(--second-color)] transition-colors duration-300 group-hover:text-[var(--main-color)]">
+                          <Binoculars className="h-4 w-4" aria-hidden="true" />
+                          {t("view_tours")}
                         </span>
+                        <span className="h-px w-10 bg-[var(--main-color)] transition-all duration-500 group-hover:w-16" />
                       </div>
                     </div>
 
-                    <div
-                      className="h-1 w-full transition-all duration-500"
-                      style={{ backgroundColor: "var(--main-color)" }}
-                    />
+                    <div className="absolute bottom-0 start-0 h-1 w-0 bg-[var(--main-color)] transition-all duration-500 group-hover:w-full" />
                   </Link>
                 );
               })}

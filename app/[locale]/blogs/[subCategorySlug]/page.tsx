@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, User } from "lucide-react";
+import { ArrowUpRight, Calendar, Clock, User } from "lucide-react";
 import { getT } from "@/lib/hooks/getT";
 import { getBlogPageData, getCategoryPageData } from "@/lib/api/blog";
 import Breadcrumb from "@/components/layout/breadcrumb";
@@ -161,72 +161,80 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                   {t("browse_all_categories")}</Link>
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
                 {posts.map((post) => (
                   <article
                     key={post.id}
-                    className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+                    className="group relative flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-gray-100 bg-white shadow-[0_10px_35px_rgba(30,26,94,0.08)] transition-all duration-500 hover:-translate-y-1.5 hover:border-gold/45 hover:shadow-[0_22px_55px_rgba(30,26,94,0.16)]"
                   >
-                    <Link href={`/blogs/${subCategorySlug}/${post.slug}`}>
+                    <Link
+                      href={`/blogs/${subCategorySlug}/${post.slug}`}
+                      className="flex h-full flex-col"
+                    >
                       {/* Thumbnail */}
-                      <div className="relative h-64 bg-gradient-to-br from-navy/20 to-gold/20 overflow-hidden">
+                      <div className="relative h-64 overflow-hidden bg-gradient-to-br from-navy/20 to-gold/20">
                         <FallbackImage
                           src={post.image}
-                          alt={post.imageAlt}
+                          alt={post.imageAlt || post.title}
+                          title={post.title}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                         />
-                        <div className="absolute top-4 left-4">
-                          <span className="bg-gold text-navy px-3 py-1 rounded-full text-sm font-bold">
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/10 to-transparent" />
+                        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent opacity-80" />
+
+                        <div className="absolute start-4 top-4">
+                          <span className="inline-flex max-w-[15rem] items-center rounded-full border border-white/25 bg-navy/60 px-3.5 py-1.5 text-xs font-bold text-white shadow-lg backdrop-blur-md">
                             {category.title}
                           </span>
+                        </div>
+
+                        <div className="absolute bottom-4 start-4 flex items-center gap-2 text-xs font-medium text-white/90">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/25 px-3 py-1.5 backdrop-blur-sm">
+                            <Calendar className="h-3.5 w-3.5 text-gold" aria-hidden="true" />
+                            <time dateTime={post.publishedAt}>{post.date}</time>
+                          </span>
+
+                          {/* {post.readTime && (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/25 px-3 py-1.5 backdrop-blur-sm">
+                              <Clock className="h-3.5 w-3.5 text-gold" aria-hidden="true" />
+                              {post.readTime}
+                            </span>
+                          )} */}
                         </div>
                       </div>
 
                       {/* Content */}
-                      <div className="p-6">
-                        <div className="flex gap-2">
-                          <div className="flex items-center gap-1 mb-3 text-sm text-gray-500">
-                            <Calendar
-                              width={20}
-                              height={20}
-                              className="text-gold"
-                            />
-                            <time dateTime={post.publishedAt}>{post.date}</time>
-                          </div>
-                          <div className="flex items-center gap-1 mb-3 text-sm text-gray-500">
-                            <User
-                              width={20}
-                              height={20}
-                              className="text-gold"
-                            />
-                            <span>{post.author.name}</span>
-                          </div>
+                      <div className="relative flex flex-1 flex-col px-6 pb-6 pt-7">
+                        <span className="absolute start-6 top-0 h-1 w-14 -translate-y-1/2 rounded-full bg-gold transition-all duration-500 group-hover:w-24" />
+
+                        <div className="mb-4 flex items-center gap-2.5 text-xs font-semibold text-gray-500">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-navy text-gold shadow-sm">
+                            <User className="h-4 w-4" aria-hidden="true" />
+                          </span>
+                          <span className="truncate">{post.author.name}</span>
                         </div>
-                        <h3 className="text-xl font-bold text-navy mb-3 group-hover:text-gold transition-colors line-clamp-2">
+
+                        <h3 className="mb-3 line-clamp-2 text-xl font-bold leading-snug text-navy transition-colors duration-300 group-hover:text-gold">
                           {post.title}
                         </h3>
 
-                        <p className="text-gray-600 mb-4 line-clamp-3">
+                        <p className="mb-5 line-clamp-3 text-sm leading-7 text-gray-600">
                           {post.excerpt}
                         </p>
 
-                        <div className="flex items-center justify-start gap-1 pt-4 font-semibold text-[var(--black-color)] border-t border-gray-200">
-                         {commonT("read_more")}
-                          <svg
-                            className="w-6 h-6 text-gold  group-hover:translate-x-1 group-hover:-rotate-45 transition-transform"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M17 8l4 4m0 0l-4 4m4-4H3"
+                        <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-5">
+                          <span className="text-sm font-bold text-navy transition-colors duration-300 group-hover:text-gold">
+                            {commonT("read_more")}
+                          </span>
+                          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-navy text-gold shadow-sm transition-all duration-300 group-hover:rotate-45 group-hover:bg-gold group-hover:text-navy rtl:group-hover:-rotate-45">
+                            <ArrowUpRight
+                              className="h-5 w-5 rtl:-scale-x-100"
+                              aria-hidden="true"
                             />
-                          </svg>
+                          </span>
                         </div>
                       </div>
                     </Link>
