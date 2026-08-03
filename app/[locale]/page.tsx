@@ -1,6 +1,6 @@
 // app/page.tsx  — Server Component (no 'use client')
 import type { Metadata } from "next";
-import { buildSeoMetadata } from "@/lib/seo";
+import { buildSeoMetadata, faqPageSchema } from "@/lib/seo";
 import { fetchSeoFromEndpoint } from "@/lib/api/seoApi";
 import Providers from "../../components/providers";
 import EgyptToursBanner from "../../components/home/hero-banner";
@@ -16,6 +16,7 @@ import TravelTourSlider from "../../components/home/tours-section";
 import { fetchHomeSections } from "@/lib/api/homeApi";
 import type { HomeSections } from "@/lib/api/homeTypes";
 import "@/styles/home.css";
+import SchemaScript from "@/components/seo/schema-script";
 export const revalidate = 300;
 
 type PageProps = {
@@ -92,9 +93,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         'max-snippet': -1,
       },
     },
-    verification: {
-      google: "your-google-verification-code",
-    },
   };
 }
 
@@ -114,10 +112,12 @@ export default async function Home({ params }: PageProps) {
   const articleSection     = sections?.articles_section;
   const partners           = sections?.partners_section?.partners           ?? []; // ← snake_case key, .partners field
   const faqs               = sections?.faq_section?.faqs                    ?? [];
+  const faqSchema          = faqPageSchema(faqs);
 
   return (
     <Providers>
       <main className="min-h-screen bg-light">
+        {faqSchema && <SchemaScript schema={faqSchema} />}
 
         {/* ── Hero Banner ─────────────────────────────────────────────────── */}
         <EgyptToursBanner sliderData={sliderData} />

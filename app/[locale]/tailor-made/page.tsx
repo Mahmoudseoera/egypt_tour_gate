@@ -185,6 +185,8 @@ function FloatingInput({
       <input
         required={required}
         type={type}
+        inputMode={type === "tel" ? "numeric" : undefined}
+        pattern={type === "tel" ? "[0-9]*" : undefined}
         value={value}
         autoComplete={autoComplete}
         onChange={(e) => onChange(e.target.value)}
@@ -869,9 +871,9 @@ const budget_range_label =
           <span className="inline-block text-xs font-bold tracking-[0.2em] uppercase text-[#e3b75e] mb-2">
             {pageSubtitle}
           </span>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#272262] mb-3 leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#272262] mb-3 leading-tight">
             {pageTitle}
-          </h1>
+          </h2>
           <p className="text-[#666] text-base sm:text-lg max-w-xl mx-auto">
             {pageDesc}
           </p>
@@ -1046,7 +1048,7 @@ const budget_range_label =
                     <FloatingInput
                       label={info_name_label}
                       value={formData.fullName}
-                      onChange={(v) => updateFormData("fullName", v)}
+                      onChange={(v) => updateFormData("fullName", v.replace(/[^\p{L}\p{M}'\-\s.]/gu, ""))}
                       icon={<User size={18} />}
                       onBlur={() => markTouched("fullName")}
                       error={fieldError("fullName")}
@@ -1083,7 +1085,7 @@ const budget_range_label =
                       label={info_phone_label}
                       type="tel"
                       value={formData.phoneNumber}
-                      onChange={(v) => updateFormData("phoneNumber", v)}
+                      onChange={(v) => updateFormData("phoneNumber", v.replace(/\D/g, ""))}
                       onBlur={() => markTouched("phoneNumber")}
                       error={fieldError("phoneNumber")}
                     />

@@ -64,7 +64,6 @@ const t = await getT("home");
             alt={t("egypt_background")}
             fill
             className="object-cover object-center"
-            priority
           />
         </div>
 

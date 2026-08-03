@@ -29,6 +29,7 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
   const title = firstSlide?.title;
   // Strip HTML tags from the API description
   const description = firstSlide?.description.replace(/<[^>]+>/g, '').trim();
+  const backgroundImage = firstSlide?.media?.image_url || backgroundImg;
   const imageOne = firstSlide?.media?.image_url;
   const imageTwo = firstSlide?.media2?.image_url;
   return (
@@ -38,9 +39,12 @@ export default function EgyptToursBanner({ sliderData = [] }: EgyptToursBannerPr
         {/* Full-width background image */}
         <div className="hero-bg-img">
           <FallbackImage
-            src={backgroundImg}
-            alt={firstSlide?.media?.image_alt ?? title}
+            src={backgroundImage}
+            alt={firstSlide?.media?.image_alt || title || "Egypt tours in Egypt"}
             fill
+            priority
+            fetchPriority="high"
+            sizes="100vw"
             className="object-cover object-center"
           />
         </div>

@@ -38,12 +38,12 @@ export default async function RoavioAboutSection({ aboutData }: AboutSectionProp
               <p className="text-sm font-semibold text-[var(--main-color)] uppercase tracking-wider mb-2">
                 {subTitle}
               </p>
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[var(--second-color)] mb-4 leading-tight">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[var(--second-color)] mb-4 leading-tight">
                 {/* Strip any embedded <br> tags from the title string */}
                 {title.split("<br")[0]}
                 <br className="hidden md:block" />
                 <span className="text-gray-900">{t("egypt_tour_gate")}</span>
-              </h2>
+              </h1>
               <p className="text-gray-600 text-lg">
                 {t("we_are_started_with_2005s")}{" "}
                 <span className="text-[var(--second-800)] font-semibold">

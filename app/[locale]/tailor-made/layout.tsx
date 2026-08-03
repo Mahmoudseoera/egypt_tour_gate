@@ -22,5 +22,10 @@ export async function generateMetadata({
 }
 
 export default function TailorMadeLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <h1 className="sr-only">Tailor Made Egypt Tours</h1>
+      {children}
+    </>
+  );
 }

@@ -83,8 +83,11 @@ export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
             {leftItems.map((faq, index) => (
               <div key={index} className="border border-gray-200 rounded-2xl overflow-hidden">
                 <button
+                  type="button"
                   className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition-colors"
                   onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                  aria-expanded={openIndex === index}
+                  aria-controls={`faq-panel-${index}`}
                 >
                   <span className="font-semibold text-[var(--second-color)] pr-4">{faq.title}</span>
                   <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${openIndex === index ? "bg-[var(--main-color)]" : "bg-gray-100"}`}>
@@ -94,7 +97,7 @@ export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
                   </span>
                 </button>
                 {openIndex === index && (
-                  <div className="px-6 pb-6">
+                  <div id={`faq-panel-${index}`} role="region" className="px-6 pb-6">
                     <div className="text-gray-600 leading-relaxed prose prose-sm max-w-none [&_a:hover]:underline" dangerouslySetInnerHTML={{ __html: faq.answer }} />
                   </div>
                 )}
@@ -109,8 +112,11 @@ export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
               return (
                 <div key={realIndex} className="border border-gray-200 rounded-2xl overflow-hidden">
                   <button
+                    type="button"
                     className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition-colors"
                     onClick={() => setOpenIndex(openIndex === realIndex ? null : realIndex)}
+                    aria-expanded={openIndex === realIndex}
+                    aria-controls={`faq-panel-${realIndex}`}
                   >
                     <span className="font-semibold text-[var(--second-color)] pr-4">{faq.title}</span>
                     <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${openIndex === realIndex ? "bg-[var(--main-color)]" : "bg-gray-100"}`}>
@@ -120,7 +126,7 @@ export default function FAQSection({ faqSection, faqs = [] }: FAQSectionProps) {
                     </span>
                   </button>
                   {openIndex === realIndex && (
-                    <div className="px-6 pb-6">
+                    <div id={`faq-panel-${realIndex}`} role="region" className="px-6 pb-6">
                       <div className="text-gray-600 leading-relaxed prose prose-sm max-w-none [&_a:hover]:underline" dangerouslySetInnerHTML={{ __html: faq.answer }} />
                     </div>
                   )}

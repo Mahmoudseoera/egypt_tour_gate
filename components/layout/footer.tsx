@@ -69,7 +69,6 @@ export default function Footer() {
                     (footerLogo.image.startsWith("http://127.0.0.1") ||
                       footerLogo.image.startsWith("http://localhost"))
                   }
-                  priority
                 />
               </div>
             </Link>

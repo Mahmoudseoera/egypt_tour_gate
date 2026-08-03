@@ -8,15 +8,15 @@ import { type SiteSettings, type SiteSettingsApiResponse } from '@/lib/api/setti
 
 /* ── Helpers ──────────────────────────────────────────────────────────────── */
 
-function toWhatsAppHref(raw: string | null | undefined): string {
-  if (!raw) return 'https://wa.me/201110008407';
+function toWhatsAppHref(raw: string | null | undefined): string | null {
+  if (!raw) return null;
   if (raw.startsWith('http')) return raw;
   const digits = raw.replace(/[^\d]/g, '');
   return `https://wa.me/${digits}`;
 }
 
-function toTelHref(raw: string | null | undefined): string {
-  if (!raw) return 'tel:+201110008407';
+function toTelHref(raw: string | null | undefined): string | null {
+  if (!raw) return null;
   const clean = raw.trim();
   return clean.startsWith('tel:') ? clean : `tel:${clean}`;
 }
@@ -100,7 +100,7 @@ function NavItem({ href, label, active, icon, external }: NavItemProps) {
 
   if (external) {
     return (
-      <a href={href} rel="noopener noreferrer"
+      <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
         aria-label={label} className="mob-nav-btn">
         {inner}
       </a>
@@ -141,22 +141,26 @@ export default function MobileFooter() {
         <div className="mob-nav-row">
 
           {/* WhatsApp */}
-          <NavItem
-            href={whatsappHref}
-            label={t("whatsapp")}
-            active={false}
-            icon={<WhatsAppIcon />}
-            external
-          />
+          {whatsappHref && (
+            <NavItem
+              href={whatsappHref}
+              label={t("whatsapp")}
+              active={false}
+              icon={<WhatsAppIcon />}
+              external
+            />
+          )}
 
           {/* Call */}
-          <NavItem
-            href={phoneHref}
-            label= {t("mobile")}
-            active={false}
-            icon={<PhoneIcon />}
-            external
-          />
+          {phoneHref && (
+            <NavItem
+              href={phoneHref}
+              label={t("mobile")}
+              active={false}
+              icon={<PhoneIcon />}
+              external
+            />
+          )}
 
           {/* Home */}
           <NavItem

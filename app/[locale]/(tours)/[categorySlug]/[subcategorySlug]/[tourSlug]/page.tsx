@@ -9,6 +9,7 @@ import SchemaScript from '@/components/seo/schema-script';
 import { breadcrumbSchema, buildSeoMetadata, tourSchema } from '@/lib/seo';
 import "@/styles/tour-details.css";
 import { getTourBySlug } from '@/lib/api/toursApi';
+import { fetchSiteSettings } from '@/lib/api/settingsApi';
 export const revalidate = 3600;
 
 type TourDetailPageProps = {
@@ -51,6 +52,13 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
     notFound();
   }
 
+  const settings = await fetchSiteSettings(locale);
+  const contact = {
+    email: settings?.gmail || settings?.email || null,
+    phone: settings?.phone || settings?.mobile || null,
+    whatsapp: settings?.whatsapp || null,
+  };
+
   const shortDescription = item.short_description || item.description || `${item.title} with Egypt Tours Gate.`;
 
   const breadcrumbItems = [
@@ -92,7 +100,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
           </div>
         </div>
 
-        <TourDetailsClient tour={item} />
+        <TourDetailsClient tour={item} contact={contact} />
       </div>
     </main>
 

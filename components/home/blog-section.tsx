@@ -118,9 +118,9 @@ export default function TravelBlogSection({
                             {post.author}
                           </span>
                         </div>
-                        <h6 className="text-[var(--second-color)] font-semibold text-sm leading-snug line-clamp-2 group-hover:text-[var(--main-color)] transition-colors duration-300">
+                        <h3 className="text-[var(--second-color)] font-semibold text-sm leading-snug line-clamp-2 group-hover:text-[var(--main-color)] transition-colors duration-300">
                           {post.title}
-                        </h6>
+                        </h3>
                         {post.smallDesc && (
                           <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">
                             {post.smallDesc}
@@ -181,9 +181,9 @@ export default function TravelBlogSection({
                         <User className="w-4 h-4 text-[var(--main-color)]" />
                         <span className="text-[var(--main-color)] font-bold text-sm">{post.author}</span>
                       </div>
-                      <h4 className="text-white font-semibold text-xl leading-snug mb-2 group-hover:text-[var(--main-color)] transition-colors duration-300">
+                      <h3 className="text-white font-semibold text-xl leading-snug mb-2 group-hover:text-[var(--main-color)] transition-colors duration-300">
                         {post.title}
-                      </h4>
+                      </h3>
                       {post.smallDesc && (
                         <p className="text-white/70 text-sm leading-relaxed line-clamp-2">{post.smallDesc}</p>
                       )}
@@ -222,9 +222,9 @@ export default function TravelBlogSection({
                             <User className="w-3.5 h-3.5 text-[var(--main-color)] flex-shrink-0" />
                             <span className="text-[var(--main-color)] font-bold text-xs truncate">{post.author}</span>
                           </div>
-                          <h4 className="text-[var(--second-color)] font-semibold text-sm leading-snug line-clamp-2 group-hover:text-[var(--main-color)] transition-colors duration-300">
+                          <h3 className="text-[var(--second-color)] font-semibold text-sm leading-snug line-clamp-2 group-hover:text-[var(--main-color)] transition-colors duration-300">
                             {post.title}
-                          </h4>
+                          </h3>
                           {post.smallDesc && (
                             <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">{post.smallDesc}</p>
                           )}
@@ -276,9 +276,9 @@ export default function TravelBlogSection({
                             <User className="w-4 h-4 text-[var(--main-color)]" />
                             <span className="text-[var(--main-color)] font-bold text-sm">{t("by")}{post.author}</span>
                           </div>
-                          <h4 className="text-white font-bold text-xl leading-tight mb-2 group-hover:text-[var(--main-color)] transition-colors duration-300">
+                          <h3 className="text-white font-bold text-xl leading-tight mb-2 group-hover:text-[var(--main-color)] transition-colors duration-300">
                             {post.title}
-                          </h4>
+                          </h3>
                           {post.smallDesc && (
                             <p className="text-white/70 text-sm leading-relaxed line-clamp-2">{post.smallDesc}</p>
                           )}

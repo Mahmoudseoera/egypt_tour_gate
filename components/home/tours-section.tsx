@@ -153,9 +153,9 @@ export default function TravelTourSlider({
                       </div>
                     </div>
                     <div className="p-6 pt-7 flex-1 flex flex-col">
-                      <h2 className="text-xl font-bold text-[var(--black-color)] leading-snug mb-3 min-h-[56px] line-clamp-2 group-hover:text-[var(--main-color)] transition-colors">
+                      <h3 className="text-xl font-bold text-[var(--black-color)] leading-snug mb-3 min-h-[56px] line-clamp-2 group-hover:text-[var(--main-color)] transition-colors">
                         {tour.title}
-                      </h2>
+                      </h3>
                       <p className="text-sm text-gray-600 leading-relaxed mb-5 flex-1 line-clamp-3">
                         {tour.description}
                       </p>
