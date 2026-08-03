@@ -55,7 +55,7 @@ async function getPageData(
     };
   }
   // Fetch the full subcategory detail (includes desc, tours, media, seo…)
-  const directSubcategory = await getSubcategoryBySlug(cleanSubcategorySlug, locale);
+  const directSubcategory = await getSubcategoryBySlug(cleanCategorySlug, cleanSubcategorySlug, locale);
 
 return {
   category,
@@ -143,7 +143,7 @@ export default async function SubcategoryPage({
     notFound();
   }
 const t = await getT("common");  
-  const tours = await getToursBySubcategory(subcategorySlug, locale);
+  const tours = await getToursBySubcategory(categorySlug, subcategorySlug, locale);
 
   const normalizedItems = tours.map((tour) => ({
     id: tour.id,

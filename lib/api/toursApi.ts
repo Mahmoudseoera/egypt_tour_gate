@@ -355,29 +355,32 @@ response = await apiGet<any>(withLocale(`/categories/${cleanSlug}`, l), {
 }
 
 // ─── Subcategory page ─────────────────────────────────────────────────────────
-// Real API: GET /sub-category/{slug}
+// Real API: GET /{categorySlug}/{subcategorySlug}
+//   e.g. https://www.egypttoursgate.com/api/v1/egypt-day-tours/cairo-day-tours
 // Response shape: { success, data: { id, name, slug, second_title, desc, media, seo, tours[] } }
 // Tours are at data.tours (after pickData unwraps the outer `data` key).
 export async function getSubcategoryBySlug(
+  categorySlug: string,
   slug: string,
   locale?: string
 ): Promise<AnyObj | null> {
   const l = normalizeLocale(locale);
+  const cleanCategorySlug = normalizeSlug(categorySlug);
   const cleanSlug = normalizeSlug(slug);
 
   let response: any;
   try {
-    response = await apiGet<any>(withLocale(`/sub-category/${cleanSlug}`, l), {
+    response = await apiGet<any>(withLocale(`/${cleanCategorySlug}/${cleanSlug}`, l), {
       next: {
   revalidate: REVALIDATE.STANDARD,
-  tags: [subcategoryTag(cleanSlug), CACHE_TAGS.tours],
+  tags: [subcategoryTag(cleanSlug), categoryTag(cleanCategorySlug), CACHE_TAGS.tours],
 },
     });
   } catch (error) {
     // SubcategoryPage's getPageData() already merges this with a header-stub
     // fallback (`subcategoryFromHeader`) and treats `null` as "not found".
     // A throttled fetch during build must degrade to that path, not crash.
-    console.warn(`[getSubcategoryBySlug] fetch failed for "${cleanSlug}" (${l}):`, String(error));
+    console.warn(`[getSubcategoryBySlug] fetch failed for "${cleanCategorySlug}/${cleanSlug}" (${l}):`, String(error));
     return null;
   }
 
@@ -394,25 +397,27 @@ export async function getSubcategoryBySlug(
 }
 
 export async function getToursBySubcategory(
+  categorySlug: string,
   slug: string,
   locale?: string
 ): Promise<ApiTourListItem[]> {
   const l = normalizeLocale(locale);
+  const cleanCategorySlug = normalizeSlug(categorySlug);
   const cleanSlug = normalizeSlug(slug);
 
   let response: any;
   try {
-    response = await apiGet<any>(withLocale(`/sub-category/${cleanSlug}`, l), {
+    response = await apiGet<any>(withLocale(`/${cleanCategorySlug}/${cleanSlug}`, l), {
       next: {
   revalidate: REVALIDATE.STANDARD,
-  tags: [subcategoryTag(cleanSlug), CACHE_TAGS.tours],
+  tags: [subcategoryTag(cleanSlug), categoryTag(cleanCategorySlug), CACHE_TAGS.tours],
 },
     });
   } catch (error) {
     // SubcategoryPage already renders a "No tours found" message when this
     // array is empty — that's the correct degraded state for a throttled
     // build-time fetch, instead of crashing the whole page.
-    console.warn(`[getToursBySubcategory] fetch failed for "${cleanSlug}" (${l}):`, String(error));
+    console.warn(`[getToursBySubcategory] fetch failed for "${cleanCategorySlug}/${cleanSlug}" (${l}):`, String(error));
     return [];
   }
 

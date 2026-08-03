@@ -214,16 +214,46 @@ useEffect(() => {
       minDate: tomorrowISO(),
       dateFormat: "Y-m-d",
       disableMobile: true,
-      onChange([date]) { /* ...unchanged... */ },
-      onClose([date]) { /* ...unchanged... */ },
+      onChange([date]) {
+        if (!date) return;
+        const iso = localISO(date);
+        setFormData((p) => ({ ...p, checkIn: iso }));
+        const err = validateField("checkIn", iso);
+        setFieldErrors((p) => ({ ...p, checkIn: err }));
+        const nextDay = new Date(date);
+        nextDay.setDate(nextDay.getDate() + 1);
+        (fpCheckOut.current as any)?.set("minDate", nextDay);
+      },
+      onClose([date]) {
+        if (!date) {
+          const err = validateField("checkIn", "");
+          setFieldErrors((p) => ({ ...p, checkIn: err }));
+        }
+      },
     }) as unknown as typeof fpCheckIn.current;
 
     fpCheckOut.current = fp(checkOutRef.current!, {
       minDate: tomorrowISO(),
       dateFormat: "Y-m-d",
       disableMobile: true,
-      onChange([date]) { /* ...unchanged... */ },
-      onClose([date]) { /* ...unchanged... */ },
+      onChange([date]) {
+        if (!date) return;
+        const iso = localISO(date);
+        setFormData((p) => {
+          const err =
+            iso <= (p.checkIn || todayISO())
+              ? "Check-out date must be after check-in date"
+              : undefined;
+          setFieldErrors((fe) => ({ ...fe, checkOut: err }));
+          return { ...p, checkOut: iso };
+        });
+      },
+      onClose([date]) {
+        if (!date) {
+          const err = validateField("checkOut", "");
+          setFieldErrors((p) => ({ ...p, checkOut: err }));
+        }
+      },
     }) as unknown as typeof fpCheckOut.current;
 
     setPickerReady(true); // ← new

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import '@/styles/globals.css';
+import '@/styles/fontawesome/css/all.min.css';
 import { montserrat } from './[locale]/fonts';
 import Analytics, { GoogleTagManagerNoScript } from '@/components/seo/analytics';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
@@ -40,6 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://www.egypttoursgate.com" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.clarity.ms" />
+         <link rel="preload" as="image" href="/assets/images/egypt-tour-gate-logo.png" fetchPriority="high" />
       </head>
       <body suppressHydrationWarning className={`${montserrat.variable} antialiased`}>
         <GoogleTagManagerNoScript />
