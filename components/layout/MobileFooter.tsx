@@ -134,12 +134,9 @@ export default function MobileFooter() {
 
   return (
     <>
-
-
       {/* ── Markup ──────────────────────────────────────────────────────── */}
       <nav id="mobileFixedFooter" aria-label={t("mobile_navigation")}>
         <div className="mob-nav-row">
-
           {/* WhatsApp */}
           {whatsappHref && (
             <NavItem
