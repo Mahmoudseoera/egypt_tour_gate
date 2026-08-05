@@ -329,11 +329,11 @@ function normalisePostDetail(raw: BlogArticleDetailRaw): BlogPost {
 }
 
 // ─── API Configuration ───────────────────────────────────────────────────────
-const API_BASE = 'https://www.egypttoursgate.com/api/v1/articles';
+const API_BASE = 'https://www.egypttoursgate.com/api/v1/blogs';
 // Article detail lives under a different base path than the listing/category
 // endpoints — confirmed from the real endpoint:
 //   https://www.egypttoursgate.com/api/v1/blog/{categorySlug}/{articleSlug}
-const BLOG_DETAIL_BASE = 'https://www.egypttoursgate.com/api/v1/blog';
+const BLOG_DETAIL_BASE = 'https://www.egypttoursgate.com/api/v1/blogs';
 
 function normalizeLocale(locale?: string): AppLocale {
   const nextLocale = (locale ?? routing.defaultLocale) as AppLocale;
@@ -377,7 +377,7 @@ export const getBlogPageData = cache(
       // unnecessarily fans out into failed build-time requests. The content
       // itself is shared while the surrounding UI remains translated.
       const res = await fetchWithRetry(
-        `${API_BASE}/get-article-categories`,
+        API_BASE,
         { next: { revalidate: REVALIDATE.STANDARD, tags: [CACHE_TAGS.blog] } }
       );
 
@@ -442,7 +442,7 @@ export const getCategoryPageData = cache(
         // This endpoint, like the categories listing endpoint, does not
         // support the locale query parameter. Use the canonical URL so the
         // same category data can be rendered for each translated UI route.
-        `${API_BASE}/get-article-by-category/${encodeURIComponent(slug)}`,
+        `${API_BASE}/${encodeURIComponent(slug)}`,
         { next: { revalidate: REVALIDATE.STANDARD, tags: [blogCategoryTag(slug), CACHE_TAGS.blog] } }
       );
 
@@ -519,7 +519,7 @@ export const getArticleDetailBySlug = cache(
 );
 // ─── Helper: Get category by slug (for breadcrumbs) ──────────────────────────
 export async function getCategoryBySlug(slug: string, locale?: string): Promise<BlogCategory | null> {
-  const res = await fetch(withLocale(`${API_BASE}/get-article-by-category/${slug}`, locale), {
+  const res = await fetch(withLocale(`${API_BASE}/${slug}`, locale), {
     next: { revalidate: REVALIDATE.STANDARD, tags: [blogCategoryTag(slug), CACHE_TAGS.blog] },
   });
   if (!res.ok) return null;
@@ -532,7 +532,7 @@ export async function getCategoryBySlug(slug: string, locale?: string): Promise<
 
 // ─── Helper: Get all categories for sidebar ──────────────────────────────────
 export async function getAllBlogCategories(locale?: string): Promise<BlogCategory[]> {
-  const res = await fetch(withLocale(`${API_BASE}/get-article-categories`, locale), {
+  const res = await fetch(withLocale(API_BASE, locale), {
     next: { revalidate: REVALIDATE.STANDARD, tags: [CACHE_TAGS.blog] },
   });
   if (!res.ok) return [];

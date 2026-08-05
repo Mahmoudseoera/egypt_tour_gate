@@ -9,7 +9,7 @@ export const TWITTER_HANDLE = "@Egypttoursgate1";
 /** The only SEO payload accepted from the API. */
 export type ApiSeo = {
   title?: string | null;
-  description?: string | null;
+  description?: string | null;  
   keywords?: string | string[] | null;
 };
 

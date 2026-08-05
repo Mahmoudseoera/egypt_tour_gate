@@ -39,7 +39,7 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
                 <span className="text-gray-900">{t("egypt_tour_gate")}</span>
               </h2>
               <p className="text-gray-600 text-lg text-wrap">
-                {t("we_are_started_with_2005s")}<span className="text-[var(--main-color)] font-semibold">{t("20_years_of_experience")}</span>
+                {t("we_are_started_with_2005s")}<span className="text-[var(--second-900)] font-semibold">{t("20_years_of_experience")}</span>
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -72,7 +72,7 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
             <div className="space-y-2">
               <h3 className="text-xl font-semibold text-[var(--second-color)]">{title2}</h3>
               <div className="text-gray-600 text-lg leading-relaxed mb-2">
-                    <div className="prose prose-sm max-w-none [&_a]:text-[var(--main-color)] [&_a:hover]:underline"
+                    <div className="prose prose-sm max-w-none [&_a]:text-[var(--second-900)] [&_a:hover]:underline"
                         dangerouslySetInnerHTML={{
                           __html: desc,
                         }}
@@ -91,8 +91,9 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
                 ))}
               </div>
               <div>
-                <Link href="/about-us" className="btn-effect mt-2 inline-block !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg" aria-label={t("learn_more_about_our_company")}>
+                <Link href="/about-us" className="btn-effect mt-2 inline-block !bg-[var(--second-color)] !text-white font-bold !py-4 !px-8 rounded-full text-lg transition-all duration-300 shadow-lg" aria-label={t("learn_more_about_our_company_page")}>
                   {t("learn_more")}
+                  <span className="sr-only"> {t("learn_more_about_our_company_page")}</span>
                 </Link>
               </div>
             </div>

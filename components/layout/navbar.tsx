@@ -263,6 +263,7 @@ export default function Navbar() {
                         key={index}
                         href={item.url || "#"}
                         target="_blank"
+                        title="TripAdvisor"
                         rel="noopener noreferrer"
                         className="px-1 md:p-2 transition hover:opacity-80"
                       >
@@ -285,6 +286,7 @@ export default function Navbar() {
                         href={`https://wa.me/${item.url}`}
                         target="_blank"
                         rel="noopener noreferrer"
+                        title="WhatsApp"
                         className="text-[var(--second-color)] hover:text-[var(--main-color)] transition"
                       >
                         <i className={item.icon}></i>
@@ -352,6 +354,7 @@ export default function Navbar() {
               </div>
               <Link
                 href="/favourite"
+                title="favourite-icon"
                 className="flex items-center gap-1 pl-4 text-[var(--second-color)] hover:text-[var(--main-color)] transition"
               >
                 <Heart size={18} style={{ color: "var(--second-color)" }} />
