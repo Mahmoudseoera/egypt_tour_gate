@@ -372,12 +372,8 @@ function emptyBlogPageData(): BlogPageData {
 export const getBlogPageData = cache(
   async (locale?: string): Promise<BlogPageData> => {
     try {
-      // The categories endpoint is currently not localised. Appending
-      // `?locale=de` (and the other non-default locales) returns 404, which
-      // unnecessarily fans out into failed build-time requests. The content
-      // itself is shared while the surrounding UI remains translated.
       const res = await fetchWithRetry(
-        API_BASE,
+        withLocale(API_BASE, locale),
         { next: { revalidate: REVALIDATE.STANDARD, tags: [CACHE_TAGS.blog] } }
       );
 
@@ -439,10 +435,7 @@ export const getCategoryPageData = cache(
   ): Promise<CategoryPageData | null> => {
     try {
       const res = await fetchWithRetry(
-        // This endpoint, like the categories listing endpoint, does not
-        // support the locale query parameter. Use the canonical URL so the
-        // same category data can be rendered for each translated UI route.
-        `${API_BASE}/${encodeURIComponent(slug)}`,
+        withLocale(`${API_BASE}/${encodeURIComponent(slug)}`, locale),
         { next: { revalidate: REVALIDATE.STANDARD, tags: [blogCategoryTag(slug), CACHE_TAGS.blog] } }
       );
 

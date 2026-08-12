@@ -104,12 +104,18 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
+  const [mobilePreference, setMobilePreference] = useState<
+    "language" | "currency" | null
+  >(null);
+  const [selectedCurrency, setSelectedCurrency] = useState("USD");
+  const [highlightSeed, setHighlightSeed] = useState(0);
 
   // useLocale() returns AppLocale — now matches useGeneralData() signature
   const locale = useLocale() as AppLocale;
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
   const t = useT("common");
   //  const homeT = useT("home");
   const { data, error, loading } = useGeneralData(locale);
@@ -136,7 +142,25 @@ export default function Navbar() {
    */
   const onLanguageChange = (newLocale: string) => {
     const nextLocale = newLocale as AppLocale;
-    router.replace("/", { locale: nextLocale });
+    setMobilePreference(null);
+    setMobileOpen(false);
+    router.replace(pathname || "/", { locale: nextLocale });
+  };
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const savedCurrency = window.localStorage.getItem("site_currency");
+      if (savedCurrency) setSelectedCurrency(savedCurrency);
+      setHighlightSeed(Math.floor(Math.random() * 2147483647));
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const onCurrencyChange = (currency: string) => {
+    setSelectedCurrency(currency);
+    setMobilePreference(null);
+    window.localStorage.setItem("site_currency", currency);
+    window.dispatchEvent(new CustomEvent("currencychange", { detail: currency }));
   };
 
   useEffect(() => {
@@ -165,9 +189,25 @@ export default function Navbar() {
   const closeMenu = () => {
     setMobileOpen(false);
     setActiveDropdown(null);
+    setMobilePreference(null);
   };
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <header className="header-skeleton" aria-label={t("loading")} aria-busy="true">
+        <div className="header-skeleton__top" />
+        <div className="header-skeleton__nav">
+          <div className="header-skeleton__logo skeleton-shimmer" />
+          <div className="header-skeleton__links">
+            {[0, 1, 2, 3, 4].map((item) => (
+              <span key={item} className="header-skeleton__link skeleton-shimmer" />
+            ))}
+          </div>
+          <div className="header-skeleton__action skeleton-shimmer" />
+        </div>
+      </header>
+    );
+  }
 
   if (error || !data) {
     return (
@@ -239,7 +279,16 @@ export default function Navbar() {
     if (!cat.subs?.length) return [];
     const { color: catColor } = getCategoryMeta(cat.slug);
 
-    return cat.subs.slice(0, 2).map((sub, index) => ({
+    const slugSeed = cat.slug
+      .split("")
+      .reduce((sum, char) => sum + char.charCodeAt(0), highlightSeed);
+    const shuffledSubs = [...cat.subs].sort((a, b) => {
+      const score = (slug: string) =>
+        slug.split("").reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) | 0, slugSeed);
+      return score(a.slug) - score(b.slug);
+    });
+
+    return shuffledSubs.slice(0, 2).map((sub, index) => ({
       title: sub.name,
       tag: index === 0 ? "Popular" : "Recommended",
       img: sub.media?.image || "/assets/images/tours/default-tour.jpg",
@@ -967,7 +1016,13 @@ export default function Navbar() {
                 </div>
 
                 {/* Currency */}
-                <div className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
+                <div className="px-5 py-1">
+                  <button
+                    type="button"
+                    aria-expanded={mobilePreference === "currency"}
+                    onClick={() => setMobilePreference(mobilePreference === "currency" ? null : "currency")}
+                    className="w-full flex items-center gap-4 py-3.5 hover:bg-gray-50 transition-colors group text-left"
+                  >
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{ background: "rgba(39,34,98,0.08)" }}
@@ -983,15 +1038,31 @@ export default function Navbar() {
                   >
                     {t("currency")}</span>
                   <span className="ml-auto text-sm text-gray-400 font-medium">
-                    {t("egp")}</span>
+                    {selectedCurrency}</span>
                   <ChevronRight
                     size={15}
-                    className="text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200"
+                    className={`text-gray-300 transition-transform duration-200 ${mobilePreference === "currency" ? "rotate-90" : ""}`}
                   />
+                  </button>
+                  {mobilePreference === "currency" && (
+                    <div className="mobile-preference-menu" role="menu">
+                      {["USD", "EUR", "GBP", "EGP"].map((currency) => (
+                        <button key={currency} type="button" role="menuitem" onClick={() => onCurrencyChange(currency)} className="lang-item w-full text-left">
+                          {currency}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Mobile Language */}
-                <div className="relative flex items-center flex-wrap gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
+                <div className="relative px-5 py-1">
+                  <button
+                    type="button"
+                    aria-expanded={mobilePreference === "language"}
+                    onClick={() => setMobilePreference(mobilePreference === "language" ? null : "language")}
+                    className="w-full flex items-center gap-4 py-3.5 hover:bg-gray-50 transition-colors text-left"
+                  >
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{ background: "rgba(39,34,98,0.08)" }}
@@ -1008,9 +1079,11 @@ export default function Navbar() {
                   </span>
                   <ChevronRight
                     size={15}
-                    className="text-gray-300 group-hover:translate-x-0.5 transition-transform duration-200"
+                    className={`text-gray-300 transition-transform duration-200 ${mobilePreference === "language" ? "rotate-90" : ""}`}
                   />
-                  <div className="lang-menu !flex-1 !relative w-auto ps-5">
+                  </button>
+                  {mobilePreference === "language" && (
+                  <div className="mobile-preference-menu">
                     {data.header.languages.map((lang) => (
                       <button
                         key={lang.slug}
@@ -1022,7 +1095,19 @@ export default function Navbar() {
                       </button>
                     ))}
                   </div>
+                  )}
                 </div>
+
+                {socialData.length > 0 && (
+                  <div className="mx-5 mt-4 border-t border-gray-100 pt-4">
+                    <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t("follow_us")}</p>
+                    <div className="flex flex-wrap items-center gap-4">
+                      {socialData.map((item, index) => (
+                        <SimpleSocialIcon key={`${item.title}-${index}`} item={item} className="text-[var(--second-color)] hover:text-[var(--main-color)] transition" />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Support */}
                 <Link

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 import { fetchSiteSettings } from "@/lib/api/settingsApi";
 
 export async function GET(req: Request) {

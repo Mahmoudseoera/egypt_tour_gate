@@ -4,7 +4,7 @@ import { useT } from "@/lib/hooks/useTranslate";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { type SiteSettings, type SiteSettingsApiResponse } from '@/lib/api/settingsApi';
+import { type SiteSettings } from '@/lib/api/settingsApi';
 
 /* ── Helpers ──────────────────────────────────────────────────────────────── */
 
@@ -25,12 +25,10 @@ function toTelHref(raw: string | null | undefined): string | null {
 
 async function loadSettings(locale = 'en'): Promise<SiteSettings | null> {
   try {
-    const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://www.egypttoursgate.com/api/v1')
-      .replace(/\/+$/, '');
-    const res = await fetch(`${base}/get-settings?locale=${locale}`);
+    const res = await fetch(`/api/settings?locale=${encodeURIComponent(locale)}`);
     if (!res.ok) return null;
-    const json: SiteSettingsApiResponse = await res.json();
-    return json?.data?.[0] ?? null;
+    const json: { success: boolean; data: SiteSettings | null } = await res.json();
+    return json?.data ?? null;
   } catch {
     return null;
   }
