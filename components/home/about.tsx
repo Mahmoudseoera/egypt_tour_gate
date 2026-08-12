@@ -31,7 +31,7 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
       <div className="bg-white py-16 px-4 md:px-8 lg:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
-            <div className="flex flex-col justify-center">
+            <div className="flex flex-col justify-center flex-wrap overflow-hidden ">
               <p className="text-sm font-semibold text-[var(--second-color)] uppercase tracking-wider mb-2">{subTitle}</p>
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[var(--second-color)] mb-4 leading-tight">
                 {title.split('<br')[0]}
@@ -48,7 +48,7 @@ export default async function RoavioAboutSection({ aboutData }: RoavioAboutSecti
                   <FallbackImage src={"/assets/images/tours/Pyramids-in-Egypt-webp.webp"} alt={t("pyramids")} className="w-full h-full object-cover roavio-image-zoom" width={800} height={800}/>
                 </div>
               </div>
-              <div className="col-span-1 bg-[var(--second-800)] rounded-3xl p-2 md:p-8 flex flex-col justify-center items-center text-white h-50 lg:h-full">
+              <div className="col-span-1 bg-[var(--second-800)] rounded-3xl p-2 md:p-8 flex flex-col justify-center items-center text-white h-50 lg:h-full overflow-hidden">
                 <div className="roavio-icon-float mb-2 md:mb-6">
                   <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="text-white">
                     <path d="M32 8C24.5 8 18 12.5 18 18C18 23.5 24.5 32 32 40C39.5 32 46 23.5 46 18C46 12.5 39.5 8 32 8Z" stroke="currentColor" strokeWidth="2" fill="none"/>

@@ -34,7 +34,7 @@ export default async function RoavioAboutSection({ aboutData }: AboutSectionProp
         <div className="max-w-7xl mx-auto">
           {/* ── Top grid: heading + image pair ──────────────────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
-            <div className="flex flex-col justify-center">
+            <div className="flex flex-col justify-center flex-wrap overflow-hidden ">
               <p className="text-sm font-semibold text-[var(--main-color)] uppercase tracking-wider mb-2">
                 {subTitle}
               </p>
@@ -63,7 +63,7 @@ export default async function RoavioAboutSection({ aboutData }: AboutSectionProp
                   />
                 </div>
               </div>
-              <div className="col-span-1 bg-[var(--second-800)] rounded-3xl p-2 md:p-8 flex flex-col justify-center items-center text-white h-50 lg:h-full">
+              <div className="col-span-1 bg-[var(--second-800)] rounded-3xl p-2 md:p-8 flex flex-col justify-center items-center text-white h-50 lg:h-full overflow-hidden">
                 <div className="roavio-icon-float mb-2 md:mb-6">
                   <svg
                     width="64"
